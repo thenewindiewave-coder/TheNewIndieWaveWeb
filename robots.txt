@@ -1,0 +1,7 @@
+# robots.txt para The New Indie Wave
+User-agent: *
+Allow: /
+Disallow: /curador.html
+Disallow: /api/
+
+Sitemap: https://thenewindiewave.com/sitemap.xml

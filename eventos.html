@@ -3,7 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Eventos & Showcases — The New Indie Wave</title>
+<title>Eventos & Showcases en Vivo — The New Indie Wave</title>
+<meta name="description" content="Conciertos, showcases íntimos y sesiones en vivo producidas por The New Indie Wave para conectar a los artistas emergentes con su público.">
+<meta name="keywords" content="conciertos indie, eventos the new indie wave, showcases musicales, toquines independientes, conciertos cdmx indie, sesiones en vivo">
+<meta name="author" content="The New Indie Wave & Rodrigo DL Moral">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#09090b">
+<link rel="canonical" href="https://thenewindiewave.com/eventos.html">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://thenewindiewave.com/eventos.html">
+<meta property="og:title" content="Eventos & Showcases en Vivo — The New Indie Wave">
+<meta property="og:description" content="Conciertos, showcases íntimos y sesiones en vivo producidas por The New Indie Wave.">
+<meta property="og:image" content="https://thenewindiewave.com/logo.png">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@TNIWave">
+<meta name="twitter:title" content="Eventos & Showcases en Vivo — The New Indie Wave">
+<meta name="twitter:description" content="Espacios y escenarios reales donde la música independiente suena en vivo.">
+<meta name="twitter:image" content="https://thenewindiewave.com/logo.png">
+
+<!-- JSON-LD Event Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MusicEvent",
+  "name": "The New Indie Wave Showcase Vol. 04",
+  "startDate": "2026-09-18T20:00:00-06:00",
+  "location": {
+    "@type": "Place",
+    "name": "Foro Indie Waves",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Ciudad de México",
+      "addressCountry": "MX"
+    }
+  },
+  "organizer": {
+    "@type": "Organization",
+    "name": "The New Indie Wave",
+    "url": "https://thenewindiewave.com/"
+  }
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Chivo:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,6 +69,7 @@
     --font-body: 'Inter', sans-serif;
     --duration-fast: 240ms;
     --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-bounce: cubic-bezier(0.34, 1.36, 0.64, 1);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,6 +81,7 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     padding-bottom: 80px;
+    overflow-x: hidden;
   }
 
   ::selection {
@@ -55,106 +102,184 @@
     max-width: 1160px;
     margin: 0 auto;
     padding: 0 24px;
+    width: 100%;
   }
 
-  /* TOP NAVIGATION */
+  /* NAVBAR */
   .navbar {
     border-bottom: 1px solid var(--border);
-    background: rgba(9, 9, 11, 0.92);
-    backdrop-filter: blur(14px);
+    background: rgba(9, 9, 11, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     position: sticky;
     top: 0;
     z-index: 100;
-    font-family: var(--font-mono);
-    font-size: 11.5px;
   }
 
   .nav-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 0;
+    height: 72px;
   }
 
   .brand-logo {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 12px;
-    color: var(--text-main);
-    text-transform: uppercase;
-    font-weight: 700;
     text-decoration: none;
-    letter-spacing: 0.04em;
+    color: var(--text-main);
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: -0.02em;
   }
 
   .site-logo {
-    height: 32px;
+    height: 36px;
     width: auto;
-    filter: invert(1);
+    border-radius: 4px;
   }
 
   .nav-links {
     display: flex;
     align-items: center;
-    gap: 22px;
+    gap: 24px;
   }
 
   .nav-links a {
     color: var(--text-muted);
     text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
     transition: color 0.15s ease;
   }
 
-  .nav-links a.active, .nav-links a:hover {
+  .nav-links a:hover {
     color: var(--text-main);
   }
 
   .btn-nav-submit {
-    padding: 8px 16px;
-    border-radius: 4px;
-    background: var(--text-main);
+    background: var(--accent-lime);
     color: #000 !important;
     font-weight: 700;
-    text-decoration: none !important;
+    padding: 8px 14px;
+    border-radius: 4px;
+    transition: transform 0.15s var(--ease-bounce) !important;
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
   }
 
-  /* HEADER BLOCK */
+  .btn-nav-submit:hover {
+    transform: scale(1.04);
+  }
+
+  /* BOTÓN MENÚ MÓVIL */
+  .mobile-menu-btn {
+    display: none;
+    background: #18181b;
+    border: 1px solid var(--border-strong);
+    color: var(--text-main);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* MODAL MENÚ MÓVIL PANTALLA COMPLETA */
+  .mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(9, 9, 11, 0.98);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 1000;
+    padding: 24px;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .mobile-nav-overlay.open {
+    display: flex;
+  }
+
+  .mobile-nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+  }
+
+  .mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: auto 0;
+  }
+
+  .mobile-nav-links a {
+    color: var(--text-main);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mobile-nav-links a:hover, .mobile-nav-links a:active {
+    color: var(--accent-lime);
+  }
+
+  /* PAGE HEADER */
   .page-header {
-    padding: 48px 0 28px;
+    padding: 60px 0 32px;
     border-bottom: 1px solid var(--border);
     margin-bottom: 36px;
   }
 
   .sec-tag {
     font-family: var(--font-mono);
-    font-size: 11.5px;
+    font-size: 12px;
     color: var(--accent-lime);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+    letter-spacing: 0.05em;
   }
 
   .page-title {
     font-family: var(--font-heading);
-    font-size: 38px;
+    font-size: clamp(32px, 5vw, 56px);
     font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 16px;
     text-transform: uppercase;
-    letter-spacing: -0.02em;
-    margin-bottom: 12px;
   }
 
   .page-desc {
+    font-size: clamp(15px, 1.8vw, 17px);
     color: var(--text-muted);
-    font-size: 15px;
     max-width: 680px;
     line-height: 1.6;
   }
 
-  /* EVENTS LIST */
-  .events-table {
+  /* EVENTS GRID */
+  .events-grid {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
   }
 
   .event-row {
@@ -326,6 +451,19 @@
     toast._timer = setTimeout(function() {
       toast.classList.remove('active');
     }, 3200);
+  }
+
+  function toggleMobileNav(open) {
+    var overlay = document.getElementById('mobileNavOverlay');
+    if(overlay) {
+      if(open) {
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      } else {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    }
   }
 </script>
 
