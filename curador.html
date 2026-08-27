@@ -542,6 +542,7 @@
       <button class="tab-btn" onclick="switchTab('accepted', this)">[ ACEPTADAS ]</button>
       <button class="tab-btn" onclick="switchTab('rejected', this)">[ HISTORIAL DECLINADAS ]</button>
       <button class="tab-btn" onclick="switchTab('playlists_manager', this)">[ 🏷️ GESTIÓN DE PLAYLISTS & ETIQUETAS ]</button>
+      <button class="tab-btn" onclick="switchTab('radar_manager', this)">[ 🌟 ARTISTAS EN EL RADAR ]</button>
     </div>
 
     <button class="btn-refresh" onclick="refreshCurrentTab()">
@@ -558,6 +559,7 @@
 
 <div class="toast-box" id="toast"></div>
 
+<script src="data_radar.js"></script>
 <script>
   var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
@@ -833,6 +835,357 @@
       loadSubmissions();
     } catch(err) {
       showToast('Error al actualizar en Supabase');
+    }
+  }
+
+  
+  // ==========================================
+  // GESTIÓN DE ARTISTAS EN EL RADAR
+  // ==========================================
+  function renderRadarManager() {
+    var container = document.getElementById('queueContainer');
+    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    
+    var top3 = list.filter(function(a){ return a.type === 'top3'; });
+    var secondary = list.filter(function(a){ return a.type === 'secondary'; });
+
+    var html = `
+      <div style="background: linear-gradient(180deg, #18181f 0%, #121216 100%); border: 1px solid var(--border-strong); border-radius: 8px; padding: 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h3 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 4px;">🌟 GESTIÓN DE ARTISTAS EN EL RADAR</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">Administra los 3 artistas Top con fotos/videos y mini-player, y las cards secundarias con fichas expandidas.</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button onclick="openRadarModal()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 10px 18px; border-radius: 4px; border: none; cursor: pointer;">
+            + AÑADIR ARTISTA AL RADAR
+          </button>
+          <button onclick="resetRadarToDefaults()" style="background: transparent; color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; padding: 10px 14px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer;">
+            🔄 Restaurar Valores por Defecto
+          </button>
+        </div>
+      </div>
+
+      <!-- SECCIÓN TOP 3 DESTACADOS -->
+      <div style="margin-bottom: 32px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+          <span style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 3px;">TOP 3</span>
+          <h4 style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; text-transform: uppercase;">Artistas Destacados (Grandes con Media & Mini Player)</h4>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px;">
+          ${top3.map(function(item, idx) {
+            var mediaThumb = item.media_url || 'logo.png';
+            return `
+              <div class="track-item" style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(187, 244, 81, 0.3);">
+                <div>
+                  <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 14px;">
+                    <img src="${mediaThumb}" style="width: 56px; height: 56px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border);" onerror="this.src='logo.png'">
+                    <div>
+                      <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); font-weight: 700;">#${idx + 1} • ${item.badge || 'TOP RADAR'}</div>
+                      <h4 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: #fff;">${item.name}</h4>
+                      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">📍 ${item.city} • ${item.genre}</div>
+                    </div>
+                  </div>
+                  <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.4; margin-bottom: 12px;">"${item.short_bio}"</p>
+                  <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-cyan); margin-bottom: 14px; background: rgba(56, 189, 248, 0.08); padding: 4px 8px; border-radius: 4px;">
+                    🎵 Spotify ID: ${item.track_id || 'Sin track configurado'}
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap;">
+                  <button onclick="openRadarModal('${item.id}')" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 8px; border-radius: 4px; cursor: pointer;">
+                    ✏️ Editar
+                  </button>
+                  <button onclick="toggleRadarType('${item.id}', 'secondary')" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; padding: 8px 10px; border-radius: 4px; cursor: pointer;">
+                    ⬇ Bajar a Secundario
+                  </button>
+                  <button onclick="deleteRadarArtist('${item.id}')" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: var(--font-mono); font-size: 11px; padding: 8px 10px; border-radius: 4px; cursor: pointer;">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- SECCIÓN SECUNDARIOS (11) -->
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+          <span style="background: var(--accent-cyan); color: #000; font-family: var(--font-mono); font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 3px;">SECUNDARIOS</span>
+          <h4 style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; text-transform: uppercase;">Selección Emergente (${secondary.length} Artistas)</h4>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+          ${secondary.map(function(item) {
+            var mediaThumb = item.media_url || 'logo.png';
+            return `
+              <div class="track-item" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 10px;">
+                    <img src="${mediaThumb}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border);" onerror="this.src='logo.png'">
+                    <div>
+                      <h4 style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: #fff;">${item.name}</h4>
+                      <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim);">📍 ${item.city}</div>
+                    </div>
+                  </div>
+                  <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan); margin-bottom: 8px;">${item.genre}</div>
+                  <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 12px;">"${item.short_bio}"</p>
+                </div>
+
+                <div style="display: flex; gap: 6px; border-top: 1px solid var(--border); padding-top: 10px;">
+                  <button onclick="toggleRadarType('${item.id}', 'top3')" style="flex: 1; background: rgba(187, 244, 81, 0.1); border: 1px solid rgba(187, 244, 81, 0.3); color: var(--accent-lime); font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; padding: 6px; border-radius: 4px; cursor: pointer;">
+                    ⬆ Subir a Top 3
+                  </button>
+                  <button onclick="openRadarModal('${item.id}')" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
+                    ✏️
+                  </button>
+                  <button onclick="deleteRadarArtist('${item.id}')" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: var(--font-mono); font-size: 10.5px; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+
+    container.innerHTML = html;
+  }
+
+  function openRadarModal(artistId) {
+    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
+    var artist = artistId ? list.find(function(a){ return a.id === artistId; }) : null;
+
+    var modalHtml = `
+      <div class="artist-modal-overlay open" id="curatorRadarModal" style="display: flex; z-index: 3000;">
+        <div class="artist-modal" style="max-width: 620px; padding: 28px; background: #121217;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px;">
+            <h3 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #fff;">
+              ${artist ? '✏️ EDITAR ARTISTA EN EL RADAR' : '✨ AÑADIR NUEVO ARTISTA'}
+            </h3>
+            <button onclick="closeRadarModal()" style="background: transparent; border: none; color: #fff; font-size: 18px; cursor: pointer;">✕</button>
+          </div>
+
+          <form onsubmit="handleRadarFormSubmit(event, '${artist ? artist.id : ''}')" style="display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto; padding-right: 6px;">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Artista / Banda *</label>
+                <input type="text" id="rfName" required value="${artist ? artist.name : ''}" placeholder="Ej. Lunar Daydream" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ciudad / Origen *</label>
+                <input type="text" id="rfCity" required value="${artist ? artist.city : ''}" placeholder="Ej. CIUDAD DE MÉXICO" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género Musical *</label>
+                <input type="text" id="rfGenre" required value="${artist ? artist.genre : ''}" placeholder="Ej. DREAM POP / SHOEGAZE" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Categoría *</label>
+                <select id="rfType" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                  <option value="top3" ${artist && artist.type === 'top3' ? 'selected' : ''}>🔥 TOP 3 Destacado</option>
+                  <option value="secondary" ${!artist || artist.type === 'secondary' ? 'selected' : ''}>⚡ Secundario (Lista 11)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">
+                Foto o Video del Artista (Cloudinary: ckknw1do)
+              </label>
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <input type="text" id="rfMediaUrl" value="${artist ? (artist.media_url || '') : ''}" placeholder="https://res.cloudinary.com/ckknw1do/... o enlace directo" style="flex: 1; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;" oninput="previewRadarMedia(this.value)">
+                <label for="rfFileInput" style="background: rgba(187, 244, 81, 0.15); border: 1px solid var(--accent-lime); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 9px 14px; border-radius: 4px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+                  📁 Subir desde PC
+                </label>
+                <input type="file" id="rfFileInput" accept="image/*,video/*" style="display:none;" onchange="handleDirectFileUpload(this)">
+              </div>
+              <div id="rfMediaPreview" style="display: ${artist && artist.media_url ? 'block' : 'none'}; margin-top: 6px;">
+                <img id="rfMediaPreviewImg" src="${artist ? (artist.media_url || '') : ''}" style="max-height: 80px; border-radius: 6px; border: 1px solid var(--border);" onerror="this.style.display='none'">
+              </div>
+              <div style="font-size: 11px; color: var(--text-dim); margin-top: 3px;">💡 Puedes subir fotos o videos directamente desde tu PC a Cloudinary o pegar cualquier enlace.</div>
+            </div>
+
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 4px;">
+                Spotify Track ID o URL de Canción (para Mini-Player)
+              </label>
+              <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="Ej. 3n3Ppam7vgaVa1iaRUc9Lp o link directo de Spotify" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+            </div>
+
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Reseña Breve para la Card (1-2 líneas) *</label>
+              <input type="text" id="rfShortBio" required value="${artist ? artist.short_bio : ''}" placeholder="Frase contundente sobre su sonido..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+            </div>
+
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Reseña Completa & Reseña de Álbum (Para Ficha Expandida) *</label>
+              <textarea id="rfFullReview" required rows="3" placeholder="Texto detallado que se mostrará en el modal flotante al dar clic..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.full_review || '') : ''}</textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Trayectoria / Biografía</label>
+                <input type="text" id="rfCareer" value="${artist ? (artist.career_notes || '') : ''}" placeholder="Hitos, escuchas, lanzamientos..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Próximos Eventos / Fechas</label>
+                <input type="text" id="rfEvents" value="${artist ? (artist.events_note || '') : ''}" placeholder="Ej. Showcase TNIW Vol. 04 (24 OCT)" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Perfil Spotify (URL)</label>
+                <input type="url" id="rfSpotifyUrl" value="${artist ? (artist.spotify_url || '') : ''}" placeholder="https://open.spotify.com/artist/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Instagram (@usuario)</label>
+                <input type="text" id="rfInstagram" value="${artist ? (artist.instagram || '') : ''}" placeholder="@nombreartista" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px;">
+              <button type="button" onclick="closeRadarModal()" style="background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; padding: 10px 16px; border-radius: 4px; cursor: pointer;">Cancelar</button>
+              <button type="submit" style="background: var(--accent-lime); border: none; color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Guardar Artista ✓</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    var oldModal = document.getElementById('curatorRadarModal');
+    if(oldModal) oldModal.remove();
+
+    var div = document.createElement('div');
+    div.innerHTML = modalHtml;
+    document.body.appendChild(div.firstElementChild);
+  }
+
+  function closeRadarModal() {
+    var modal = document.getElementById('curatorRadarModal');
+    if(modal) modal.remove();
+  }
+
+  function handleRadarFormSubmit(e, existingId) {
+    e.preventDefault();
+    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
+    
+    var artistData = {
+      id: existingId || ('radar-' + Date.now()),
+      name: document.getElementById('rfName').value.trim(),
+      city: document.getElementById('rfCity').value.trim().toUpperCase(),
+      genre: document.getElementById('rfGenre').value.trim().toUpperCase(),
+      type: document.getElementById('rfType').value,
+      badge: document.getElementById('rfType').value === 'top3' ? 'TOP RADAR' : 'RECOMENDADO',
+      media_type: (document.getElementById('rfMediaUrl').value.endsWith('.mp4')) ? 'video' : 'image',
+      media_url: document.getElementById('rfMediaUrl').value.trim(),
+      track_id: document.getElementById('rfTrackId').value.trim(),
+      short_bio: document.getElementById('rfShortBio').value.trim(),
+      full_review: document.getElementById('rfFullReview').value.trim(),
+      career_notes: document.getElementById('rfCareer').value.trim(),
+      events_note: document.getElementById('rfEvents').value.trim(),
+      spotify_url: document.getElementById('rfSpotifyUrl').value.trim(),
+      instagram: document.getElementById('rfInstagram').value.trim()
+    };
+
+    if(existingId) {
+      var idx = list.findIndex(function(a){ return a.id === existingId; });
+      if(idx !== -1) list[idx] = artistData;
+    } else {
+      list.unshift(artistData);
+    }
+
+    saveRadarArtists(list);
+    closeRadarModal();
+    renderRadarManager();
+    showToast('✓ Artista guardado con éxito');
+  }
+
+  function toggleRadarType(artistId, newType) {
+    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
+    var item = list.find(function(a){ return a.id === artistId; });
+    if(item) {
+      item.type = newType;
+      saveRadarArtists(list);
+      renderRadarManager();
+      showToast('✓ Categoría cambiada a ' + (newType === 'top3' ? 'Top 3' : 'Secundario'));
+    }
+  }
+
+  function deleteRadarArtist(artistId) {
+    if(!confirm('¿Seguro que deseas eliminar este artista del radar?')) return;
+    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
+    list = list.filter(function(a){ return a.id !== artistId; });
+    saveRadarArtists(list);
+    renderRadarManager();
+    showToast('✓ Artista eliminado del radar');
+  }
+
+  
+  async function handleDirectFileUpload(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    var reader = new FileReader();
+
+    showToast('⏳ Subiendo ' + file.name + ' a Cloudinary...');
+
+    reader.onload = async function(e) {
+      var base64Data = e.target.result;
+      var isVideo = file.type.startsWith('video');
+
+      try {
+        var res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileData: base64Data,
+            resourceType: isVideo ? 'video' : 'image'
+          })
+        });
+
+        var data = await res.json();
+        if (data && data.success && data.url) {
+          document.getElementById('rfMediaUrl').value = data.url;
+          previewRadarMedia(data.url);
+          showToast('✓ Archivo subido con éxito a Cloudinary');
+        } else {
+          document.getElementById('rfMediaUrl').value = base64Data;
+          previewRadarMedia(base64Data);
+          showToast('✓ Imagen cargada');
+        }
+      } catch(err) {
+        document.getElementById('rfMediaUrl').value = base64Data;
+        previewRadarMedia(base64Data);
+        showToast('✓ Imagen cargada');
+      }
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  function previewRadarMedia(url) {
+    var prev = document.getElementById('rfMediaPreview');
+    var prevImg = document.getElementById('rfMediaPreviewImg');
+    if (prev && prevImg && url) {
+      prevImg.src = url;
+      prevImg.style.display = 'block';
+      prev.style.display = 'block';
+    }
+  }
+
+  function resetRadarToDefaults() {
+    if(!confirm('¿Restaurar la lista original de artistas en el radar?')) return;
+    if(typeof DEFAULT_RADAR_ARTISTS !== 'undefined') {
+      saveRadarArtists(DEFAULT_RADAR_ARTISTS);
+      renderRadarManager();
+      showToast('✓ Valores por defecto restaurados');
     }
   }
 
