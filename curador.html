@@ -538,10 +538,11 @@
       <button class="tab-btn active" onclick="switchTab('pending', this)">[ PENDIENTES DE ESCUCHA ]</button>
       <button class="tab-btn" onclick="switchTab('accepted', this)">[ ACEPTADAS ]</button>
       <button class="tab-btn" onclick="switchTab('rejected', this)">[ HISTORIAL DECLINADAS ]</button>
+      <button class="tab-btn" onclick="switchTab('playlists_manager', this)">[ 🏷️ GESTIÓN DE PLAYLISTS & ETIQUETAS ]</button>
     </div>
 
-    <button class="btn-refresh" onclick="loadSubmissions()">
-      🔄 Refrescar Cola en Vivo
+    <button class="btn-refresh" onclick="refreshCurrentTab()">
+      🔄 Refrescar en Vivo
     </button>
   </div>
 
@@ -609,7 +610,11 @@
     document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
     btn.classList.add('active');
     currentTab = tab;
-    renderQueue();
+    if(tab === 'playlists_manager') {
+      loadPlaylistsForManager();
+    } else {
+      renderQueue();
+    }
   }
 
   // 3. Renderizado de Canciones
@@ -719,7 +724,87 @@
     }
   }
 
-  // 6. Actualizar Decisión en Supabase en Tiempo Real
+  function refreshCurrentTab() {
+    if(currentTab === 'playlists_manager') {
+      loadPlaylistsForManager();
+    } else {
+      loadSubmissions();
+    }
+  }
+
+  // 7. GESTOR Y EDITOR DE ETIQUETAS DE PLAYLISTS
+  var livePlaylists = [];
+  async function loadPlaylistsForManager() {
+    var container = document.getElementById('queueContainer');
+    container.innerHTML = '<div class="empty-box">Cargando playlists desde Spotify API...</div>';
+    try {
+      const res = await fetch('/api/playlists');
+      if(!res.ok) throw new Error('Error al cargar');
+      const data = await res.json();
+      livePlaylists = data.allPlaylists || [];
+      renderPlaylistManager();
+    } catch(e) {
+      container.innerHTML = '<div class="empty-box">No se pudieron cargar las playlists. Verifica tus credenciales.</div>';
+    }
+  }
+
+  function renderPlaylistManager() {
+    var container = document.getElementById('queueContainer');
+    if(!livePlaylists || livePlaylists.length === 0) {
+      container.innerHTML = '<div class="empty-box">No hay playlists encontradas.</div>';
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 20px;">
+        <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; margin-bottom: 4px;">🏷️ EDITOR DE ETIQUETAS & GÉNEROS DE PLAYLISTS</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">Edita las etiquetas de género y categoría de cada playlist para que los filtros de la web se actualicen a tu gusto.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        ${livePlaylists.map(p => {
+          var savedCustom = localStorage.getItem('tniw_tags_' + p.id);
+          var currentTags = savedCustom || (p.genres ? p.genres.join(', ') : 'Indie rock, Alternative');
+          
+          return `
+            <div class="track-item" style="padding: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+                <div>
+                  <h4 style="font-family: var(--font-heading); font-size: 17px; font-weight: 700; color: #fff;">${p.name}</h4>
+                  <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); margin-top: 2px;">
+                    ID: ${p.id} • 👥 ${(p.followers || 0).toLocaleString()} seguidores
+                  </div>
+                </div>
+                <a href="${p.spotify_url}" target="_blank" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-decoration: none; border: 1px solid var(--border); padding: 4px 10px; border-radius: 4px;">
+                  Abrir en Spotify ↗
+                </a>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">
+                    Etiquetas de Género (separadas por coma):
+                  </label>
+                  <input type="text" id="tags-input-${p.id}" value="${currentTags}" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); border-radius: 4px; padding: 10px 12px; color: #fff; font-family: var(--font-body); font-size: 13px;">
+                </div>
+                <button onclick="savePlaylistTags('${p.id}')" style="background: var(--accent-lime); color: #000; border: none; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 11px 18px; border-radius: 4px; cursor: pointer; align-self: flex-end;">
+                  Guardar Etiquetas ✓
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  function savePlaylistTags(pId) {
+    var val = document.getElementById('tags-input-' + pId).value;
+    localStorage.setItem('tniw_tags_' + pId, val);
+    showToast('✓ Etiquetas de la playlist actualizadas');
+  }
+
+  // 8. Actualizar Decisión en Supabase en Tiempo Real
   async function updateDecision(recordId, status) {
     var fb = document.getElementById('fb-' + recordId).value;
 

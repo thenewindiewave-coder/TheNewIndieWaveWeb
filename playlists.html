@@ -368,7 +368,7 @@
   </div>
 
   <!-- FULL ACCORDION -->
-  <div class="playlist-accordion-list">
+  <div class="playlist-accordion-list" id="playlistsAccordion">
     
     <div class="acc-item" data-category="rock">
       <button class="acc-header-btn" onclick="toggleAcc(this)">
@@ -559,13 +559,14 @@
     });
   }
 
-  // Carga automática del Top Playlists en tiempo real desde la API de Spotify
+  // Carga automática del Top Playlists y catálogo desde el perfil de Spotify
   async function loadTopPlaylists() {
     try {
       const res = await fetch('/api/playlists');
       if(!res.ok) return;
       const data = await res.json();
       
+      // 1. Renderizar Top 3
       if(data && data.topPlaylists && data.topPlaylists.length >= 3) {
         const topRow = document.getElementById('featuredSpotifyRow');
         if(topRow) {
@@ -581,6 +582,32 @@
           `).join('');
         }
       }
+
+      // 2. Si vienen playlists dinámicas del perfil, actualizar catálogo
+      if(data && data.allPlaylists && data.allPlaylists.length > 0) {
+        const acc = document.getElementById('playlistsAccordion');
+        if(acc) {
+          acc.innerHTML = data.allPlaylists.map((p, idx) => `
+            <div class="acc-item" data-category="${p.category || 'rock'}">
+              <button class="acc-header-btn" onclick="toggleAcc(this)">
+                <div class="acc-header-meta">
+                  <div class="acc-playlist-title">${(idx + 1) < 10 ? '0' + (idx + 1) : (idx + 1)}. ${p.name}</div>
+                  <div class="acc-playlist-desc">${p.description || 'Curaduría oficial por The New Indie Wave.'}</div>
+                  <div class="acc-genres-tags">
+                    ${(p.genres || ['Indie']).map(g => `<span>${g}</span>`).join('')}
+                    ${p.followers > 0 ? `<span style="color: var(--accent-lime); border-color: rgba(187,244,81,0.3);">👥 ${p.followers.toLocaleString()} seg.</span>` : ''}
+                  </div>
+                </div>
+                <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="acc-panel">
+                <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/${p.id}?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
     } catch(err) {
       console.log('Using static fallback for playlists');
     }
