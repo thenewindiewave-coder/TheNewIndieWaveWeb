@@ -364,7 +364,12 @@
     <button class="filter-pill" onclick="filterPlaylists('rock', this)">[ ROCK & INDIE ]</button>
     <button class="filter-pill" onclick="filterPlaylists('pop', this)">[ INDIE POP & BEDROOM ]</button>
     <button class="filter-pill" onclick="filterPlaylists('heavy', this)">[ METAL & HARD ROCK ]</button>
-    <button class="filter-pill" onclick="filterPlaylists('vibes', this)">[ DARKWAVE & URBANO ]</button>
+    <button class="filter-pill" onclick="filterPlaylists('darkwave', this)">[ DARKWAVE & POST-PUNK ]</button>
+    <button class="filter-pill" onclick="filterPlaylists('urbano', this)">[ URBANO & TRAP ]</button>
+    <button class="filter-pill" onclick="filterPlaylists('shoegaze', this)">[ SHOEGAZE & DREAM POP ]</button>
+    <button class="filter-pill" onclick="filterPlaylists('folk', this)">[ FOLK & ACÚSTICO ]</button>
+    <button class="filter-pill" onclick="filterPlaylists('punk', this)">[ PUNK & GARAJE ]</button>
+    <button class="filter-pill" onclick="filterPlaylists('electronic', this)">[ ELECTRÓNICA & SYNTH ]</button>
   </div>
 
   <!-- FULL ACCORDION -->
@@ -498,7 +503,7 @@
       </div>
     </div>
 
-    <div class="acc-item" data-category="vibes">
+    <div class="acc-item" data-category="urbano">
       <button class="acc-header-btn" onclick="toggleAcc(this)">
         <div class="acc-header-meta">
           <div class="acc-playlist-title">09. Música urbana con flow y ritmo para moverte</div>
@@ -514,7 +519,7 @@
       </div>
     </div>
 
-    <div class="acc-item" data-category="vibes">
+    <div class="acc-item" data-category="darkwave electronic">
       <button class="acc-header-btn" onclick="toggleAcc(this)">
         <div class="acc-header-meta">
           <div class="acc-playlist-title">10. Darkwave oscuro y atmosférico para la madrugada</div>
@@ -530,6 +535,17 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- AVISO DINÁMICO SI AÚN NO HAY PLAYLIST DE ESA CATEGORÍA -->
+  <div id="emptyCategoryNotice" style="display: none; text-align: center; padding: 48px 24px; background: var(--bg-card); border: 1px dashed var(--border-strong); border-radius: 8px; margin-top: 16px;">
+    <div style="font-family: var(--font-heading); font-size: 19px; font-weight: 800; color: #fff; margin-bottom: 6px;">
+      🚀 PRÓXIMAMENTE PLAYLIST OFICIAL EN ESTE GÉNERO
+    </div>
+    <p style="font-size: 13.5px; color: var(--text-muted); max-width: 500px; margin: 0 auto 18px; line-height: 1.5;">
+      Estamos curando nuevos temas para inaugurar esta lista. ¡Envía tu canción en este estilo para ser de los primeros en estrenarla!
+    </p>
+    <a href="enviar.html" class="btn-nav-submit" style="display: inline-block;">ENVIAR CANCIÓN A ESTE GÉNERO ↗</a>
   </div>
 </main>
 
@@ -550,13 +566,21 @@
     btn.classList.add('active');
 
     var items = document.querySelectorAll('.acc-item');
+    var visibleCount = 0;
     items.forEach(function(item) {
-      if(category === 'all' || item.dataset.category === category) {
+      var cats = (item.dataset.category || '').split(' ');
+      if(category === 'all' || cats.includes(category)) {
         item.style.display = 'block';
+        visibleCount++;
       } else {
         item.style.display = 'none';
       }
     });
+
+    var notice = document.getElementById('emptyCategoryNotice');
+    if(notice) {
+      notice.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
   }
 
   // Carga automática del Top Playlists y catálogo desde el perfil de Spotify

@@ -67,10 +67,17 @@ function extractGenres(name, description) {
 
 function detectCategory(name, description) {
   const text = `${name} ${description}`.toLowerCase();
-  if (text.includes('metal') || text.includes('hard rock') || text.includes('grunge')) return 'heavy';
-  if (text.includes('pop') || text.includes('bedroom') || text.includes('chill') || text.includes('suave')) return 'pop';
-  if (text.includes('darkwave') || text.includes('urbano') || text.includes('trap') || text.includes('synth')) return 'vibes';
-  return 'rock';
+  const cats = [];
+  if (text.includes('metal') || text.includes('hard rock') || text.includes('grunge')) cats.push('heavy');
+  if (text.includes('pop') || text.includes('bedroom') || text.includes('suave')) cats.push('pop');
+  if (text.includes('darkwave') || text.includes('post-punk') || text.includes('gothic')) cats.push('darkwave');
+  if (text.includes('urbano') || text.includes('trap') || text.includes('reggaetón') || text.includes('dembow')) cats.push('urbano');
+  if (text.includes('shoegaze') || text.includes('dream pop') || text.includes('slowcore')) cats.push('shoegaze');
+  if (text.includes('folk') || text.includes('acoustic') || text.includes('acústico')) cats.push('folk');
+  if (text.includes('punk') || text.includes('garage') || text.includes('garaje')) cats.push('punk');
+  if (text.includes('synth') || text.includes('electronic') || text.includes('electrónica')) cats.push('electronic');
+  if (cats.length === 0 || text.includes('rock') || text.includes('indie')) cats.push('rock');
+  return cats.join(' ');
 }
 
 export default async function handler(req, res) {
