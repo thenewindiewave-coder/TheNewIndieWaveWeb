@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Artistas en el Radar — The New Indie Wave</title>
 <meta name="description" content="Descubre los proyectos musicales independientes y talentos emergentes destacados por el colectivo The New Indie Wave.">
-<meta name="keywords" content="artistas indie emergentes, bandas independientes, radar indie, the new indie wave artistas, musica indie spotify">
+<meta name="keywords" content="artistas indie emergentes, bandas independientes, radar indie, the new indie wave artistas">
 <meta name="author" content="The New Indie Wave & Rodrigo DL Moral">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#09090b">
@@ -189,7 +189,7 @@
     gap: 6px;
   }
 
-  /* MODAL MENU MOVIL PANTALLA COMPLETA */
+  /* MODAL MENU MOVIL */
   .mobile-nav-overlay {
     display: none;
     position: fixed;
@@ -243,16 +243,16 @@
 
   /* PAGE HEADER */
   .page-header {
-    padding: 60px 0 32px;
+    padding: 50px 0 24px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 48px;
+    margin-bottom: 40px;
   }
 
   .sec-tag {
     font-family: var(--font-mono);
     font-size: 12px;
     color: var(--accent-lime);
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     letter-spacing: 0.05em;
   }
 
@@ -262,22 +262,13 @@
     font-weight: 900;
     letter-spacing: -0.03em;
     line-height: 1.1;
-    margin-bottom: 16px;
     text-transform: uppercase;
   }
 
-  .page-desc {
-    font-size: clamp(15px, 1.8vw, 17px);
-    color: var(--text-muted);
-    max-width: 720px;
-    line-height: 1.6;
-  }
-
-  /* SECTION LABELS */
+  /* SECTION LABELS (LIMPIOS SIN SUBTITULOS) */
   .section-label-bar {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     margin-bottom: 24px;
     border-left: 3px solid var(--accent-lime);
     padding-left: 14px;
@@ -291,18 +282,12 @@
     letter-spacing: -0.02em;
   }
 
-  .section-sub {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-  }
-
-  /* TOP 3 FEATURED CARDS (PREMIUM) */
+  /* TOP 3 FEATURED CARDS */
   .top3-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: 28px;
-    margin-bottom: 64px;
+    margin-bottom: 60px;
   }
 
   .top3-card {
@@ -382,7 +367,7 @@
   }
 
   .top3-body {
-    padding: 24px;
+    padding: 22px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -390,7 +375,7 @@
 
   .top3-name {
     font-family: var(--font-heading);
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 900;
     letter-spacing: -0.02em;
     margin-bottom: 4px;
@@ -401,16 +386,8 @@
     font-family: var(--font-mono);
     font-size: 11.5px;
     color: var(--accent-cyan);
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     font-weight: 600;
-  }
-
-  .top3-desc {
-    font-size: 13.5px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin-bottom: 18px;
-    flex-grow: 1;
   }
 
   /* MINI PLAYER EMBED */
@@ -443,6 +420,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: auto;
   }
 
   .top3-card:hover .top3-footer-btn {
@@ -462,7 +440,7 @@
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 22px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -490,7 +468,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   .secondary-avatar {
@@ -515,15 +493,7 @@
     font-family: var(--font-mono);
     font-size: 11px;
     color: var(--accent-cyan);
-    margin-bottom: 8px;
-  }
-
-  .secondary-desc {
-    font-size: 12.5px;
-    color: var(--text-muted);
-    line-height: 1.45;
-    margin-bottom: 14px;
-    flex-grow: 1;
+    margin-top: 2px;
   }
 
   .secondary-card-footer {
@@ -751,7 +721,6 @@
       <a href="enviar.html" class="btn-nav-submit">ENVIAR CANCIÓN ↗</a>
     </nav>
 
-    <!-- BOTÓN MENÚ MÓVIL -->
     <button class="mobile-menu-btn" onclick="toggleMobileNav(true)" aria-label="Abrir Menú">
       <span>MENÚ</span> ☰
     </button>
@@ -793,34 +762,21 @@
   <div class="page-header">
     <div class="sec-tag">// 03. SCOUTING & RECOMENDACIÓN EDITORIAL</div>
     <h1 class="page-title">ARTISTAS EN EL RADAR</h1>
-    <p class="page-desc">
-      Proyectos y bandas independientes seleccionados por nuestra curaduría que marcan la vanguardia sonora. Escucha sus tracks, conoce su historia y descubre la nueva ola.
-    </p>
   </div>
 
   <!-- SECTION 1: TOP 3 ARTISTAS DESTACADOS -->
   <div class="section-label-bar">
-    <div>
-      <h2 class="section-heading">🔥 TOP 3 ARTISTAS DESTACADOS</h2>
-      <div class="section-sub">// SELECCIÓN PRINCIPAL CON MINI-PLAYERS EN VIVO</div>
-    </div>
+    <h2 class="section-heading">🔥 TOP 3 ARTISTAS DESTACADOS</h2>
   </div>
 
-  <div class="top3-grid" id="top3Container">
-    <!-- Renderizado dinámicamente con JavaScript -->
-  </div>
+  <div class="top3-grid" id="top3Container"></div>
 
   <!-- SECTION 2: 11 ARTISTAS EN EL RADAR -->
   <div class="section-label-bar" style="border-color: var(--accent-cyan);">
-    <div>
-      <h2 class="section-heading">⚡ EN EL RADAR // SELECCIÓN EMERGENTE</h2>
-      <div class="section-sub">// 11 PROPUESTAS RECOMENDADAS PARA SEGUIR DE CERCA</div>
-    </div>
+    <h2 class="section-heading">⚡ EN EL RADAR // SELECCIÓN EMERGENTE</h2>
   </div>
 
-  <div class="secondary-grid" id="secondaryContainer">
-    <!-- Renderizado dinámicamente con JavaScript -->
-  </div>
+  <div class="secondary-grid" id="secondaryContainer"></div>
 
 </main>
 
@@ -829,9 +785,7 @@
   <div class="artist-modal" role="dialog" aria-modal="true">
     <button class="modal-close-btn" onclick="closeArtistModal()" aria-label="Cerrar Ficha">✕</button>
     
-    <div class="modal-hero-media" id="mHeroMedia">
-      <!-- Media inyectado dinámicamente -->
-    </div>
+    <div class="modal-hero-media" id="mHeroMedia"></div>
     
     <div class="modal-content-inner">
       <div class="modal-header-info">
@@ -865,25 +819,244 @@
       </div>
 
       <!-- ACCIONES -->
-      <div class="modal-actions" id="mActions">
-        <!-- Botones de Spotify e Instagram -->
-      </div>
+      <div class="modal-actions" id="mActions"></div>
     </div>
   </div>
 </div>
 
-<!-- SCRIPTS DE DATOS Y RENDERIZADO -->
 <script src="data_radar.js"></script>
 <script>
+  // Dataset directo de respaldo inmediato
+  var DEFAULT_LIST = (typeof DEFAULT_RADAR_ARTISTS !== 'undefined') ? DEFAULT_RADAR_ARTISTS : [
+    {
+      id: "radar-1",
+      name: "Lunar Daydream",
+      city: "CIUDAD DE MÉXICO",
+      genre: "DREAM POP / SHOEGAZE",
+      type: "top3",
+      badge: "TOP RADAR #1",
+      media_url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=900&q=80",
+      track_id: "3n3Ppam7vgaVa1iaRUc9Lp",
+      full_review: "Originarios del sur de la Ciudad de México, Lunar Daydream mezcla guitarras espaciales cargadas de chorus con cajas de ritmos vintage y melodías etéreas. Su reciente trabajo ha capturado la atención de la escena independiente.",
+      career_notes: "Formados en 2023, cuentan con más de 80,000 escuchas mensuales en Spotify y múltiples shows en vivo.",
+      events_note: "Showcase TNIW Vol. 04 — Foro Cultural Indie (24 OCT 2026)",
+      spotify_url: "https://open.spotify.com/artist/3n3Ppam7vgaVa1iaRUc9Lp",
+      instagram: "@lunardaydream"
+    },
+    {
+      id: "radar-2",
+      name: "Distorsión Fría",
+      city: "BUENOS AIRES",
+      genre: "POST-PUNK / DARKWAVE",
+      type: "top3",
+      badge: "TOP RADAR #2",
+      media_url: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80",
+      track_id: "0VjIjW4GlUZAMYd2vXMi3b",
+      full_review: "Desde los sótanos de Buenos Aires, este dúo post-punk revitaliza las texturas frías de los sintetizadores analógicos con bajos distorsionados y voces graves.",
+      career_notes: "Ganadores del circuito emergente porteño 2025, actualmente grabando su primer larga duración en cinta analógica.",
+      events_note: "Festival TNIW 2026 — Escenario Alterno (05 DIC 2026)",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@distorsionfria"
+    },
+    {
+      id: "radar-3",
+      name: "Cero Tardes",
+      city: "BOGOTÁ",
+      genre: "INDIE POP / FOLK",
+      type: "top3",
+      badge: "TOP RADAR #3",
+      media_url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=80",
+      track_id: "7qiZfU4dY1lWllzX7mPBI3",
+      full_review: "Con una instrumentación orgánica que combina guitarras acústicas afinadas en abierto, percusiones suaves y armonías vocales a dos voces, Cero Tardes crea paisajes sonoros íntimos.",
+      career_notes: "Proyecto solista colaborativo fundado en Colombia con presentaciones acústicas en teatros independientes.",
+      events_note: "Secret Rooftop Sessions — Terraza Roma Norte (12 NOV 2026)",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@cerotardes"
+    },
+    {
+      id: "radar-4",
+      name: "Siluetas de Verano",
+      city: "SANTIAGO DE CHILE",
+      genre: "BEDROOM POP / LO-FI",
+      type: "secondary",
+      badge: "ESTRENO",
+      media_url: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=600&q=80",
+      track_id: "4cOdK2wGLETKBW3PvgPWqT",
+      full_review: "Composiciones caseras nacidas durante noches de insomnio. Melodías de ensueño con guitarras jangle y sintes casio.",
+      career_notes: "Pioneros del sonido bedroom chileno con lanzamientos en cassette.",
+      events_note: "Gira acústica Cono Sur 2026",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@siluetasdeverano"
+    },
+    {
+      id: "radar-5",
+      name: "Los Extraviados",
+      city: "MADRID / CDMX",
+      genre: "INDIE ROCK / GARAJE",
+      type: "secondary",
+      badge: "COLECTIVO",
+      media_url: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=600&q=80",
+      track_id: "3jjujdUJ72nuh5eMFTpqQB",
+      full_review: "Riffs veloces y actitud punk melódica con letras honestas sobre la vida urbana contemporánea.",
+      career_notes: "Banda binacional con base entre España y México.",
+      events_note: "Showcase Madrid - Sala Sol",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@losextraviados"
+    },
+    {
+      id: "radar-6",
+      name: "Frecuencia Marina",
+      city: "LIMA",
+      genre: "DREAM POP / SYNTH",
+      type: "secondary",
+      badge: "RECOMENDADO",
+      media_url: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&q=80",
+      track_id: "1xK59OXxi2TAAAbmZK0hp9",
+      full_review: "Atmósferas espaciales que fusionan el shoegaze latino con beats electrónicos elegantes.",
+      career_notes: "Trío limeño elogiado por revistas especializadas.",
+      events_note: "Festival Costa Verde 2026",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@frecuenciamarina"
+    },
+    {
+      id: "radar-7",
+      name: "Sombras de Neón",
+      city: "MONTERREY",
+      genre: "DARKWAVE / EBM",
+      type: "secondary",
+      badge: "DESTACADO",
+      media_url: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&q=80",
+      track_id: "2takcwOaAZWiRsqPHPb7uy",
+      full_review: "Bajo arpegiado analógico implacable con cajas de ritmo potentes para clubes oscuros.",
+      career_notes: "Presentaciones estelares en festivales de música electrónica.",
+      events_note: "Club Darkwave MTY (Noviembre)",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@sombrasdeneon"
+    },
+    {
+      id: "radar-8",
+      name: "La Última Niebla",
+      city: "VALPARAÍSO",
+      genre: "SHOEGAZE / NOISE",
+      type: "secondary",
+      badge: "EN ROTACIÓN",
+      media_url: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80",
+      track_id: "7qiZfU4dY1lWllzX7mPBI3",
+      full_review: "Exploración sonora intensa inspirada en el shoegaze de los 90s con un toque sudamericano moderno.",
+      career_notes: "Banda de culto en el puerto de Valparaíso.",
+      events_note: "Ciclo Ruido y Mar",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@laultimaniebla"
+    },
+    {
+      id: "radar-9",
+      name: "Río Salvaje",
+      city: "GUADALAJARA",
+      genre: "INDIE FOLK / PSICODELIA",
+      type: "secondary",
+      badge: "ESTRENO",
+      media_url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80",
+      track_id: "0VjIjW4GlUZAMYd2vXMi3b",
+      full_review: "Folk psicodélico que evoca caminos de montaña y fogatas al aire libre con coros expansivos.",
+      career_notes: "Grabaciones en vivo en bosques de Jalisco.",
+      events_note: "Sesión Acústica GDL",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@riosalvaje.musica"
+    },
+    {
+      id: "radar-10",
+      name: "Autopista Central",
+      city: "SAN JOSÉ",
+      genre: "POST-PUNK / GARAJE",
+      type: "secondary",
+      badge: "RECOMENDADO",
+      media_url: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&q=80",
+      track_id: "3n3Ppam7vgaVa1iaRUc9Lp",
+      full_review: "Canciones directas de menos de tres minutos que retratan el caos y la juventud urbana.",
+      career_notes: "Una de las bandas más activas del circuito indie costarricense.",
+      events_note: "Toquín San José Punk Fest",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@autopistacentral"
+    },
+    {
+      id: "radar-11",
+      name: "Cintas Magnéticas",
+      city: "MEDELLÍN",
+      genre: "LO-FI BEATS / CHILL",
+      type: "secondary",
+      badge: "DESTACADO",
+      media_url: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&q=80",
+      track_id: "4cOdK2wGLETKBW3PvgPWqT",
+      full_review: "Productor independiente que rescata grabaciones de boleros viejos y las fusiona con texturas modernas.",
+      career_notes: "Más de 500,000 streams acumulados en playlists globales.",
+      events_note: "Lanzamiento nuevo beat tape",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@cintasmagneticas"
+    },
+    {
+      id: "radar-12",
+      name: "Velo Nocturno",
+      city: "PUEBLA",
+      genre: "GOTH ROCK / DARKWAVE",
+      type: "secondary",
+      badge: "EN ROTACIÓN",
+      media_url: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&q=80",
+      track_id: "3jjujdUJ72nuh5eMFTpqQB",
+      full_review: "Atmósferas victorianas combinadas con ritmos bailables inspirados en el rock gótico clásico.",
+      career_notes: "Reconocidos en la escena oscura mexicana por sus shows teatrales.",
+      events_note: "Noche Gótica Cholula",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@velonocturno"
+    },
+    {
+      id: "radar-13",
+      name: "Satélites Olvidados",
+      city: "BARCELONA",
+      genre: "MATH ROCK / EMO INDIE",
+      type: "secondary",
+      badge: "ESTRENO",
+      media_url: "https://images.unsplash.com/photo-1520523839898-50712825e617?w=600&q=80",
+      track_id: "1xK59OXxi2TAAAbmZK0hp9",
+      full_review: "Técnica musical depurada al servicio de canciones cargadas de nostalgia y fuerza juvenil.",
+      career_notes: "Cuarteto formado en Cataluña con giras autogestionadas.",
+      events_note: "Gira peninsular 2026",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@satelitesolvidados"
+    },
+    {
+      id: "radar-14",
+      name: "Aurora Estéreo",
+      city: "MONTEVIDEO",
+      genre: "SYNTH POP / NEW WAVE",
+      type: "secondary",
+      badge: "RECOMENDADO",
+      media_url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80",
+      track_id: "2takcwOaAZWiRsqPHPb7uy",
+      full_review: "Herederos del pop refinado del Río de la Plata con arreglos vocales sofisticados.",
+      career_notes: "Banda revelación de la escena uruguaya con videoclips estéticos.",
+      events_note: "Showcase Sala Zitarrosa",
+      spotify_url: "https://open.spotify.com/",
+      instagram: "@auroraestereo"
+    }
+  ];
+
   var artistsList = [];
 
   function renderRadarArtists() {
-    artistsList = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
+    try {
+      if (typeof getRadarArtists === 'function') {
+        artistsList = getRadarArtists();
+      }
+    } catch(e) {}
+    
+    if (!artistsList || artistsList.length === 0) {
+      artistsList = DEFAULT_LIST;
+    }
     
     var top3Container = document.getElementById('top3Container');
     var secondaryContainer = document.getElementById('secondaryContainer');
     
-    if(!top3Container || !secondaryContainer) return;
+    if (!top3Container || !secondaryContainer) return;
 
     var top3 = artistsList.filter(function(a){ return a.type === 'top3'; }).slice(0, 3);
     var secondary = artistsList.filter(function(a){ return a.type === 'secondary'; });
@@ -908,7 +1081,7 @@
         '</div>';
       }
 
-      top3Html += '<div class="top3-card" onclick="openArtistModal('' + item.id + '')">' +
+      top3Html += '<div class="top3-card" onclick="openArtistModal(\'' + item.id + '\')">' +
         '<div class="top3-media-wrap">' +
           '<div class="top3-badge">' + badgeText + '</div>' +
           mediaHtml +
@@ -918,7 +1091,6 @@
         '<div class="top3-body">' +
           '<h3 class="top3-name">' + item.name + '</h3>' +
           '<div class="top3-genre">' + item.genre + '</div>' +
-          '<p class="top3-desc">"' + item.short_bio + '"</p>' +
           trackEmbed +
           '<div class="top3-footer-btn">VER FICHA & BIOGRAFÍA <span>↗</span></div>' +
         '</div>' +
@@ -930,20 +1102,19 @@
     var secHtml = '';
     secondary.forEach(function(item) {
       var avatarImg = item.media_url || 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=400&q=80';
-      secHtml += '<div class="secondary-card" onclick="openArtistModal('' + item.id + '')">' +
+      secHtml += '<div class="secondary-card" onclick="openArtistModal(\'' + item.id + '\')">' +
         '<div>' +
           '<div class="secondary-card-top">' +
             '<span>📍 ' + item.city + '</span>' +
             '<span style="color: var(--accent-lime); font-weight:700;">' + (item.badge || 'EN ROTACIÓN') + '</span>' +
           '</div>' +
           '<div class="secondary-avatar-strip">' +
-            '<div class="secondary-avatar" style="background-image: url('' + avatarImg + '');"></div>' +
+            '<div class="secondary-avatar" style="background-image: url(\'' + avatarImg + '\');"></div>' +
             '<div>' +
               '<h4 class="secondary-name">' + item.name + '</h4>' +
               '<div class="secondary-genre">' + item.genre + '</div>' +
             '</div>' +
           '</div>' +
-          '<p class="secondary-desc">"' + item.short_bio + '"</p>' +
         '</div>' +
         '<div class="secondary-card-footer">' +
           '<span>VER TRAYECTORIA</span>' +
@@ -957,10 +1128,10 @@
   // MODAL LOGIC
   function openArtistModal(id) {
     var artist = artistsList.find(function(a){ return a.id === id; });
-    if(!artist) return;
+    if (!artist) return;
 
     var heroWrap = document.getElementById('mHeroMedia');
-    if(artist.media_type === 'video' || (artist.media_url && artist.media_url.endsWith('.mp4'))) {
+    if (artist.media_type === 'video' || (artist.media_url && artist.media_url.endsWith('.mp4'))) {
       heroWrap.innerHTML = '<video src="' + artist.media_url + '" autoplay loop muted playsinline></video><div class="modal-hero-overlay"></div>';
     } else {
       var imgUrl = artist.media_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=900&q=80';
@@ -974,7 +1145,7 @@
     
     // Player
     var playerWrap = document.getElementById('mPlayerWrap');
-    if(artist.track_id) {
+    if (artist.track_id) {
       var cleanId = artist.track_id.replace('spotify:track:', '').split('?')[0].split('/').pop();
       playerWrap.innerHTML = '<iframe src="https://open.spotify.com/embed/track/' + cleanId + '?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style="border-radius:8px;"></iframe>';
       playerWrap.style.display = 'block';
@@ -982,10 +1153,10 @@
       playerWrap.style.display = 'none';
     }
 
-    document.getElementById('mFullReview').textContent = artist.full_review || artist.short_bio;
+    document.getElementById('mFullReview').textContent = artist.full_review || 'Proyecto destacado por el colectivo The New Indie Wave.';
     
     var careerSec = document.getElementById('mCareerSec');
-    if(artist.career_notes) {
+    if (artist.career_notes) {
       document.getElementById('mCareer').textContent = artist.career_notes;
       careerSec.style.display = 'block';
     } else {
@@ -993,7 +1164,7 @@
     }
 
     var eventsSec = document.getElementById('mEventsSec');
-    if(artist.events_note) {
+    if (artist.events_note) {
       document.getElementById('mEvents').textContent = artist.events_note;
       eventsSec.style.display = 'block';
     } else {
@@ -1002,10 +1173,10 @@
 
     // Actions
     var actionsHtml = '';
-    if(artist.spotify_url) {
+    if (artist.spotify_url) {
       actionsHtml += '<a href="' + artist.spotify_url + '" target="_blank" rel="noopener noreferrer" class="btn-modal-action primary">🎧 Escuchar en Spotify ↗</a>';
     }
-    if(artist.instagram) {
+    if (artist.instagram) {
       var igHandle = artist.instagram.replace('@', '');
       actionsHtml += '<a href="https://instagram.com/' + igHandle + '" target="_blank" rel="noopener noreferrer" class="btn-modal-action">📷 ' + artist.instagram + ' ↗</a>';
     }
@@ -1018,22 +1189,22 @@
 
   function closeArtistModal() {
     var modal = document.getElementById('artistModal');
-    if(modal) {
+    if (modal) {
       modal.classList.remove('open');
       document.body.style.overflow = '';
       var playerWrap = document.getElementById('mPlayerWrap');
-      if(playerWrap) playerWrap.innerHTML = '';
+      if (playerWrap) playerWrap.innerHTML = '';
     }
   }
 
   function handleModalBackdropClick(e) {
-    if(e.target.id === 'artistModal') {
+    if (e.target.id === 'artistModal') {
       closeArtistModal();
     }
   }
 
   document.addEventListener('keydown', function(e) {
-    if(e.key === 'Escape') {
+    if (e.key === 'Escape') {
       closeArtistModal();
       toggleMobileNav(false);
     }
@@ -1041,8 +1212,8 @@
 
   function toggleMobileNav(open) {
     var overlay = document.getElementById('mobileNavOverlay');
-    if(overlay) {
-      if(open) {
+    if (overlay) {
+      if (open) {
         overlay.classList.add('open');
         document.body.style.overflow = 'hidden';
       } else {
@@ -1052,7 +1223,8 @@
     }
   }
 
-  // Inicializar al cargar
+  // Renderizar inmediatamente y en DOMContentLoaded
+  renderRadarArtists();
   window.addEventListener('DOMContentLoaded', renderRadarArtists);
 </script>
 
