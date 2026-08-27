@@ -28,21 +28,6 @@
 <meta name="twitter:description" content="Proyectos musicales y bandas independientes que marcan la nueva ola.">
 <meta name="twitter:image" content="https://thenewindiewave.com/logo.png">
 
-<!-- JSON-LD Structured Data -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  "name": "Artistas en el Radar — The New Indie Wave",
-  "description": "Directorio y curaduría editorial de proyectos emergentes de música independiente.",
-  "publisher": {
-    "@type": "Organization",
-    "name": "The New Indie Wave",
-    "url": "https://thenewindiewave.com/"
-  }
-}
-</script>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Chivo:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -243,29 +228,29 @@
 
   /* PAGE HEADER */
   .page-header {
-    padding: 50px 0 24px;
+    padding: 44px 0 20px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 40px;
+    margin-bottom: 36px;
   }
 
   .sec-tag {
     font-family: var(--font-mono);
     font-size: 12px;
     color: var(--accent-lime);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     letter-spacing: 0.05em;
   }
 
   .page-title {
     font-family: var(--font-heading);
-    font-size: clamp(32px, 5vw, 56px);
+    font-size: clamp(32px, 5vw, 52px);
     font-weight: 900;
     letter-spacing: -0.03em;
     line-height: 1.1;
     text-transform: uppercase;
   }
 
-  /* SECTION LABELS (LIMPIOS SIN SUBTITULOS) */
+  /* SECTION LABELS */
   .section-label-bar {
     display: flex;
     align-items: center;
@@ -769,14 +754,266 @@
     <h2 class="section-heading">🔥 TOP 3 ARTISTAS DESTACADOS</h2>
   </div>
 
-  <div class="top3-grid" id="top3Container"></div>
+  <div class="top3-grid" id="top3Container">
+    <!-- TOP 1 -->
+    <div class="top3-card" onclick="openArtistModal('radar-1')">
+      <div class="top3-media-wrap">
+        <div class="top3-badge">TOP RADAR #1</div>
+        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=900&q=80" alt="Lunar Daydream" loading="lazy">
+        <div class="top3-media-overlay"></div>
+        <div class="top3-origin">📍 CIUDAD DE MÉXICO</div>
+      </div>
+      <div class="top3-body">
+        <h3 class="top3-name">Lunar Daydream</h3>
+        <div class="top3-genre">DREAM POP / SHOEGAZE</div>
+        <div class="mini-player-box" onclick="event.stopPropagation()">
+          <iframe src="https://open.spotify.com/embed/track/3n3Ppam7vgaVa1iaRUc9Lp?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+        <div class="top3-footer-btn">VER FICHA & BIOGRAFÍA <span>↗</span></div>
+      </div>
+    </div>
+
+    <!-- TOP 2 -->
+    <div class="top3-card" onclick="openArtistModal('radar-2')">
+      <div class="top3-media-wrap">
+        <div class="top3-badge">TOP RADAR #2</div>
+        <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80" alt="Distorsión Fría" loading="lazy">
+        <div class="top3-media-overlay"></div>
+        <div class="top3-origin">📍 BUENOS AIRES</div>
+      </div>
+      <div class="top3-body">
+        <h3 class="top3-name">Distorsión Fría</h3>
+        <div class="top3-genre">POST-PUNK / DARKWAVE</div>
+        <div class="mini-player-box" onclick="event.stopPropagation()">
+          <iframe src="https://open.spotify.com/embed/track/0VjIjW4GlUZAMYd2vXMi3b?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+        <div class="top3-footer-btn">VER FICHA & BIOGRAFÍA <span>↗</span></div>
+      </div>
+    </div>
+
+    <!-- TOP 3 -->
+    <div class="top3-card" onclick="openArtistModal('radar-3')">
+      <div class="top3-media-wrap">
+        <div class="top3-badge">TOP RADAR #3</div>
+        <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=80" alt="Cero Tardes" loading="lazy">
+        <div class="top3-media-overlay"></div>
+        <div class="top3-origin">📍 BOGOTÁ</div>
+      </div>
+      <div class="top3-body">
+        <h3 class="top3-name">Cero Tardes</h3>
+        <div class="top3-genre">INDIE POP / FOLK</div>
+        <div class="mini-player-box" onclick="event.stopPropagation()">
+          <iframe src="https://open.spotify.com/embed/track/7qiZfU4dY1lWllzX7mPBI3?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+        <div class="top3-footer-btn">VER FICHA & BIOGRAFÍA <span>↗</span></div>
+      </div>
+    </div>
+  </div>
 
   <!-- SECTION 2: 11 ARTISTAS EN EL RADAR -->
   <div class="section-label-bar" style="border-color: var(--accent-cyan);">
     <h2 class="section-heading">⚡ EN EL RADAR // SELECCIÓN EMERGENTE</h2>
   </div>
 
-  <div class="secondary-grid" id="secondaryContainer"></div>
+  <div class="secondary-grid" id="secondaryContainer">
+    <!-- 1 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-4')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 SANTIAGO DE CHILE</span>
+          <span style="color: var(--accent-lime); font-weight:700;">ESTRENO</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">Siluetas de Verano</h4>
+            <div class="secondary-genre">BEDROOM POP / LO-FI</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+
+    <!-- 2 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-5')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 MADRID / CDMX</span>
+          <span style="color: var(--accent-lime); font-weight:700;">COLECTIVO</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">Los Extraviados</h4>
+            <div class="secondary-genre">INDIE ROCK / GARAJE</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+
+    <!-- 3 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-6')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 LIMA</span>
+          <span style="color: var(--accent-lime); font-weight:700;">RECOMENDADO</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">Frecuencia Marina</h4>
+            <div class="secondary-genre">DREAM POP / SYNTH</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-7')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 MONTERREY</span>
+          <span style="color: var(--accent-lime); font-weight:700;">DESTACADO</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">Sombras de Neón</h4>
+            <div class="secondary-genre">DARKWAVE / EBM</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+
+    <!-- 5 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-8')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 VALPARAÍSO</span>
+          <span style="color: var(--accent-lime); font-weight:700;">EN ROTACIÓN</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">La Última Niebla</h4>
+            <div class="secondary-genre">SHOEGAZE / NOISE</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+
+    <!-- 6 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-9')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 GUADALAJARA</span>
+          <span style="color: var(--accent-lime); font-weight:700;">ESTRENO</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">Río Salvaje</h4>
+            <div class="secondary-genre">INDIE FOLK / PSICODELIA</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+
+    <!-- 7 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-10')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 SAN JOSÉ</span>
+          <span style="color: var(--accent-lime); font-weight:700;">RECOMENDADO</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">Autopista Central</h4>
+            <div class="secondary-genre">POST-PUNK / GARAJE</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+
+    <!-- 8 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-11')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 MEDELLÍN</span>
+          <span style="color: var(--accent-lime); font-weight:700;">DESTACADO</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">Cintas Magnéticas</h4>
+            <div class="secondary-genre">LO-FI BEATS / CHILL</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+
+    <!-- 9 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-12')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 PUEBLA</span>
+          <span style="color: var(--accent-lime); font-weight:700;">EN ROTACIÓN</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">Velo Nocturno</h4>
+            <div class="secondary-genre">GOTH ROCK / DARKWAVE</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+
+    <!-- 10 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-13')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 BARCELONA</span>
+          <span style="color: var(--accent-lime); font-weight:700;">ESTRENO</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1520523839898-50712825e617?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">Satélites Olvidados</h4>
+            <div class="secondary-genre">MATH ROCK / EMO INDIE</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+
+    <!-- 11 -->
+    <div class="secondary-card" onclick="openArtistModal('radar-14')">
+      <div>
+        <div class="secondary-card-top">
+          <span>📍 MONTEVIDEO</span>
+          <span style="color: var(--accent-lime); font-weight:700;">RECOMENDADO</span>
+        </div>
+        <div class="secondary-avatar-strip">
+          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80');"></div>
+          <div>
+            <h4 class="secondary-name">Aurora Estéreo</h4>
+            <div class="secondary-genre">SYNTH POP / NEW WAVE</div>
+          </div>
+        </div>
+      </div>
+      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+    </div>
+  </div>
 
 </main>
 
@@ -826,8 +1063,7 @@
 
 <script src="data_radar.js"></script>
 <script>
-  // Dataset directo de respaldo inmediato
-  var DEFAULT_LIST = (typeof DEFAULT_RADAR_ARTISTS !== 'undefined') ? DEFAULT_RADAR_ARTISTS : [
+  var artistsList = [
     {
       id: "radar-1",
       name: "Lunar Daydream",
@@ -837,7 +1073,7 @@
       badge: "TOP RADAR #1",
       media_url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=900&q=80",
       track_id: "3n3Ppam7vgaVa1iaRUc9Lp",
-      full_review: "Originarios del sur de la Ciudad de México, Lunar Daydream mezcla guitarras espaciales cargadas de chorus con cajas de ritmos vintage y melodías etéreas. Su reciente trabajo ha capturado la atención de la escena independiente.",
+      full_review: "Originarios del sur de la Ciudad de México, Lunar Daydream mezcla guitarras espaciales cargadas de chorus con cajas de ritmos vintage y melodías etéreas.",
       career_notes: "Formados en 2023, cuentan con más de 80,000 escuchas mensuales en Spotify y múltiples shows en vivo.",
       events_note: "Showcase TNIW Vol. 04 — Foro Cultural Indie (24 OCT 2026)",
       spotify_url: "https://open.spotify.com/artist/3n3Ppam7vgaVa1iaRUc9Lp",
@@ -853,7 +1089,7 @@
       media_url: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80",
       track_id: "0VjIjW4GlUZAMYd2vXMi3b",
       full_review: "Desde los sótanos de Buenos Aires, este dúo post-punk revitaliza las texturas frías de los sintetizadores analógicos con bajos distorsionados y voces graves.",
-      career_notes: "Ganadores del circuito emergente porteño 2025, actualmente grabando su primer larga duración en cinta analógica.",
+      career_notes: "Ganadores del circuito emergente porteño 2025, actualmente grabando su primer larga duración.",
       events_note: "Festival TNIW 2026 — Escenario Alterno (05 DIC 2026)",
       spotify_url: "https://open.spotify.com/",
       instagram: "@distorsionfria"
@@ -882,7 +1118,7 @@
       badge: "ESTRENO",
       media_url: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=600&q=80",
       track_id: "4cOdK2wGLETKBW3PvgPWqT",
-      full_review: "Composiciones caseras nacidas durante noches de insomnio. Melodías de ensueño con guitarras jangle y sintes casio.",
+      full_review: "Composiciones caseras con melodías de ensueño con guitarras jangle y sintes casio.",
       career_notes: "Pioneros del sonido bedroom chileno con lanzamientos en cassette.",
       events_note: "Gira acústica Cono Sur 2026",
       spotify_url: "https://open.spotify.com/",
@@ -1040,90 +1276,16 @@
     }
   ];
 
-  var artistsList = [];
-
-  function renderRadarArtists() {
-    try {
-      if (typeof getRadarArtists === 'function') {
-        artistsList = getRadarArtists();
+  // Si hay datos personalizados en localStorage, utilizarlos
+  try {
+    var stored = localStorage.getItem('tniw_radar_artists');
+    if (stored) {
+      var parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        artistsList = parsed;
       }
-    } catch(e) {}
-    
-    if (!artistsList || artistsList.length === 0) {
-      artistsList = DEFAULT_LIST;
     }
-    
-    var top3Container = document.getElementById('top3Container');
-    var secondaryContainer = document.getElementById('secondaryContainer');
-    
-    if (!top3Container || !secondaryContainer) return;
-
-    var top3 = artistsList.filter(function(a){ return a.type === 'top3'; }).slice(0, 3);
-    var secondary = artistsList.filter(function(a){ return a.type === 'secondary'; });
-
-    // RENDER TOP 3
-    var top3Html = '';
-    top3.forEach(function(item, idx) {
-      var badgeText = item.badge || ('TOP RADAR #' + (idx + 1));
-      var mediaHtml = '';
-      if(item.media_type === 'video' || (item.media_url && item.media_url.endsWith('.mp4'))) {
-        mediaHtml = '<video src="' + item.media_url + '" autoplay loop muted playsinline poster="logo.png"></video>';
-      } else {
-        var imgUrl = item.media_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80';
-        mediaHtml = '<img src="' + imgUrl + '" alt="' + item.name + '" loading="lazy">';
-      }
-
-      var trackEmbed = '';
-      if(item.track_id) {
-        var cleanId = item.track_id.replace('spotify:track:', '').split('?')[0].split('/').pop();
-        trackEmbed = '<div class="mini-player-box" onclick="event.stopPropagation()">' +
-          '<iframe src="https://open.spotify.com/embed/track/' + cleanId + '?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>' +
-        '</div>';
-      }
-
-      top3Html += '<div class="top3-card" onclick="openArtistModal(\'' + item.id + '\')">' +
-        '<div class="top3-media-wrap">' +
-          '<div class="top3-badge">' + badgeText + '</div>' +
-          mediaHtml +
-          '<div class="top3-media-overlay"></div>' +
-          '<div class="top3-origin">📍 ' + item.city + '</div>' +
-        '</div>' +
-        '<div class="top3-body">' +
-          '<h3 class="top3-name">' + item.name + '</h3>' +
-          '<div class="top3-genre">' + item.genre + '</div>' +
-          trackEmbed +
-          '<div class="top3-footer-btn">VER FICHA & BIOGRAFÍA <span>↗</span></div>' +
-        '</div>' +
-      '</div>';
-    });
-    top3Container.innerHTML = top3Html;
-
-    // RENDER 11 SECUNDARIOS
-    var secHtml = '';
-    secondary.forEach(function(item) {
-      var avatarImg = item.media_url || 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=400&q=80';
-      secHtml += '<div class="secondary-card" onclick="openArtistModal(\'' + item.id + '\')">' +
-        '<div>' +
-          '<div class="secondary-card-top">' +
-            '<span>📍 ' + item.city + '</span>' +
-            '<span style="color: var(--accent-lime); font-weight:700;">' + (item.badge || 'EN ROTACIÓN') + '</span>' +
-          '</div>' +
-          '<div class="secondary-avatar-strip">' +
-            '<div class="secondary-avatar" style="background-image: url(\'' + avatarImg + '\');"></div>' +
-            '<div>' +
-              '<h4 class="secondary-name">' + item.name + '</h4>' +
-              '<div class="secondary-genre">' + item.genre + '</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="secondary-card-footer">' +
-          '<span>VER TRAYECTORIA</span>' +
-          '<span>↗</span>' +
-        '</div>' +
-      '</div>';
-    });
-    secondaryContainer.innerHTML = secHtml;
-  }
+  } catch(e) {}
 
   // MODAL LOGIC
   function openArtistModal(id) {
@@ -1222,10 +1384,6 @@
       }
     }
   }
-
-  // Renderizar inmediatamente y en DOMContentLoaded
-  renderRadarArtists();
-  window.addEventListener('DOMContentLoaded', renderRadarArtists);
 </script>
 
 </body>
