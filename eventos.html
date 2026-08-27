@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Eventos & Showcases — The New Indie Wave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Chivo:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090b;
+    --bg-card: #121215;
+    --bg-card-hover: #18181d;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text-main: #f4f4f6;
+    --text-muted: #8e8e96;
+    --text-dim: #52525b;
+    --accent-lime: #bbf451;
+    --accent-orange: #fb923c;
+    --font-heading: 'Chivo', sans-serif;
+    --font-mono: 'Chivo Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+    --duration-fast: 240ms;
+    --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 80px;
+  }
+
+  ::selection {
+    background: var(--accent-lime);
+    color: #000;
+  }
+
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* TOP NAVIGATION */
+  .navbar {
+    border-bottom: 1px solid var(--border);
+    background: rgba(9, 9, 11, 0.92);
+    backdrop-filter: blur(14px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+  }
+
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+  }
+
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-main);
+    text-transform: uppercase;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .site-logo {
+    height: 32px;
+    width: auto;
+    filter: invert(1);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .nav-links a.active, .nav-links a:hover {
+    color: var(--text-main);
+  }
+
+  .btn-nav-submit {
+    padding: 8px 16px;
+    border-radius: 4px;
+    background: var(--text-main);
+    color: #000 !important;
+    font-weight: 700;
+    text-decoration: none !important;
+  }
+
+  /* HEADER BLOCK */
+  .page-header {
+    padding: 48px 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+  }
+
+  .sec-tag {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--accent-lime);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .page-title {
+    font-family: var(--font-heading);
+    font-size: 38px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .page-desc {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 680px;
+    line-height: 1.6;
+  }
+
+  /* EVENTS LIST */
+  .events-table {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .event-row {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 22px 28px;
+    display: grid;
+    grid-template-columns: 140px 1.5fr 1fr auto;
+    align-items: center;
+    gap: 24px;
+    transition: all var(--duration-fast) var(--ease-smooth-out);
+  }
+
+  .event-row:hover {
+    border-color: var(--border-strong);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+  }
+
+  .event-date {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--accent-lime);
+  }
+
+  .event-info h4 {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .event-info p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .event-venue-tag {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .btn-event-rsvp {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-event-rsvp:hover {
+    background: var(--text-main);
+    color: #000;
+    border-color: #fff;
+  }
+
+  .toast-box {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #ffffff;
+    color: #000000;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 4px;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.6);
+    transform: translateY(30px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all var(--duration-fast) cubic-bezier(0.34, 1.36, 0.64, 1);
+    z-index: 1000;
+  }
+
+  .toast-box.active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    .event-row { grid-template-columns: 1fr; gap: 12px; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<!-- NAVIGATION -->
+<header class="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="brand-logo">
+      <img src="logo.png" alt="The New Indie Wave" class="site-logo">
+      <span>THE NEW INDIE WAVE</span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="playlists.html">02. PLAYLISTS</a>
+      <a href="artistas.html">03. ARTISTAS EN EL RADAR</a>
+      <a href="eventos.html" class="active" style="color:#fff; font-weight:700;">04. EVENTOS // LIVE</a>
+      <a href="manifiesto.html">05. MANIFIESTO</a>
+      <a href="enviar.html" class="btn-nav-submit">ENVIAR CANCIÓN ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div class="page-header">
+    <div class="sec-tag">// 04. SHOWCASES & CONCIERTOS EN VIVO</div>
+    <h1 class="page-title">PRÓXIMOS EVENTOS</h1>
+    <p class="page-desc">
+      Conciertos, noches de showcase y sesiones acústicas organizadas por The New Indie Wave para conectar cara a cara bandas emergentes con su público.
+    </p>
+  </div>
+
+  <div class="events-table">
+    
+    <div class="event-row">
+      <div class="event-date">24 OCT 2026</div>
+      <div class="event-info">
+        <h4>The New Indie Wave Showcase Vol. 04</h4>
+        <p>Lineup: Lunar Daydream + Distorsión Fría + Siluetas de Verano. Formato íntimo con venta de vinilos.</p>
+      </div>
+      <div class="event-venue-tag">📍 Foro Cultural Indie — CDMX</div>
+      <button class="btn-event-rsvp" onclick="showToast('🎟 Redirigiendo a reserva de entradas...')">RESERVAR ↗</button>
+    </div>
+
+    <div class="event-row">
+      <div class="event-date">12 NOV 2026</div>
+      <div class="event-info">
+        <h4>Secret Rooftop Sessions</h4>
+        <p>Sesión acústica y electro-lofi al atardecer para miembros del colectivo y suscriptores.</p>
+      </div>
+      <div class="event-venue-tag">📍 Terraza Roma Norte — CDMX</div>
+      <button class="btn-event-rsvp" onclick="showToast('✨ Registro en lista de espera confirmado')">LISTA ESPERA ↗</button>
+    </div>
+
+    <div class="event-row">
+      <div class="event-date">05 DIC 2026</div>
+      <div class="event-info">
+        <h4>The New Indie Wave Festival '26</h4>
+        <p>8 bandas en vivo en dos escenarios alternos. Curaduría 100% independiente cerrando el año.</p>
+      </div>
+      <div class="event-venue-tag">📍 Parque Urbano Cultural</div>
+      <button class="btn-event-rsvp" onclick="showToast('📢 Te notificaremos cuando inicie la preventa')">PREVENTA ↗</button>
+    </div>
+
+  </div>
+</main>
+
+<div class="toast-box" id="toast"></div>
+
+<script>
+  function showToast(msg) {
+    var toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('active');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function() {
+      toast.classList.remove('active');
+    }, 3200);
+  }
+</script>
+
+</body>
+</html>

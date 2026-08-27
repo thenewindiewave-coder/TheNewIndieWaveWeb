@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Artistas en el Radar — The New Indie Wave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Chivo:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090b;
+    --bg-card: #121215;
+    --bg-card-hover: #18181d;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text-main: #f4f4f6;
+    --text-muted: #8e8e96;
+    --text-dim: #52525b;
+    --accent-lime: #bbf451;
+    --accent-cyan: #38bdf8;
+    --accent-orange: #fb923c;
+    --accent-pink: #f472b6;
+    --font-heading: 'Chivo', sans-serif;
+    --font-mono: 'Chivo Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+    --duration-fast: 240ms;
+    --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 80px;
+  }
+
+  ::selection {
+    background: var(--accent-lime);
+    color: #000;
+  }
+
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* TOP NAVIGATION */
+  .navbar {
+    border-bottom: 1px solid var(--border);
+    background: rgba(9, 9, 11, 0.92);
+    backdrop-filter: blur(14px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+  }
+
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+  }
+
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-main);
+    text-transform: uppercase;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .site-logo {
+    height: 32px;
+    width: auto;
+    filter: invert(1);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .nav-links a.active, .nav-links a:hover {
+    color: var(--text-main);
+  }
+
+  .btn-nav-submit {
+    padding: 8px 16px;
+    border-radius: 4px;
+    background: var(--text-main);
+    color: #000 !important;
+    font-weight: 700;
+    text-decoration: none !important;
+  }
+
+  /* HEADER BLOCK */
+  .page-header {
+    padding: 48px 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+  }
+
+  .sec-tag {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--accent-lime);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .page-title {
+    font-family: var(--font-heading);
+    font-size: 38px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .page-desc {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 680px;
+    line-height: 1.6;
+  }
+
+  /* ARTISTS GRID */
+  .artists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 20px;
+  }
+
+  .artist-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 22px;
+    transition: all var(--duration-fast) var(--ease-smooth-out);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .artist-card:hover {
+    border-color: var(--border-strong);
+    background: var(--bg-card-hover);
+    transform: translateY(-3px);
+  }
+
+  .artist-card-top {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+
+  .artist-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #27272a;
+    border: 1px solid var(--border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+
+  .artist-name {
+    font-family: var(--font-heading);
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .artist-vibe {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-cyan);
+    margin-bottom: 10px;
+  }
+
+  .artist-review {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin-bottom: 16px;
+    flex-grow: 1;
+  }
+
+  .track-pill {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-main);
+  }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<!-- NAVIGATION -->
+<header class="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="brand-logo">
+      <img src="logo.png" alt="The New Indie Wave" class="site-logo">
+      <span>THE NEW INDIE WAVE</span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="playlists.html">02. PLAYLISTS</a>
+      <a href="artistas.html" class="active" style="color:#fff; font-weight:700;">03. ARTISTAS EN EL RADAR</a>
+      <a href="eventos.html">04. EVENTOS // LIVE</a>
+      <a href="manifiesto.html">05. MANIFIESTO</a>
+      <a href="enviar.html" class="btn-nav-submit">ENVIAR CANCIÓN ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div class="page-header">
+    <div class="sec-tag">// 03. SCOUTING & RECOMENDACIÓN EDITORIAL</div>
+    <h1 class="page-title">ARTISTAS EN EL RADAR</h1>
+    <p class="page-desc">
+      Proyectos independientes que han pasado por nuestra revisión editorial y forman parte de la comunidad activa de The New Indie Wave.
+    </p>
+  </div>
+
+  <div class="artists-grid">
+    
+    <div class="artist-card">
+      <div class="artist-card-top">
+        <span>CIUDAD DE MÉXICO</span>
+        <span style="color: var(--accent-lime);">RECOMENDADO</span>
+      </div>
+      <div class="artist-avatar" style="background: radial-gradient(circle, #3b0764, #18181b);">LD</div>
+      <h3 class="artist-name">Lunar Daydream</h3>
+      <div class="artist-vibe">DREAM POP / SHOEGAZE</div>
+      <p class="artist-review">"Atmósferas flotantes y una producción densa en capas que rescata la esencia melódica del dream pop internacional."</p>
+      <div class="track-pill">
+        <span>Track: "Slow Wave"</span>
+        <span>Vol. 01</span>
+      </div>
+    </div>
+
+    <div class="artist-card">
+      <div class="artist-card-top">
+        <span>BUENOS AIRES</span>
+        <span style="color: var(--accent-orange);">EN VIVO</span>
+      </div>
+      <div class="artist-avatar" style="background: radial-gradient(circle, #064e3b, #18181b);">DF</div>
+      <h3 class="artist-name">Distorsión Fría</h3>
+      <div class="artist-vibe">POST-PUNK / DARKWAVE</div>
+      <p class="artist-review">"Bajo contundente, cajas de ritmo ochenteras y estética nocturna lista para sonar en nuestros showcases en vivo."</p>
+      <div class="track-pill">
+        <span>Track: "Sombras"</span>
+        <span>Vol. 02</span>
+      </div>
+    </div>
+
+    <div class="artist-card">
+      <div class="artist-card-top">
+        <span>SANTIAGO DE CHILE</span>
+        <span style="color: var(--accent-cyan);">ESTRENO</span>
+      </div>
+      <div class="artist-avatar" style="background: radial-gradient(circle, #7c2d12, #18181b);">SV</div>
+      <h3 class="artist-name">Siluetas de Verano</h3>
+      <div class="artist-vibe">BEDROOM POP / LO-FI</div>
+      <p class="artist-review">"Texturas de cinta de cuatro canales con armonías vocales íntimas y sinceras grabadas en casa."</p>
+      <div class="track-pill">
+        <span>Track: "Café Frío"</span>
+        <span>Vol. 05</span>
+      </div>
+    </div>
+
+    <div class="artist-card">
+      <div class="artist-card-top">
+        <span>MADRID / CDMX</span>
+        <span style="color: var(--accent-pink);">COLECTIVO</span>
+      </div>
+      <div class="artist-avatar" style="background: radial-gradient(circle, #831843, #18181b);">LE</div>
+      <h3 class="artist-name">Los Extraviados</h3>
+      <div class="artist-vibe">INDIE ROCK / GARAJE</div>
+      <p class="artist-review">"Potencia rítmica directa, guitarras crudas y coros enérgicos que conectan con la nueva oleada de rock independiente."</p>
+      <div class="track-pill">
+        <span>Track: "Vibración"</span>
+        <span>Vol. 03</span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>

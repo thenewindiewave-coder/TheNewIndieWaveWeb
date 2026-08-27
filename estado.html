@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Estado de tu Envío — The New Indie Wave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Chivo:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090b;
+    --bg-card: #121215;
+    --bg-card-subtle: #17171d;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text-main: #f4f4f6;
+    --text-muted: #8e8e96;
+    --text-dim: #52525b;
+    
+    --accent-lime: #bbf451;
+    --accent-cyan: #38bdf8;
+    --accent-orange: #fb923c;
+    --accent-green: #4ade80;
+
+    --font-heading: 'Chivo', sans-serif;
+    --font-mono: 'Chivo Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+
+    --ease-bounce: cubic-bezier(0.34, 1.36, 0.64, 1);
+    --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 80px;
+  }
+
+  ::selection {
+    background: var(--accent-lime);
+    color: #000;
+  }
+
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* TOP NAVIGATION */
+  .navbar {
+    border-bottom: 1px solid var(--border);
+    background: rgba(9, 9, 11, 0.92);
+    backdrop-filter: blur(14px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+  }
+
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+  }
+
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-main);
+    text-transform: uppercase;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .site-logo {
+    height: 32px;
+    width: auto;
+    filter: invert(1);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .nav-links a:hover {
+    color: var(--text-main);
+  }
+
+  .btn-nav-submit {
+    padding: 8px 16px;
+    border-radius: 4px;
+    background: var(--text-main);
+    color: #000 !important;
+    font-weight: 700;
+    text-decoration: none !important;
+  }
+
+  /* HEADER BLOCK */
+  .page-header {
+    padding: 44px 0 24px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    margin-bottom: 14px;
+    transition: color 0.15s ease;
+  }
+
+  .back-btn:hover {
+    color: var(--accent-lime);
+  }
+
+  .status-badge-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-lime);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(187, 244, 81, 0.1);
+    border: 1px solid rgba(187, 244, 81, 0.25);
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-lime);
+    box-shadow: 0 0 8px var(--accent-lime);
+    animation: pulse 1.8s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  .page-title {
+    font-family: var(--font-heading);
+    font-size: 34px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+
+  .page-desc {
+    color: var(--text-muted);
+    font-size: 14.5px;
+  }
+
+  /* MAGIC LINK BAR */
+  .magic-link-box {
+    background: var(--bg-card-subtle);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 24px 0 32px;
+  }
+
+  .magic-info {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .magic-id-tag {
+    color: var(--text-main);
+    font-weight: 700;
+    background: rgba(255,255,255,0.06);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  .btn-copy-magic {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-copy-magic:hover {
+    background: var(--text-main);
+    color: #000;
+  }
+
+  /* COUNTDOWN TIMER CARD */
+  .timer-card {
+    background: linear-gradient(180deg, #16161c 0%, #0e0e12 100%);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .timer-left h3 {
+    font-family: var(--font-heading);
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .timer-left p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .timer-digits-box {
+    display: flex;
+    gap: 8px;
+    font-family: var(--font-mono);
+  }
+
+  .time-unit {
+    background: #09090b;
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    border-radius: 6px;
+    text-align: center;
+    min-width: 60px;
+  }
+
+  .time-num {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent-lime);
+    display: block;
+    line-height: 1.1;
+  }
+
+  .time-label {
+    font-size: 9.5px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* PROGRESS STEPPER */
+  .stepper-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+
+  .stepper-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 24px;
+  }
+
+  .stepper-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+  }
+
+  .step-row {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .step-icon-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #1e1e24;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    z-index: 2;
+  }
+
+  .step-row.completed .step-icon-wrap {
+    background: var(--accent-lime);
+    color: #000;
+    border-color: var(--accent-lime);
+  }
+
+  .step-row.active .step-icon-wrap {
+    background: rgba(187, 244, 81, 0.15);
+    border-color: var(--accent-lime);
+    color: var(--accent-lime);
+    box-shadow: 0 0 12px rgba(187, 244, 81, 0.3);
+  }
+
+  .step-content h4 {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .step-row.completed .step-content h4 {
+    color: var(--text-main);
+  }
+
+  .step-row.active .step-content h4 {
+    color: var(--accent-lime);
+  }
+
+  .step-row.pending .step-content h4 {
+    color: var(--text-dim);
+  }
+
+  .step-content p {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* DETAILS SUMMARY */
+  .details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .detail-item {
+    font-size: 12px;
+  }
+
+  .detail-lbl {
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .detail-val {
+    color: var(--text-main);
+    font-weight: 600;
+  }
+
+  /* ACCEPTED STATE PREVIEW (CONDITIONAL) */
+  .accepted-banner {
+    display: none;
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    border-radius: 8px;
+    padding: 24px;
+    margin-top: 24px;
+  }
+
+  .accepted-banner.show {
+    display: block;
+  }
+
+  .btn-download-story {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-lime);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-top: 12px;
+    cursor: pointer;
+  }
+
+  /* TOAST */
+  .toast-box {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #ffffff;
+    color: #000000;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 4px;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.6);
+    transform: translateY(30px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.24s var(--ease-bounce);
+    z-index: 1000;
+  }
+
+  .toast-box.active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 680px) {
+    .timer-card { flex-direction: column; align-items: flex-start; }
+    .details-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<!-- HEADER -->
+<header class="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="brand-logo">
+      <img src="logo.png" alt="The New Indie Wave" class="site-logo">
+      <span>THE NEW INDIE WAVE</span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="playlists.html">02. PLAYLISTS</a>
+      <a href="artistas.html">03. ARTISTAS EN EL RADAR</a>
+      <a href="eventos.html">04. EVENTOS // LIVE</a>
+      <a href="manifiesto.html">05. MANIFIESTO</a>
+      <a href="enviar.html" class="btn-nav-submit">ENVIAR OTRA CANCIÓN ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div class="page-header">
+    <a href="index.html" class="back-btn">← Volver al inicio</a>
+    
+    <div>
+      <div class="status-badge-top">
+        <span class="pulse-dot"></span>
+        <span id="badgeText">EN COLA DEL CURADOR</span>
+      </div>
+    </div>
+
+    <h1 class="page-title">ESTADO DE TU ENVÍO</h1>
+    <p class="page-desc" id="headerSub">
+      Monitorea en tiempo real la revisión editorial de tu tema sin necesidad de contraseña.
+    </p>
+  </div>
+
+  <!-- MAGIC LINK ACCESSIBILITY -->
+  <div class="magic-link-box">
+    <div class="magic-info">
+      <span>ID de Envío:</span>
+      <span class="magic-id-tag" id="trackIdDisplay">TNIW-8F3A29</span>
+    </div>
+    <button class="btn-copy-magic" onclick="copyMagicLink()">
+      🔗 Copiar Magic Link para volver cuando quieras
+    </button>
+  </div>
+
+  <!-- COUNTDOWN TIMER -->
+  <div class="timer-card">
+    <div class="timer-left">
+      <h3>TIEMPO DE RESPUESTA ESTIMADO</h3>
+      <p>Rodrigo DL Moral escuchará tu pista y enviará feedback antes de:</p>
+    </div>
+    <div class="timer-digits-box">
+      <div class="time-unit">
+        <span class="time-num" id="tHours">36</span>
+        <span class="time-label">Horas</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-num" id="tMinutes">42</span>
+        <span class="time-label">Min</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-num" id="tSeconds">18</span>
+        <span class="time-label">Seg</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEPPER PROCESS -->
+  <div class="stepper-card">
+    <div class="stepper-title">// PROGRESO EN VIVO</div>
+
+    <div class="stepper-steps">
+      
+      <!-- STEP 1 -->
+      <div class="step-row completed" id="step1">
+        <div class="step-icon-wrap">✓</div>
+        <div class="step-content">
+          <h4>01. Canción Recibida</h4>
+          <p>Metadata validada, enlace activo y playlist destino asignada.</p>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-row active" id="step2">
+        <div class="step-icon-wrap">02</div>
+        <div class="step-content">
+          <h4>02. En Cola del Curador</h4>
+          <p>Tu canción está en la bandeja de escucha oficial de The New Indie Wave.</p>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-row pending" id="step3">
+        <div class="step-icon-wrap">03</div>
+        <div class="step-content">
+          <h4>03. Escucha Editorial (Mínimo 30-45 seg)</h4>
+          <p>Evaluación de producción, mood y encaje sonoro para la playlist.</p>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-row pending" id="step4">
+        <div class="step-icon-wrap">04</div>
+        <div class="step-content">
+          <h4>04. Decisión Final & Difusión</h4>
+          <p>Inclusión en playlist + video-historia descargable + TikToks en @TNIWave & @MtrendVideo (si es seleccionada).</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SUBMISSION DETAILS -->
+    <div class="details-grid">
+      <div class="detail-item">
+        <div class="detail-lbl">Artista / Banda</div>
+        <div class="detail-val" id="dArtist">Tu Proyecto Musical</div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-lbl">Canción</div>
+        <div class="detail-val" id="dSong">Título de tu Track</div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-lbl">Playlist Asignada</div>
+        <div class="detail-val" id="dPlaylist">Rock indie para manejar de noche</div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-lbl">Tipo de Envío</div>
+        <div class="detail-val" style="color: var(--accent-lime);">✓ Estándar (100% Curaduría Humana)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCEPTED STATE (DEMO TOGGLE) -->
+  <div class="accepted-banner" id="acceptedBox">
+    <h3 style="color: var(--accent-green); font-family: var(--font-heading); font-size: 20px; font-weight: 800; margin-bottom: 6px;">
+      🎉 ¡FELICIDADES! TU CANCIÓN FUE SELECCIONADA
+    </h3>
+    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+      Tu tema ya ha sido añadido a la playlist oficial y programado para amplificación en nuestras redes sociales (@TNIWave y @MtrendVideo).
+    </p>
+    <a href="#" class="btn-download-story" onclick="showToast('Generando Video-Historia vertical...')">
+      📥 Descargar Video-Historia para tus Redes (Instagram / TikTok)
+    </a>
+  </div>
+</main>
+
+<div class="toast-box" id="toast"></div>
+
+<script>
+  // 1. Obtener ID de la URL o de localStorage
+  var urlParams = new URLSearchParams(window.location.search);
+  var currentId = urlParams.get('id') || localStorage.getItem('tniw_last_submission_id') || 'TNIW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  // Guardar en localStorage para persistencia en este navegador
+  localStorage.setItem('tniw_last_submission_id', currentId);
+  document.getElementById('trackIdDisplay').textContent = currentId;
+
+  // Cargar datos guardados si existen
+  var savedData = localStorage.getItem('tniw_submission_data');
+  if(savedData) {
+    try {
+      var d = JSON.parse(savedData);
+      if(d.artist_name) document.getElementById('dArtist').textContent = d.artist_name;
+      if(d.song_title) document.getElementById('dSong').textContent = d.song_title;
+      if(d.playlist) document.getElementById('dPlaylist').textContent = d.playlist;
+    } catch(e){}
+  }
+
+  // 2. Consulta en vivo a la base de datos (Supabase)
+  var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
+
+  async function fetchLiveStatus() {
+    try {
+      // 1. Intentar consulta directa a Supabase
+      var res = await fetch(SUPABASE_URL + '/rest/v1/submissions?track_id=eq.' + encodeURIComponent(currentId) + '&select=*', {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        }
+      });
+
+      var record = null;
+      if(res.ok) {
+        var rows = await res.json();
+        if(rows && rows.length > 0) record = rows[0];
+      }
+
+      if(!record) {
+        // Fallback a /api/status de Vercel
+        var resApi = await fetch('/api/status?id=' + encodeURIComponent(currentId));
+        if(resApi.ok) {
+          var jsonApi = await resApi.json();
+          if(jsonApi && jsonApi.data) record = jsonApi.data;
+        }
+      }
+
+      if(record) {
+        if(record.artist_name) document.getElementById('dArtist').textContent = record.artist_name;
+        if(record.song_title) document.getElementById('dSong').textContent = record.song_title;
+        if(record.playlist) document.getElementById('dPlaylist').textContent = record.playlist;
+        
+        // Actualizar Stepper según el estado real
+        if(record.status === 'accepted') {
+          document.getElementById('badgeText').textContent = 'ACEPTADA EN PLAYLIST';
+          document.getElementById('step2').className = 'step-row completed';
+          document.getElementById('step3').className = 'step-row completed';
+          document.getElementById('step4').className = 'step-row completed';
+          document.getElementById('acceptedBox').classList.add('show');
+        } else if(record.status === 'listening') {
+          document.getElementById('badgeText').textContent = 'EN ESCUCHA EDITORIAL';
+          document.getElementById('step2').className = 'step-row completed';
+          document.getElementById('step3').className = 'step-row active';
+        } else if(record.status === 'queue' || record.status === 'pending') {
+          document.getElementById('badgeText').textContent = 'EN COLA DEL CURADOR';
+          document.getElementById('step1').className = 'step-row completed';
+          document.getElementById('step2').className = 'step-row active';
+        }
+      }
+    } catch(err){}
+  }
+  fetchLiveStatus();
+
+  // 3. Temporizador regresivo en tiempo real
+  var totalSeconds = 48 * 3600 - 14 * 60 - 22; // ~47 horas restantes de demo
+  function updateTimer() {
+    if(totalSeconds <= 0) {
+      document.getElementById('tHours').textContent = '00';
+      document.getElementById('tMinutes').textContent = '00';
+      document.getElementById('tSeconds').textContent = '00';
+      return;
+    }
+    totalSeconds--;
+    var h = Math.floor(totalSeconds / 3600);
+    var m = Math.floor((totalSeconds % 3600) / 60);
+    var s = totalSeconds % 60;
+    document.getElementById('tHours').textContent = h < 10 ? '0' + h : h;
+    document.getElementById('tMinutes').textContent = m < 10 ? '0' + m : m;
+    document.getElementById('tSeconds').textContent = s < 10 ? '0' + s : s;
+  }
+  setInterval(updateTimer, 1000);
+  updateTimer();
+
+  // 3. Copiar Magic Link
+  function copyMagicLink() {
+    var fullUrl = window.location.origin + window.location.pathname + '?id=' + currentId;
+    if(navigator.clipboard) {
+      navigator.clipboard.writeText(fullUrl).then(function() {
+        showToast('✓ Magic Link copiado al portapapeles');
+      });
+    } else {
+      showToast('✓ Enlace: ' + fullUrl);
+    }
+  }
+
+  function showToast(msg) {
+    var toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('active');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function() {
+      toast.classList.remove('active');
+    }, 3200);
+  }
+</script>
+
+</body>
+</html>

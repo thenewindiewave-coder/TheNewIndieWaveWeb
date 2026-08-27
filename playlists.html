@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Playlists Oficiales — The New Indie Wave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Chivo:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090b;
+    --bg-card: #121215;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text-main: #f4f4f6;
+    --text-muted: #8e8e96;
+    --text-dim: #52525b;
+    --accent-lime: #bbf451;
+    --font-heading: 'Chivo', sans-serif;
+    --font-mono: 'Chivo Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+    --duration-quick: 160ms;
+    --duration-fast: 240ms;
+    --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-bounce: cubic-bezier(0.34, 1.36, 0.64, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 80px;
+  }
+
+  ::selection {
+    background: var(--accent-lime);
+    color: #000;
+  }
+
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* TOP NAVIGATION */
+  .navbar {
+    border-bottom: 1px solid var(--border);
+    background: rgba(9, 9, 11, 0.92);
+    backdrop-filter: blur(14px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+  }
+
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+  }
+
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-main);
+    text-transform: uppercase;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .site-logo {
+    height: 32px;
+    width: auto;
+    filter: invert(1);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .nav-links a.active, .nav-links a:hover {
+    color: var(--text-main);
+  }
+
+  .btn-nav-submit {
+    padding: 8px 16px;
+    border-radius: 4px;
+    background: var(--text-main);
+    color: #000 !important;
+    font-weight: 700;
+    text-decoration: none !important;
+  }
+
+  /* HEADER BLOCK */
+  .page-header {
+    padding: 48px 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+  }
+
+  .sec-tag {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--accent-lime);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .page-title {
+    font-family: var(--font-heading);
+    font-size: 38px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .page-desc {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 680px;
+    line-height: 1.6;
+  }
+
+  /* FEATURED TOP ROW */
+  .featured-spotify-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .featured-embed-wrap {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #18181b;
+    border: 1px solid var(--border);
+    transition: transform var(--duration-fast) var(--ease-smooth-out), border-color var(--duration-fast) ease;
+  }
+
+  .featured-embed-wrap:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-3px);
+  }
+
+  /* FILTER BAR */
+  .filter-pill-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin-bottom: 24px;
+    padding-bottom: 4px;
+  }
+
+  .filter-pill {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 7px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--duration-quick) ease;
+  }
+
+  .filter-pill:hover {
+    border-color: var(--border-strong);
+    color: var(--text-main);
+  }
+
+  .filter-pill.active {
+    background: var(--text-main);
+    color: #000;
+    font-weight: 700;
+    border-color: var(--text-main);
+  }
+
+  /* ACCORDION */
+  .playlist-accordion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .acc-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color var(--duration-fast) ease;
+  }
+
+  .acc-item:hover {
+    border-color: var(--border-strong);
+  }
+
+  .acc-header-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: none;
+    border: none;
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+    gap: 16px;
+  }
+
+  .acc-header-meta {
+    flex: 1;
+  }
+
+  .acc-playlist-title {
+    font-family: var(--font-heading);
+    font-size: 16.5px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .acc-playlist-desc {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+
+  .acc-genres-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .acc-genres-tags span {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 3px;
+    color: var(--text-muted);
+  }
+
+  .acc-chevron {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    transition: transform var(--duration-fast) var(--ease-smooth-out);
+  }
+
+  .acc-item.open .acc-chevron {
+    transform: rotate(180deg);
+  }
+
+  .acc-panel {
+    display: none;
+    padding: 0 20px 20px;
+  }
+
+  .acc-item.open .acc-panel {
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<!-- NAVIGATION -->
+<header class="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="brand-logo">
+      <img src="logo.png" alt="The New Indie Wave" class="site-logo">
+      <span>THE NEW INDIE WAVE</span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="playlists.html" class="active" style="color:#fff; font-weight:700;">02. PLAYLISTS</a>
+      <a href="artistas.html">03. ARTISTAS EN EL RADAR</a>
+      <a href="eventos.html">04. EVENTOS // LIVE</a>
+      <a href="manifiesto.html">05. MANIFIESTO</a>
+      <a href="enviar.html" class="btn-nav-submit">ENVIAR CANCIÓN ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div class="page-header">
+    <div class="sec-tag">// 02. CURADURÍA EN SPOTIFY</div>
+    <h1 class="page-title">DESCUBRIMIENTO DE PLAYLISTS</h1>
+    <p class="page-desc">
+      Playlists Oficiales organizadas por estado de ánimo, estilo y energía sonora. Mezcla de talentos independientes emergentes con referentes consagrados para dar a la música nueva un lugar real donde sonar.
+    </p>
+  </div>
+
+  <!-- FEATURED ROW -->
+  <div class="featured-spotify-row">
+    <div class="featured-embed-wrap">
+      <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2APaz3JDupY9fNUczoKMUP?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>
+    <div class="featured-embed-wrap">
+      <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/36ribRboGB3DwM821oYokl?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>
+    <div class="featured-embed-wrap">
+      <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6cuhRpfYmEt0vYCT9mFLKc?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <!-- FILTER PILLS -->
+  <div class="filter-pill-row">
+    <button class="filter-pill active" onclick="filterPlaylists('all', this)">[ TODAS LAS PLAYLISTS ]</button>
+    <button class="filter-pill" onclick="filterPlaylists('rock', this)">[ ROCK & INDIE ]</button>
+    <button class="filter-pill" onclick="filterPlaylists('pop', this)">[ INDIE POP & BEDROOM ]</button>
+    <button class="filter-pill" onclick="filterPlaylists('heavy', this)">[ METAL & HARD ROCK ]</button>
+    <button class="filter-pill" onclick="filterPlaylists('vibes', this)">[ DARKWAVE & URBANO ]</button>
+  </div>
+
+  <!-- FULL ACCORDION -->
+  <div class="playlist-accordion-list">
+    
+    <div class="acc-item" data-category="rock">
+      <button class="acc-header-btn" onclick="toggleAcc(this)">
+        <div class="acc-header-meta">
+          <div class="acc-playlist-title">01. Rock indie para manejar de noche sin rumbo</div>
+          <div class="acc-playlist-desc">Ventanas abajo, ciudad dormida y el volumen en el punto exacto donde el silencio ya no molesta.</div>
+          <div class="acc-genres-tags">
+            <span>Indie rock</span><span>Alternative</span><span>Post-punk</span><span>Shoegaze</span><span>Britpop</span>
+          </div>
+        </div>
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-panel">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2APaz3JDupY9fNUczoKMUP?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="acc-item" data-category="rock">
+      <button class="acc-header-btn" onclick="toggleAcc(this)">
+        <div class="acc-header-meta">
+          <div class="acc-playlist-title">02. Rock indie para cuando no puedes dormir y piensas demasiado</div>
+          <div class="acc-playlist-desc">Para las 3am que se sienten eternas y los pensamientos que no piden permiso para quedarse.</div>
+          <div class="acc-genres-tags">
+            <span>Indie rock</span><span>Slowcore</span><span>Dream pop</span><span>Ambient</span><span>Sadcore</span>
+          </div>
+        </div>
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-panel">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/5gh1rPce7FnEENWk1POIse?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="acc-item" data-category="rock">
+      <button class="acc-header-btn" onclick="toggleAcc(this)">
+        <div class="acc-header-meta">
+          <div class="acc-playlist-title">03. Rock indie sucio y crudo para sentirte rebelde</div>
+          <div class="acc-playlist-desc">Guitarras sin pulir, actitud sin filtro, la banda sonora de romper las reglas que nadie te puso.</div>
+          <div class="acc-genres-tags">
+            <span>Garage rock</span><span>Punk</span><span>Lo-fi rock</span><span>Grunge</span><span>Noise rock</span>
+          </div>
+        </div>
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-panel">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2QlvwB1vEhxQ4CM4jrbC8g?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="acc-item" data-category="pop">
+      <button class="acc-header-btn" onclick="toggleAcc(this)">
+        <div class="acc-header-meta">
+          <div class="acc-playlist-title">04. Pop indie para estar feliz y triste al mismo tiempo</div>
+          <div class="acc-playlist-desc">Esa sensación agridulce de reírte de algo que también te duele un poco.</div>
+          <div class="acc-genres-tags">
+            <span>Indie pop</span><span>Bedroom pop</span><span>Dream pop</span><span>Twee pop</span><span>Sadpop</span>
+          </div>
+        </div>
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-panel">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/36ribRboGB3DwM821oYokl?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="acc-item" data-category="pop">
+      <button class="acc-header-btn" onclick="toggleAcc(this)">
+        <div class="acc-header-meta">
+          <div class="acc-playlist-title">05. Pop indie íntimo para escuchar solo en tu cuarto</div>
+          <div class="acc-playlist-desc">Como si alguien te cantara al oído, solo para ti, con la puerta cerrada.</div>
+          <div class="acc-genres-tags">
+            <span>Bedroom pop</span><span>Lo-fi</span><span>Singer-songwriter</span><span>Acoustic</span><span>Folk</span>
+          </div>
+        </div>
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-panel">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0Ty7tTNh1ONGyOLuasPREj?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="acc-item" data-category="pop">
+      <button class="acc-header-btn" onclick="toggleAcc(this)">
+        <div class="acc-header-meta">
+          <div class="acc-playlist-title">06. Pop indie suave para domingos sin hacer nada</div>
+          <div class="acc-playlist-desc">Café que se enfría, cobijas que no se quitan y planes que se posponen para mañana.</div>
+          <div class="acc-genres-tags">
+            <span>Indie pop</span><span>Chillwave</span><span>Acoustic</span><span>Folk pop</span><span>Soft rock</span>
+          </div>
+        </div>
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-panel">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/20uF7xCOW8zldDCiAowxuF?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="acc-item" data-category="heavy">
+      <button class="acc-header-btn" onclick="toggleAcc(this)">
+        <div class="acc-header-meta">
+          <div class="acc-playlist-title">07. Hard rock para sacar la rabia y el enojo acumulado</div>
+          <div class="acc-playlist-desc">Cuando las palabras no alcanzan, los riffs sí dicen todo lo que traes por dentro.</div>
+          <div class="acc-genres-tags">
+            <span>Hard rock</span><span>Alternative metal</span><span>Grunge</span><span>Nu metal</span><span>Stoner</span>
+          </div>
+        </div>
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-panel">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6cuhRpfYmEt0vYCT9mFLKc?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="acc-item" data-category="heavy">
+      <button class="acc-header-btn" onclick="toggleAcc(this)">
+        <div class="acc-header-meta">
+          <div class="acc-playlist-title">08. Metal intenso para liberar toda tu energía</div>
+          <div class="acc-playlist-desc">Sin freno, sin disculpas, la descarga que necesitas cuando el día te queda chico.</div>
+          <div class="acc-genres-tags">
+            <span>Metal</span><span>Metalcore</span><span>Hardcore</span><span>Thrash metal</span><span>Death metal</span>
+          </div>
+        </div>
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-panel">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/5OLiBaOPAe5cBEdV1AoSd1?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="acc-item" data-category="vibes">
+      <button class="acc-header-btn" onclick="toggleAcc(this)">
+        <div class="acc-header-meta">
+          <div class="acc-playlist-title">09. Música urbana con flow y ritmo para moverte</div>
+          <div class="acc-playlist-desc">El beat que te levanta del sillón antes de que decidas si querías bailar o no.</div>
+          <div class="acc-genres-tags">
+            <span>Urbano</span><span>Trap</span><span>Dembow</span><span>Latin trap</span><span>Afrobeat</span>
+          </div>
+        </div>
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-panel">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/7bbYPZ5ia4IGRP2fT47kXr?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <div class="acc-item" data-category="vibes">
+      <button class="acc-header-btn" onclick="toggleAcc(this)">
+        <div class="acc-header-meta">
+          <div class="acc-playlist-title">10. Darkwave oscuro y atmosférico para la madrugada</div>
+          <div class="acc-playlist-desc">Sintetizadores fríos y una ciudad que respira distinto cuando todos duermen.</div>
+          <div class="acc-genres-tags">
+            <span>Darkwave</span><span>Synthwave</span><span>Post-punk</span><span>Coldwave</span><span>Industrial</span>
+          </div>
+        </div>
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-panel">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/4mcJJz8GiKTuxieL9Jziln?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function toggleAcc(btn) {
+    var item = btn.closest('.acc-item');
+    var isOpen = item.classList.contains('open');
+    document.querySelectorAll('.acc-item.open').forEach(function(el) {
+      el.classList.remove('open');
+    });
+    if(!isOpen) {
+      item.classList.add('open');
+    }
+  }
+
+  function filterPlaylists(category, btn) {
+    document.querySelectorAll('.filter-pill').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+
+    var items = document.querySelectorAll('.acc-item');
+    items.forEach(function(item) {
+      if(category === 'all' || item.dataset.category === category) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
