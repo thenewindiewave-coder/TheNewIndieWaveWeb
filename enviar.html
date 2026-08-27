@@ -402,12 +402,39 @@
       </button>
     </div>
 
-    <!-- FORM -->
+    <!-- FORM CON INGESTA INTELIGENTE -->
     <form id="submit-form" onsubmit="handleSongSubmit(event)">
       <div class="scouting-form-grid">
+        
+        <!-- 1. SPOTIFY URL ARRIBA CON AUTO-FETCH -->
+        <div class="form-full" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-strong); padding: 18px; border-radius: 6px;">
+          <label class="field-label" style="color: var(--accent-lime); font-size: 11.5px;">1. PEGA EL ENLACE DE SPOTIFY DE TU CANCIÓN</label>
+          <input id="pb-spotify" type="url" class="field-input" placeholder="https://open.spotify.com/track/..." required oninput="handleSpotifyLinkInput(this.value)">
+          <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); margin-top: 6px;">
+            ⚡ Auto-detección: extraeremos el nombre del artista, track y portada automáticamente.
+          </div>
+
+          <!-- PREVIEW CARD DINÁMICA -->
+          <div id="spotifyPreviewBox" style="display: none; align-items: center; gap: 14px; margin-top: 14px; padding: 12px; background: #000; border-radius: 6px; border: 1px solid var(--border);">
+            <img id="spCover" src="" style="width: 52px; height: 52px; border-radius: 4px; object-fit: cover;">
+            <div>
+              <div id="spTitle" style="font-family: var(--font-heading); font-size: 15px; font-weight: 800; color: #fff;"></div>
+              <div id="spArtist" style="font-size: 12px; color: var(--accent-cyan); font-family: var(--font-mono);"></div>
+            </div>
+            <div style="margin-left: auto; color: var(--accent-lime); font-family: var(--font-mono); font-size: 10.5px;">
+              ✓ Track detectado
+            </div>
+          </div>
+        </div>
+
         <div>
           <label class="field-label">Nombre del Artista / Banda</label>
           <input id="pb-artist" class="field-input" placeholder="Tu nombre artístico" required>
+        </div>
+
+        <div>
+          <label class="field-label">Título de la Canción</label>
+          <input id="pb-title" class="field-input" placeholder="Nombre de tu canción" required>
         </div>
 
         <div>
@@ -421,18 +448,8 @@
         </div>
 
         <div>
-          <label class="field-label">Título de la Canción</label>
-          <input id="pb-title" class="field-input" placeholder="Nombre de tu canción" required>
-        </div>
-
-        <div class="form-full">
-          <label class="field-label">Enlace de Spotify del Track</label>
-          <input id="pb-spotify" type="url" class="field-input" placeholder="https://open.spotify.com/track/..." required>
-        </div>
-
-        <div>
-          <label class="field-label">Género de la Canción</label>
-          <select id="pb-genre" class="field-select"></select>
+          <label class="field-label">Género Musical</label>
+          <select id="pb-genre" class="field-select" onchange="autoMatchPlaylist(this.value)"></select>
         </div>
 
         <div>
@@ -446,7 +463,12 @@
         </div>
 
         <div class="form-full">
-          <label class="field-label">Playlist Destino</label>
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <label class="field-label">Playlist Destino en Spotify</label>
+            <span id="autoMatchBadge" style="display: none; font-family: var(--font-mono); font-size: 10px; color: var(--accent-lime);">
+              ✨ Auto-Match sugerido según género
+            </span>
+          </div>
           <select id="playlist-real-select" class="field-select" required></select>
         </div>
 
@@ -460,9 +482,15 @@
           <input id="pb-tiktok" class="field-input" placeholder="@usuario_tiktok">
         </div>
 
+        <!-- PITCH CORTO CON LÍMITE DE 280 CARACTERES -->
         <div class="form-full">
-          <label class="field-label">Notas Adicionales (Opcional)</label>
-          <textarea id="pb-notes" class="field-textarea" placeholder="Cuéntanos un poco más sobre la producción o historia de la canción..."></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <label class="field-label">Pitch Corto / Historia del Track (Opcional)</label>
+            <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim);">
+              <span id="charCount">0</span> / 280 caracteres
+            </span>
+          </div>
+          <textarea id="pb-notes" class="field-textarea" maxlength="280" placeholder="Escribe en 1 o 2 frases concisas qué inspiró este tema o qué lo hace especial..." oninput="updatePitchCount(this)"></textarea>
         </div>
 
         <div class="form-full check-terms-wrap">
@@ -472,7 +500,7 @@
           </label>
           <label class="check-label">
             <input type="checkbox" required>
-            <span>Entiendo que el envío entra a revisión curatorial y no garantiza la publicación automática.</span>
+            <span>Entiendo que el envío entra a revisión curatorial honesta.</span>
           </label>
         </div>
 
@@ -523,6 +551,81 @@
   var playlistRealSel = document.getElementById('playlist-real-select');
   if(playlistRealSel) {
     playlistRealSel.innerHTML = '<option value="" disabled selected>Selecciona la playlist ideal para tu track</option>' + realPlaylists.map(function(p, i){ return '<option value="'+p+'">'+(i+1)+'. '+p+'</option>'; }).join('');
+  }
+
+  // 1. Contador de Pitch de 280 caracteres
+  function updatePitchCount(el) {
+    document.getElementById('charCount').textContent = el.value.length;
+  }
+
+  // 2. Auto-Detección de Metadata desde Spotify
+  var _spTimer = null;
+  function handleSpotifyLinkInput(url) {
+    clearTimeout(_spTimer);
+    if(!url || !url.includes('spotify.com/track/')) {
+      document.getElementById('spotifyPreviewBox').style.display = 'none';
+      return;
+    }
+
+    _spTimer = setTimeout(async function() {
+      try {
+        const oembedUrl = 'https://open.spotify.com/oembed?url=' + encodeURIComponent(url.trim());
+        const res = await fetch(oembedUrl);
+        if(!res.ok) return;
+        const data = await res.json();
+        
+        if(data && data.title) {
+          // Extraer Título y Artista si vienen en formato "Canción by Artista"
+          var parts = data.title.split(' by ');
+          var songTitle = parts[0] || data.title;
+          var artistName = parts[1] || (data.author_name || '');
+
+          if(songTitle) document.getElementById('pb-title').value = songTitle;
+          if(artistName) document.getElementById('pb-artist').value = artistName;
+
+          // Mostrar Preview Card
+          document.getElementById('spTitle').textContent = songTitle;
+          document.getElementById('spArtist').textContent = artistName ? 'por ' + artistName : 'Spotify Track';
+          if(data.thumbnail_url) {
+            document.getElementById('spCover').src = data.thumbnail_url;
+            document.getElementById('spCover').style.display = 'block';
+          } else {
+            document.getElementById('spCover').style.display = 'none';
+          }
+          document.getElementById('spotifyPreviewBox').style.display = 'flex';
+          showToast('✓ Track detectado: ' + songTitle);
+        }
+      } catch(e){}
+    }, 400);
+  }
+
+  // 3. Auto-Match Inteligente de Playlist según el Género
+  var genreToPlaylistMap = {
+    "Indie Rock": "Rock indie para manejar de noche sin rumbo",
+    "Slowcore": "Rock indie para cuando no puedes dormir y piensas demasiado",
+    "Garage Rock": "Rock indie sucio y crudo para sentirte rebelde",
+    "Post-Punk": "Rock indie sucio y crudo para sentirte rebelde",
+    "Dream Pop": "Pop indie para estar feliz y triste al mismo tiempo",
+    "Indie Pop": "Pop indie para estar feliz y triste al mismo tiempo",
+    "Bedroom Pop": "Pop indie íntimo para escuchar solo en tu cuarto",
+    "Lo-Fi": "Pop indie íntimo para escuchar solo en tu cuarto",
+    "Chillwave": "Pop indie suave para domingos sin hacer nada",
+    "Acoustic / Folk": "Pop indie suave para domingos sin hacer nada",
+    "Hard Rock": "Hard rock para sacar la rabia y el enojo acumulado",
+    "Grunge": "Hard rock para sacar la rabia y el enojo acumulado",
+    "Metal": "Metal intenso para liberar toda tu energía",
+    "Metalcore": "Metal intenso para liberar toda tu energía",
+    "Urbano / Trap": "Música urbana con flow y ritmo para moverte",
+    "Darkwave": "Darkwave oscuro y atmosférico para la madrugada"
+  };
+
+  function autoMatchPlaylist(genre) {
+    var match = genreToPlaylistMap[genre];
+    if(match) {
+      document.getElementById('playlist-real-select').value = match;
+      document.getElementById('autoMatchBadge').style.display = 'inline';
+      showToast('✨ Auto-Match: ' + match);
+    }
   }
 
   function handleConnectSpotify() {
