@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Artistas en el Radar — The New Indie Wave</title>
 <meta name="description" content="Descubre los proyectos musicales independientes y talentos emergentes destacados por el colectivo The New Indie Wave.">
 <meta name="keywords" content="artistas indie emergentes, bandas independientes, radar indie, the new indie wave artistas">
@@ -56,6 +56,12 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
   
   body {
     background-color: var(--bg);
@@ -65,6 +71,7 @@
     -webkit-font-smoothing: antialiased;
     padding-bottom: 90px;
     overflow-x: hidden;
+    width: 100%;
   }
 
   ::selection {
@@ -584,14 +591,15 @@
     background: #121217;
     border: 1px solid var(--border-strong);
     border-radius: 12px;
-    max-width: 580px;
+    max-width: 480px;
     width: 100%;
-    max-height: 88vh;
-    max-height: 88dvh;
+    max-height: 92vh;
+    max-height: 92dvh;
     position: relative;
     box-shadow: 0 24px 60px rgba(0,0,0,0.9);
     animation: modalIn 0.2s var(--ease-smooth);
     overflow-y: auto;
+    overflow-x: hidden;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     display: flex;
@@ -730,32 +738,32 @@
   }
 
   .modal-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+    gap: 6px;
+    width: 100%;
     border-top: 1px solid var(--border);
     padding-top: 14px;
-    flex-wrap: wrap;
   }
 
   .btn-social-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    padding: 9px 12px;
+    gap: 6px;
+    padding: 9px 8px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-strong);
     border-radius: 6px;
     color: var(--text-main);
     text-decoration: none;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 700;
     transition: all 0.15s var(--ease-smooth);
-    flex: 1;
-    min-width: 90px;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: nowrap;
   }
 
   .btn-social-icon svg {
@@ -803,13 +811,23 @@
     .nav-links { display: none; }
     .mobile-menu-btn { display: flex; }
     .top3-grid { grid-template-columns: 1fr; }
-    .artist-modal-overlay { padding: 10px 8px; }
-    .artist-modal { max-height: 88dvh; border-radius: 10px; }
-    .modal-hero-media { height: 110px; }
-    .modal-content-inner { padding: 0 16px 16px; }
-    .modal-title { font-size: 21px; }
-    .modal-text { font-size: 13px; line-height: 1.5; }
-    .btn-modal-action { padding: 8px 10px; font-size: 10.5px; }
+    .artist-modal-overlay { padding: 12px 10px; }
+    .artist-modal {
+      max-width: calc(100vw - 20px);
+      max-height: 92dvh;
+      border-radius: 10px;
+    }
+    .modal-hero-media { height: 115px; }
+    .modal-content-inner { padding: 0 14px 16px; }
+    .modal-title { font-size: 20px; }
+    .modal-text { font-size: 12.5px; line-height: 1.5; }
+    .modal-actions {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+    .btn-social-icon.tiktok {
+      grid-column: span 2;
+    }
   }
 
 </style>
@@ -1299,6 +1317,14 @@
       }
     }
   }
+
+  // Bloquear gesto de pellizco (pinch-to-zoom) en Android / iOS
+  document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove', function(e) {
+    if (e.touches && e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
 </script>
 
 </body>
