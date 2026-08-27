@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Panel de Curaduría — The New Indie Wave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Chivo:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090b;
+    --bg-card: #121215;
+    --bg-card-hover: #17171d;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text-main: #f4f4f6;
+    --text-muted: #8e8e96;
+    --text-dim: #52525b;
+    
+    --accent-lime: #bbf451;
+    --accent-cyan: #38bdf8;
+    --accent-orange: #fb923c;
+    --accent-pink: #f472b6;
+    --accent-red: #ef4444;
+    --accent-green: #22c55e;
+
+    --font-heading: 'Chivo', sans-serif;
+    --font-mono: 'Chivo Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 80px;
+  }
+
+  ::selection { background: var(--accent-lime); color: #000; }
+
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* TOP NAVIGATION */
+  .navbar {
+    border-bottom: 1px solid var(--border);
+    background: rgba(9, 9, 11, 0.94);
+    backdrop-filter: blur(14px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+  }
+
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+  }
+
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-main);
+    text-transform: uppercase;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .site-logo { height: 30px; filter: invert(1); }
+
+  .badge-curator {
+    background: rgba(187, 244, 81, 0.12);
+    border: 1px solid var(--accent-lime);
+    color: var(--accent-lime);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+
+  /* METRICS BAR */
+  .metrics-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin: 32px 0 28px;
+  }
+
+  .metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+
+  .metric-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .metric-value {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+
+  /* QUEUE TABS & CONTROLS */
+  .controls-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .tab-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .tab-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .tab-btn.active {
+    background: var(--text-main);
+    color: #000;
+    font-weight: 700;
+    border-color: var(--text-main);
+  }
+
+  .btn-refresh {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-refresh:hover {
+    border-color: #fff;
+  }
+
+  /* TRACK REVIEW CARDS */
+  .queue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .track-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    transition: border-color 0.2s ease;
+  }
+
+  .track-item:hover {
+    border-color: var(--border-strong);
+  }
+
+  .track-item.boost {
+    border-color: rgba(251, 146, 60, 0.4);
+    box-shadow: 0 0 20px rgba(251, 146, 60, 0.08);
+  }
+
+  .track-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .track-meta-left {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .track-cover-placeholder {
+    width: 64px;
+    height: 64px;
+    border-radius: 6px;
+    background: #1e1e24;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent-lime);
+    border: 1px solid var(--border);
+  }
+
+  .track-title {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+
+  .track-artist {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .track-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .track-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 3px;
+    color: var(--text-muted);
+  }
+
+  .sla-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sla-urgent {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--accent-red);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .sla-normal {
+    background: rgba(187, 244, 81, 0.1);
+    color: var(--accent-lime);
+    border: 1px solid rgba(187, 244, 81, 0.25);
+  }
+
+  /* SPOTIFY PLAYER EMBED WRAP */
+  .player-embed-box {
+    margin: 16px 0 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  /* FEEDBACK & ACTIONS */
+  .review-console {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px;
+  }
+
+  .feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  .btn-ai-assist {
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: var(--accent-cyan);
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+  }
+
+  .btn-ai-assist:hover {
+    background: rgba(56, 189, 248, 0.2);
+  }
+
+  .feedback-textarea {
+    width: 100%;
+    background: #09090b;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    color: var(--text-main);
+    font-family: var(--font-body);
+    font-size: 13px;
+    min-height: 60px;
+    resize: vertical;
+    margin-bottom: 14px;
+  }
+
+  .feedback-textarea:focus {
+    outline: none;
+    border-color: var(--accent-lime);
+  }
+
+  .decision-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .btn-decline {
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: var(--accent-red);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-decline:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .btn-accept {
+    background: var(--accent-lime);
+    color: #000;
+    border: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 800;
+    padding: 10px 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-accept:hover {
+    background: #c8fa6b;
+    transform: translateY(-1px);
+  }
+
+  /* EMPTY STATE */
+  .empty-box {
+    text-align: center;
+    padding: 60px 20px;
+    border: 1px dashed var(--border-strong);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  /* PIN OVERLAY (Seguridad simple para Rodrigo) */
+  .pin-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(9, 9, 11, 0.97);
+    backdrop-filter: blur(20px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pin-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 36px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+  }
+
+  .pin-title {
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .pin-input {
+    width: 100%;
+    background: #09090b;
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 12px;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    text-align: center;
+    letter-spacing: 0.2em;
+    margin: 18px 0;
+  }
+
+  .btn-pin-unlock {
+    width: 100%;
+    background: var(--accent-lime);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  /* TOAST */
+  .toast-box {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #ffffff;
+    color: #000000;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 4px;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.6);
+    transform: translateY(30px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 10000;
+  }
+
+  .toast-box.active { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<!-- ACCESO PRIVADO / PIN -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <div class="site-logo" style="margin-bottom: 12px;">🌊</div>
+    <h2 class="pin-title">PANEL DE CURADURÍA</h2>
+    <p style="font-size: 12.5px; color: var(--text-muted);">The New Indie Wave // Acceso exclusivo para Rodrigo</p>
+    <input type="password" class="pin-input" id="pinInput" placeholder="Introduce tu clave" autofocus onkeydown="if(event.key==='Enter') unlockPanel()">
+    <button class="btn-pin-unlock" onclick="unlockPanel()">ACCEDER A LA COLA ↗</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="brand-logo">
+      <img src="logo.png" alt="The New Indie Wave" class="site-logo">
+      <span>THE NEW INDIE WAVE</span>
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <span class="badge-curator">● CURADOR EN VIVO: RODRIGO DL MORAL</span>
+      <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">← Ver Web Pública</a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  
+  <!-- METRICS -->
+  <div class="metrics-strip">
+    <div class="metric-card">
+      <div class="metric-label">En Cola de Escucha</div>
+      <div class="metric-value" id="mQueue">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Aceptadas en Playlist</div>
+      <div class="metric-value" style="color: var(--accent-lime);" id="mAccepted">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Tiempo Promedio Respuesta</div>
+      <div class="metric-value" style="color: var(--accent-cyan);">24h</div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls-bar">
+    <div class="tab-group">
+      <button class="tab-btn active" onclick="switchTab('pending', this)">[ PENDIENTES DE ESCUCHA ]</button>
+      <button class="tab-btn" onclick="switchTab('accepted', this)">[ ACEPTADAS ]</button>
+      <button class="tab-btn" onclick="switchTab('rejected', this)">[ HISTORIAL DECLINADAS ]</button>
+    </div>
+
+    <button class="btn-refresh" onclick="loadSubmissions()">
+      🔄 Refrescar Cola en Vivo
+    </button>
+  </div>
+
+  <!-- LIST OF TRACKS -->
+  <div class="queue-list" id="queueContainer">
+    <div class="empty-box">Cargando envíos desde Supabase...</div>
+  </div>
+
+</main>
+
+<div class="toast-box" id="toast"></div>
+
+<script>
+  var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
+
+  var allSubmissions = [];
+  var currentTab = 'pending';
+
+  // 1. Desbloqueo de Panel (Clave simple predeterminada: 'tniw2026' o 'rodrigo')
+  function unlockPanel() {
+    var p = document.getElementById('pinInput').value;
+    if(p === 'tniw2026' || p === 'rodrigo' || p === 'indie') {
+      document.getElementById('pinOverlay').style.display = 'none';
+      sessionStorage.setItem('tniw_curator_auth', '1');
+      loadSubmissions();
+    } else {
+      showToast('❌ Clave incorrecta');
+    }
+  }
+
+  if(sessionStorage.getItem('tniw_curator_auth') === '1') {
+    document.getElementById('pinOverlay').style.display = 'none';
+    loadSubmissions();
+  }
+
+  // 2. Cargar envíos desde Supabase
+  async function loadSubmissions() {
+    var container = document.getElementById('queueContainer');
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/submissions?select=*&order=created_at.desc', {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        }
+      });
+      if(!res.ok) throw new Error('Error al conectar con Supabase');
+      allSubmissions = await res.json();
+      updateMetrics();
+      renderQueue();
+      showToast('✓ Cola de envíos actualizada');
+    } catch(err) {
+      container.innerHTML = '<div class="empty-box">No se pudieron cargar los envíos. Verifica tu conexión.</div>';
+    }
+  }
+
+  function updateMetrics() {
+    var pending = allSubmissions.filter(function(s){ return s.status === 'pending' || s.status === 'queue'; }).length;
+    var accepted = allSubmissions.filter(function(s){ return s.status === 'accepted'; }).length;
+    document.getElementById('mQueue').textContent = pending;
+    document.getElementById('mAccepted').textContent = accepted;
+  }
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentTab = tab;
+    renderQueue();
+  }
+
+  // 3. Renderizado de Canciones
+  function renderQueue() {
+    var container = document.getElementById('queueContainer');
+    var filtered = allSubmissions.filter(function(s) {
+      if(currentTab === 'pending') return s.status === 'pending' || s.status === 'queue';
+      if(currentTab === 'accepted') return s.status === 'accepted';
+      if(currentTab === 'rejected') return s.status === 'rejected';
+      return true;
+    });
+
+    if(filtered.length === 0) {
+      container.innerHTML = '<div class="empty-box">No hay canciones en este apartado actualmente.</div>';
+      return;
+    }
+
+    container.innerHTML = filtered.map(function(item) {
+      var spotifyEmbed = getSpotifyEmbedUrl(item.spotify_url);
+      var isBoost = item.tier === 'boost';
+
+      return `
+        <div class="track-item ${isBoost ? 'boost' : ''}" id="item-${item.id}">
+          <div class="track-item-header">
+            <div class="track-meta-left">
+              <div class="track-cover-placeholder">♪</div>
+              <div>
+                <h3 class="track-title">${item.song_title || 'Sin Título'}</h3>
+                <div class="track-artist">
+                  <strong>${item.artist_name || 'Artista'}</strong> • 📍 ${item.country || 'N/A'} • ✉️ ${item.email}
+                </div>
+                <div class="track-tags">
+                  <span class="track-tag">🎯 Playlist: ${item.playlist}</span>
+                  <span class="track-tag">🏷️ ${item.genre || 'Indie'}</span>
+                  <span class="track-tag">🌐 ${item.language || 'Español'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <span class="sla-badge ${isBoost ? 'sla-urgent' : 'sla-normal'}">
+                ${isBoost ? '⚡ IMPULSO PRIORITARIO' : '⏳ ESTÁNDAR (48H)'}
+              </span>
+            </div>
+          </div>
+
+          ${spotifyEmbed ? `
+            <div class="player-embed-box">
+              <iframe style="border-radius:12px" src="${spotifyEmbed}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+          ` : ''}
+
+          ${item.notes ? `
+            <div style="font-size: 12.5px; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 4px; margin-bottom: 14px;">
+              💬 <strong>Nota del Artista:</strong> "${item.notes}"
+            </div>
+          ` : ''}
+
+          <!-- FEEDBACK & ACCIÓN -->
+          <div class="review-console">
+            <div class="feedback-header">
+              <span>FEEDBACK EDITORIAL PARA EL ARTISTA:</span>
+              <button class="btn-ai-assist" onclick="generateAiFeedback('${item.id}', '${item.genre}', '${item.playlist}')">
+                ✨ Generar Borrador con IA
+              </button>
+            </div>
+            
+            <textarea class="feedback-textarea" id="fb-${item.id}" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
+
+            <div class="decision-actions">
+              <button class="btn-decline" onclick="updateDecision('${item.id}', 'rejected')">
+                ✕ Declinar Envío
+              </button>
+              <button class="btn-accept" onclick="updateDecision('${item.id}', 'accepted')">
+                ✓ Aceptar para Playlist & Redes ↗
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 4. Transformar URL de Spotify en Embed
+  function getSpotifyEmbedUrl(url) {
+    if(!url) return null;
+    var match = url.match(/track\/([a-zA-Z0-9]+)/);
+    if(match && match[1]) {
+      return 'https://open.spotify.com/embed/track/' + match[1] + '?utm_source=generator&theme=0';
+    }
+    return null;
+  }
+
+  // 5. Asistente de Feedback con IA (Borrador inteligente instantáneo)
+  function generateAiFeedback(id, genre, playlist) {
+    var templates = [
+      "Excelente atmósfera en los sintetizadores y buen groove rítmico. Tiene la vibra exacta que buscamos para enriquecer esta lista.",
+      "Gran concepto y muy buena interpretación vocal. La producción encaja perfectamente con el mood indie de nuestro colectivo.",
+      "Muy buen trabajo en las guitarras y melodía envolvente. Para este lanzamiento buscamos algo con una dinámica distinta, ¡sigue creando!",
+      "La canción transmite una emoción muy auténtica. Nos encantaría considerarla para nuestros próximos showcases en vivo."
+    ];
+    var randomText = templates[Math.floor(Math.random() * templates.length)];
+    var ta = document.getElementById('fb-' + id);
+    if(ta) {
+      ta.value = randomText;
+      showToast('✨ Borrador de feedback generado');
+    }
+  }
+
+  // 6. Actualizar Decisión en Supabase en Tiempo Real
+  async function updateDecision(recordId, status) {
+    var fb = document.getElementById('fb-' + recordId).value;
+
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          status: status,
+          feedback: fb,
+          updated_at: new Date().toISOString()
+        })
+      });
+
+      if(!res.ok) throw new Error('Error al actualizar');
+      
+      showToast(status === 'accepted' ? '🎉 ¡Canción ACEPTADA con éxito!' : 'Envío marcado como declinado');
+      loadSubmissions();
+    } catch(err) {
+      showToast('Error al actualizar en Supabase');
+    }
+  }
+
+  function showToast(msg) {
+    var toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('active');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function() {
+      toast.classList.remove('active');
+    }, 3200);
+  }
+</script>
+
+</body>
+</html>
