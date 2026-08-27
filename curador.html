@@ -997,6 +997,13 @@
 
             <div>
               <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">
+                Clasificación de Artista (Solista, Dúo, Trío, Agrupación, Producer, DJ, etc.) *
+              </label>
+              <input type="text" id="rfBadge" required value="${artist ? (artist.badge || 'AGRUPACIÓN') : 'AGRUPACIÓN'}" placeholder="Ej. SOLISTA, DÚO, AGRUPACIÓN, PRODUCER, DJ" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+            </div>
+
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">
                 Foto o Video del Artista (Cloudinary: ckknw1do)
               </label>
               <div style="display: flex; gap: 8px; margin-bottom: 6px;">
@@ -1083,7 +1090,7 @@
       city: document.getElementById('rfCity').value.trim().toUpperCase(),
       genre: document.getElementById('rfGenre').value.trim().toUpperCase(),
       type: document.getElementById('rfType').value,
-      badge: document.getElementById('rfType').value === 'top3' ? 'TOP RADAR' : 'RECOMENDADO',
+      badge: (document.getElementById('rfBadge') ? document.getElementById('rfBadge').value.trim().toUpperCase() : 'AGRUPACIÓN'),
       media_type: (document.getElementById('rfMediaUrl').value.endsWith('.mp4')) ? 'video' : 'image',
       media_url: document.getElementById('rfMediaUrl').value.trim(),
       track_id: document.getElementById('rfTrackId').value.trim(),
