@@ -374,6 +374,7 @@
   @media (max-width: 768px) {
     .event-row { grid-template-columns: 1fr; gap: 12px; }
     .nav-links { display: none; }
+    .mobile-menu-btn { display: flex; }
   }
 </style>
 </head>
@@ -384,20 +385,55 @@
 <!-- NAVIGATION -->
 <header class="navbar">
   <div class="container nav-inner">
-    <a href="index.html" class="brand-logo">
+    <a href="index.html" class="brand-logo" title="The New Indie Wave">
       <img src="logo.png" alt="The New Indie Wave" class="site-logo">
       <span>THE NEW INDIE WAVE</span>
     </a>
 
-    <nav class="nav-links">
+    <nav class="nav-links" aria-label="Navegación principal">
       <a href="playlists.html">02. PLAYLISTS</a>
       <a href="artistas.html">03. ARTISTAS EN EL RADAR</a>
       <a href="eventos.html" class="active" style="color:#fff; font-weight:700;">04. EVENTOS // LIVE</a>
       <a href="manifiesto.html">05. MANIFIESTO</a>
       <a href="enviar.html" class="btn-nav-submit">ENVIAR CANCIÓN ↗</a>
     </nav>
+
+    <!-- BOTÓN MENÚ MÓVIL -->
+    <button class="mobile-menu-btn" onclick="toggleMobileNav(true)" aria-label="Abrir Menú">
+      <span>MENÚ</span> ☰
+    </button>
   </div>
 </header>
+
+<!-- OVERLAY MENÚ MÓVIL RESPONSIVO -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay">
+  <div class="mobile-nav-header">
+    <div class="brand-logo">
+      <img src="logo.png" alt="Logo" class="site-logo">
+      <span>THE NEW INDIE WAVE</span>
+    </div>
+    <button class="mobile-menu-btn" onclick="toggleMobileNav(false)" aria-label="Cerrar Menú">
+      ✕ CERRAR
+    </button>
+  </div>
+
+  <nav class="mobile-nav-links">
+    <a href="index.html">01. INICIO <span>↗</span></a>
+    <a href="playlists.html">02. PLAYLISTS OFICIALES <span>↗</span></a>
+    <a href="artistas.html">03. ARTISTAS EN EL RADAR <span>↗</span></a>
+    <a href="eventos.html" style="color: var(--accent-lime);">04. EVENTOS // LIVE <span>↗</span></a>
+    <a href="manifiesto.html">05. MANIFIESTO <span>↗</span></a>
+  </nav>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <a href="enviar.html" class="btn-nav-submit" style="text-align: center; justify-content: center; min-height: 48px; font-size: 14px;">
+      ENVIAR TU CANCIÓN ↗
+    </a>
+    <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-align: center;">
+      THE NEW INDIE WAVE © 2026 // COLECTIVO INDEPENDIENTE
+    </div>
+  </div>
+</div>
 
 <main class="container">
   <div class="page-header">
