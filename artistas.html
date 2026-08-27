@@ -414,83 +414,120 @@
     border-color: var(--accent-lime);
   }
 
-  /* SECONDARY 11 CARDS GRID */
-  .secondary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-    gap: 20px;
+  /* SECONDARY 11 HORIZONTAL ROWS (ESCALONADAS) */
+  .secondary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
-  .secondary-card {
+  .secondary-row {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 20px;
+    padding: 14px 22px;
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
-    transition: all var(--duration-fast) var(--ease-smooth);
+    align-items: center;
+    gap: 16px;
     cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-smooth);
   }
 
-  .secondary-card:hover {
-    border-color: var(--border-strong);
+  .secondary-row:hover {
     background: var(--bg-card-hover);
-    transform: translateY(-3px);
+    border-color: var(--border-strong);
+    transform: translateX(4px);
   }
 
-  .secondary-card-top {
+  .secondary-row:hover .sec-row-name {
+    color: var(--accent-lime);
+  }
+
+  .secondary-row:hover .sec-row-arrow {
+    color: var(--accent-lime);
+    transform: translateX(3px);
+  }
+
+  .sec-row-main {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 16px;
+  }
+
+  .sec-row-num {
     font-family: var(--font-mono);
-    font-size: 10.5px;
+    font-size: 12px;
     color: var(--text-dim);
-    margin-bottom: 12px;
+    font-weight: 700;
+    width: 22px;
   }
 
-  .secondary-avatar-strip {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-
-  .secondary-avatar {
-    width: 44px;
-    height: 44px;
+  .sec-row-avatar {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background-size: cover;
-    background-position: center;
+    object-fit: cover;
     border: 1px solid var(--border-strong);
     flex-shrink: 0;
   }
 
-  .secondary-name {
-    font-family: var(--font-heading);
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
+  .sec-row-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  .secondary-genre {
+  .sec-row-name {
+    font-family: var(--font-heading);
+    font-size: 16.5px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #fff;
+    transition: color 0.15s ease;
+  }
+
+  .sec-row-genre {
     font-family: var(--font-mono);
     font-size: 11px;
     color: var(--accent-cyan);
-    margin-top: 2px;
   }
 
-  .secondary-card-footer {
+  .sec-row-meta {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
+    gap: 16px;
+  }
+
+  .sec-row-city {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  .sec-row-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
     color: var(--accent-lime);
-    font-weight: 600;
+    background: rgba(187, 244, 81, 0.08);
+    border: 1px solid rgba(187, 244, 81, 0.2);
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+  }
+
+  .sec-row-arrow {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 700;
+    transition: all 0.15s ease;
+  }
+
+  @media (max-width: 768px) {
+    .sec-row-meta .sec-row-badge { display: none; }
+    .secondary-row { padding: 12px 14px; }
   }
 
   /* MODAL FLOTANTE EXPANDIDO */
@@ -681,7 +718,6 @@
     .nav-links { display: none; }
     .mobile-menu-btn { display: flex; }
     .top3-grid { grid-template-columns: 1fr; }
-    .secondary-grid { grid-template-columns: 1fr; }
     .modal-content-inner { padding: 0 20px 24px; }
   }
 </style>
@@ -810,208 +846,197 @@
     </div>
   </div>
 
-  <!-- SECTION 2: 11 ARTISTAS EN EL RADAR -->
+  <!-- SECTION 2: 11 ARTISTAS EN EL RADAR (FILAS HORIZONTALES ESCALONADAS) -->
   <div class="section-label-bar" style="border-color: var(--accent-cyan);">
     <h2 class="section-heading">⚡ EN EL RADAR // SELECCIÓN EMERGENTE</h2>
   </div>
 
-  <div class="secondary-grid" id="secondaryContainer">
-    <!-- 1 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-4')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 SANTIAGO DE CHILE</span>
-          <span style="color: var(--accent-lime); font-weight:700;">ESTRENO</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">Siluetas de Verano</h4>
-            <div class="secondary-genre">BEDROOM POP / LO-FI</div>
-          </div>
+  <div class="secondary-list" id="secondaryContainer">
+    <!-- 01 -->
+    <div class="secondary-row" onclick="openArtistModal('radar-4')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">01</span>
+        <img src="https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=400&q=80" class="sec-row-avatar" alt="Siluetas de Verano" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">Siluetas de Verano</h4>
+          <span class="sec-row-genre">BEDROOM POP / LO-FI</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 SANTIAGO DE CHILE</span>
+        <span class="sec-row-badge">ESTRENO</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
 
-    <!-- 2 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-5')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 MADRID / CDMX</span>
-          <span style="color: var(--accent-lime); font-weight:700;">COLECTIVO</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">Los Extraviados</h4>
-            <div class="secondary-genre">INDIE ROCK / GARAJE</div>
-          </div>
+    <!-- 02 -->
+    <div class="secondary-row" onclick="openArtistModal('radar-5')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">02</span>
+        <img src="https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=400&q=80" class="sec-row-avatar" alt="Los Extraviados" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">Los Extraviados</h4>
+          <span class="sec-row-genre">INDIE ROCK / GARAJE</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 MADRID / CDMX</span>
+        <span class="sec-row-badge">COLECTIVO</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
 
-    <!-- 3 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-6')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 LIMA</span>
-          <span style="color: var(--accent-lime); font-weight:700;">RECOMENDADO</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">Frecuencia Marina</h4>
-            <div class="secondary-genre">DREAM POP / SYNTH</div>
-          </div>
+    <!-- 03 -->
+    <div class="secondary-row" onclick="openArtistModal('radar-6')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">03</span>
+        <img src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&q=80" class="sec-row-avatar" alt="Frecuencia Marina" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">Frecuencia Marina</h4>
+          <span class="sec-row-genre">DREAM POP / SYNTH</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 LIMA</span>
+        <span class="sec-row-badge">RECOMENDADO</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
 
-    <!-- 4 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-7')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 MONTERREY</span>
-          <span style="color: var(--accent-lime); font-weight:700;">DESTACADO</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">Sombras de Neón</h4>
-            <div class="secondary-genre">DARKWAVE / EBM</div>
-          </div>
+    <!-- 04 -->
+    <div class="secondary-row" onclick="openArtistModal('radar-7')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">04</span>
+        <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&q=80" class="sec-row-avatar" alt="Sombras de Neón" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">Sombras de Neón</h4>
+          <span class="sec-row-genre">DARKWAVE / EBM</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 MONTERREY</span>
+        <span class="sec-row-badge">DESTACADO</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
 
-    <!-- 5 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-8')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 VALPARAÍSO</span>
-          <span style="color: var(--accent-lime); font-weight:700;">EN ROTACIÓN</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">La Última Niebla</h4>
-            <div class="secondary-genre">SHOEGAZE / NOISE</div>
-          </div>
+    <!-- 05 -->
+    <div class="secondary-row" onclick="openArtistModal('radar-8')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">05</span>
+        <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80" class="sec-row-avatar" alt="La Última Niebla" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">La Última Niebla</h4>
+          <span class="sec-row-genre">SHOEGAZE / NOISE</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 VALPARAÍSO</span>
+        <span class="sec-row-badge">EN ROTACIÓN</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
 
-    <!-- 6 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-9')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 GUADALAJARA</span>
-          <span style="color: var(--accent-lime); font-weight:700;">ESTRENO</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">Río Salvaje</h4>
-            <div class="secondary-genre">INDIE FOLK / PSICODELIA</div>
-          </div>
+    <!-- 06 -->
+    <div class="secondary-row" onclick="openArtistModal('radar-9')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">06</span>
+        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80" class="sec-row-avatar" alt="Río Salvaje" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">Río Salvaje</h4>
+          <span class="sec-row-genre">INDIE FOLK / PSICODELIA</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 GUADALAJARA</span>
+        <span class="sec-row-badge">ESTRENO</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
 
-    <!-- 7 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-10')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 SAN JOSÉ</span>
-          <span style="color: var(--accent-lime); font-weight:700;">RECOMENDADO</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">Autopista Central</h4>
-            <div class="secondary-genre">POST-PUNK / GARAJE</div>
-          </div>
+    <!-- 07 -->
+    <div class="secondary-row" onclick="openArtistModal('radar-10')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">07</span>
+        <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80" class="sec-row-avatar" alt="Autopista Central" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">Autopista Central</h4>
+          <span class="sec-row-genre">POST-PUNK / GARAJE</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 SAN JOSÉ</span>
+        <span class="sec-row-badge">RECOMENDADO</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
 
-    <!-- 8 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-11')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 MEDELLÍN</span>
-          <span style="color: var(--accent-lime); font-weight:700;">DESTACADO</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">Cintas Magnéticas</h4>
-            <div class="secondary-genre">LO-FI BEATS / CHILL</div>
-          </div>
+    <!-- 08 -->
+    <div class="secondary-row" onclick="openArtistModal('radar-11')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">08</span>
+        <img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80" class="sec-row-avatar" alt="Cintas Magnéticas" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">Cintas Magnéticas</h4>
+          <span class="sec-row-genre">LO-FI BEATS / CHILL</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 MEDELLÍN</span>
+        <span class="sec-row-badge">DESTACADO</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
 
-    <!-- 9 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-12')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 PUEBLA</span>
-          <span style="color: var(--accent-lime); font-weight:700;">EN ROTACIÓN</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">Velo Nocturno</h4>
-            <div class="secondary-genre">GOTH ROCK / DARKWAVE</div>
-          </div>
+    <!-- 09 -->
+    <div class="secondary-row" onclick="openArtistModal('radar-12')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">09</span>
+        <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&q=80" class="sec-row-avatar" alt="Velo Nocturno" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">Velo Nocturno</h4>
+          <span class="sec-row-genre">GOTH ROCK / DARKWAVE</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 PUEBLA</span>
+        <span class="sec-row-badge">EN ROTACIÓN</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
 
     <!-- 10 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-13')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 BARCELONA</span>
-          <span style="color: var(--accent-lime); font-weight:700;">ESTRENO</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1520523839898-50712825e617?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">Satélites Olvidados</h4>
-            <div class="secondary-genre">MATH ROCK / EMO INDIE</div>
-          </div>
+    <div class="secondary-row" onclick="openArtistModal('radar-13')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">10</span>
+        <img src="https://images.unsplash.com/photo-1520523839898-50712825e617?w=400&q=80" class="sec-row-avatar" alt="Satélites Olvidados" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">Satélites Olvidados</h4>
+          <span class="sec-row-genre">MATH ROCK / EMO INDIE</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 BARCELONA</span>
+        <span class="sec-row-badge">ESTRENO</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
 
     <!-- 11 -->
-    <div class="secondary-card" onclick="openArtistModal('radar-14')">
-      <div>
-        <div class="secondary-card-top">
-          <span>📍 MONTEVIDEO</span>
-          <span style="color: var(--accent-lime); font-weight:700;">RECOMENDADO</span>
-        </div>
-        <div class="secondary-avatar-strip">
-          <div class="secondary-avatar" style="background-image: url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80');"></div>
-          <div>
-            <h4 class="secondary-name">Aurora Estéreo</h4>
-            <div class="secondary-genre">SYNTH POP / NEW WAVE</div>
-          </div>
+    <div class="secondary-row" onclick="openArtistModal('radar-14')">
+      <div class="sec-row-main">
+        <span class="sec-row-num">11</span>
+        <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80" class="sec-row-avatar" alt="Aurora Estéreo" loading="lazy">
+        <div class="sec-row-text">
+          <h4 class="sec-row-name">Aurora Estéreo</h4>
+          <span class="sec-row-genre">SYNTH POP / NEW WAVE</span>
         </div>
       </div>
-      <div class="secondary-card-footer"><span>VER TRAYECTORIA</span><span>↗</span></div>
+      <div class="sec-row-meta">
+        <span class="sec-row-city">📍 MONTEVIDEO</span>
+        <span class="sec-row-badge">RECOMENDADO</span>
+        <span class="sec-row-arrow">↗</span>
+      </div>
     </div>
   </div>
 
@@ -1276,7 +1301,6 @@
     }
   ];
 
-  // Si hay datos personalizados en localStorage, utilizarlos
   try {
     var stored = localStorage.getItem('tniw_radar_artists');
     if (stored) {
