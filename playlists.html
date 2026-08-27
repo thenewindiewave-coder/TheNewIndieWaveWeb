@@ -171,13 +171,54 @@
     transform: translateY(-3px);
   }
 
-  /* FILTER BAR */
+  /* FILTER BAR CON CONTROLES */
+  .filter-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
   .filter-pill-row {
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    margin-bottom: 24px;
-    padding-bottom: 4px;
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    padding: 4px 2px;
+    flex: 1;
+  }
+
+  .filter-pill-row::-webkit-scrollbar {
+    display: none; /* Chrome, Edge, Safari */
+  }
+
+  .filter-nav-btn {
+    background: #111114;
+    border: 1px solid var(--border-strong);
+    color: var(--text-main);
+    width: 34px;
+    height: 34px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .filter-nav-btn:hover {
+    background: var(--text-main);
+    color: #000;
+    border-color: var(--text-main);
+    transform: scale(1.05);
   }
 
   .filter-pill {
@@ -191,6 +232,7 @@
     cursor: pointer;
     white-space: nowrap;
     transition: all var(--duration-quick) ease;
+    flex-shrink: 0;
   }
 
   .filter-pill:hover {
@@ -354,22 +396,31 @@
   </div>
 
   <!-- SECCIÓN EXPLORAR TODAS -->
-  <div style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; text-transform: uppercase; margin-bottom: 14px;">
-    EXPLORAR POR GÉNERO & ESTILO:
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+    <div style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; text-transform: uppercase;">
+      EXPLORAR POR GÉNERO & ESTILO:
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">
+      Usa las flechas para explorar más géneros ➔
+    </div>
   </div>
 
-  <!-- FILTER PILLS -->
-  <div class="filter-pill-row">
-    <button class="filter-pill active" onclick="filterPlaylists('all', this)">[ TODAS LAS PLAYLISTS ]</button>
-    <button class="filter-pill" onclick="filterPlaylists('rock', this)">[ ROCK & INDIE ]</button>
-    <button class="filter-pill" onclick="filterPlaylists('pop', this)">[ INDIE POP & BEDROOM ]</button>
-    <button class="filter-pill" onclick="filterPlaylists('heavy', this)">[ METAL & HARD ROCK ]</button>
-    <button class="filter-pill" onclick="filterPlaylists('darkwave', this)">[ DARKWAVE & POST-PUNK ]</button>
-    <button class="filter-pill" onclick="filterPlaylists('urbano', this)">[ URBANO & TRAP ]</button>
-    <button class="filter-pill" onclick="filterPlaylists('shoegaze', this)">[ SHOEGAZE & DREAM POP ]</button>
-    <button class="filter-pill" onclick="filterPlaylists('folk', this)">[ FOLK & ACÚSTICO ]</button>
-    <button class="filter-pill" onclick="filterPlaylists('punk', this)">[ PUNK & GARAJE ]</button>
-    <button class="filter-pill" onclick="filterPlaylists('electronic', this)">[ ELECTRÓNICA & SYNTH ]</button>
+  <!-- FILTER CONTROLS WRAPPER -->
+  <div class="filter-wrapper">
+    <button class="filter-nav-btn" onclick="scrollFilters(-220)" title="Desplazar a la izquierda" aria-label="Anterior">‹</button>
+    <div class="filter-pill-row" id="filterPillRow">
+      <button class="filter-pill active" onclick="filterPlaylists('all', this)">[ TODAS LAS PLAYLISTS ]</button>
+      <button class="filter-pill" onclick="filterPlaylists('rock', this)">[ ROCK & INDIE ]</button>
+      <button class="filter-pill" onclick="filterPlaylists('pop', this)">[ INDIE POP & BEDROOM ]</button>
+      <button class="filter-pill" onclick="filterPlaylists('heavy', this)">[ METAL & HARD ROCK ]</button>
+      <button class="filter-pill" onclick="filterPlaylists('darkwave', this)">[ DARKWAVE & POST-PUNK ]</button>
+      <button class="filter-pill" onclick="filterPlaylists('urbano', this)">[ URBANO & TRAP ]</button>
+      <button class="filter-pill" onclick="filterPlaylists('shoegaze', this)">[ SHOEGAZE & DREAM POP ]</button>
+      <button class="filter-pill" onclick="filterPlaylists('folk', this)">[ FOLK & ACÚSTICO ]</button>
+      <button class="filter-pill" onclick="filterPlaylists('punk', this)">[ PUNK & GARAJE ]</button>
+      <button class="filter-pill" onclick="filterPlaylists('electronic', this)">[ ELECTRÓNICA & SYNTH ]</button>
+    </div>
+    <button class="filter-nav-btn" onclick="scrollFilters(220)" title="Desplazar a la derecha" aria-label="Siguiente">›</button>
   </div>
 
   <!-- FULL ACCORDION -->
@@ -550,6 +601,13 @@
 </main>
 
 <script>
+  function scrollFilters(offset) {
+    var row = document.getElementById('filterPillRow');
+    if(row) {
+      row.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+  }
+
   function toggleAcc(btn) {
     var item = btn.closest('.acc-item');
     var isOpen = item.classList.contains('open');
