@@ -782,16 +782,30 @@
     </div>
   </div>
 
-  <!-- ACCEPTED STATE (DEMO TOGGLE) -->
-  <div class="accepted-banner" id="acceptedBox">
+  <!-- ACCEPTED STATE -->
+  <div class="accepted-banner" id="acceptedBox" style="display: none;">
     <h3 style="color: var(--accent-green); font-family: var(--font-heading); font-size: 20px; font-weight: 800; margin-bottom: 6px;">
       🎉 ¡FELICIDADES! TU CANCIÓN FUE SELECCIONADA
     </h3>
     <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
       Tu tema ya ha sido añadido a la playlist oficial y programado para amplificación en nuestras redes sociales (@TNIWave y @MtrendVideo).
     </p>
+    <div id="acceptedFeedbackWrap" style="display:none; margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 13px; color: #fff;"></div>
     <a href="#" class="btn-download-story" onclick="showToast('Generando Video-Historia vertical...')">
       📥 Descargar Video-Historia para tus Redes (Instagram / TikTok)
+    </a>
+  </div>
+
+  <!-- DECLINED STATE -->
+  <div class="accepted-banner" id="declinedBox" style="display: none; border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.04);">
+    <h3 style="color: #ef4444; font-family: var(--font-heading); font-size: 19px; font-weight: 800; margin-bottom: 6px;">
+      📋 REVISIÓN EDITORIAL FINALIZADA
+    </h3>
+    <p style="font-size: 13.5px; color: var(--text-main); line-height: 1.6; margin-bottom: 12px;" id="declinedFeedback">
+      Gracias por compartir tu música con The New Indie Wave. En esta ocasión la canción no encajó con el sonido o dinámica específica que buscamos para esta playlist.
+    </p>
+    <a href="enviar.html" class="btn-download-story" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--border-strong);">
+      ✨ Enviar otra canción para revisión ↗
     </a>
   </div>
 </main>
@@ -853,25 +867,54 @@
         if(record.playlist) document.getElementById('dPlaylist').textContent = record.playlist;
         
         // Actualizar Stepper según el estado real
+        var accBox = document.getElementById('acceptedBox');
+        var decBox = document.getElementById('declinedBox');
+
         if(record.status === 'accepted') {
           document.getElementById('badgeText').textContent = 'ACEPTADA EN PLAYLIST';
+          document.getElementById('step1').className = 'step-row completed';
           document.getElementById('step2').className = 'step-row completed';
           document.getElementById('step3').className = 'step-row completed';
           document.getElementById('step4').className = 'step-row completed';
-          document.getElementById('acceptedBox').classList.add('show');
+          if (accBox) accBox.style.display = 'block';
+          if (decBox) decBox.style.display = 'none';
+          if (record.feedback && record.feedback.trim()) {
+            var fbW = document.getElementById('acceptedFeedbackWrap');
+            if (fbW) {
+              fbW.innerHTML = '<strong>Nota del Curador:</strong> "' + record.feedback + '"';
+              fbW.style.display = 'block';
+            }
+          }
+        } else if(record.status === 'declined' || record.status === 'rejected') {
+          document.getElementById('badgeText').textContent = 'REVISIÓN FINALIZADA (DECLINADA)';
+          document.getElementById('step1').className = 'step-row completed';
+          document.getElementById('step2').className = 'step-row completed';
+          document.getElementById('step3').className = 'step-row completed';
+          document.getElementById('step4').className = 'step-row completed';
+          if (accBox) accBox.style.display = 'none';
+          if (decBox) decBox.style.display = 'block';
+          if (record.feedback && record.feedback.trim()) {
+            document.getElementById('declinedFeedback').innerHTML = '<strong>Feedback de Rodrigo DL Moral:</strong><br><br>"' + record.feedback + '"';
+          }
         } else if(record.status === 'listening') {
           document.getElementById('badgeText').textContent = 'EN ESCUCHA EDITORIAL';
+          document.getElementById('step1').className = 'step-row completed';
           document.getElementById('step2').className = 'step-row completed';
           document.getElementById('step3').className = 'step-row active';
-        } else if(record.status === 'queue' || record.status === 'pending') {
+          if (accBox) accBox.style.display = 'none';
+          if (decBox) decBox.style.display = 'none';
+        } else {
           document.getElementById('badgeText').textContent = 'EN COLA DEL CURADOR';
           document.getElementById('step1').className = 'step-row completed';
           document.getElementById('step2').className = 'step-row active';
+          if (accBox) accBox.style.display = 'none';
+          if (decBox) decBox.style.display = 'none';
         }
       }
     } catch(err){}
   }
   fetchLiveStatus();
+  setInterval(fetchLiveStatus, 4000);
 
   // 3. Temporizador regresivo en tiempo real
   var totalSeconds = 48 * 3600 - 14 * 60 - 22; // ~47 horas restantes de demo
