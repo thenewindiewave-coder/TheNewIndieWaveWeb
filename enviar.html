@@ -587,13 +587,48 @@
         </div>
 
         <div>
-          <label class="field-label">Email de Contacto</label>
+          <label class="field-label">Email de Contacto *</label>
           <input id="pb-email" type="email" class="field-input" placeholder="tucorreo@ejemplo.com" required>
         </div>
 
         <div>
-          <label class="field-label">País</label>
+          <label class="field-label">País *</label>
           <select id="country-select" class="field-select" required></select>
+        </div>
+
+        <div class="form-full">
+          <label class="field-label">Número de WhatsApp (Opcional)</label>
+          <div style="display: grid; grid-template-columns: 200px 1fr; gap: 10px;">
+            <select id="wa-country-prefix" class="field-select" style="background:#09090b;">
+              <option value="+52" selected>🇲🇽 México (+52)</option>
+              <option value="+57">🇨🇴 Colombia (+57)</option>
+              <option value="+54">🇦🇷 Argentina (+54)</option>
+              <option value="+34">🇪🇸 España (+34)</option>
+              <option value="+56">🇨🇱 Chile (+56)</option>
+              <option value="+51">🇵🇪 Perú (+51)</option>
+              <option value="+1">🇺🇸 Estados Unidos (+1)</option>
+              <option value="+593">🇪🇨 Ecuador (+593)</option>
+              <option value="+502">🇬🇹 Guatemala (+502)</option>
+              <option value="+506">🇨🇷 Costa Rica (+506)</option>
+              <option value="+598">🇺🇾 Uruguay (+598)</option>
+              <option value="+58">🇻🇪 Venezuela (+58)</option>
+              <option value="+507">🇵🇦 Panamá (+507)</option>
+              <option value="+591">🇧🇴 Bolivia (+591)</option>
+              <option value="+1">🇩🇴 Rep. Dominicana (+1)</option>
+              <option value="+504">🇭🇳 Honduras (+504)</option>
+              <option value="+503">🇸🇻 El Salvador (+503)</option>
+              <option value="+595">🇵🇾 Paraguay (+595)</option>
+              <option value="+505">🇳🇮 Nicaragua (+505)</option>
+              <option value="+1">🇵🇷 Puerto Rico (+1)</option>
+              <option value="+1">🇨🇦 Canadá (+1)</option>
+              <option value="+44">🇬🇧 Reino Unido (+44)</option>
+              <option value="+49">🇩🇪 Alemania (+49)</option>
+              <option value="+33">🇫🇷 Francia (+33)</option>
+              <option value="+39">🇮🇹 Italia (+39)</option>
+              <option value="+55">🇧🇷 Brasil (+55)</option>
+            </select>
+            <input id="pb-whatsapp" type="tel" class="field-input" placeholder="Ej: 55 1234 5678 (Opcional)">
+          </div>
         </div>
 
         <div>
@@ -702,11 +737,82 @@
   }
 
   var genres = [
-    "Indie Rock", "Dream Pop", "Shoegaze", "Bedroom Pop", "Post-Punk", 
-    "Darkwave", "Garage Rock", "Lo-Fi", "Indie Pop", "Hard Rock", 
-    "Alternative", "Metal", "Metalcore", "Grunge", "Slowcore", 
-    "Chillwave", "Urbano / Trap", "Acoustic / Folk", "Otro"
+    "Acoustic / Acústico",
+    "Alternative Rock",
+    "Ambient",
+    "Art Pop",
+    "Art Rock",
+    "Bedroom Pop",
+    "Britpop",
+    "C86 / Jangle Pop",
+    "Chillwave",
+    "Coldwave",
+    "Dance-Punk",
+    "Dancehall",
+    "Dark Synth",
+    "Darkwave",
+    "Death Metal",
+    "Downtempo",
+    "Dream Pop",
+    "EBM / Industrial",
+    "Electro-Pop",
+    "Electrónica / Dance",
+    "Emo / Midwest Emo",
+    "Experimental",
+    "Folk / Folk Rock",
+    "Garage Rock",
+    "Glam Rock",
+    "Glitch Pop",
+    "Goth Rock",
+    "Grunge",
+    "Hard Rock",
+    "Hardcore Punk",
+    "Heavy Metal",
+    "Hyperpop",
+    "Indie Dance",
+    "Indie Folk",
+    "Indie Pop",
+    "Indie R&B",
+    "Indie Rock",
+    "Industrial Rock",
+    "Lo-Fi / Bedroom",
+    "Math Rock",
+    "Melodic Hardcore",
+    "Metalcore",
+    "Neo-Psychedelia",
+    "Neo-Soul",
+    "Neoclásico",
+    "New Wave",
+    "Noise Pop",
+    "Noise Rock",
+    "Nu Metal",
+    "Post-Hardcore",
+    "Post-Punk",
+    "Post-Rock",
+    "Power Pop",
+    "Prog Rock",
+    "Psychedelic Rock",
+    "Punk Rock",
+    "Reggae",
+    "Screamo",
+    "Shoegaze",
+    "Ska",
+    "Ska-Punk",
+    "Slowcore",
+    "Space Rock",
+    "Stoner Rock",
+    "Surf Rock",
+    "Synth-Pop",
+    "Synthwave",
+    "Techno / House",
+    "Thrash Metal",
+    "Trap / Trap Latino",
+    "Trip Hop",
+    "Twee Pop",
+    "Urbano Alternativo",
+    "Otro"
   ];
+
   var genreSel = document.getElementById('pb-genre');
   if(genreSel) {
     genreSel.innerHTML = '<option value="" disabled selected>Selecciona el género</option>' + genres.map(function(g){ return '<option value="'+g+'">'+g+'</option>'; }).join('');
@@ -737,6 +843,119 @@
   // 2. Auto-Detección de Metadata desde Spotify
   var _spTimer = null;
   function handleSpotifyLinkInput(url) {
+    clearTimeout(_spTimer);
+    if(!url || !url.includes('spotify.com/track/')) {
+      document.getElementById('spotifyPreviewBox').style.display = 'none';
+      return;
+    }
+
+    _spTimer = setTimeout(async function() {
+      try {
+        const oembedUrl = 'https://open.spotify.com/oembed?url=' + encodeURIComponent(url.trim());
+        const res = await fetch(oembedUrl);
+        if(!res.ok) return;
+        const data = await res.json();
+        
+        if(data && data.title) {
+          var parts = data.title.split(' by ');
+          var songTitle = parts[0] || data.title;
+          var artistName = parts[1] || (data.author_name || '');
+
+          if(songTitle) document.getElementById('pb-title').value = songTitle;
+          if(artistName) document.getElementById('pb-artist').value = artistName;
+
+          document.getElementById('spTitle').textContent = songTitle;
+          document.getElementById('spArtist').textContent = artistName ? 'por ' + artistName : 'Spotify Track';
+          if(data.thumbnail_url) {
+            document.getElementById('spCover').src = data.thumbnail_url;
+            document.getElementById('spCover').style.display = 'block';
+          } else {
+            document.getElementById('spCover').style.display = 'none';
+          }
+          document.getElementById('spotifyPreviewBox').style.display = 'flex';
+          showToast('✓ Track detectado: ' + songTitle);
+        }
+      } catch(e){}
+    }, 400);
+  }
+
+  // 3. Auto-Match Inteligente de Playlist según el Género
+  var genreToPlaylistMap = {
+    "Indie Rock": "Rock indie para manejar de noche sin rumbo",
+    "Alternative Rock": "Rock indie para manejar de noche sin rumbo",
+    "Britpop": "Rock indie para manejar de noche sin rumbo",
+    "Power Pop": "Rock indie para manejar de noche sin rumbo",
+    "Garage Rock": "Rock indie sucio y crudo para sentirte rebelde",
+    "Post-Punk": "Rock indie sucio y crudo para sentirte rebelde",
+    "Punk Rock": "Rock indie sucio y crudo para sentirte rebelde",
+    "Dance-Punk": "Rock indie sucio y crudo para sentirte rebelde",
+    "Ska": "Rock indie sucio y crudo para sentirte rebelde",
+    "Ska-Punk": "Rock indie sucio y crudo para sentirte rebelde",
+    "Surf Rock": "Rock indie sucio y crudo para sentirte rebelde",
+    "Noise Rock": "Rock indie sucio y crudo para sentirte rebelde",
+    "Slowcore": "Rock indie para cuando no puedes dormir y piensas demasiado",
+    "Post-Rock": "Rock indie para cuando no puedes dormir y piensas demasiado",
+    "Math Rock": "Rock indie para cuando no puedes dormir y piensas demasiado",
+    "Emo / Midwest Emo": "Rock indie para cuando no puedes dormir y piensas demasiado",
+    "Dream Pop": "Pop indie para estar feliz y triste al mismo tiempo",
+    "Indie Pop": "Pop indie para estar feliz y triste al mismo tiempo",
+    "Shoegaze": "Pop indie para estar feliz y triste al mismo tiempo",
+    "Noise Pop": "Pop indie para estar feliz y triste al mismo tiempo",
+    "C86 / Jangle Pop": "Pop indie para estar feliz y triste al mismo tiempo",
+    "Twee Pop": "Pop indie para estar feliz y triste al mismo tiempo",
+    "Art Pop": "Pop indie para estar feliz y triste al mismo tiempo",
+    "Bedroom Pop": "Pop indie íntimo para escuchar solo en tu cuarto",
+    "Lo-Fi / Bedroom": "Pop indie íntimo para escuchar solo en tu cuarto",
+    "Indie R&B": "Pop indie íntimo para escuchar solo en tu cuarto",
+    "Neo-Soul": "Pop indie íntimo para escuchar solo en tu cuarto",
+    "Chillwave": "Pop indie suave para domingos sin hacer nada",
+    "Acoustic / Acústico": "Pop indie suave para domingos sin hacer nada",
+    "Folk / Folk Rock": "Pop indie suave para domingos sin hacer nada",
+    "Indie Folk": "Pop indie suave para domingos sin hacer nada",
+    "Ambient": "Pop indie suave para domingos sin hacer nada",
+    "Neoclásico": "Pop indie suave para domingos sin hacer nada",
+    "Downtempo": "Pop indie suave para domingos sin hacer nada",
+    "Hard Rock": "Hard rock para sacar la rabia y el enojo acumulado",
+    "Grunge": "Hard rock para sacar la rabia y el enojo acumulado",
+    "Stoner Rock": "Hard rock para sacar la rabia y el enojo acumulado",
+    "Glam Rock": "Hard rock para sacar la rabia y el enojo acumulado",
+    "Heavy Metal": "Metal intenso para liberar toda tu energía",
+    "Metalcore": "Metal intenso para liberar toda tu energía",
+    "Death Metal": "Metal intenso para liberar toda tu energía",
+    "Thrash Metal": "Metal intenso para liberar toda tu energía",
+    "Nu Metal": "Metal intenso para liberar toda tu energía",
+    "Hardcore Punk": "Metal intenso para liberar toda tu energía",
+    "Melodic Hardcore": "Metal intenso para liberar toda tu energía",
+    "Post-Hardcore": "Metal intenso para liberar toda tu energía",
+    "Screamo": "Metal intenso para liberar toda tu energía",
+    "Urbano Alternativo": "Música urbana con flow y ritmo para moverte",
+    "Trap / Trap Latino": "Música urbana con flow y ritmo para moverte",
+    "Dancehall": "Música urbana con flow y ritmo para moverte",
+    "Reggae": "Música urbana con flow y ritmo para moverte",
+    "Trip Hop": "Música urbana con flow y ritmo para moverte",
+    "Hyperpop": "Música urbana con flow y ritmo para moverte",
+    "Glitch Pop": "Música urbana con flow y ritmo para moverte",
+    "Darkwave": "Darkwave oscuro y atmosférico para la madrugada",
+    "Coldwave": "Darkwave oscuro y atmosférico para la madrugada",
+    "Goth Rock": "Darkwave oscuro y atmosférico para la madrugada",
+    "Synth-Pop": "Darkwave oscuro y atmosférico para la madrugada",
+    "Synthwave": "Darkwave oscuro y atmosférico para la madrugada",
+    "New Wave": "Darkwave oscuro y atmosférico para la madrugada",
+    "EBM / Industrial": "Darkwave oscuro y atmosférico para la madrugada",
+    "Dark Synth": "Darkwave oscuro y atmosférico para la madrugada",
+    "Industrial Rock": "Darkwave oscuro y atmosférico para la madrugada",
+    "Electro-Pop": "Darkwave oscuro y atmosférico para la madrugada",
+    "Electrónica / Dance": "Darkwave oscuro y atmosférico para la madrugada",
+    "Indie Dance": "Darkwave oscuro y atmosférico para la madrugada",
+    "Techno / House": "Darkwave oscuro y atmosférico para la madrugada",
+    "Psychedelic Rock": "Rock indie para manejar de noche sin rumbo",
+    "Neo-Psychedelia": "Rock indie para manejar de noche sin rumbo",
+    "Space Rock": "Rock indie para manejar de noche sin rumbo",
+    "Art Rock": "Rock indie para manejar de noche sin rumbo",
+    "Prog Rock": "Rock indie para manejar de noche sin rumbo"
+  };
+
+    function handleSpotifyLinkInput(url) {
     clearTimeout(_spTimer);
     if(!url || !url.includes('spotify.com/track/')) {
       document.getElementById('spotifyPreviewBox').style.display = 'none';
@@ -863,10 +1082,15 @@
     btn.textContent = 'Enviando track...';
     btn.disabled = true;
 
+    var waPrefix = document.getElementById('wa-country-prefix') ? document.getElementById('wa-country-prefix').value : '+52';
+    var waNum = document.getElementById('pb-whatsapp') ? document.getElementById('pb-whatsapp').value.trim() : '';
+    var fullWa = waNum ? (waPrefix + ' ' + waNum) : '';
+
     var payload = {
       artist_name: document.getElementById('pb-artist').value,
       email: document.getElementById('pb-email').value,
       country: document.getElementById('country-select').value,
+      whatsapp: fullWa,
       instagram: document.getElementById('pb-ig').value,
       tiktok: document.getElementById('pb-tiktok').value,
       song_title: document.getElementById('pb-title').value,

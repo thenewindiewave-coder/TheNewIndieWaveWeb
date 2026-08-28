@@ -746,6 +746,7 @@
                   <span class="track-tag">🎯 Playlist: ${item.playlist}</span>
                   <span class="track-tag">🏷️ ${item.genre || 'Indie'}</span>
                   <span class="track-tag">🌐 ${item.language || 'Español'}</span>
+                  ${item.whatsapp ? `<span class="track-tag" style="background: rgba(37,211,102,0.15); border-color: rgba(37,211,102,0.4); color:#25D366;"><a href="https://wa.me/${item.whatsapp.replace(/[^0-9]/g, '')}" target="_blank" style="color:inherit; text-decoration:none;">💬 WhatsApp: ${item.whatsapp} ↗</a></span>` : ''}
                 </div>
               </div>
             </div>
