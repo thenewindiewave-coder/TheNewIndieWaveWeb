@@ -53,15 +53,18 @@ async function saveRadarArtistToSupabase(artist) {
       track_id: artist.track_id || '',
       short_bio: artist.short_bio || '',
       full_review: artist.full_review || '',
+      career_notes: artist.career_notes || '',
+      events_note: artist.events_note || '',
       spotify_url: artist.spotify_url || '',
       instagram: artist.instagram || '',
       apple_music_url: artist.apple_music_url || '',
       youtube_url: artist.youtube_url || '',
       tiktok_url: artist.tiktok_url || '',
+      facebook_url: artist.facebook_url || '',
       bandcamp_url: artist.bandcamp_url || '',
       soundcloud_url: artist.soundcloud_url || '',
       website_url: artist.website_url || '',
-      other_url: Object.keys(otherData).length > 0 ? JSON.stringify(otherData) : (artist.other_url || '')
+      other_url: artist.other_url || ''
     };
 
     var res = await fetch(SUPABASE_URL + '/rest/v1/radar_artists', {
