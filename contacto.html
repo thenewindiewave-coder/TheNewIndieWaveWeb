@@ -35,16 +35,17 @@
     .nav-link:hover { color: #fff; }
     .btn-submit-nav { background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 8px 16px; border-radius: 4px; text-decoration: none; }
     
-    .contact-hero { padding: 60px 0 30px 0; }
+    .contact-hero { padding: 60px 0 20px 0; }
     .contact-tag { font-family: var(--font-mono); font-size: 12px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 12px; }
     .contact-title { font-family: var(--font-heading); font-size: 42px; font-weight: 800; letter-spacing: -1px; margin-bottom: 14px; }
-    .contact-desc { font-size: 16px; color: var(--text-muted); max-width: 620px; }
+    .contact-desc { font-size: 16px; color: var(--text-muted); max-width: 680px; line-height: 1.6; }
 
     .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
-    .contact-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 30px; }
-    .contact-card-title { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-    .contact-card-desc { font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
-    .contact-link-btn { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 10px 18px; border-radius: 4px; text-decoration: none; transition: all 0.2s; }
+    .contact-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 28px; display: flex; flex-direction: column; justify-content: space-between; }
+    .contact-card:hover { border-color: var(--border-strong); }
+    .contact-card-title { font-family: var(--font-heading); font-size: 19px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .contact-card-desc { font-size: 13.5px; color: var(--text-muted); margin-bottom: 22px; line-height: 1.6; flex: 1; }
+    .contact-link-btn { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 10px 16px; border-radius: 4px; text-decoration: none; transition: all 0.2s; align-self: flex-start; }
     .contact-link-btn:hover { background: var(--accent-lime); color: #000; border-color: var(--accent-lime); }
 
     .social-channel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
@@ -53,7 +54,7 @@
     .channel-name { font-family: var(--font-heading); font-size: 14px; font-weight: 700; }
     .channel-handle { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
 
-    @media(max-width: 768px) {
+    @media(max-width: 800px) {
       .contact-grid { grid-template-columns: 1fr; }
       .social-channel-grid { grid-template-columns: 1fr; }
     }
@@ -213,28 +214,42 @@
       <div class="contact-tag">// CONTACTO DIRECTO & PRENSA</div>
       <h1 class="contact-title">Hablemos de Música.</h1>
       <p class="contact-desc">
-        ¿Tienes un proyecto musical, propuesta de colaboración, prensa o booking para eventos en vivo? Estamos para escucharte.
+        The New Indie Wave conecta a músicos, promotores, venues y medios culturales. Selecciona el canal correspondiente para contactar directamente a Rodrigo DL Moral y al equipo editorial.
       </p>
     </div>
 
     <div class="contact-grid">
-      <!-- Correo Principal -->
+      <!-- 1. Correo Oficial & Curaduría -->
       <div class="contact-card">
         <div class="contact-card-title">✉️ Correo Oficial & Curaduría</div>
-        <p class="contact-card-desc">Para dudas sobre envíos, propuestas editoriales, alianzas de difusión y contacto directo con Rodrigo DL Moral.</p>
+        <p class="contact-card-desc">Para seguimiento de envíos de canciones, dudas sobre feedback editorial, alianzas de prensa y contacto general de la plataforma.</p>
         <a href="mailto:the.new.indie.wave@gmail.com" class="contact-link-btn">the.new.indie.wave@gmail.com ↗</a>
       </div>
 
-      <!-- Booking & Shows -->
+      <!-- 2. Artistas en el Radar & Scouting -->
+      <div class="contact-card">
+        <div class="contact-card-title">🌟 Artistas en el Radar & Scouting</div>
+        <p class="contact-card-desc">Si tienes un proyecto con trayectoria sólida, EP/Álbum publicado y buscas una reseña editorial completa o perfil destacado en nuestra sección oficial de Radar.</p>
+        <a href="mailto:the.new.indie.wave@gmail.com?subject=Postulacion%20Artistas%20en%20el%20Radar" class="contact-link-btn">Postular al Radar ↗</a>
+      </div>
+
+      <!-- 3. Booking & Showcases en Vivo -->
       <div class="contact-card">
         <div class="contact-card-title">🎪 Booking & Showcases en Vivo</div>
-        <p class="contact-card-desc">Si organizas conciertos, festivales o representas un venue y quieres programar bandas del colectivo The New Indie Wave.</p>
-        <a href="mailto:rodridom.rock@gmail.com" class="contact-link-btn">rodridom.rock@gmail.com ↗</a>
+        <p class="contact-card-desc">Para promotores, foros, festivales o marcas que deseen programar conciertos en vivo o contratar talento curado por The New Indie Wave.</p>
+        <a href="mailto:rodridom.rock@gmail.com?subject=Booking%20Showcases%20TNIW" class="contact-link-btn">rodridom.rock@gmail.com ↗</a>
+      </div>
+
+      <!-- 4. Difusión de Eventos Musicales -->
+      <div class="contact-card">
+        <div class="contact-card-title">📢 Difusión de Eventos Musicales</div>
+        <p class="contact-card-desc">¿Organizas un concierto, festival o tocada independiente? Envíanos tu cartel y detalles para difundirlo en nuestra cartelera de eventos y redes sociales (aunque The New Indie Wave no sea el organizador).</p>
+        <a href="mailto:the.new.indie.wave@gmail.com?subject=Difusion%20de%20Evento%20Musical" class="contact-link-btn">Solicitar Difusión de Evento ↗</a>
       </div>
     </div>
 
     <!-- Canales Oficiales -->
-    <div style="margin-top: 50px;">
+    <div style="margin-top: 60px;">
       <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; margin-bottom: 6px;">Nuestros Canales Oficiales</h3>
       <p style="font-size: 14px; color: var(--text-muted);">Sigue la ola indie en todas las redes:</p>
 
@@ -286,7 +301,6 @@
   </main>
 
   <!-- FOOTER GLOBAL -->
-<!-- FOOTER GLOBAL -->
 <footer class="site-footer">
   <div class="container footer-grid">
     <!-- Brand Info -->
@@ -355,7 +369,6 @@
     </div>
   </div>
 </footer>
-
 
 </body>
 </html>
