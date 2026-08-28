@@ -13,10 +13,13 @@ var DEFAULT_RADAR_ARTISTS = [
     "track_id": "3n3Ppam7vgaVa1iaRUc9Lp",
     "short_bio": "Capas envolventes de reverb, sintetizadores análogos nostálgicos y una melodía hipnótica perfecta para la noche.",
     "full_review": "Originarios del sur de la Ciudad de México, Lunar Daydream mezcla guitarras espaciales cargadas de chorus con cajas de ritmos vintage y melodías etéreas.",
-    "career_notes": "Formados en 2023, cuentan con más de 80,000 escuchas mensuales en Spotify y múltiples shows en vivo.",
-    "events_note": "Showcase TNIW Vol. 04 — Foro Cultural Indie (24 OCT 2026)",
     "spotify_url": "https://open.spotify.com/artist/3n3Ppam7vgaVa1iaRUc9Lp",
-    "instagram": "@lunardaydream"
+    "instagram": "@lunardaydream",
+    "apple_music_url": "",
+    "youtube_url": "https://www.youtube.com/results?search_query=Lunar+Daydream",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-2",
@@ -31,10 +34,13 @@ var DEFAULT_RADAR_ARTISTS = [
     "track_id": "0VjIjW4GlUZAMYd2vXMi3b",
     "short_bio": "Líneas de bajo penetrantes, cajas de ritmo ochenteras y líricas existenciales con una ejecución en vivo demoledora.",
     "full_review": "Desde los sótanos de Buenos Aires, este dúo post-punk revitaliza las texturas frías de los sintetizadores analógicos con bajos distorsionados y voces graves.",
-    "career_notes": "Ganadores del circuito emergente porteño 2025, actualmente grabando su primer larga duración.",
-    "events_note": "Festival TNIW 2026 — Escenario Alterno (05 DIC 2026)",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@distorsionfria"
+    "instagram": "@distorsionfria",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-3",
@@ -49,10 +55,13 @@ var DEFAULT_RADAR_ARTISTS = [
     "track_id": "7qiZfU4dY1lWllzX7mPBI3",
     "short_bio": "Frescura acústica con arreglos de cuerdas sutiles y ganchos vocales inolvidables para escuchar al atardecer.",
     "full_review": "Con una instrumentación orgánica que combina guitarras acústicas afinadas en abierto, percusiones suaves y armonías vocales a dos voces, Cero Tardes crea paisajes sonoros íntimos.",
-    "career_notes": "Proyecto solista colaborativo fundado en Colombia con presentaciones acústicas en teatros independientes.",
-    "events_note": "Secret Rooftop Sessions — Terraza Roma Norte (12 NOV 2026)",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@cerotardes"
+    "instagram": "@cerotardes",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-4",
@@ -65,12 +74,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=600&q=80",
     "track_id": "4cOdK2wGLETKBW3PvgPWqT",
-    "short_bio": "Texturas de cinta de cuatro canales con armonías vocales íntimas y sinceras grabadas en casa.",
+    "short_bio": "Texturas de cinta de 4 canales con armonías íntimas grabadas en casa.",
     "full_review": "Composiciones caseras con melodías de ensueño con guitarras jangle y sintes casio.",
-    "career_notes": "Pioneros del sonido bedroom chileno con lanzamientos en cassette.",
-    "events_note": "Gira acústica Cono Sur 2026",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@siluetasdeverano"
+    "instagram": "@siluetasdeverano",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-5",
@@ -83,12 +95,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=600&q=80",
     "track_id": "3jjujdUJ72nuh5eMFTpqQB",
-    "short_bio": "Potencia rítmica directa, guitarras crudas y coros enérgicos que conectan con la nueva oleada independiente.",
+    "short_bio": "Potencia rítmica directa, guitarras crudas y coros enérgicos urbanos.",
     "full_review": "Riffs veloces y actitud punk melódica con letras honestas sobre la vida urbana contemporánea.",
-    "career_notes": "Banda binacional con base entre España y México.",
-    "events_note": "Showcase Madrid - Sala Sol",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@losextraviados"
+    "instagram": "@losextraviados",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-6",
@@ -101,12 +116,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&q=80",
     "track_id": "1xK59OXxi2TAAAbmZK0hp9",
-    "short_bio": "Sintetizadores acuáticos y melodías envolventes que capturan la bruma costera del Pacífico.",
+    "short_bio": "Sintetizadores acuáticos y melodías envolventes de la bruma costera.",
     "full_review": "Atmósferas espaciales que fusionan el shoegaze latino con beats electrónicos elegantes.",
-    "career_notes": "Trío limeño elogiado por revistas especializadas.",
-    "events_note": "Festival Costa Verde 2026",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@frecuenciamarina"
+    "instagram": "@frecuenciamarina",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-7",
@@ -119,12 +137,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&q=80",
     "track_id": "2takcwOaAZWiRsqPHPb7uy",
-    "short_bio": "Secuencias industriales bailables y estéticas retro-futuristas nocturnas de alto impacto.",
+    "short_bio": "Secuencias industriales bailables y estéticas retro-futuristas nocturnas.",
     "full_review": "Bajo arpegiado analógico implacable con cajas de ritmo potentes para clubes oscuros.",
-    "career_notes": "Presentaciones estelares en festivales de música electrónica.",
-    "events_note": "Club Darkwave MTY (Noviembre)",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@sombrasdeneon"
+    "instagram": "@sombrasdeneon",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-8",
@@ -137,12 +158,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80",
     "track_id": "7qiZfU4dY1lWllzX7mPBI3",
-    "short_bio": "Murallas sónicas de distorsión dulce y melodías vocales sumergidas en delay infinito.",
+    "short_bio": "Murallas sónicas de distorsión dulce y melodías sumergidas en delay.",
     "full_review": "Exploración sonora intensa inspirada en el shoegaze de los 90s con un toque sudamericano moderno.",
-    "career_notes": "Banda de culto en el puerto de Valparaíso.",
-    "events_note": "Ciclo Ruido y Mar",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@laultimaniebla"
+    "instagram": "@laultimaniebla",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-9",
@@ -155,12 +179,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80",
     "track_id": "0VjIjW4GlUZAMYd2vXMi3b",
-    "short_bio": "Guitarras acústicas hipnóticas, pedales de modulación y poesía introspectiva sobre la naturaleza.",
+    "short_bio": "Guitarras acústicas hipnóticas y poesía introspectiva sobre la naturaleza.",
     "full_review": "Folk psicodélico que evoca caminos de montaña y fogatas al aire libre con coros expansivos.",
-    "career_notes": "Grabaciones en vivo en bosques de Jalisco.",
-    "events_note": "Sesión Acústica GDL",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@riosalvaje.musica"
+    "instagram": "@riosalvaje.musica",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-10",
@@ -173,12 +200,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&q=80",
     "track_id": "3n3Ppam7vgaVa1iaRUc9Lp",
-    "short_bio": "Energía cruda centroamericana con baterías veloces y guitarras filosas cargadas de adrenalina.",
+    "short_bio": "Energía cruda con baterías veloces y guitarras filosas llenas de adrenalina.",
     "full_review": "Canciones directas de menos de tres minutos que retratan el caos y la juventud urbana.",
-    "career_notes": "Una de las bandas más activas del circuito indie costarricense.",
-    "events_note": "Toquín San José Punk Fest",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@autopistacentral"
+    "instagram": "@autopistacentral",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-11",
@@ -191,12 +221,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&q=80",
     "track_id": "4cOdK2wGLETKBW3PvgPWqT",
-    "short_bio": "Samples de vinilo cálidos, pianos nostálgicos y bajos suaves para estudiar o relajarse.",
+    "short_bio": "Samples de vinilo cálidos, pianos nostálgicos y bajos suaves lo-fi.",
     "full_review": "Productor independiente que rescata grabaciones de boleros viejos y las fusiona con texturas modernas.",
-    "career_notes": "Más de 500,000 streams acumulados en playlists globales.",
-    "events_note": "Lanzamiento nuevo beat tape",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@cintasmagneticas"
+    "instagram": "@cintasmagneticas",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-12",
@@ -209,12 +242,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&q=80",
     "track_id": "3jjujdUJ72nuh5eMFTpqQB",
-    "short_bio": "Lirismo gótico elegante, guitarras con flanger marcado y una voz profunda inconfundible.",
+    "short_bio": "Lirismo gótico elegante, guitarras con flanger y una voz profunda única.",
     "full_review": "Atmósferas victorianas combinadas con ritmos bailables inspirados en el rock gótico clásico.",
-    "career_notes": "Reconocidos en la escena oscura mexicana por sus shows teatrales.",
-    "events_note": "Noche Gótica Cholula",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@velonocturno"
+    "instagram": "@velonocturno",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-13",
@@ -227,12 +263,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1520523839898-50712825e617?w=600&q=80",
     "track_id": "1xK59OXxi2TAAAbmZK0hp9",
-    "short_bio": "Compases intrincados, guitarras tapping brillantes y explosiones emocionales catárticas.",
+    "short_bio": "Compases intrincados, guitarras tapping brillantes y fuerza catárquica.",
     "full_review": "Técnica musical depurada al servicio de canciones cargadas de nostalgia y fuerza juvenil.",
-    "career_notes": "Cuarteto formado en Cataluña con giras autogestionadas.",
-    "events_note": "Gira peninsular 2026",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@satelitesolvidados"
+    "instagram": "@satelitesolvidados",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   },
   {
     "id": "radar-14",
@@ -245,12 +284,15 @@ var DEFAULT_RADAR_ARTISTS = [
     "media_type": "image",
     "media_url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80",
     "track_id": "2takcwOaAZWiRsqPHPb7uy",
-    "short_bio": "Melodías pop luminosas con sintetizadores analógicos brillantes y un groove bailable.",
+    "short_bio": "Melodías pop luminosas con sintetizadores brillantes y groove bailable.",
     "full_review": "Herederos del pop refinado del Río de la Plata con arreglos vocales sofisticados.",
-    "career_notes": "Banda revelación de la escena uruguaya con videoclips estéticos.",
-    "events_note": "Showcase Sala Zitarrosa",
     "spotify_url": "https://open.spotify.com/",
-    "instagram": "@auroraestereo"
+    "instagram": "@auroraestereo",
+    "apple_music_url": "",
+    "youtube_url": "",
+    "tiktok_url": "",
+    "website_url": "",
+    "other_url": ""
   }
 ];
 

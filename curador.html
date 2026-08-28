@@ -1025,16 +1025,16 @@
     var artist = artistId ? list.find(function(a){ return a.id === artistId; }) : null;
 
     var modalHtml = `
-      <div class="artist-modal-overlay open" id="curatorRadarModal" style="display: flex; z-index: 3000;">
-        <div class="artist-modal" style="max-width: 620px; padding: 28px; background: #121217;">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px;">
-            <h3 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #fff;">
+      <div class="artist-modal-overlay open" id="curatorRadarModal" style="display: flex; z-index: 99999;">
+        <div class="artist-modal" style="max-width: 620px; padding: 26px; background: #121217;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 18px;">
+            <h3 style="font-family: var(--font-heading); font-size: 19px; font-weight: 800; color: #fff;">
               ${artist ? '✏️ EDITAR ARTISTA EN EL RADAR' : '✨ AÑADIR NUEVO ARTISTA'}
             </h3>
             <button onclick="closeRadarModal()" style="background: transparent; border: none; color: #fff; font-size: 18px; cursor: pointer;">✕</button>
           </div>
 
-          <form onsubmit="handleRadarFormSubmit(event, '${artist ? artist.id : ''}')" style="display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto; padding-right: 6px;">
+          <form onsubmit="handleRadarFormSubmit(event, '${artist ? artist.id : ''}')" style="display: flex; flex-direction: column; gap: 14px; max-height: 72vh; overflow-y: auto; padding-right: 6px;">
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div>
@@ -1063,9 +1063,19 @@
 
             <div>
               <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">
-                Clasificación de Artista (Solista, Dúo, Trío, Agrupación, Producer, DJ, etc.) *
+                Clasificación de Artista *
               </label>
-              <input type="text" id="rfBadge" required value="${artist ? (artist.badge || 'AGRUPACIÓN') : 'AGRUPACIÓN'}" placeholder="Ej. SOLISTA, DÚO, AGRUPACIÓN, PRODUCER, DJ" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              <select id="rfBadge" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; font-weight:700; cursor:pointer;">
+                <option value="SOLISTA" ${(artist && artist.badge === 'SOLISTA') ? 'selected' : ''}>SOLISTA</option>
+                <option value="DÚO" ${(artist && artist.badge === 'DÚO') ? 'selected' : ''}>DÚO</option>
+                <option value="TRÍO" ${(artist && artist.badge === 'TRÍO') ? 'selected' : ''}>TRÍO</option>
+                <option value="AGRUPACIÓN" ${(!artist || artist.badge === 'AGRUPACIÓN') ? 'selected' : ''}>AGRUPACIÓN</option>
+                <option value="BANDA" ${(artist && artist.badge === 'BANDA') ? 'selected' : ''}>BANDA</option>
+                <option value="PRODUCER" ${(artist && artist.badge === 'PRODUCER') ? 'selected' : ''}>PRODUCER</option>
+                <option value="DJ" ${(artist && artist.badge === 'DJ') ? 'selected' : ''}>DJ</option>
+                <option value="COLECTIVO" ${(artist && artist.badge === 'COLECTIVO') ? 'selected' : ''}>COLECTIVO</option>
+                <option value="PROYECTO" ${(artist && artist.badge === 'PROYECTO') ? 'selected' : ''}>PROYECTO</option>
+              </select>
             </div>
 
             <div>
@@ -1082,45 +1092,66 @@
               <div id="rfMediaPreview" style="display: ${artist && artist.media_url ? 'block' : 'none'}; margin-top: 6px;">
                 <img id="rfMediaPreviewImg" src="${artist ? (artist.media_url || '') : ''}" style="max-height: 80px; border-radius: 6px; border: 1px solid var(--border);" onerror="this.style.display='none'">
               </div>
-              <div style="font-size: 11px; color: var(--text-dim); margin-top: 3px;">💡 Puedes subir fotos o videos directamente desde tu PC a Cloudinary o pegar cualquier enlace.</div>
             </div>
 
             <div>
               <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 4px;">
-                Spotify Track ID o URL de Canción (para Mini-Player)
+                Spotify Track ID o URL de Canción (para Mini-Player en Card)
               </label>
               <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="Ej. 3n3Ppam7vgaVa1iaRUc9Lp o link directo de Spotify" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
             </div>
 
             <div>
-              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Reseña Breve para la Card (1-2 líneas) *</label>
-              <input type="text" id="rfShortBio" required value="${artist ? artist.short_bio : ''}" placeholder="Frase contundente sobre su sonido..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Frase Breve para la Card (< 100 caracteres) *</label>
+              <input type="text" id="rfShortBio" required maxlength="120" value="${artist ? artist.short_bio : ''}" placeholder="Frase corta sobre su propuesta sonora..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
             </div>
 
             <div>
-              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Reseña Completa & Reseña de Álbum (Para Ficha Expandida) *</label>
-              <textarea id="rfFullReview" required rows="3" placeholder="Texto detallado que se mostrará en el modal flotante al dar clic..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.full_review || '') : ''}</textarea>
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Reseña (Para Ficha Expandida) *</label>
+              <textarea id="rfFullReview" required rows="3" placeholder="Texto de la reseña editorial que se mostrará en el modal..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.full_review || '') : ''}</textarea>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Trayectoria / Biografía</label>
-                <input type="text" id="rfCareer" value="${artist ? (artist.career_notes || '') : ''}" placeholder="Hitos, escuchas, lanzamientos..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+            <!-- ENLACES Y REDES SOCIALES (Solo se muestran si se llenan) -->
+            <div style="border-top: 1px solid var(--border); padding-top: 12px;">
+              <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 10px;">
+                🌐 Enlaces & Redes Sociales (Los que dejes vacíos no se mostrarán):
               </div>
-              <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Próximos Eventos / Fechas</label>
-                <input type="text" id="rfEvents" value="${artist ? (artist.events_note || '') : ''}" placeholder="Ej. Showcase TNIW Vol. 04 (24 OCT)" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
-              </div>
-            </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Perfil Spotify (URL)</label>
-                <input type="url" id="rfSpotifyUrl" value="${artist ? (artist.spotify_url || '') : ''}" placeholder="https://open.spotify.com/artist/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Spotify (URL)</label>
+                  <input type="url" id="rfSpotifyUrl" value="${artist ? (artist.spotify_url || '') : ''}" placeholder="https://open.spotify.com/artist/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Instagram (URL o @usuario)</label>
+                  <input type="text" id="rfInstagram" value="${artist ? (artist.instagram || '') : ''}" placeholder="@usuario o link completo" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
               </div>
-              <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Instagram (@usuario)</label>
-                <input type="text" id="rfInstagram" value="${artist ? (artist.instagram || '') : ''}" placeholder="@nombreartista" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Apple Music (URL)</label>
+                  <input type="url" id="rfAppleUrl" value="${artist ? (artist.apple_music_url || '') : ''}" placeholder="https://music.apple.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">YouTube (URL)</label>
+                  <input type="url" id="rfYoutubeUrl" value="${artist ? (artist.youtube_url || '') : ''}" placeholder="https://youtube.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">TikTok (URL o @usuario)</label>
+                  <input type="text" id="rfTiktokUrl" value="${artist ? (artist.tiktok_url || '') : ''}" placeholder="@usuario o link" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Sitio Web Oficial (URL)</label>
+                  <input type="url" id="rfWebsiteUrl" value="${artist ? (artist.website_url || '') : ''}" placeholder="https://miweb.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Otro / Linktree (URL)</label>
+                  <input type="url" id="rfOtherUrl" value="${artist ? (artist.other_url || '') : ''}" placeholder="https://linktr.ee/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
               </div>
             </div>
 
@@ -1162,10 +1193,13 @@
       track_id: document.getElementById('rfTrackId').value.trim(),
       short_bio: document.getElementById('rfShortBio').value.trim(),
       full_review: document.getElementById('rfFullReview').value.trim(),
-      career_notes: document.getElementById('rfCareer').value.trim(),
-      events_note: document.getElementById('rfEvents').value.trim(),
-      spotify_url: document.getElementById('rfSpotifyUrl').value.trim(),
-      instagram: document.getElementById('rfInstagram').value.trim()
+      spotify_url: (document.getElementById('rfSpotifyUrl') ? document.getElementById('rfSpotifyUrl').value.trim() : ''),
+      instagram: (document.getElementById('rfInstagram') ? document.getElementById('rfInstagram').value.trim() : ''),
+      apple_music_url: (document.getElementById('rfAppleUrl') ? document.getElementById('rfAppleUrl').value.trim() : ''),
+      youtube_url: (document.getElementById('rfYoutubeUrl') ? document.getElementById('rfYoutubeUrl').value.trim() : ''),
+      tiktok_url: (document.getElementById('rfTiktokUrl') ? document.getElementById('rfTiktokUrl').value.trim() : ''),
+      website_url: (document.getElementById('rfWebsiteUrl') ? document.getElementById('rfWebsiteUrl').value.trim() : ''),
+      other_url: (document.getElementById('rfOtherUrl') ? document.getElementById('rfOtherUrl').value.trim() : '')
     };
 
     if(existingId) {
