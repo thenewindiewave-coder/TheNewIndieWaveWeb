@@ -18,6 +18,7 @@ async function syncRadarFromSupabase() {
               var parsed = JSON.parse(item.other_url);
               if (parsed.career_notes) item.career_notes = parsed.career_notes;
               if (parsed.events_note) item.events_note = parsed.events_note;
+              if (parsed.facebook_url) item.facebook_url = parsed.facebook_url;
             } catch(e) {}
           }
           return item;
@@ -38,6 +39,7 @@ async function saveRadarArtistToSupabase(artist) {
     var otherData = {};
     if (artist.career_notes) otherData.career_notes = artist.career_notes;
     if (artist.events_note) otherData.events_note = artist.events_note;
+    if (artist.facebook_url) otherData.facebook_url = artist.facebook_url;
 
     var payload = {
       id: artist.id,

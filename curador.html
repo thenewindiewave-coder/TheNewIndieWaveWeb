@@ -2033,11 +2033,18 @@
                 </div>
               </div>
 
-              <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🔵 Facebook (Página o perfil URL)</label>
+                  <input type="url" id="rfFacebookUrl" value="${artist ? (artist.facebook_url || '') : ''}" placeholder="https://facebook.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
                 <div>
                   <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🔷 Bandcamp (URL)</label>
                   <input type="url" id="rfBandcampUrl" value="${artist ? (artist.bandcamp_url || '') : ''}" placeholder="https://artista.bandcamp.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
+              </div>
+
+              <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
                 <div>
                   <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🌍 Sitio Web Oficial / Linktree (URL)</label>
                   <input type="url" id="rfWebsiteUrl" value="${artist ? (artist.website_url || '') : ''}" placeholder="https://miweb.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
@@ -2121,6 +2128,7 @@
       youtube_url: (document.getElementById('rfYoutubeUrl') ? document.getElementById('rfYoutubeUrl').value.trim() : ''),
       tiktok_url: cleanTk,
       apple_music_url: (document.getElementById('rfAppleMusicUrl') ? document.getElementById('rfAppleMusicUrl').value.trim() : ''),
+      facebook_url: (document.getElementById('rfFacebookUrl') ? document.getElementById('rfFacebookUrl').value.trim() : ''),
       soundcloud_url: (document.getElementById('rfSoundcloudUrl') ? document.getElementById('rfSoundcloudUrl').value.trim() : ''),
       bandcamp_url: (document.getElementById('rfBandcampUrl') ? document.getElementById('rfBandcampUrl').value.trim() : ''),
       website_url: (document.getElementById('rfWebsiteUrl') ? document.getElementById('rfWebsiteUrl').value.trim() : '')
