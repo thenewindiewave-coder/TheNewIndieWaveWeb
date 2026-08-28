@@ -9,6 +9,9 @@
 <meta name="author" content="The New Indie Wave & Rodrigo DL Moral">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#09090b">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="canonical" href="https://thenewindiewave.online/enviar.html">
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
@@ -845,8 +848,10 @@
     document.getElementById('charCount').textContent = el.value.length;
   }
 
-  // 2. Auto-Detección Inteligente de Metadata desde Spotify
+  // 2. Auto-Detección Inteligente de Metadata desde Spotify (Multi-Lane Instant Resolution)
   var _spTimer = null;
+  var _clientToken = null;
+  var _tokenExpiry = 0;
 
   function extractTrackIdFromUrl(raw) {
     if (!raw) return null;
@@ -863,12 +868,37 @@
     return null;
   }
 
+  async function getDirectSpotifyToken() {
+    var now = Date.now();
+    if (_clientToken && now < _tokenExpiry) return _clientToken;
+    try {
+      var auth = btoa('7a56561898eb4057941b2c1453476e10:86ed4df85d3f4f46885eb51013a0ab0f');
+      var res = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + auth,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'grant_type=client_credentials'
+      });
+      if (res.ok) {
+        var d = await res.json();
+        _clientToken = d.access_token;
+        _tokenExpiry = now + (d.expires_in - 60) * 1000;
+        return _clientToken;
+      }
+    } catch(e) {}
+    return null;
+  }
+
   async function handleSpotifyLinkInput(rawUrl, isManual) {
     clearTimeout(_spTimer);
-    var inputVal = (rawUrl || document.getElementById('pb-spotify').value || '').trim();
+    var inputEl = document.getElementById('pb-spotify');
+    var inputVal = (rawUrl || (inputEl ? inputEl.value : '') || '').trim();
     
     if (!inputVal) {
-      document.getElementById('spotifyPreviewBox').style.display = 'none';
+      var prevBox = document.getElementById('spotifyPreviewBox');
+      if (prevBox) prevBox.style.display = 'none';
       return;
     }
 
@@ -882,71 +912,93 @@
     }
 
     if (btn) btn.innerHTML = '<span>⏳ Buscando...</span>';
-    if (statusEl) statusEl.innerHTML = '<span style="color: var(--accent-cyan);">⏳ Conectando con Spotify API...</span>';
+    if (statusEl) statusEl.innerHTML = '<span style="color: var(--accent-cyan); font-weight:700;">⏳ Conectando con Spotify API...</span>';
 
-    var delay = isManual ? 0 : 250;
+    var delay = isManual ? 0 : 200;
 
     _spTimer = setTimeout(async function() {
+      var data = null;
+
+      // CARRIL 1: Consulta directa a Spotify Web API (0 ms de latencia)
       try {
-        var baseApi = (window.location.origin && window.location.origin.startsWith('http')) 
-          ? (window.location.origin + '/api/spotify-lookup') 
-          : 'https://thenewindiewave.online/api/spotify-lookup';
-
-        var res = await fetch(baseApi + '?id=' + encodeURIComponent(trackId));
-        var data = null;
-
-        if (res.ok) {
-          data = await res.json();
-        }
-
-        // Si falló en local o endpoint relativo, consultar producción
-        if (!data || (!data.title && !data.artist)) {
-          try {
-            var prodRes = await fetch('https://thenewindiewave.online/api/spotify-lookup?id=' + encodeURIComponent(trackId));
-            if (prodRes.ok) data = await prodRes.json();
-          } catch(e) {}
-        }
-
-        if (data && (data.title || data.artist)) {
-          var titleEl = document.getElementById('pb-title');
-          var artistEl = document.getElementById('pb-artist');
-          
-          if (data.title && titleEl) titleEl.value = data.title;
-          if (data.artist && artistEl) artistEl.value = data.artist;
-
-          // Mostrar tarjeta de preview
-          var spTitle = document.getElementById('spTitle');
-          var spArtist = document.getElementById('spArtist');
-          var spCover = document.getElementById('spCover');
-          var prevBox = document.getElementById('spotifyPreviewBox');
-
-          if (spTitle) spTitle.textContent = data.title || 'Canción Detectada';
-          if (spArtist) spArtist.textContent = data.artist ? ('por ' + data.artist) : 'Artista en Spotify';
-          
-          if (data.cover && spCover) {
-            spCover.src = data.cover;
-            spCover.style.display = 'block';
-          } else if (spCover) {
-            spCover.style.display = 'none';
+        var token = await getDirectSpotifyToken();
+        if (token) {
+          var spRes = await fetch('https://api.spotify.com/v1/tracks/' + encodeURIComponent(trackId), {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (spRes.ok) {
+            var track = await spRes.json();
+            data = {
+              title: track.name,
+              artist: track.artists.map(function(a){ return a.name; }).join(', '),
+              cover: (track.album && track.album.images && track.album.images.length > 0) ? track.album.images[0].url : ''
+            };
           }
-
-          if (prevBox) prevBox.style.display = 'flex';
-          if (statusEl) statusEl.innerHTML = '<span style="color: var(--accent-lime); font-weight: 700;">✓ Detectado: ' + data.title + ' — ' + data.artist + '</span>';
-          if (btn) btn.innerHTML = '<span>✓ Listo</span>';
-          showToast('✓ Detectado: ' + data.title + ' (' + data.artist + ')');
-        } else {
-          if (statusEl) statusEl.textContent = '⚡ No pudimos auto-detectar los datos; puedes escribirlos abajo.';
-          if (btn) btn.innerHTML = '<span>⚡ Detectar</span>';
         }
-      } catch(e) {
-        console.error('Error en detección Spotify:', e);
-        if (statusEl) statusEl.textContent = '⚡ Puedes ingresar el nombre y artista manualmente.';
-        if (btn) btn.innerHTML = '<span>⚡ Detectar</span>';
-      } finally {
-        setTimeout(function() {
-          if (btn) btn.innerHTML = '<span>⚡ Detectar</span>';
-        }, 2500);
+      } catch(e) {}
+
+      // CARRIL 2: Serverless /api/spotify-lookup
+      if (!data || (!data.title && !data.artist)) {
+        try {
+          var baseApi = (window.location.origin && window.location.origin.startsWith('http')) 
+            ? (window.location.origin + '/api/spotify-lookup') 
+            : 'https://thenewindiewave.online/api/spotify-lookup';
+          var res = await fetch(baseApi + '?id=' + encodeURIComponent(trackId));
+          if (res.ok) data = await res.json();
+        } catch(e) {}
       }
+
+      // CARRIL 3: Fallback a oEmbed
+      if (!data || (!data.title && !data.artist)) {
+        try {
+          var cleanUrl = 'https://open.spotify.com/track/' + trackId;
+          var oRes = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(cleanUrl));
+          if (oRes.ok) {
+            var oData = await oRes.json();
+            var parts = (oData.title || '').split(' by ');
+            data = {
+              title: parts[0] || oData.title,
+              artist: parts[1] || oData.author_name || '',
+              cover: oData.thumbnail_url || ''
+            };
+          }
+        } catch(e) {}
+      }
+
+      if (data && (data.title || data.artist)) {
+        var titleEl = document.getElementById('pb-title');
+        var artistEl = document.getElementById('pb-artist');
+        
+        if (data.title && titleEl) titleEl.value = data.title;
+        if (data.artist && artistEl) artistEl.value = data.artist;
+
+        var spTitle = document.getElementById('spTitle');
+        var spArtist = document.getElementById('spArtist');
+        var spCover = document.getElementById('spCover');
+        var prevBox = document.getElementById('spotifyPreviewBox');
+
+        if (spTitle) spTitle.textContent = data.title || 'Canción Detectada';
+        if (spArtist) spArtist.textContent = data.artist ? ('por ' + data.artist) : 'Artista en Spotify';
+        
+        if (data.cover && spCover) {
+          spCover.src = data.cover;
+          spCover.style.display = 'block';
+        } else if (spCover) {
+          spCover.style.display = 'none';
+        }
+
+        if (prevBox) prevBox.style.display = 'flex';
+        if (statusEl) statusEl.innerHTML = '<span style="color: var(--accent-lime); font-weight: 700;">✓ Detectado: ' + (data.title || '') + ' — ' + (data.artist || '') + '</span>';
+        if (btn) btn.innerHTML = '<span>✓ Listo</span>';
+        showToast('✓ Detectado: ' + data.title + ' (' + data.artist + ')');
+      } else {
+        if (statusEl) statusEl.textContent = '⚡ No pudimos auto-detectar los datos; puedes escribirlos abajo.';
+        if (btn) btn.innerHTML = '<span>⚡ Detectar</span>';
+      }
+
+      setTimeout(function() {
+        if (btn) btn.innerHTML = '<span>⚡ Detectar</span>';
+      }, 2500);
     }, delay);
   }
 
