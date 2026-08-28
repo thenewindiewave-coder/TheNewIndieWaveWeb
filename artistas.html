@@ -1247,9 +1247,13 @@
   try {
     var stored = localStorage.getItem('tniw_radar_artists');
     if (stored) {
-      var parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        artistsList = parsed;
+      if (stored.length > 2000000) {
+        localStorage.removeItem('tniw_radar_artists');
+      } else {
+        var parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          artistsList = parsed;
+        }
       }
     }
   } catch(e) {}

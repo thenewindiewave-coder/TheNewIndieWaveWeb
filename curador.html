@@ -615,6 +615,15 @@
 
 <script src="data_radar.js"></script>
 <script>
+  // PROTECCIÓN CONTRA OUT OF MEMORY (Limpieza de memoria caché pesada)
+  try {
+    var rawRadar = localStorage.getItem('tniw_radar_artists');
+    if (rawRadar && rawRadar.length > 2000000) { // Si pesa más de 2MB por fotos no comprimidas
+      console.warn('Detectado caché de radar excesivo. Limpiando para prevenir Out of Memory...');
+      localStorage.removeItem('tniw_radar_artists');
+    }
+  } catch(e) {}
+
   var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
@@ -1283,6 +1292,51 @@
   }
 
   
+  // COMPRESIÓN AUTOMÁTICA DE IMÁGENES EN EL NAVEGADOR (Evita Out of Memory y sube en segundos)
+  function compressImageFile(file, maxWidth, maxHeight, quality) {
+    maxWidth = maxWidth || 1200;
+    maxHeight = maxHeight || 1200;
+    quality = quality || 0.82;
+
+    return new Promise(function(resolve, reject) {
+      if (!file.type.startsWith('image/')) {
+        return resolve({ isImage: false, file: file, dataUrl: null });
+      }
+
+      var reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onerror = reject;
+        img.onload = function() {
+          var w = img.width;
+          var h = img.height;
+
+          if (w > maxWidth || h > maxHeight) {
+            if (w > h) {
+              h = Math.round((h * maxWidth) / w);
+              w = maxWidth;
+            } else {
+              w = Math.round((w * maxHeight) / h);
+              h = maxHeight;
+            }
+          }
+
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          var compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve({ isImage: true, dataUrl: compressedDataUrl, width: w, height: h });
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function handleDirectFileUpload(input) {
     if (!input.files || !input.files[0]) return;
     var file = input.files[0];
@@ -1293,29 +1347,32 @@
     if (statusEl) {
       statusEl.style.display = 'inline-block';
       statusEl.style.color = 'var(--accent-lime)';
-      statusEl.textContent = '⏳ Leyendo archivo...';
+      statusEl.textContent = '⏳ Optimizando ' + file.name + '...';
     }
-    showToast('⏳ Procesando ' + file.name + '...');
+    showToast('⏳ Optimizando imagen...');
 
-    var reader = new FileReader();
-    reader.onload = async function(e) {
-      var base64Data = e.target.result;
-      
-      // Mostrar vista previa local instantáneamente
-      previewRadarMedia(base64Data);
-      mediaUrlInput.value = base64Data;
+    try {
+      var compressed = await compressImageFile(file);
+      var uploadPayload = compressed.isImage ? compressed.dataUrl : null;
+
+      // Vista previa instantánea optimizada
+      if (uploadPayload) {
+        previewRadarMedia(uploadPayload);
+        mediaUrlInput.value = uploadPayload;
+      }
 
       if (statusEl) {
         statusEl.textContent = '⏳ Subiendo a Cloudinary...';
       }
-      showToast('⏳ Subiendo a Cloudinary (ckknw1do)...');
+      showToast('⏳ Subiendo a Cloudinary...');
 
+      // Intentar subir a Vercel/Serverless API
       try {
         var res = await fetch('/api/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            fileData: base64Data,
+            fileData: uploadPayload || '',
             resourceType: isVideo ? 'video' : 'image'
           })
         });
@@ -1326,22 +1383,30 @@
             mediaUrlInput.value = data.url;
             previewRadarMedia(data.url);
             if (statusEl) statusEl.textContent = '✓ Subido a Cloudinary';
-            showToast('✓ Archivo subido con éxito a Cloudinary');
+            showToast('✓ Imagen subida con éxito a Cloudinary');
             return;
           }
         }
       } catch(err) {
-        console.warn('API serverless no alcanzada en este entorno:', err);
+        console.warn('Endpoint /api/upload no disponible localmente:', err);
       }
 
-      // Si no hay serverless activo (modo local), la imagen queda cargada en base64 de inmediato
-      mediaUrlInput.value = base64Data;
-      previewRadarMedia(base64Data);
-      if (statusEl) statusEl.textContent = '✓ Imagen lista y cargada';
-      showToast('✓ Imagen cargada con éxito');
-    };
+      // Si estamos en entorno local, la versión comprimida (de solo ~100KB) queda lista sin riesgo
+      if (uploadPayload) {
+        mediaUrlInput.value = uploadPayload;
+        previewRadarMedia(uploadPayload);
+      }
+      if (statusEl) statusEl.textContent = '✓ Imagen lista y optimizada';
+      showToast('✓ Imagen procesada correctamente');
 
-    reader.readAsDataURL(file);
+    } catch(err) {
+      console.error('Error al procesar archivo:', err);
+      if (statusEl) {
+        statusEl.style.color = '#ef4444';
+        statusEl.textContent = '✕ Error al procesar archivo';
+      }
+      showToast('✕ Error al procesar imagen');
+    }
   }
 
   function previewRadarMedia(url) {
@@ -1358,12 +1423,17 @@
     }
   }
 
-  function resetRadarToDefaults() {
-    if(!confirm('¿Restaurar la lista original de artistas en el radar?')) return;
-    if(typeof DEFAULT_RADAR_ARTISTS !== 'undefined') {
-      saveRadarArtists(DEFAULT_RADAR_ARTISTS);
-      renderRadarManager();
-      showToast('✓ Valores por defecto restaurados');
+  function saveRadarArtists(artists) {
+    try {
+      var str = JSON.stringify(artists);
+      // Seguridad: si supera límite seguro de 3MB, avisar
+      if (str.length > 3500000) {
+        console.warn('Caché cercano al límite de localStorage');
+      }
+      localStorage.setItem('tniw_radar_artists', str);
+    } catch(e) {
+      console.error('Error guardando radar', e);
+      showToast('⚠️ No se pudo almacenar en caché local (Límite excedido)');
     }
   }
 
