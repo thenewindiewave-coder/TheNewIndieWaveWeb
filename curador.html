@@ -1481,7 +1481,9 @@
       { name: "Space Song", artist: "Beach House" },
       { name: "A Real Hero", artist: "College & Electric Youth" },
       { name: "Sunset", artist: "The Midnight" },
-      { name: "Shadows", artist: "Cannons" }
+      { name: "Shadows", artist: "Cannons" },
+      { name: "The Perfect Girl", artist: "Mareux" },
+      { name: "Dark Beach", artist: "Pastel Ghost" }
     ],
     "Rock indie para manejar de noche sin rumbo": [
       { name: "Midnight City", artist: "M83" },
@@ -1489,7 +1491,9 @@
       { name: "Do I Wanna Know?", artist: "Arctic Monkeys" },
       { name: "Sweater Weather", artist: "The Neighbourhood" },
       { name: "Somebody Else", artist: "The 1975" },
-      { name: "Sex on Fire", artist: "Kings of Leon" }
+      { name: "Sex on Fire", artist: "Kings of Leon" },
+      { name: "Obstacle 1", artist: "Interpol" },
+      { name: "Cigarette Daydreams", artist: "Cage The Elephant" }
     ],
     "Rock indie para cuando no puedes dormir y piensas demasiado": [
       { name: "Chamber of Reflection", artist: "Mac DeMarco" },
@@ -1497,7 +1501,9 @@
       { name: "Freaks", artist: "Surf Curse" },
       { name: "Are You Bored Yet?", artist: "Wallows" },
       { name: "Duvet", artist: "bôa" },
-      { name: "Lovers Rock", artist: "TV Girl" }
+      { name: "Lovers Rock", artist: "TV Girl" },
+      { name: "YKWIM?", artist: "Yot Club" },
+      { name: "Show Me How", artist: "Men I Trust" }
     ],
     "Rock indie sucio y crudo para sentirte rebelde": [
       { name: "Fell in Love with a Girl", artist: "The White Stripes" },
@@ -1505,7 +1511,9 @@
       { name: "Brianstorm", artist: "Arctic Monkeys" },
       { name: "Last Nite", artist: "The Strokes" },
       { name: "Seven Nation Army", artist: "The White Stripes" },
-      { name: "I Wanna Be Yours", artist: "Arctic Monkeys" }
+      { name: "I Wanna Be Yours", artist: "Arctic Monkeys" },
+      { name: "Song 2", artist: "Blur" },
+      { name: "Rope", artist: "Foo Fighters" }
     ],
     "Pop indie para estar feliz y triste al mismo tiempo": [
       { name: "Tongue Tied", artist: "GROUPLOVE" },
@@ -1513,7 +1521,9 @@
       { name: "Walking On A Dream", artist: "Empire of the Sun" },
       { name: "Riptide", artist: "Vance Joy" },
       { name: "Safe and Sound", artist: "Capital Cities" },
-      { name: "Shut Up and Dance", artist: "WALK THE MOON" }
+      { name: "Shut Up and Dance", artist: "WALK THE MOON" },
+      { name: "What You Know", artist: "Two Door Cinema Club" },
+      { name: "Young Folks", artist: "Peter Bjorn and John" }
     ],
     "Pop indie íntimo para escuchar solo en tu cuarto": [
       { name: "Lover Is a Day", artist: "Cuco" },
@@ -1521,7 +1531,9 @@
       { name: "Bubble Gum", artist: "Clairo" },
       { name: "Affection", artist: "Cigarettes After Sex" },
       { name: "Show Me How", artist: "Men I Trust" },
-      { name: "Telephones", artist: "Vacations" }
+      { name: "Telephones", artist: "Vacations" },
+      { name: "Pretty Girl", artist: "Clairo" },
+      { name: "My Jinji", artist: "Sunset Rollercoaster" }
     ],
     "Pop indie suave para domingos sin hacer nada": [
       { name: "Bloom", artist: "The Paper Kites" },
@@ -1529,7 +1541,9 @@
       { name: "Holocene", artist: "Bon Iver" },
       { name: "First Day of My Life", artist: "Bright Eyes" },
       { name: "Flightless Bird", artist: "Iron & Wine" },
-      { name: "Rivers and Roads", artist: "The Head and the Heart" }
+      { name: "Rivers and Roads", artist: "The Head and the Heart" },
+      { name: "Stubborn Love", artist: "The Lumineers" },
+      { name: "Skinny Love", artist: "Bon Iver" }
     ]
   };
 
@@ -1546,7 +1560,9 @@
       { name: "Chamber of Reflection", artist: "Mac DeMarco" },
       { name: "Sweater Weather", artist: "The Neighbourhood" },
       { name: "After Dark", artist: "Mr.Kitty" },
-      { name: "Nightcall", artist: "Kavinsky" }
+      { name: "Nightcall", artist: "Kavinsky" },
+      { name: "Resonance", artist: "HOME" },
+      { name: "Sunset", artist: "The Midnight" }
     ];
   }
 
@@ -1588,119 +1604,124 @@
       ctx.fillRect(0, 0, W, H);
     }
 
-    // 2. Mockup Card Principal (1080 x 1920 Proporción Perfecta)
-    var cardW = 920;
-    var cardH = 1420;
+    // 2. Mockup Card Principal (Elevada a y=185 para dejar libre thenewindiewave.online a y=1625)
+    var cardW = 900;
+    var cardH = 1350;
     var cardX = (W - cardW) / 2;
-    var cardY = (H - cardH) / 2 - 30;
+    var cardY = 185; // Termina en 1535px, dejando 90px libres arriba de thenewindiewave.online
 
     // Sombra profunda
     ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-    ctx.shadowBlur = 50;
-    ctx.shadowOffsetY = 25;
-    ctx.fillStyle = 'rgba(10, 10, 14, 0.97)';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+    ctx.shadowBlur = 55;
+    ctx.shadowOffsetY = 26;
+    ctx.fillStyle = 'rgba(10, 10, 14, 0.98)';
     drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 30);
     ctx.fill();
     ctx.restore();
 
-    // Borde iluminado
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+    // Borde de la tarjeta
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
     ctx.lineWidth = 2.5;
     drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 30);
     ctx.stroke();
 
-    // 3. CABECERA VIBRANTE Y LLAMATIVA (Height 490px)
-    var headerH = 490;
+    // Clip general de la tarjeta para que las canciones del fondo se desvanezcan con realismo
     ctx.save();
     ctx.beginPath();
-    drawRoundRectCur(ctx, cardX, cardY, cardW, headerH, { tl: 30, tr: 30, br: 0, bl: 0 });
+    drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 30);
     ctx.clip();
 
-    // Gradiente de cabecera con profundidad
+    // 3. CABECERA CENTRADA, VIBRANTE Y LLAMATIVA (Height 470px)
+    var headerH = 470;
+    ctx.save();
     var grad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + headerH);
-    grad.addColorStop(0, '#131b2e');
-    grad.addColorStop(0.4, '#0f172a');
+    grad.addColorStop(0, '#162238');
+    grad.addColorStop(0.45, '#0d1527');
     grad.addColorStop(1, '#05070a');
     ctx.fillStyle = grad;
     ctx.fillRect(cardX, cardY, cardW, headerH);
 
     // Ondas luminosas de fondo
-    ctx.strokeStyle = 'rgba(187, 244, 81, 0.22)';
-    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.2)';
+    ctx.lineWidth = 3.5;
     ctx.beginPath();
     for (var i = 0; i < cardW; i += 15) {
-      var yOffset = Math.sin(i * 0.035) * 45 + (headerH / 2) + 20;
+      var yOffset = Math.sin(i * 0.035) * 40 + (headerH / 2) + 25;
       if (i === 0) ctx.moveTo(cardX + i, cardY + yOffset);
       else ctx.lineTo(cardX + i, cardY + yOffset);
     }
     ctx.stroke();
 
-    // Badge superior
-    ctx.fillStyle = 'rgba(187, 244, 81, 0.15)';
-    drawRoundRectCur(ctx, cardX + 44, cardY + 42, 340, 36, 6);
+    // Badge superior centrado
+    var badgeW = 320;
+    var badgeH = 34;
+    var badgeX = cardX + (cardW - badgeW) / 2;
+    var badgeY = cardY + 38;
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.14)';
+    drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 6);
     ctx.fill();
     ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
     ctx.lineWidth = 1;
-    drawRoundRectCur(ctx, cardX + 44, cardY + 42, 340, 36, 6);
+    drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 6);
     ctx.stroke();
 
     ctx.fillStyle = '#bbf451';
-    ctx.font = 'bold 16px monospace';
-    ctx.fillText('● PLAYLIST OFICIAL SPOTIFY', cardX + 58, cardY + 66);
+    ctx.font = 'bold 15px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('● PLAYLIST OFICIAL SPOTIFY', cardX + (cardW / 2), badgeY + 22);
 
-    // Título Grande y Llamativo de la Playlist
+    // Título Grande y Centrado de la Playlist
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 48px sans-serif';
-    wrapTextCur(ctx, playlist, cardX + 44, cardY + 140, cardW - 190, 58);
+    ctx.font = '900 44px sans-serif';
+    wrapTextCenteredCur(ctx, playlist, cardX + (cardW / 2), cardY + 130, cardW - 120, 54);
 
-    // Curaduría al pie de la cabecera
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.font = '600 18px monospace';
-    ctx.fillText('CURADURÍA EDITORIAL OFICIAL', cardX + 44, cardY + headerH - 46);
+    // Sello Editorial Centrado
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.font = '600 16px monospace';
+    ctx.fillText('CURADURÍA EDITORIAL OFICIAL', cardX + (cardW / 2), cardY + headerH - 42);
 
     ctx.fillStyle = '#bbf451';
-    ctx.font = 'bold 22px monospace';
-    ctx.fillText('THE NEW INDIE WAVE', cardX + 44, cardY + headerH - 18);
+    ctx.font = 'bold 20px monospace';
+    ctx.fillText('THE NEW INDIE WAVE', cardX + (cardW / 2), cardY + headerH - 18);
+    ctx.textAlign = 'left';
 
     ctx.restore();
 
     // 4. BOTÓN VERDE SPOTIFY EN MODO PAUSE (Reproducción en Curso)
-    var pauseX = cardX + cardW - 90;
-    var pauseY = cardY + headerH - 16;
-    var pauseR = 48;
+    var pauseX = cardX + cardW - 80;
+    var pauseY = cardY + headerH - 14;
+    var pauseR = 44;
 
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.6)';
-    ctx.shadowBlur = 22;
+    ctx.shadowBlur = 20;
     ctx.fillStyle = '#1DB954';
     ctx.beginPath();
     ctx.arc(pauseX, pauseY, pauseR, 0, Math.PI * 2);
     ctx.fill();
 
-    // Icono PAUSA (Dos barras verticales negras)
+    // Icono PAUSA
     ctx.fillStyle = '#000000';
-    var barW = 8;
-    var barH = 26;
-    var barGap = 7;
-    // Barra izquierda
+    var barW = 7;
+    var barH = 24;
+    var barGap = 6;
     ctx.fillRect(pauseX - barW - (barGap/2), pauseY - (barH/2), barW, barH);
-    // Barra derecha
     ctx.fillRect(pauseX + (barGap/2), pauseY - (barH/2), barW, barH);
     ctx.restore();
 
     // 5. ENCABEZADO DE COLA / TRACKLIST
     var listStartY = cardY + headerH + 34;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.font = '800 19px monospace';
+    ctx.font = '800 18px monospace';
     ctx.fillText('★ EN REPRODUCCIÓN // RECIÉN AÑADIDA', cardX + 44, listStartY);
 
-    // 6. CANCIÓN ADMITIDA (PUESTO #1 DESTACADO Y EN REPRODUCCIÓN)
-    var row1Y = listStartY + 20;
-    var row1H = 118;
+    // 6. CANCIÓN ADMITIDA (PUESTO #1 DESTACADO)
+    var row1Y = listStartY + 18;
+    var row1H = 112;
 
     ctx.fillStyle = 'rgba(187, 244, 81, 0.1)';
-    drawRoundRectCur(ctx, cardX + 24, row1Y, cardW - 48, row11H = row1H, 14);
+    drawRoundRectCur(ctx, cardX + 24, row1Y, cardW - 48, row1H, 14);
     ctx.fill();
     ctx.strokeStyle = 'rgba(187, 244, 81, 0.45)';
     ctx.lineWidth = 2;
@@ -1708,79 +1729,93 @@
     ctx.stroke();
 
     // Portada / Badge de la Canción #1
-    var t1X = cardX + 44;
-    var t1Y = row1Y + 18;
-    var t1Size = 82;
+    var t1X = cardX + 42;
+    var t1Y = row1Y + 16;
+    var t1Size = 80;
     ctx.fillStyle = '#bbf451';
     drawRoundRectCur(ctx, t1X, t1Y, t1Size, t1Size, 10);
     ctx.fill();
 
-    // Icono ecualizador / música sonando
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 30px sans-serif';
-    ctx.fillText('🎵', t1X + 24, t1Y + 52);
+    ctx.font = 'bold 28px sans-serif';
+    ctx.fillText('🎵', t1X + 23, t1Y + 51);
 
     // Títulos de la canción #1
     ctx.fillStyle = '#bbf451';
-    ctx.font = 'bold 32px sans-serif';
-    ctx.fillText(truncateStringCur(song, 22), t1X + t1Size + 22, t1Y + 36);
+    ctx.font = 'bold 30px sans-serif';
+    ctx.fillText(truncateStringCur(song, 22), t1X + t1Size + 22, t1Y + 34);
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = '600 22px monospace';
-    ctx.fillText(truncateStringCur(artist, 26) + ' • ' + genre, t1X + t1Size + 22, t1Y + 68);
+    ctx.font = '600 20px monospace';
+    ctx.fillText(truncateStringCur(artist, 26) + ' • ' + genre, t1X + t1Size + 22, t1Y + 66);
 
-    // Corazón verde Liked
     ctx.fillStyle = '#1DB954';
     ctx.font = '32px sans-serif';
-    ctx.fillText('💚', cardX + cardW - 90, t1Y + 52);
+    ctx.fillText('💚', cardX + cardW - 88, t1Y + 50);
 
-    // 7. LISTA COMPLETA DE 5 TEMAS SIGUIENTES (Sin cuadros vacíos)
+    // 7. LISTA EXTENSA DE 7 TEMAS SIGUIENTES (Con desvanecimiento / overflow realista al final)
     var otherTracks = getTracksForPlaylist(playlist);
-    var startOthersY = row1Y + row1H + 18;
+    var startOthersY = row1Y + row1H + 16;
 
-    for (var t = 0; t < Math.min(5, otherTracks.length); t++) {
+    for (var t = 0; t < otherTracks.length; t++) {
       var trackItem = otherTracks[t];
-      var currentY = startOthersY + (t * 105);
+      var currentY = startOthersY + (t * 96);
 
       // Número de pista
       ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
-      ctx.font = 'bold 20px monospace';
-      ctx.fillText((t + 2 < 10 ? '0' : '') + (t + 2), cardX + 44, currentY + 38);
+      ctx.font = 'bold 19px monospace';
+      ctx.fillText((t + 2 < 10 ? '0' : '') + (t + 2), cardX + 44, currentY + 36);
 
       // Nombre de la canción
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = 'bold 25px sans-serif';
-      ctx.fillText(truncateStringCur(trackItem.name, 26), cardX + 90, currentY + 30);
+      ctx.font = 'bold 23px sans-serif';
+      ctx.fillText(truncateStringCur(trackItem.name, 28), cardX + 88, currentY + 28);
 
       // Artista
       ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-      ctx.font = '500 19px monospace';
-      ctx.fillText(truncateStringCur(trackItem.artist, 30), cardX + 90, currentY + 58);
+      ctx.font = '500 18px monospace';
+      ctx.fillText(truncateStringCur(trackItem.artist, 32), cardX + 88, currentY + 54);
 
       // Corazón de guardado
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
       ctx.font = '22px sans-serif';
-      ctx.fillText('🤍', cardX + cardW - 85, currentY + 42);
+      ctx.fillText('🤍', cardX + cardW - 85, currentY + 40);
 
       // Línea divisoria sutil
-      if (t < 4) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(cardX + 44, currentY + 80);
-        ctx.lineTo(cardX + cardW - 44, currentY + 80);
-        ctx.stroke();
-      }
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cardX + 44, currentY + 74);
+      ctx.lineTo(cardX + cardW - 44, currentY + 74);
+      ctx.stroke();
     }
 
-    // 8. PIE DEL MOCKUP
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.font = '700 16px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('ESCUCHA ESTE TEMA EN SPOTIFY // THENEWINDIEWAVE.ONLINE', cardX + (cardW / 2), cardY + cardH - 24);
-    ctx.textAlign = 'left';
+    ctx.restore(); // Termina clip de la tarjeta
 
     _curCachedStoryDataUrl = canvas.toDataURL('image/png');
+  }
+
+  function wrapTextCenteredCur(ctx, text, centerX, startY, maxWidth, lineHeight) {
+    var words = text.split(' ');
+    var lines = [];
+    var currentLine = '';
+    for (var n = 0; n < words.length; n++) {
+      var testLine = currentLine + words[n] + ' ';
+      var metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && n > 0) {
+        lines.push(currentLine.trim());
+        currentLine = words[n] + ' ';
+      } else {
+        currentLine = testLine;
+      }
+    }
+    lines.push(currentLine.trim());
+
+    ctx.textAlign = 'center';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], centerX, startY + (i * lineHeight));
+    }
+    ctx.textAlign = 'left';
   }
 
   function downloadCuratorStoryImage() {
