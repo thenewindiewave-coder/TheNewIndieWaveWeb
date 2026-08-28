@@ -9,6 +9,8 @@ export default async function handler(req, res) {
     'playlist-modify-public',
     'playlist-modify-private',
     'playlist-read-private',
+    'playlist-read-collaborative',
+    'user-read-private',
     'user-read-email'
   ].join(' ');
 
