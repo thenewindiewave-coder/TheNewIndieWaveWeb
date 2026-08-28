@@ -617,8 +617,22 @@
     currentTab = tab;
     if(tab === 'playlists_manager') {
       loadPlaylistsForManager();
+    } else if(tab === 'radar_manager') {
+      renderRadarManager();
     } else {
       renderQueue();
+    }
+  }
+
+  function refreshCurrentTab() {
+    if(currentTab === 'radar_manager') {
+      renderRadarManager();
+      showToast('✓ Artistas en el Radar actualizados');
+    } else if(currentTab === 'playlists_manager') {
+      loadPlaylistsForManager();
+      showToast('✓ Playlists actualizadas');
+    } else {
+      loadSubmissions();
     }
   }
 
