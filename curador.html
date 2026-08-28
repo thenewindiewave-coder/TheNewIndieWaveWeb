@@ -1632,58 +1632,67 @@
     drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 30);
     ctx.clip();
 
-    // 3. CABECERA CENTRADA, VIBRANTE Y LLAMATIVA (Height 470px)
-    var headerH = 470;
+    // 3. CABECERA EDITORIAL DE ALTO IMPACTO (Height 475px)
+    var headerH = 475;
     ctx.save();
     var grad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + headerH);
-    grad.addColorStop(0, '#162238');
-    grad.addColorStop(0.45, '#0d1527');
-    grad.addColorStop(1, '#05070a');
+    grad.addColorStop(0, '#101726');
+    grad.addColorStop(0.5, '#0a0e17');
+    grad.addColorStop(1, '#040609');
     ctx.fillStyle = grad;
     ctx.fillRect(cardX, cardY, cardW, headerH);
 
-    // Ondas luminosas de fondo
-    ctx.strokeStyle = 'rgba(187, 244, 81, 0.2)';
-    ctx.lineWidth = 3.5;
-    ctx.beginPath();
-    for (var i = 0; i < cardW; i += 15) {
-      var yOffset = Math.sin(i * 0.035) * 40 + (headerH / 2) + 25;
-      if (i === 0) ctx.moveTo(cardX + i, cardY + yOffset);
-      else ctx.lineTo(cardX + i, cardY + yOffset);
-    }
-    ctx.stroke();
+    // Ecualizador gráfico / espectro de audio decorativo
+    var eqBarCount = 28;
+    var eqWidth = 16;
+    var eqGap = 12;
+    var totalEqW = eqBarCount * eqWidth + (eqBarCount - 1) * eqGap;
+    var eqStartX = cardX + (cardW - totalEqW) / 2;
+    var eqBaseY = cardY + headerH - 65;
 
-    // Badge superior centrado
-    var badgeW = 320;
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.12)';
+    for (var b = 0; b < eqBarCount; b++) {
+      var hFactor = Math.abs(Math.sin((b + 3) * 0.45) * Math.cos(b * 0.25));
+      var barHeight = 12 + (hFactor * 48);
+      drawRoundRectCur(ctx, eqStartX + (b * (eqWidth + eqGap)), eqBaseY - barHeight, eqWidth, barHeight, 4);
+      ctx.fill();
+    }
+
+    // Badge superior centrado con acento verde neón
+    var badgeW = 340;
     var badgeH = 34;
     var badgeX = cardX + (cardW - badgeW) / 2;
-    var badgeY = cardY + 38;
-    ctx.fillStyle = 'rgba(187, 244, 81, 0.14)';
+    var badgeY = cardY + 32;
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.12)';
     drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 6);
     ctx.fill();
     ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
     drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 6);
     ctx.stroke();
 
     ctx.fillStyle = '#bbf451';
-    ctx.font = 'bold 15px monospace';
+    ctx.font = 'bold 14px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('● PLAYLIST OFICIAL SPOTIFY', cardX + (cardW / 2), badgeY + 22);
+    ctx.fillText('⚡ SPOTIFY OFFICIAL PLAYLIST', cardX + (cardW / 2), badgeY + 22);
 
-    // Título Grande y Centrado de la Playlist
+    // Título Editorial en MAYÚSCULAS con Tipografía Imponente
+    var upperPlaylist = (playlist || 'ROCK INDIE').toUpperCase();
     ctx.fillStyle = '#ffffff';
-    ctx.font = '900 44px sans-serif';
-    wrapTextCenteredCur(ctx, playlist, cardX + (cardW / 2), cardY + 130, cardW - 120, 54);
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+    ctx.shadowBlur = 16;
+    ctx.font = '900 44px "Space Grotesk", "Outfit", "Syne", -apple-system, sans-serif';
+    wrapTextCenteredCur(ctx, upperPlaylist, cardX + (cardW / 2), cardY + 125, cardW - 140, 52);
+    ctx.shadowBlur = 0;
 
     // Sello Editorial Centrado
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-    ctx.font = '600 16px monospace';
-    ctx.fillText('CURADURÍA EDITORIAL OFICIAL', cardX + (cardW / 2), cardY + headerH - 42);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.font = '700 14px monospace';
+    ctx.fillText('CURADURÍA EDITORIAL OFICIAL', cardX + (cardW / 2), cardY + headerH - 38);
 
     ctx.fillStyle = '#bbf451';
-    ctx.font = 'bold 20px monospace';
-    ctx.fillText('THE NEW INDIE WAVE', cardX + (cardW / 2), cardY + headerH - 18);
+    ctx.font = 'bold 19px monospace';
+    ctx.fillText('THE NEW INDIE WAVE', cardX + (cardW / 2), cardY + headerH - 16);
     ctx.textAlign = 'left';
 
     ctx.restore();
