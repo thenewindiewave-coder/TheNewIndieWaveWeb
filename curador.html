@@ -694,6 +694,7 @@
       loadPlaylistsForManager();
     } else if(tab === 'radar_manager') {
       renderRadarManager();
+    if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
     } else {
       renderQueue();
     }
@@ -702,6 +703,7 @@
   function refreshCurrentTab() {
     if(currentTab === 'radar_manager') {
       renderRadarManager();
+    if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
       showToast('✓ Artistas en el Radar actualizados');
     } else if(currentTab === 'playlists_manager') {
       loadPlaylistsForManager();
@@ -1283,27 +1285,52 @@
     }
     closeRadarModal();
     renderRadarManager();
+    if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
     showToast('✓ Artista guardado con éxito');
   }
 
-  function toggleRadarType(artistId, newType) {
+  async function toggleRadarType(artistId, newType) {
     var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
     var item = list.find(function(a){ return a.id === artistId; });
     if(item) {
       item.type = newType;
       saveRadarArtists(list);
       renderRadarManager();
+    if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
       showToast('✓ Categoría cambiada a ' + (newType === 'top3' ? 'Top 3' : 'Secundario'));
+
+      try {
+        await fetch(SUPABASE_URL + '/rest/v1/radar_artists?id=eq.' + encodeURIComponent(artistId), {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ type: newType })
+        });
+      } catch(e) {}
     }
   }
 
-  function deleteRadarArtist(artistId) {
+  async function deleteRadarArtist(artistId) {
     if(!confirm('¿Seguro que deseas eliminar este artista del radar?')) return;
     var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
     list = list.filter(function(a){ return a.id !== artistId; });
     saveRadarArtists(list);
     renderRadarManager();
+    if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
     showToast('✓ Artista eliminado del radar');
+
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/radar_artists?id=eq.' + encodeURIComponent(artistId), {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        }
+      });
+    } catch(e) {}
   }
 
   
