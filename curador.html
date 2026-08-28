@@ -639,6 +639,20 @@
   var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
+    // MAPA DE ENLACES A LAS PLAYLISTS OFICIALES DE SPOTIFY
+  var playlistLinksMap = {
+    "Rock indie para manejar de noche sin rumbo": "https://open.spotify.com/playlist/2APaz3JDupY9fNUczoKMUP",
+    "Rock indie para cuando no puedes dormir y piensas demasiado": "https://open.spotify.com/playlist/5gh1rPce7FnEENWk1POIse",
+    "Rock indie sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/2QlvwB1vEhxQ4CM4jrbC8g",
+    "Pop indie para estar feliz y triste al mismo tiempo": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl",
+    "Pop indie íntimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "Pop indie suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
+    "Hard rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
+    "Metal intenso para liberar toda tu energía": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
+    "Música urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
+    "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln"
+  };
+
   var allSubmissions = [];
   var currentTab = 'pending';
 
@@ -767,7 +781,7 @@
                   ${waNumber ? ` • <a href="https://wa.me/${waCleanDigits}" target="_blank" style="color: #25D366; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: rgba(37,211,102,0.12); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(37,211,102,0.3); font-size: 11.5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp: ${waNumber} ↗</a>` : ''}
                 </div>
                 <div class="track-tags">
-                  <span class="track-tag">🎯 Playlist: ${item.playlist}</span>
+                  <a href="${playlistLinksMap[item.playlist] || 'https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu'}" target="_blank" rel="noopener noreferrer" class="track-tag" style="color: var(--accent-lime); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; border-color: rgba(187, 244, 81, 0.35); background: rgba(187, 244, 81, 0.08); font-weight: 600;">🎯 Playlist: ${item.playlist} ↗</a>
                   <span class="track-tag">🏷️ ${item.genre || 'Indie'}</span>
                   <span class="track-tag">🌐 ${item.language || 'Español'}</span>
                 </div>
