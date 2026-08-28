@@ -742,7 +742,7 @@
       <div class="step-row pending" id="step3">
         <div class="step-icon-wrap">03</div>
         <div class="step-content">
-          <h4>03. Escucha Editorial (Mínimo 30-45 seg)</h4>
+          <h4>03. Escucha Editorial (Mínimo 1:30 min)</h4>
           <p>Evaluación de producción, mood y encaje sonoro para la playlist.</p>
         </div>
       </div>
@@ -897,7 +897,7 @@
             document.getElementById('declinedFeedback').innerHTML = '<strong>Feedback de Rodrigo DL Moral:</strong><br><br>"' + record.feedback + '"';
           }
         } else if(record.status === 'listening') {
-          document.getElementById('badgeText').textContent = 'EN ESCUCHA EDITORIAL';
+          document.getElementById('badgeText').textContent = 'EN ESCUCHA EDITORIAL (1:30 MIN)';
           document.getElementById('step1').className = 'step-row completed';
           document.getElementById('step2').className = 'step-row completed';
           document.getElementById('step3').className = 'step-row active';

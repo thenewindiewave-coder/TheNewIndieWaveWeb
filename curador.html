@@ -802,7 +802,7 @@
               </button>
             </div>
             
-            <textarea class="feedback-textarea" id="fb-${item.id}" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
+            <textarea class="feedback-textarea" id="fb-${item.id}" onfocus="markAsListening('${item.id}')" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
 
             <div class="decision-actions">
               <button class="btn-decline" onclick="updateDecision('${item.id}', 'declined')">
