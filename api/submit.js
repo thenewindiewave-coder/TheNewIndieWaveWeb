@@ -66,13 +66,7 @@ export default async function handler(req, res) {
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-      // Fallback amigable si aún no se configuran variables de entorno
-      return res.status(200).json({
-        success: true,
-        mock: true,
-        track_id: track_id || 'TNIW-DEMO',
-        message: 'Envío recibido (Modo Local/Mock).'
-      });
+      return res.status(500).json({ error: 'Error de configuración: Falta SUPABASE_SERVICE_ROLE_KEY en Vercel.' });
     }
 
     // --- PROTECCIÓN ANTI-SPAM (Por Email e IP) ---

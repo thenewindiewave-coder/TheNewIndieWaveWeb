@@ -16,20 +16,11 @@ export default async function handler(req, res) {
   }
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    return res.status(200).json({
-      success: true,
-      mock: true,
-      data: {
-        track_id: id,
-        artist_name: 'Artista Demo',
-        song_title: 'Canción Demo',
-        playlist: 'Rock indie para manejar de noche',
-        status: 'queue',
-        created_at: new Date().toISOString()
-      }
+    return res.status(500).json({ 
+      error: 'Error de configuración: Falta configurar SUPABASE_SERVICE_ROLE_KEY en el panel de Vercel.' 
     });
   }
 
