@@ -16,15 +16,9 @@ export default async function handler(req, res) {
   }
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
-<<<<<<< HEAD
   const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-=======
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
->>>>>>> 4aabf515b1e275d199226e069db1ca4070ae6f44
     return res.status(200).json({
       success: true,
       mock: true,
@@ -42,13 +36,8 @@ export default async function handler(req, res) {
   try {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/submissions?track_id=eq.${encodeURIComponent(id)}&select=*`, {
       headers: {
-<<<<<<< HEAD
         'apikey': SUPABASE_SERVICE_KEY,
         'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-=======
-        'apikey': SUPABASE_SERVICE_ROLE_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
->>>>>>> 4aabf515b1e275d199226e069db1ca4070ae6f44
       }
     });
 

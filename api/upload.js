@@ -19,17 +19,13 @@ module.exports = async (req, res) => {
   }
 
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-<<<<<<< HEAD
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  const effectiveApiKey = req.body.apiKey || apiKey;
 
-  if (!cloudName || !apiKey || !apiSecret) {
+  if (!cloudName || !effectiveApiKey || !apiSecret) {
     return res.status(500).json({ error: 'Faltan variables de entorno de Cloudinary' });
   }
-=======
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
-  const effectiveApiKey = apiKey || process.env.CLOUDINARY_API_KEY;
->>>>>>> 4aabf515b1e275d199226e069db1ca4070ae6f44
 
   try {
     const timestamp = Math.round(new Date().getTime() / 1000);
