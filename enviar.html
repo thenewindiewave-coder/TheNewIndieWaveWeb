@@ -660,11 +660,11 @@
             <div class="follow-actions-row">
               <a id="btnFollowPlaylistLink" href="https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu" target="_blank" rel="noopener noreferrer" class="btn-follow-playlist" onclick="handleFollowPlaylistClick()">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.308c-.216.353-.675.467-1.028.25-2.816-1.722-6.36-2.112-10.534-1.158-.403.093-.807-.156-.9-.559-.093-.404.156-.808.56-.9 4.568-1.045 8.487-.597 11.653 1.34.352.217.466.674.249 1.027zm1.468-3.265c-.272.443-.853.582-1.296.31-3.224-1.982-8.139-2.555-11.953-1.397-.498.151-1.03-.134-1.18-.633-.151-.498.134-1.03.633-1.18 4.359-1.323 9.774-.683 13.486 1.603.443.272.582.853.31 1.297zm.126-3.41c-3.865-2.296-10.24-2.508-13.929-1.388-.593.18-1.222-.16-1.402-.753-.18-.593.16-1.222.753-1.402 4.238-1.286 11.284-1.038 15.736 1.605.534.317.708 1.01.391 1.545-.316.533-1.009.708-1.549.393z"/></svg>
-                <span>1. Abrir y Seguir Playlist en Spotify ↗</span>
+                <span id="txtBtnFollow">1. Abrir y Seguir Playlist en Spotify ↗</span>
               </a>
 
-              <label class="follow-check-label">
-                <input type="checkbox" id="checkFollowPlaylist" onchange="toggleFollowVerification(this.checked)" required>
+              <label class="follow-check-label" id="lblCheckFollow" style="opacity: 0.45; cursor: not-allowed;">
+                <input type="checkbox" id="checkFollowPlaylist" onchange="toggleFollowVerification(this.checked)" disabled required>
                 <span>2. Ya sigo esta playlist en Spotify</span>
               </label>
             </div>
@@ -987,16 +987,31 @@
     "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln"
   };
 
+  var hasOpenedPlaylistInSpotify = false;
+
   function handlePlaylistSelectChange(playlistName) {
     var box = document.getElementById('playlistFollowBox');
     var btn = document.getElementById('btnFollowPlaylistLink');
     var check = document.getElementById('checkFollowPlaylist');
+    var lbl = document.getElementById('lblCheckFollow');
+    var txtBtn = document.getElementById('txtBtnFollow');
     
     if (playlistName && playlistName.trim()) {
       var link = playlistLinksMap[playlistName] || 'https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu';
       btn.href = link;
       box.style.display = 'flex';
-      check.checked = false;
+      
+      // Reiniciar estado al cambiar de playlist
+      hasOpenedPlaylistInSpotify = false;
+      if (check) {
+        check.checked = false;
+        check.disabled = true;
+      }
+      if (lbl) {
+        lbl.style.opacity = '0.45';
+        lbl.style.cursor = 'not-allowed';
+      }
+      if (txtBtn) txtBtn.textContent = '1. Abrir y Seguir Playlist en Spotify ↗';
       toggleFollowVerification(false);
     } else {
       box.style.display = 'none';
@@ -1005,17 +1020,42 @@
   }
 
   function handleFollowPlaylistClick() {
-    showToast('✓ Abriendo Spotify... No olvides darle Seguir (♡)');
+    hasOpenedPlaylistInSpotify = true;
+    var check = document.getElementById('checkFollowPlaylist');
+    var lbl = document.getElementById('lblCheckFollow');
+    var txtBtn = document.getElementById('txtBtnFollow');
+
+    // Desbloquear casilla 2 al abrir Spotify
+    if (check) {
+      check.disabled = false;
+    }
+    if (lbl) {
+      lbl.style.opacity = '1';
+      lbl.style.cursor = 'pointer';
+    }
+    if (txtBtn) {
+      txtBtn.textContent = '✓ 1. Playlist Abierta en Spotify';
+    }
+
+    showToast('✓ Abriendo Spotify... Dale "Seguir" (♡) y luego marca la casilla.');
   }
 
   function toggleFollowVerification(isChecked) {
     var submitBtn = document.getElementById('btnSubmitSong');
+    var check = document.getElementById('checkFollowPlaylist');
+
+    if (!hasOpenedPlaylistInSpotify && isChecked) {
+      if (check) check.checked = false;
+      showToast('⚠️ Primero haz clic en "1. Abrir y Seguir Playlist" para abrir Spotify.');
+      return;
+    }
+
     if (submitBtn) {
-      if (isChecked) {
+      if (isChecked && hasOpenedPlaylistInSpotify) {
         submitBtn.disabled = false;
         submitBtn.style.opacity = '1';
         submitBtn.style.cursor = 'pointer';
-        showToast('✓ Playlist verificada. Puedes enviar tu canción.');
+        showToast('✓ Requisito verificado. Puedes enviar tu canción.');
       } else {
         submitBtn.disabled = true;
         submitBtn.style.opacity = '0.5';
