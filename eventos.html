@@ -584,44 +584,21 @@
     </p>
   </div>
 
-  <div class="events-table">
-    
-    <div class="event-row">
-      <div class="event-date">24 OCT 2026</div>
-      <div class="event-info">
-        <h4>The New Indie Wave Showcase Vol. 04</h4>
-        <p>Lineup: Lunar Daydream + Distorsión Fría + Siluetas de Verano. Formato íntimo con venta de vinilos.</p>
-      </div>
-      <div class="event-venue-tag">📍 Foro Cultural Indie — CDMX</div>
-      <button class="btn-event-rsvp" onclick="showToast('🎟 Redirigiendo a reserva de entradas...')">RESERVAR ↗</button>
+  <!-- DYNAMIC EVENTS CONTAINER (LOADED FROM SUPABASE) -->
+  <div id="eventsContainer" class="events-grid">
+    <!-- Skeleton loader mientras carga -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 32px; text-align: center; color: var(--text-muted); font-family: var(--font-mono); font-size: 13px;">
+      <span style="display: inline-block; animation: pulse 1.5s infinite;">⏳ Consultando cartelera oficial en tiempo real...</span>
     </div>
-
-    <div class="event-row">
-      <div class="event-date">12 NOV 2026</div>
-      <div class="event-info">
-        <h4>Secret Rooftop Sessions</h4>
-        <p>Sesión acústica y electro-lofi al atardecer para miembros del colectivo y suscriptores.</p>
-      </div>
-      <div class="event-venue-tag">📍 Terraza Roma Norte — CDMX</div>
-      <button class="btn-event-rsvp" onclick="showToast('✨ Registro en lista de espera confirmado')">LISTA ESPERA ↗</button>
-    </div>
-
-    <div class="event-row">
-      <div class="event-date">05 DIC 2026</div>
-      <div class="event-info">
-        <h4>The New Indie Wave Festival '26</h4>
-        <p>8 bandas en vivo en dos escenarios alternos. Curaduría 100% independiente cerrando el año.</p>
-      </div>
-      <div class="event-venue-tag">📍 Parque Urbano Cultural</div>
-      <button class="btn-event-rsvp" onclick="showToast('📢 Te notificaremos cuando inicie la preventa')">PREVENTA ↗</button>
-    </div>
-
   </div>
 </main>
 
 <div class="toast-box" id="toast"></div>
 
 <script>
+  var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
+
   function showToast(msg) {
     var toast = document.getElementById('toast');
     toast.textContent = msg;
@@ -644,6 +621,109 @@
       }
     }
   }
+
+  // CARGAR EVENTOS DINÁMICAMENTE DESDE SUPABASE
+  async function loadEventsFromSupabase() {
+    var container = document.getElementById('eventsContainer');
+    if (!container) return;
+
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/events?select=*&order=created_at.desc', {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        }
+      });
+
+      var events = [];
+      if (res.ok) {
+        events = await res.json();
+      }
+
+      if (events && events.length > 0) {
+        container.innerHTML = events.map(function(ev) {
+          var dateText = ev.date || ev.event_date || 'FECHA POR CONFIRMAR';
+          var title = ev.title || ev.name || 'Showcase Oficial';
+          var desc = ev.description || 'Showcase y música en vivo en colaboración con artistas independientes.';
+          var venue = ev.venue || '📍 Sede por anunciar';
+          var rsvpUrl = ev.rsvp_url || ev.ticket_url || '#';
+          var rsvpLabel = ev.rsvp_label || 'RESERVAR ↗';
+
+          return `
+            <div class="event-row">
+              <div class="event-date">${escapeHtml(dateText)}</div>
+              <div class="event-info">
+                <h4>${escapeHtml(title)}</h4>
+                <p>${escapeHtml(desc)}</p>
+              </div>
+              <div class="event-venue-tag">${escapeHtml(venue)}</div>
+              <div>
+                ${rsvpUrl !== '#' ? `
+                  <a href="${escapeHtml(rsvpUrl)}" target="_blank" rel="noopener noreferrer" class="btn-event-rsvp" style="text-decoration:none; display:inline-block; text-align:center;">
+                    ${escapeHtml(rsvpLabel)}
+                  </a>
+                ` : `
+                  <button class="btn-event-rsvp" onclick="showToast('📢 Próximamente entradas disponibles para este evento.')">
+                    ${escapeHtml(rsvpLabel)}
+                  </button>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        // ESTADO VACÍO ELEGANTE (CUANDO NO HAY EVENTOS REGISTRADOS)
+        container.innerHTML = `
+          <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 8px; padding: 48px 32px; text-align: center;">
+            <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--accent-lime); letter-spacing: 1px; margin-bottom: 8px;">// CARTELERA EN PREPARACIÓN</div>
+            <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 8px;">
+              Próximas Fechas & Showcases en Planeación
+            </h3>
+            <p style="font-size: 14px; color: var(--text-muted); max-width: 580px; margin: 0 auto 24px; line-height: 1.6;">
+              Actualmente no hay eventos públicos activos con venta de boletos. Estamos coordinando los próximos showcases y fechas en vivo.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+              <a href="contacto.html" class="btn-nav-submit" style="text-decoration: none; font-size: 12.5px;">
+                📅 Proponer o Difundir tu Evento ↗
+              </a>
+              <a href="https://chat.whatsapp.com/JxPkXMuiNCV2waucjn1DFa" target="_blank" rel="noopener noreferrer" class="btn-event-rsvp" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; color: #25D366; border-color: rgba(37, 211, 102, 0.35);">
+                💬 Enterarme Primero en WhatsApp ↗
+              </a>
+            </div>
+          </div>
+        `;
+      }
+    } catch (err) {
+      // Fallback si la tabla aún no existe en Supabase
+      container.innerHTML = `
+        <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 8px; padding: 48px 32px; text-align: center;">
+          <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--accent-lime); letter-spacing: 1px; margin-bottom: 8px;">// CARTELERA EN PREPARACIÓN</div>
+          <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 8px;">
+            Próximas Fechas & Showcases en Planeación
+          </h3>
+          <p style="font-size: 14px; color: var(--text-muted); max-width: 580px; margin: 0 auto 24px; line-height: 1.6;">
+            Actualmente no hay eventos públicos activos. Si eres banda, promotor o venue y deseas proponer o difundir una fecha, contáctanos.
+          </p>
+          <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="contacto.html" class="btn-nav-submit" style="text-decoration: none; font-size: 12.5px;">
+              📅 Proponer o Difundir tu Evento ↗
+            </a>
+            <a href="https://chat.whatsapp.com/JxPkXMuiNCV2waucjn1DFa" target="_blank" rel="noopener noreferrer" class="btn-event-rsvp" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; color: #25D366; border-color: rgba(37, 211, 102, 0.35);">
+              💬 Enterarme Primero en WhatsApp ↗
+            </a>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // Iniciar carga al abrir la página
+  loadEventsFromSupabase();
 </script>
 
 <!-- FOOTER GLOBAL -->
