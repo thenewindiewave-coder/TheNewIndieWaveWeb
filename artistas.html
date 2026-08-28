@@ -1242,11 +1242,11 @@
 
 <script src="data_radar.js"></script>
 <script>
-  // PURGA INMEDIATA DE CACHÉ PESADO PARA RESCATAR NAVEGADOR
+  // SEGURIDAD DE PERSISTENCIA
   (function() {
     try {
       var raw = localStorage.getItem('tniw_radar_artists');
-      if (raw && (raw.includes('data:video') || raw.includes('data:image') || raw.length > 300000)) {
+      if (raw && raw.length > 4500000) {
         localStorage.removeItem('tniw_radar_artists');
       }
     } catch(e) {}
@@ -1299,6 +1299,16 @@
     // 3. Spotify (ID o URL)
     var cleanId = clean.replace('spotify:track:', '').split('?')[0].split('/').pop();
     return '<iframe src="https://open.spotify.com/embed/track/' + cleanId + '?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style="border-radius:8px; display:block; width:100%;"></iframe>';
+  }
+
+  // Sincronización en tiempo real desde base de datos Supabase
+  if (typeof syncRadarFromSupabase === 'function') {
+    syncRadarFromSupabase().then(function(data){
+      if (data && data.length > 0) {
+        artistsList = data;
+        renderAllRadarArtists();
+      }
+    });
   }
 
   // RENDER DINÁMICO EN TIEMPO REAL DESDE CURADURÍA

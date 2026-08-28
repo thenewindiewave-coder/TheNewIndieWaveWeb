@@ -1,3 +1,42 @@
+var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
+
+async function syncRadarFromSupabase() {
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/radar_artists?select=*&order=created_at.asc', {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+      }
+    });
+    if (res.ok) {
+      var data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        localStorage.setItem('tniw_radar_artists', JSON.stringify(data));
+        return data;
+      }
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function saveRadarArtistToSupabase(artist) {
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/radar_artists', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(artist)
+    });
+  } catch(e) {
+    console.warn('Supabase sync no disponible:', e);
+  }
+}
+
 // Base de datos oficial de ARTISTAS EN EL RADAR - THE NEW INDIE WAVE
 var DEFAULT_RADAR_ARTISTS = [
   {
