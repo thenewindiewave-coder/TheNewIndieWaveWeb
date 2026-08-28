@@ -314,42 +314,113 @@
     margin-bottom: 24px;
   }
 
-  /* MAGIC LINK BAR */
-  .magic-link-bar {
-    background: #09090b;
+    /* MAGIC LINK BANNER (COHESIVE SITE STYLE) */
+  .magic-link-box {
+    background: var(--bg-card);
     border: 1px solid var(--border-strong);
-    border-radius: 6px;
-    padding: 14px 18px;
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin-bottom: 24px;
+  }
+
+  .magic-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
     flex-wrap: wrap;
     gap: 12px;
+    margin-bottom: 10px;
   }
 
-  .magic-link-text {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--accent-cyan);
-    word-break: break-all;
-  }
-
-  .btn-copy-magic {
-    background: transparent;
-    border: 1px solid var(--border-strong);
-    color: var(--text-main);
+  .magic-tag-lead {
     font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s ease;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent-lime);
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
 
-  .btn-copy-magic:hover {
-    background: var(--text-main);
+  .magic-id-badge {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  .magic-id-badge strong {
+    color: var(--accent-lime);
+    background: rgba(187, 244, 81, 0.1);
+    border: 1px solid rgba(187, 244, 81, 0.25);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+
+  .magic-warning-text {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin-bottom: 18px;
+  }
+
+  .magic-warning-text strong {
+    color: #fff;
+  }
+
+  .magic-actions-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn-magic-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 9px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    border: none;
+  }
+
+  .btn-magic-primary {
+    background: var(--accent-lime);
+    color: #000;
+  }
+
+  .btn-magic-primary:hover {
+    background: #fff;
+    transform: scale(1.02);
+  }
+
+  .btn-magic-secondary {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border-strong);
+    color: #fff;
+  }
+
+  .btn-magic-secondary:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: #fff;
+  }
+
+  .btn-magic-wa {
+    background: rgba(37, 211, 102, 0.1);
+    border: 1px solid rgba(37, 211, 102, 0.3);
+    color: #25D366;
+  }
+
+  .btn-magic-wa:hover {
+    background: #25D366;
     color: #000;
   }
 
@@ -813,7 +884,7 @@
     </p>
   </div>
 
-  <!-- MAGIC LINK PROMINENT BANNER -->
+    <!-- MAGIC LINK PROMINENT BANNER -->
   <div class="magic-link-box">
     <div class="magic-header-row">
       <div class="magic-tag-lead">
@@ -821,12 +892,12 @@
         <span>ENLACE PRIVADO DE SEGUIMIENTO (MAGIC LINK)</span>
       </div>
       <div class="magic-id-badge">
-        ID de Envío: <span id="trackIdDisplay" style="color: var(--accent-cyan);">TNIW-8F3A29</span>
+        ID de Envío: <strong id="trackIdDisplay">TNIW-MQQ3CF</strong>
       </div>
     </div>
 
     <p class="magic-warning-text">
-      <strong>⚠️ GUARDA O COMPARTE ESTE ENLACE AHORA:</strong> Este es tu enlace único e irrepetible para monitorear el progreso de escucha en tiempo real y leer el feedback editorial. <strong>Sin este enlace no podrás volver a consultar el estatus de tu canción.</strong>
+      <strong>⚠️ Guarda o comparte este enlace:</strong> Sin este link personalizado no podrás volver a consultar el estatus, ver el progreso de escucha en vivo ni leer el feedback de tu canción.
     </p>
 
     <div class="magic-actions-row">
