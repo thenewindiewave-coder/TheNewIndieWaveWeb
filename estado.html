@@ -813,15 +813,34 @@
     </p>
   </div>
 
-  <!-- MAGIC LINK ACCESSIBILITY -->
+  <!-- MAGIC LINK PROMINENT BANNER -->
   <div class="magic-link-box">
-    <div class="magic-info">
-      <span>ID de Envío:</span>
-      <span class="magic-id-tag" id="trackIdDisplay">TNIW-8F3A29</span>
+    <div class="magic-header-row">
+      <div class="magic-tag-lead">
+        <span>🔒</span>
+        <span>ENLACE PRIVADO DE SEGUIMIENTO (MAGIC LINK)</span>
+      </div>
+      <div class="magic-id-badge">
+        ID de Envío: <span id="trackIdDisplay" style="color: var(--accent-cyan);">TNIW-8F3A29</span>
+      </div>
     </div>
-    <button class="btn-copy-magic" onclick="copyMagicLink()">
-      🔗 Guarda este enlace para volver a revisar tu solicitud
-    </button>
+
+    <p class="magic-warning-text">
+      <strong>⚠️ GUARDA O COMPARTE ESTE ENLACE AHORA:</strong> Este es tu enlace único e irrepetible para monitorear el progreso de escucha en tiempo real y leer el feedback editorial. <strong>Sin este enlace no podrás volver a consultar el estatus de tu canción.</strong>
+    </p>
+
+    <div class="magic-actions-row">
+      <button class="btn-magic-action btn-magic-primary" onclick="copyMagicLink()" id="btnCopyMagicLink">
+        📋 Copiar Magic Link
+      </button>
+      <button class="btn-magic-action btn-magic-secondary" onclick="shareMagicLink()">
+        ↗ Compartir Enlace
+      </button>
+      <a class="btn-magic-action btn-magic-wa" id="btnShareWhatsApp" href="#" target="_blank" rel="noopener noreferrer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+        Guardar en mi WhatsApp ↗
+      </a>
+    </div>
   </div>
 
   <!-- COUNTDOWN TIMER -->
@@ -952,6 +971,7 @@
   // Guardar en localStorage para persistencia en este navegador
   localStorage.setItem('tniw_last_submission_id', currentId);
   document.getElementById('trackIdDisplay').textContent = currentId;
+    updateWhatsAppShareBtn();
 
   // Cargar datos guardados si existen
   var savedData = localStorage.getItem('tniw_submission_data');
@@ -1068,15 +1088,49 @@
   setInterval(updateTimer, 1000);
   updateTimer();
 
-  // 3. Copiar Magic Link
+  // 3. Copiar y Compartir Magic Link
+  function getMagicLinkUrl() {
+    return window.location.origin + window.location.pathname + '?id=' + encodeURIComponent(currentId || '');
+  }
+
+  function updateWhatsAppShareBtn() {
+    var fullUrl = getMagicLinkUrl();
+    var waBtn = document.getElementById('btnShareWhatsApp');
+    if (waBtn) {
+      var msg = '🔗 Mi Magic Link para consultar el estado de mi canción en The New Indie Wave (ID: ' + (currentId || '') + '): ' + fullUrl;
+      waBtn.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
+    }
+  }
+
   function copyMagicLink() {
-    var fullUrl = window.location.origin + window.location.pathname + '?id=' + currentId;
+    var fullUrl = getMagicLinkUrl();
+    var btn = document.getElementById('btnCopyMagicLink');
     if(navigator.clipboard) {
       navigator.clipboard.writeText(fullUrl).then(function() {
-        showToast('✓ Enlace copiado al portapapeles');
+        showToast('✓ ¡Magic Link copiado! Guárdalo en tus notas o chat.');
+        if(btn) {
+          btn.textContent = '✓ ¡Copiado con Éxito!';
+          setTimeout(function(){ btn.textContent = '📋 Copiar Magic Link'; }, 3000);
+        }
       });
     } else {
       showToast('✓ Enlace: ' + fullUrl);
+    }
+  }
+
+  function shareMagicLink() {
+    var fullUrl = getMagicLinkUrl();
+    var title = 'Estado de mi Canción // The New Indie Wave';
+    var text = 'Monitorea la revisión editorial y estatus en tiempo real de mi canción en The New Indie Wave (ID: ' + (currentId || '') + '):';
+
+    if (navigator.share) {
+      navigator.share({
+        title: title,
+        text: text,
+        url: fullUrl
+      }).catch(function(e){});
+    } else {
+      copyMagicLink();
     }
   }
 
