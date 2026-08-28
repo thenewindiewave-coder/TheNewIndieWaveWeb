@@ -861,26 +861,73 @@
             </div>
           ` : ''}
 
-          <!-- FEEDBACK & ACCIÓN -->
-          <div class="review-console">
-            <div class="feedback-header">
-              <span>FEEDBACK EDITORIAL PARA EL ARTISTA:</span>
-              <button class="btn-ai-assist" onclick="generateAiFeedback('${item.id}', '${item.genre}', '${item.playlist}')">
-                ✨ Generar Borrador con IA
-              </button>
-            </div>
-            
-            <textarea class="feedback-textarea" id="fb-${item.id}" onfocus="markAsListening('${item.id}')" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
+          ${(function(){
+            if (currentTab === 'pending') {
+              return `
+                <div class="review-console">
+                  <div class="feedback-header">
+                    <span>FEEDBACK EDITORIAL PARA EL ARTISTA:</span>
+                    <button class="btn-ai-assist" onclick="generateAiFeedback('${item.id}', '${item.genre}', '${item.playlist}')">
+                      ✨ Generar Borrador con IA
+                    </button>
+                  </div>
+                  
+                  <textarea class="feedback-textarea" id="fb-${item.id}" onfocus="markAsListening('${item.id}')" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
 
-            <div class="decision-actions">
-              <button class="btn-decline" onclick="updateDecision('${item.id}', 'declined')">
-                ✕ Declinar Envío
-              </button>
-              <button class="btn-accept" onclick="updateDecision('${item.id}', 'accepted')">
-                ✓ Aceptar para Playlist & Redes ↗
-              </button>
-            </div>
-          </div>
+                  <div class="decision-actions">
+                    <button class="btn-decline" onclick="updateDecision('${item.id}', 'declined')">
+                      ✕ Declinar Envío
+                    </button>
+                    <button class="btn-accept" onclick="updateDecision('${item.id}', 'accepted')">
+                      ✓ Aceptar para Playlist & Redes ↗
+                    </button>
+                  </div>
+                </div>
+              `;
+            } else if (currentTab === 'accepted') {
+              return `
+                <div style="background: rgba(187, 244, 81, 0.04); border: 1px solid rgba(187, 244, 81, 0.25); border-radius: 6px; padding: 16px; margin-top: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                    <span style="color: var(--accent-lime); font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
+                      ✓ ACEPTADA EN PLAYLIST
+                    </span>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                      <button onclick="insertToSpotifyManual('${item.spotify_url}', '${item.playlist}')" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: none; padding: 7px 14px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                        ⚡ Insertar / Re-insertar en Spotify
+                      </button>
+                      <a href="estado.html?id=${encodeURIComponent(item.track_id || '')}" target="_blank" style="background: rgba(255,255,255,0.08); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 7px 14px; border-radius: 4px; text-decoration: none; border: 1px solid var(--border-strong);">
+                        🔗 Magic Link (${item.track_id || 'Ver Estado'}) ↗
+                      </a>
+                    </div>
+                  </div>
+                  ${item.feedback ? `
+                    <div style="font-size: 13px; color: var(--text-main); background: rgba(0,0,0,0.4); padding: 10px 14px; border-radius: 4px; border-left: 3px solid var(--accent-lime);">
+                      <strong>Feedback Enviado:</strong> "${item.feedback}"
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            } else if (currentTab === 'rejected') {
+              return `
+                <div style="background: rgba(239, 68, 68, 0.04); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 16px; margin-top: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                    <span style="color: #ef4444; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
+                      ✕ SOLICITUD DECLINADA
+                    </span>
+                    <a href="estado.html?id=${encodeURIComponent(item.track_id || '')}" target="_blank" style="background: rgba(255,255,255,0.08); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 7px 14px; border-radius: 4px; text-decoration: none; border: 1px solid var(--border-strong);">
+                      🔗 Magic Link (${item.track_id || 'Ver Estado'}) ↗
+                    </a>
+                  </div>
+                  ${item.feedback ? `
+                    <div style="font-size: 13px; color: var(--text-main); background: rgba(0,0,0,0.4); padding: 10px 14px; border-radius: 4px; border-left: 3px solid #ef4444;">
+                      <strong>Feedback Enviado:</strong> "${item.feedback}"
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }
+            return '';
+          })()}
         </div>
       `;
     }).join('');
@@ -1008,6 +1055,33 @@
   }
 
   // 8. Actualizar Decisión en Supabase en Tiempo Real
+    // Función manual para insertar track en Spotify
+  async function insertToSpotifyManual(spotifyUrl, playlistName) {
+    var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
+    showToast('⏳ Conectando con Spotify para insertar track...');
+    try {
+      var res = await fetch('/api/spotify-add-track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          spotify_url: spotifyUrl,
+          playlist_name: playlistName,
+          refresh_token: rToken
+        })
+      });
+      var data = await res.json();
+      if(data.success) {
+        showToast('⚡ ¡Canción insertada físicamente en Spotify con éxito!');
+      } else if (data.needs_auth) {
+        showToast('⚠️ Haz clic en "Vincular Spotify" arriba primero.');
+      } else {
+        showToast('⚠️ ' + (data.error || 'Error al insertar en Spotify'));
+      }
+    } catch(e) {
+      showToast('Error de conexión con Spotify API');
+    }
+  }
+
   async function updateDecision(recordId, status) {
     var fbEl = document.getElementById('fb-' + recordId);
     var fb = fbEl ? fbEl.value : '';

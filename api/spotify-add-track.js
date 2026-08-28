@@ -1,7 +1,8 @@
 // Serverless Function: /api/spotify-add-track
-// Añade físicamente una canción a la playlist correspondiente en Spotify
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || '7a56561898eb4057941b2c1453476e10';
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET || '86ed4df85d3f4f46885eb51013a0ab0f';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
 const PLAYLIST_ID_MAP = {
   "Rock indie para manejar de noche sin rumbo": "2APaz3JDupY9fNUczoKMUP",
@@ -42,10 +43,29 @@ export default async function handler(req, res) {
 
   const { spotify_url, playlist_name, refresh_token } = req.body || {};
 
-  const rToken = refresh_token || process.env.SPOTIFY_REFRESH_TOKEN;
+  let rToken = refresh_token || process.env.SPOTIFY_REFRESH_TOKEN;
+
+  // Si no viene en el payload, buscar token en Supabase
+  if (!rToken) {
+    try {
+      const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/radar_artists?id=eq.spotify_auth_config&select=short_bio`, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
+      if (dbRes.ok) {
+        const rows = await dbRes.json();
+        if (rows && rows.length > 0 && rows[0].short_bio) {
+          rToken = rows[0].short_bio;
+        }
+      }
+    } catch(e){}
+  }
+
   if (!rToken) {
     return res.status(400).json({
-      error: 'No se encontró refresh_token de Spotify. Vincula tu cuenta de Spotify primero en el panel.',
+      error: 'No se encontró cuenta de Spotify vinculada. Haz clic en "Vincular Spotify" en el panel.',
       needs_auth: true
     });
   }
@@ -98,7 +118,7 @@ export default async function handler(req, res) {
 
     if (!addRes.ok) {
       const addErr = await addRes.json();
-      throw new Error('Spotify API Error: ' + (addErr.error ? addErr.error.message : 'Error desconocido al añadir track'));
+      throw new Error('Spotify API Error: ' + (addErr.error ? addErr.error.message : 'Error al añadir canción a playlist'));
     }
 
     const addData = await addRes.json();
