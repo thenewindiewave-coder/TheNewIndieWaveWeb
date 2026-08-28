@@ -1096,9 +1096,12 @@
               <span style="color: var(--accent-lime); font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
                 ✓ ACEPTADA EN PLAYLIST: ${item.playlist}
               </span>
-              <div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <button onclick="insertToSpotifyManual('${item.spotify_url}', '${item.playlist}')" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                   ⚡ Insertar / Re-insertar en Spotify
+                </button>
+                <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                  🎨 Generar Historia Story ↗
                 </button>
               </div>
             </div>
@@ -1426,5 +1429,306 @@
     setTimeout(function() { t.style.display = 'none'; }, 3500);
   }
 </script>
+
+<!-- MODAL GENERADOR DE HISTORIA DE INSTAGRAM PARA CURADOR (1080x1920) -->
+<div id="storyModalCurator" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 860px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
+    <button onclick="closeCuratorStoryModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; z-index: 10;">✕</button>
+    
+    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// GENERADOR DE HISTORIAS // PANEL CURADOR</div>
+    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">Historia Promocional para Redes</h3>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 22px;">
+      Mockup automático en resolución 1080 x 1920 px listo para publicar en @the.new.indie.wave & @m.trendvideo.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
+      <!-- Canvas Preview Container -->
+      <div style="background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; justify-content: center; align-items: center;">
+        <canvas id="curatorStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 260px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
+      </div>
+
+      <!-- Action Panel & Download -->
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 16px;">
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); margin-bottom: 4px;">DETALLES DEL TRACK:</div>
+          <div style="font-size: 13px; color: #fff; font-weight: 700;" id="curStoryPreviewTrack">Cargando...</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="curStoryPreviewPlaylist">Playlist: ...</div>
+          <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); margin-top: 6px;">Formato: 1080 x 1920 px (9:16 HD)</div>
+        </div>
+
+        <button onclick="downloadCuratorStoryImage()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 14px 20px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
+          📥 Descargar Imagen de Historia (PNG HD)
+        </button>
+
+        <button onclick="copyCuratorStoryToClipboard()" style="background: rgba(255,255,255,0.06); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 11px 18px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
+          📋 Copiar Imagen al Portapapeles
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var _curStoryBgImage = new Image();
+  _curStoryBgImage.crossOrigin = 'anonymous';
+  _curStoryBgImage.src = 'historia_back.jpg';
+  var _curCachedStoryDataUrl = null;
+  var _curSongName = 'historia_tniw';
+
+  function openCuratorStoryGenerator(encArtist, encSong, encPlaylist, encGenre) {
+    var artist = decodeURIComponent(encArtist || 'Artista');
+    var song = decodeURIComponent(encSong || 'Canción');
+    var playlist = decodeURIComponent(encPlaylist || 'Rock Indie');
+    var genre = decodeURIComponent(encGenre || 'Indie');
+    _curSongName = song;
+
+    var modal = document.getElementById('storyModalCurator');
+    if (modal) modal.style.display = 'flex';
+
+    document.getElementById('curStoryPreviewTrack').textContent = song + ' — ' + artist;
+    document.getElementById('curStoryPreviewPlaylist').textContent = 'Playlist: ' + playlist;
+
+    generateCuratorStoryCanvas(artist, song, playlist, genre);
+  }
+
+  function closeCuratorStoryModal() {
+    var modal = document.getElementById('storyModalCurator');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function generateCuratorStoryCanvas(artist, song, playlist, genre) {
+    var canvas = document.getElementById('curatorStoryCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = 1080;
+    var H = 1920;
+
+    if (_curStoryBgImage.complete && _curStoryBgImage.naturalWidth > 0) {
+      ctx.drawImage(_curStoryBgImage, 0, 0, W, H);
+    } else {
+      ctx.fillStyle = '#09090b';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    var cardW = 860;
+    var cardH = 1240;
+    var cardX = (W - cardW) / 2;
+    var cardY = (H - cardH) / 2 - 40;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 20;
+    ctx.fillStyle = 'rgba(18, 18, 22, 0.95)';
+    drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 28);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 2;
+    drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 28);
+    ctx.stroke();
+
+    var headerH = 460;
+    ctx.save();
+    ctx.beginPath();
+    drawRoundRectCur(ctx, cardX, cardY, cardW, headerH, { tl: 28, tr: 28, br: 0, bl: 0 });
+    ctx.clip();
+
+    var grad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + headerH);
+    grad.addColorStop(0, '#1a2332');
+    grad.addColorStop(0.5, '#0f172a');
+    grad.addColorStop(1, '#05070a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(cardX, cardY, cardW, headerH);
+
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.15)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (var i = 0; i < cardW; i += 20) {
+      var yOffset = Math.sin(i * 0.05) * 30 + (headerH / 2);
+      if (i === 0) ctx.moveTo(cardX + i, cardY + yOffset);
+      else ctx.lineTo(cardX + i, cardY + yOffset);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = '600 22px monospace';
+    ctx.fillText('PLAYLIST OFICIAL SPOTIFY', cardX + 36, cardY + 54);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 36px sans-serif';
+    wrapTextCur(ctx, playlist, cardX + 36, cardY + 110, cardW - 180, 44);
+
+    ctx.fillStyle = '#bbf451';
+    ctx.font = 'bold 20px monospace';
+    ctx.fillText('CURADA POR THE NEW INDIE WAVE', cardX + 36, cardY + headerH - 36);
+    ctx.restore();
+
+    var playX = cardX + cardW - 74;
+    var playY = cardY + headerH - 24;
+    var playR = 42;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = '#1DB954';
+    ctx.beginPath();
+    ctx.arc(playX, playY, playR, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.moveTo(playX - 10, playY - 16);
+    ctx.lineTo(playX + 16, playY);
+    ctx.lineTo(playX - 10, playY + 16);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    var listStartY = cardY + headerH + 30;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.font = '700 18px monospace';
+    ctx.fillText('FEATURING // RECIÉN AÑADIDA', cardX + 36, listStartY);
+
+    var row1Y = listStartY + 24;
+    var rowH = 110;
+
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.08)';
+    drawRoundRectCur(ctx, cardX + 20, row1Y, cardW - 40, rowH, 12);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.3)';
+    ctx.lineWidth = 1.5;
+    drawRoundRectCur(ctx, cardX + 20, row1Y, cardW - 40, rowH, 12);
+    ctx.stroke();
+
+    var thumbX = cardX + 38;
+    var thumbY = row1Y + 18;
+    var thumbSize = 74;
+    ctx.fillStyle = '#bbf451';
+    drawRoundRectCur(ctx, thumbX, thumbY, thumbSize, thumbSize, 8);
+    ctx.fill();
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 28px sans-serif';
+    ctx.fillText('▶', thumbX + 26, thumbY + 48);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px sans-serif';
+    ctx.fillText(truncateStringCur(song, 22), thumbX + thumbSize + 22, thumbY + 34);
+
+    ctx.fillStyle = '#bbf451';
+    ctx.font = '600 20px monospace';
+    ctx.fillText(truncateStringCur(artist, 26) + ' • ' + genre, thumbX + thumbSize + 22, thumbY + 64);
+
+    ctx.fillStyle = '#1DB954';
+    ctx.font = '28px sans-serif';
+    ctx.fillText('💚', cardX + cardW - 90, thumbY + 48);
+
+    var otherTracks = [
+      { name: 'After Dark', artist: 'Mr.Kitty' },
+      { name: 'Space Song', artist: 'Beach House' },
+      { name: 'A Real Hero', artist: 'College & Electric Youth' }
+    ];
+
+    for (var t = 0; t < 3; t++) {
+      var oTrack = otherTracks[t];
+      var oRowY = row1Y + rowH + 16 + (t * 90);
+      var oThumbX = cardX + 38;
+      var oThumbY = oRowY + 10;
+      var oThumbSize = 58;
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      drawRoundRectCur(ctx, oThumbX, oThumbY, oThumbSize, oThumbSize, 6);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText(oTrack.name, oThumbX + oThumbSize + 20, oThumbY + 28);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.font = '17px monospace';
+      ctx.fillText(oTrack.artist, oThumbX + oThumbSize + 20, oThumbY + 52);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.font = '22px sans-serif';
+      ctx.fillText('🤍', cardX + cardW - 85, oThumbY + 40);
+    }
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.font = '600 16px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('ESCUCHA ESTE TEMA EN SPOTIFY // THE NEW INDIE WAVE', cardX + (cardW / 2), cardY + cardH - 24);
+    ctx.textAlign = 'left';
+
+    _curCachedStoryDataUrl = canvas.toDataURL('image/png');
+  }
+
+  function downloadCuratorStoryImage() {
+    if (!_curCachedStoryDataUrl) return;
+    var a = document.createElement('a');
+    a.download = 'Historia_TNIW_' + _curSongName.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+    a.href = _curCachedStoryDataUrl;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('✓ Descargando Historia (1080x1920 HD)...');
+  }
+
+  function copyCuratorStoryToClipboard() {
+    if (!navigator.clipboard || !window.ClipboardItem || !_curCachedStoryDataUrl) {
+      showToast('⚠️ Tu navegador no soporta copiado directo');
+      return;
+    }
+    fetch(_curCachedStoryDataUrl)
+      .then(function(res){ return res.blob(); })
+      .then(function(blob){
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function(){
+          showToast('✓ ¡Imagen de historia copiada al portapapeles!');
+        });
+      });
+  }
+
+  function drawRoundRectCur(ctx, x, y, width, height, radius) {
+    if (typeof radius === 'number') {
+      radius = { tl: radius, tr: radius, br: radius, bl: radius };
+    }
+    ctx.beginPath();
+    ctx.moveTo(x + radius.tl, y);
+    ctx.lineTo(x + width - radius.tr, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+    ctx.lineTo(x + width, y + height - radius.br);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+    ctx.lineTo(x + radius.bl, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+    ctx.lineTo(x, y + radius.tl);
+    ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+    ctx.closePath();
+  }
+
+  function wrapTextCur(ctx, text, x, y, maxWidth, lineHeight) {
+    var words = text.split(' ');
+    var line = '';
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line + words[n] + ' ';
+      var metrics = ctx.measureText(testLine);
+      var testWidth = metrics.width;
+      if (testWidth > maxWidth && n > 0) {
+        ctx.fillText(line, x, y);
+        line = words[n] + ' ';
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, x, y);
+  }
+
+  function truncateStringCur(str, num) {
+    if (!str) return '';
+    if (str.length <= num) return str;
+    return str.slice(0, num) + '...';
+  }
+</script>
+
 </body>
 </html>

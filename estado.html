@@ -1013,9 +1013,9 @@
       Tu tema ya ha sido añadido a la playlist oficial y programado para amplificación en nuestras redes sociales (@the.new.indie.wave y @m.trendvideo).
     </p>
     <div id="acceptedFeedbackWrap" style="display:none; margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 13px; color: #fff;"></div>
-    <a href="#" class="btn-download-story" onclick="showToast('Generando Video-Historia vertical...')">
-      📥 Descargar Video-Historia para tus Redes (Instagram / TikTok)
-    </a>
+    <button class="btn-download-story" onclick="openStoryGeneratorModal()" style="cursor: pointer; border: none; font-size: 13px; padding: 12px 22px;">
+      🎨 Generar Historia para tus Redes (Instagram / TikTok) ↗
+    </button>
   </div>
 
   <!-- DECLINED STATE -->
@@ -1301,6 +1301,361 @@
   </div>
 </footer>
 
+
+
+<!-- MODAL GENERADOR DE HISTORIA DE INSTAGRAM (1080x1920) -->
+<div id="storyModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 860px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
+    <button onclick="closeStoryModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; z-index: 10;">✕</button>
+    
+    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// GENERADOR OFICIAL DE HISTORIAS</div>
+    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">Tu Historia Promocional para Instagram & TikTok</h3>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 22px;">
+      Generada automáticamente con tu portada, título y la playlist oficial de The New Indie Wave.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
+      <!-- Canvas Preview Container -->
+      <div style="background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; justify-content: center; align-items: center;">
+        <canvas id="storyCanvas" width="1080" height="1920" style="width: 100%; max-width: 260px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
+      </div>
+
+      <!-- Action Panel & Download -->
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 16px;">
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); margin-bottom: 4px;">ESTADÍSTICAS DEL MOCKUP:</div>
+          <div style="font-size: 13px; color: #fff; font-weight: 700;" id="storyPreviewTrack">Cargando...</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="storyPreviewPlaylist">Playlist: ...</div>
+          <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); margin-top: 6px;">Formato: 1080 x 1920 px (9:16 HD)</div>
+        </div>
+
+        <button onclick="downloadStoryImage()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 14px 20px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25); transition: transform 0.15s;">
+          📥 Descargar Imagen de Historia (PNG HD)
+        </button>
+
+        <button onclick="shareStoryNatively()" style="background: #25D366; color: #000; font-family: var(--font-mono); font-size: 12.5px; font-weight: 800; padding: 12px 20px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          📲 Compartir en Instagram / Redes
+        </button>
+
+        <button onclick="copyStoryToClipboard()" style="background: rgba(255,255,255,0.06); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 11px 18px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
+          📋 Copiar Imagen al Portapapeles
+        </button>
+
+        <div style="font-size: 11.5px; color: var(--text-dim); line-height: 1.4; margin-top: 4px;">
+          💡 <strong>Tip para Stories:</strong> Sube esta imagen a tu Instagram Story, añade el sticker de música con tu canción y etiqueta a <strong>@the.new.indie.wave</strong> para que te reposteemos.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var _storyBgImage = new Image();
+  _storyBgImage.crossOrigin = 'anonymous';
+  _storyBgImage.src = 'historia_back.jpg';
+
+  var _cachedStoryDataUrl = null;
+
+  function openStoryGeneratorModal() {
+    var modal = document.getElementById('storyModal');
+    if(modal) modal.style.display = 'flex';
+
+    var artistName = (window._currentSubmissionData && window._currentSubmissionData.artist_name) || document.getElementById('dArtist').textContent || 'Artista Indie';
+    var songTitle = (window._currentSubmissionData && window._currentSubmissionData.song_title) || document.getElementById('dSong').textContent || 'Título de la Canción';
+    var playlistName = (window._currentSubmissionData && window._currentSubmissionData.playlist) || document.getElementById('dPlaylist').textContent || 'Rock indie para manejar de noche';
+    var genre = (window._currentSubmissionData && window._currentSubmissionData.genre) || 'Indie';
+
+    document.getElementById('storyPreviewTrack').textContent = songTitle + ' — ' + artistName;
+    document.getElementById('storyPreviewPlaylist').textContent = 'Playlist: ' + playlistName;
+
+    generateStoryCanvas(artistName, songTitle, playlistName, genre);
+  }
+
+  function closeStoryModal() {
+    var modal = document.getElementById('storyModal');
+    if(modal) modal.style.display = 'none';
+  }
+
+  function generateStoryCanvas(artist, song, playlist, genre) {
+    var canvas = document.getElementById('storyCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = 1080;
+    var H = 1920;
+
+    // 1. Dibujar Fondo Oficial
+    if (_storyBgImage.complete && _storyBgImage.naturalWidth > 0) {
+      ctx.drawImage(_storyBgImage, 0, 0, W, H);
+    } else {
+      ctx.fillStyle = '#09090b';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // 2. DIBUJAR MOCKUP SPOTIFY CARD (Centrada)
+    var cardW = 860;
+    var cardH = 1240;
+    var cardX = (W - cardW) / 2;
+    var cardY = (H - cardH) / 2 - 40;
+
+    // Sombra del Mockup
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 20;
+
+    // Fondo oscuro de la tarjeta
+    ctx.fillStyle = 'rgba(18, 18, 22, 0.95)';
+    drawRoundRect(ctx, cardX, cardY, cardW, cardH, 28);
+    ctx.fill();
+    ctx.restore();
+
+    // Borde elegante
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 2;
+    drawRoundRect(ctx, cardX, cardY, cardW, cardH, 28);
+    ctx.stroke();
+
+    // 3. CABECERA DEL MOCKUP (Artwork / Portada Superior)
+    var headerH = 460;
+    ctx.save();
+    ctx.beginPath();
+    drawRoundRect(ctx, cardX, cardY, cardW, headerH, { tl: 28, tr: 28, br: 0, bl: 0 });
+    ctx.clip();
+
+    // Gradiente dinámico de portada según género
+    var grad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + headerH);
+    grad.addColorStop(0, '#1a2332');
+    grad.addColorStop(0.5, '#0f172a');
+    grad.addColorStop(1, '#05070a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(cardX, cardY, cardW, headerH);
+
+    // Patrón decorativo de onda
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.15)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (var i = 0; i < cardW; i += 20) {
+      var yOffset = Math.sin(i * 0.05) * 30 + (headerH / 2);
+      if (i === 0) ctx.moveTo(cardX + i, cardY + yOffset);
+      else ctx.lineTo(cardX + i, cardY + yOffset);
+    }
+    ctx.stroke();
+
+    // Texto superior de la cabecera
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = '600 22px monospace';
+    ctx.fillText('PLAYLIST OFICIAL SPOTIFY', cardX + 36, cardY + 54);
+
+    // Título de la Playlist
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 36px sans-serif';
+    wrapText(ctx, playlist, cardX + 36, cardY + 110, cardW - 180, 44);
+
+    // Marca de Curaduría
+    ctx.fillStyle = '#bbf451';
+    ctx.font = 'bold 20px monospace';
+    ctx.fillText('CURADA POR THE NEW INDIE WAVE', cardX + 36, cardY + headerH - 36);
+
+    ctx.restore();
+
+    // 4. BOTÓN VERDE FLOTANTE SPOTIFY PLAY
+    var playX = cardX + cardW - 74;
+    var playY = cardY + headerH - 24;
+    var playR = 42;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = '#1DB954';
+    ctx.beginPath();
+    ctx.arc(playX, playY, playR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Triángulo Play blanco
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.moveTo(playX - 10, playY - 16);
+    ctx.lineTo(playX + 16, playY);
+    ctx.lineTo(playX - 10, playY + 16);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // 5. SECCIÓN "FEATURING // RECIÉN AÑADIDA"
+    var listStartY = cardY + headerH + 30;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.font = '700 18px monospace';
+    ctx.fillText('FEATURING // RECIÉN AÑADIDA', cardX + 36, listStartY);
+
+    // 6. CANCIÓN ADMITIDA (PUESTO #1 DESTACADO)
+    var row1Y = listStartY + 24;
+    var rowH = 110;
+
+    // Resaltado de fondo para la canción admitida
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.08)';
+    drawRoundRect(ctx, cardX + 20, row1Y, cardW - 40, rowH, 12);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.3)';
+    ctx.lineWidth = 1.5;
+    drawRoundRect(ctx, cardX + 20, row1Y, cardW - 40, rowH, 12);
+    ctx.stroke();
+
+    // Miniatura carátula track
+    var thumbX = cardX + 38;
+    var thumbY = row1Y + 18;
+    var thumbSize = 74;
+    ctx.fillStyle = '#bbf451';
+    drawRoundRect(ctx, thumbX, thumbY, thumbSize, thumbSize, 8);
+    ctx.fill();
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 28px sans-serif';
+    ctx.fillText('▶', thumbX + 26, thumbY + 48);
+
+    // Título de la canción y Artista
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px sans-serif';
+    ctx.fillText(truncateString(song, 22), thumbX + thumbSize + 22, thumbY + 34);
+
+    ctx.fillStyle = '#bbf451';
+    ctx.font = '600 20px monospace';
+    ctx.fillText(truncateString(artist, 26) + ' • ' + genre, thumbX + thumbSize + 22, thumbY + 64);
+
+    // Corazón verde Liked
+    ctx.fillStyle = '#1DB954';
+    ctx.font = '28px sans-serif';
+    ctx.fillText('💚', cardX + cardW - 90, thumbY + 48);
+
+    // 7. CANCIONES COMPLEMENTARIAS DE LA PLAYLIST (#2, #3, #4)
+    var otherTracks = [
+      { name: 'After Dark', artist: 'Mr.Kitty' },
+      { name: 'Space Song', artist: 'Beach House' },
+      { name: 'A Real Hero', artist: 'College & Electric Youth' },
+      { name: 'Nightcall', artist: 'Kavinsky' }
+    ];
+
+    for (var t = 0; t < 3; t++) {
+      var oTrack = otherTracks[t];
+      var oRowY = row1Y + rowH + 16 + (t * 90);
+
+      // Mini carátula gris
+      var oThumbX = cardX + 38;
+      var oThumbY = oRowY + 10;
+      var oThumbSize = 58;
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      drawRoundRect(ctx, oThumbX, oThumbY, oThumbSize, oThumbSize, 6);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText(oTrack.name, oThumbX + oThumbSize + 20, oThumbY + 28);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.font = '17px monospace';
+      ctx.fillText(oTrack.artist, oThumbX + oThumbSize + 20, oThumbY + 52);
+
+      // Corazón gris
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.font = '22px sans-serif';
+      ctx.fillText('🤍', cardX + cardW - 85, oThumbY + 40);
+    }
+
+    // 8. PIE DEL MOCKUP
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.font = '600 16px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('ESCUCHA ESTE TEMA EN SPOTIFY // THE NEW INDIE WAVE', cardX + (cardW / 2), cardY + cardH - 24);
+    ctx.textAlign = 'left';
+
+    _cachedStoryDataUrl = canvas.toDataURL('image/png');
+  }
+
+  function downloadStoryImage() {
+    if (!_cachedStoryDataUrl) return;
+    var a = document.createElement('a');
+    var song = (window._currentSubmissionData && window._currentSubmissionData.song_title) || 'historia_tniw';
+    a.download = 'Historia_TNIW_' + song.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+    a.href = _cachedStoryDataUrl;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('✓ Descargando Historia (1080x1920 HD)...');
+  }
+
+  function shareStoryNatively() {
+    if (!navigator.share || !_cachedStoryDataUrl) {
+      downloadStoryImage();
+      return;
+    }
+    fetch(_cachedStoryDataUrl)
+      .then(function(res){ return res.blob(); })
+      .then(function(blob){
+        var file = new File([blob], 'historia_tniw.png', { type: 'image/png' });
+        navigator.share({
+          title: '¡Mi canción está en The New Indie Wave!',
+          text: 'Escucha mi tema en las playlists oficiales de The New Indie Wave @the.new.indie.wave',
+          files: [file]
+        }).catch(function(){ downloadStoryImage(); });
+      })
+      .catch(function(){ downloadStoryImage(); });
+  }
+
+  function copyStoryToClipboard() {
+    if (!navigator.clipboard || !window.ClipboardItem || !_cachedStoryDataUrl) {
+      showToast('⚠️ Tu navegador no soporta copiado directo de imágenes');
+      return;
+    }
+    fetch(_cachedStoryDataUrl)
+      .then(function(res){ return res.blob(); })
+      .then(function(blob){
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function(){
+          showToast('✓ ¡Imagen copiada al portapapeles! Pégala en tus historias o chat');
+        });
+      });
+  }
+
+  // Helpers de Canvas
+  function drawRoundRect(ctx, x, y, width, height, radius) {
+    if (typeof radius === 'number') {
+      radius = { tl: radius, tr: radius, br: radius, bl: radius };
+    }
+    ctx.beginPath();
+    ctx.moveTo(x + radius.tl, y);
+    ctx.lineTo(x + width - radius.tr, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+    ctx.lineTo(x + width, y + height - radius.br);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+    ctx.lineTo(x + radius.bl, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+    ctx.lineTo(x, y + radius.tl);
+    ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+    ctx.closePath();
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    var words = text.split(' ');
+    var line = '';
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line + words[n] + ' ';
+      var metrics = ctx.measureText(testLine);
+      var testWidth = metrics.width;
+      if (testWidth > maxWidth && n > 0) {
+        ctx.fillText(line, x, y);
+        line = words[n] + ' ';
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, x, y);
+  }
+
+  function truncateString(str, num) {
+    if (!str) return '';
+    if (str.length <= num) return str;
+    return str.slice(0, num) + '...';
+  }
+</script>
 
 </body>
 </html>
