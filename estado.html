@@ -688,7 +688,7 @@
       <span class="magic-id-tag" id="trackIdDisplay">TNIW-8F3A29</span>
     </div>
     <button class="btn-copy-magic" onclick="copyMagicLink()">
-      🔗 Copiar Magic Link para volver cuando quieras
+      🔗 Guarda este enlace para volver a revisar tu solicitud
     </button>
   </div>
 
@@ -898,7 +898,7 @@
     var fullUrl = window.location.origin + window.location.pathname + '?id=' + currentId;
     if(navigator.clipboard) {
       navigator.clipboard.writeText(fullUrl).then(function() {
-        showToast('✓ Magic Link copiado al portapapeles');
+        showToast('✓ Enlace copiado al portapapeles');
       });
     } else {
       showToast('✓ Enlace: ' + fullUrl);

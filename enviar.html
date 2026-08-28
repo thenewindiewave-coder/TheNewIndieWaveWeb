@@ -1074,12 +1074,13 @@
     var waPrefix = document.getElementById('wa-country-prefix') ? document.getElementById('wa-country-prefix').value : '+52';
     var waNum = document.getElementById('pb-whatsapp') ? document.getElementById('pb-whatsapp').value.trim() : '';
     var fullWa = waNum ? (waPrefix + ' ' + waNum) : '';
+    var rawNotes = document.getElementById('pb-notes') ? document.getElementById('pb-notes').value.trim() : '';
+    var combinedNotes = (fullWa ? ('[WA: ' + fullWa + '] ') : '') + rawNotes;
 
     var payload = {
       artist_name: document.getElementById('pb-artist').value,
       email: document.getElementById('pb-email').value,
       country: document.getElementById('country-select').value,
-      whatsapp: fullWa,
       instagram: document.getElementById('pb-ig').value,
       tiktok: document.getElementById('pb-tiktok').value,
       song_title: document.getElementById('pb-title').value,
@@ -1087,7 +1088,7 @@
       language: document.getElementById('pb-language').value,
       genre: document.getElementById('pb-genre').value,
       playlist: document.getElementById('playlist-real-select').value,
-      notes: document.getElementById('pb-notes').value,
+      notes: combinedNotes,
       status: 'pending'
     };
 
