@@ -1050,7 +1050,38 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género Musical *</label>
-                <input type="text" id="rfGenre" required value="${artist ? artist.genre : ''}" placeholder="Ej. DREAM POP / SHOEGAZE" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <select id="rfGenre" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:12.5px; font-weight:700; cursor:pointer;">
+                  <option value="DREAM POP / SHOEGAZE" ${artist && artist.genre === 'DREAM POP / SHOEGAZE' ? 'selected' : ''}>DREAM POP / SHOEGAZE</option>
+                  <option value="POST-PUNK / DARKWAVE" ${artist && artist.genre === 'POST-PUNK / DARKWAVE' ? 'selected' : ''}>POST-PUNK / DARKWAVE</option>
+                  <option value="INDIE POP / FOLK" ${artist && artist.genre === 'INDIE POP / FOLK' ? 'selected' : ''}>INDIE POP / FOLK</option>
+                  <option value="BEDROOM POP / LO-FI" ${artist && artist.genre === 'BEDROOM POP / LO-FI' ? 'selected' : ''}>BEDROOM POP / LO-FI</option>
+                  <option value="INDIE ROCK / GARAJE" ${artist && artist.genre === 'INDIE ROCK / GARAJE' ? 'selected' : ''}>INDIE ROCK / GARAJE</option>
+                  <option value="SYNTH POP / NEW WAVE" ${artist && artist.genre === 'SYNTH POP / NEW WAVE' ? 'selected' : ''}>SYNTH POP / NEW WAVE</option>
+                  <option value="DARKWAVE / EBM" ${artist && artist.genre === 'DARKWAVE / EBM' ? 'selected' : ''}>DARKWAVE / EBM</option>
+                  <option value="SHOEGAZE / NOISE" ${artist && artist.genre === 'SHOEGAZE / NOISE' ? 'selected' : ''}>SHOEGAZE / NOISE</option>
+                  <option value="INDIE FOLK / PSICODELIA" ${artist && artist.genre === 'INDIE FOLK / PSICODELIA' ? 'selected' : ''}>INDIE FOLK / PSICODELIA</option>
+                  <option value="POST-PUNK / GARAJE" ${artist && artist.genre === 'POST-PUNK / GARAJE' ? 'selected' : ''}>POST-PUNK / GARAJE</option>
+                  <option value="LO-FI BEATS / CHILL" ${artist && artist.genre === 'LO-FI BEATS / CHILL' ? 'selected' : ''}>LO-FI BEATS / CHILL</option>
+                  <option value="GOTH ROCK / DARKWAVE" ${artist && artist.genre === 'GOTH ROCK / DARKWAVE' ? 'selected' : ''}>GOTH ROCK / DARKWAVE</option>
+                  <option value="MATH ROCK / EMO INDIE" ${artist && artist.genre === 'MATH ROCK / EMO INDIE' ? 'selected' : ''}>MATH ROCK / EMO INDIE</option>
+                  <option value="INDIE ROCK / ALTERNATIVO" ${artist && artist.genre === 'INDIE ROCK / ALTERNATIVO' ? 'selected' : ''}>INDIE ROCK / ALTERNATIVO</option>
+                  <option value="INDIE POP / ELECTROPOP" ${artist && artist.genre === 'INDIE POP / ELECTROPOP' ? 'selected' : ''}>INDIE POP / ELECTROPOP</option>
+                  <option value="ART ROCK / EXPERIMENTAL" ${artist && artist.genre === 'ART ROCK / EXPERIMENTAL' ? 'selected' : ''}>ART ROCK / EXPERIMENTAL</option>
+                  <option value="HYPERPOP / GLITCH" ${artist && artist.genre === 'HYPERPOP / GLITCH' ? 'selected' : ''}>HYPERPOP / GLITCH</option>
+                  <option value="INDIE R&B / NEO-SOUL" ${artist && artist.genre === 'INDIE R&B / NEO-SOUL' ? 'selected' : ''}>INDIE R&B / NEO-SOUL</option>
+                  <option value="ELECTRO INDIE / DANCE" ${artist && artist.genre === 'ELECTRO INDIE / DANCE' ? 'selected' : ''}>ELECTRO INDIE / DANCE</option>
+                  <option value="URBANO ALTERNATIVO / TRAP INDIE" ${artist && artist.genre === 'URBANO ALTERNATIVO / TRAP INDIE' ? 'selected' : ''}>URBANO ALTERNATIVO / TRAP INDIE</option>
+                  <option value="MIDWEST EMO / SCREAMO" ${artist && artist.genre === 'MIDWEST EMO / SCREAMO' ? 'selected' : ''}>MIDWEST EMO / SCREAMO</option>
+                  <option value="PSICODELIA / SPACE ROCK" ${artist && artist.genre === 'PSICODELIA / SPACE ROCK' ? 'selected' : ''}>PSICODELIA / SPACE ROCK</option>
+                  <option value="PUNK ROCK / HARDCORE" ${artist && artist.genre === 'PUNK ROCK / HARDCORE' ? 'selected' : ''}>PUNK ROCK / HARDCORE</option>
+                  <option value="SKA PUNK / MESTIZO" ${artist && artist.genre === 'SKA PUNK / MESTIZO' ? 'selected' : ''}>SKA PUNK / MESTIZO</option>
+                  <option value="AMBIENT / NEOCLÁSICO" ${artist && artist.genre === 'AMBIENT / NEOCLÁSICO' ? 'selected' : ''}>AMBIENT / NEOCLÁSICO</option>
+                  <option value="ELECTRÓNICA / TECHNO / HOUSE" ${artist && artist.genre === 'ELECTRÓNICA / TECHNO / HOUSE' ? 'selected' : ''}>ELECTRÓNICA / TECHNO / HOUSE</option>
+                  <option value="FOLK ROCK / ACÚSTICO" ${artist && artist.genre === 'FOLK ROCK / ACÚSTICO' ? 'selected' : ''}>FOLK ROCK / ACÚSTICO</option>
+                  <option value="JANGLE POP / C86" ${artist && artist.genre === 'JANGLE POP / C86' ? 'selected' : ''}>JANGLE POP / C86</option>
+                  <option value="TRIP HOP / DOWNTEMPO" ${artist && artist.genre === 'TRIP HOP / DOWNTEMPO' ? 'selected' : ''}>TRIP HOP / DOWNTEMPO</option>
+                  <option value="DARK SYNTH / INDUSTRIAL" ${artist && artist.genre === 'DARK SYNTH / INDUSTRIAL' ? 'selected' : ''}>DARK SYNTH / INDUSTRIAL</option>
+                </select>
               </div>
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Categoría *</label>
