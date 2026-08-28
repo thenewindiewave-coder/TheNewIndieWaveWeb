@@ -537,6 +537,223 @@
     to { transform: scale(1) translateY(0); opacity: 1; }
   }
 
+
+  /* COMPACT ACCORDION CARDS */
+  .queue-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .queue-search-bar {
+    flex: 1;
+    min-width: 260px;
+    background: #141417;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 9px 14px;
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+  }
+
+  .queue-search-bar:focus {
+    border-color: var(--accent-lime);
+  }
+
+  .queue-toggle-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-tool {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border-strong);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 7px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .btn-tool:hover {
+    background: rgba(255,255,255,0.12);
+  }
+
+  .track-item.compact-card {
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+  }
+
+  .compact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    background: #121215;
+    user-select: none;
+    gap: 12px;
+  }
+
+  .compact-header:hover {
+    background: #18181c;
+  }
+
+  .compact-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .compact-play-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(187, 244, 81, 0.12);
+    color: var(--accent-lime);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    border: 1px solid rgba(187, 244, 81, 0.25);
+  }
+
+  .compact-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .compact-title {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  .compact-artist {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .compact-pill {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 3px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .compact-pill.playlist-pill {
+    background: rgba(187, 244, 81, 0.08);
+    border-color: rgba(187, 244, 81, 0.25);
+    color: var(--accent-lime);
+    font-weight: 600;
+  }
+
+  .compact-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .btn-toggle-chevron {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 3px;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .btn-toggle-chevron.open {
+    transform: rotate(180deg);
+    color: var(--accent-lime);
+  }
+
+  .badge-status-accepted {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--accent-lime);
+    background: rgba(187, 244, 81, 0.12);
+    border: 1px solid rgba(187, 244, 81, 0.3);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .badge-status-declined {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .badge-status-pending {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .track-detail-body {
+    padding: 16px 20px 20px 20px;
+    background: #0d0d10;
+    border-top: 1px solid var(--border);
+  }
+
+  .detail-contact-row {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .detail-note-box {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.35);
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-top: 12px;
+    margin-bottom: 14px;
+    border-left: 2px solid var(--border-strong);
+  }
+
 </style>
 <!-- Umami Analytics -->
 <script defer src="https://cloud.umami.is/script.js" data-website-id="40498ef6-8c96-4181-83ff-f3393e6a5b10"></script>
@@ -616,6 +833,15 @@
     <button class="btn-refresh" onclick="refreshCurrentTab()">
       🔄 Refrescar en Vivo
     </button>
+  </div>
+
+    <!-- TOOLBAR DE GESTIÓN RÁPIDA -->
+  <div class="queue-toolbar" id="queueToolbar" style="display: flex;">
+    <input type="text" id="queueSearchInput" onkeyup="renderQueue()" placeholder="🔍 Buscar por artista, canción, playlist o país..." class="queue-search-bar">
+    <div class="queue-toggle-actions">
+      <button class="btn-tool" onclick="toggleAllCards(true)">🔽 Desplegar Todas</button>
+      <button class="btn-tool" onclick="toggleAllCards(false)">🔼 Colapsar Todas</button>
+    </div>
   </div>
 
   <!-- LIST OF TRACKS -->
