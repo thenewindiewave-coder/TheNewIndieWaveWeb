@@ -4,4 +4,4 @@ Allow: /
 Disallow: /curador.html
 Disallow: /api/
 
-Sitemap: https://thenewindiewave.com/sitemap.xml
+Sitemap: https://thenewindiewave.online/sitemap.xml
