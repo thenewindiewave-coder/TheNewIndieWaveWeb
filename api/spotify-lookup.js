@@ -1,3 +1,4 @@
+// Serverless Function para Vercel: /api/spotify-lookup
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || '7a56561898eb4057941b2c1453476e10';
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET || '86ed4df85d3f4f46885eb51013a0ab0f';
 
@@ -20,18 +21,28 @@ async function getAccessToken() {
     body: 'grant_type=client_credentials'
   });
 
-  if (!res.ok) throw new Error('Error al obtener token de Spotify');
+  if (!res.ok) {
+    throw new Error('Error al obtener token de Spotify');
+  }
+
   const data = await res.json();
   cachedToken = data.access_token;
   tokenExpiresAt = now + (data.expires_in - 60) * 1000;
   return cachedToken;
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
   const { url, id } = req.query || {};
   let trackId = id;
@@ -67,7 +78,7 @@ module.exports = async (req, res) => {
 
     const track = await trackRes.json();
     const title = track.name;
-    const artist = track.artists.map(a => a.name).join(', ');
+    const artist = track.artists ? track.artists.map(a => a.name).join(', ') : 'Artista Desconocido';
     const cover = (track.album && track.album.images && track.album.images.length > 0)
       ? track.album.images[0].url
       : '';
@@ -84,6 +95,6 @@ module.exports = async (req, res) => {
     });
   } catch (err) {
     console.error('Spotify Lookup Error:', err);
-    return res.status(500).json({ error: 'Error al consultar Spotify API' });
+    return res.status(500).json({ error: 'Error al consultar Spotify API: ' + err.message });
   }
-};
+}
