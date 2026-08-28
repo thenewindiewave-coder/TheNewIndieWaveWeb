@@ -486,6 +486,138 @@
     .mobile-menu-btn { display: flex; }
     .page-header { padding: 40px 0 20px; }
   }
+
+  /* GLOBAL RICH FOOTER */
+  .site-footer {
+    background: #09090b;
+    border-top: 1px solid var(--border);
+    margin-top: 80px;
+    padding-top: 60px;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 50px;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    margin-bottom: 16px;
+  }
+
+  .footer-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+
+  .footer-brand-name {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #fff;
+  }
+
+  .footer-bio {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 440px;
+    margin-bottom: 22px;
+  }
+
+  .footer-socials {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .social-icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .social-icon-btn:hover {
+    background: rgba(187, 244, 81, 0.12);
+    border-color: var(--accent-lime);
+    color: var(--accent-lime);
+    transform: translateY(-2px);
+  }
+
+  .footer-heading {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--accent-lime);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .footer-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer-nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: color 0.15s ease;
+  }
+
+  .footer-nav a:hover {
+    color: #fff;
+  }
+
+  .subfooter {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 22px 0;
+    background: #050507;
+  }
+
+  .subfooter-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 850px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .subfooter-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+
 </style>
 <!-- Umami Analytics -->
 <script defer src="https://cloud.umami.is/script.js" data-website-id="40498ef6-8c96-4181-83ff-f3393e6a5b10"></script>
@@ -894,6 +1026,76 @@
     }
   }
 </script>
+
+<!-- FOOTER GLOBAL -->
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <!-- Brand Info -->
+    <div class="footer-col brand-col">
+      <a href="index.html" class="footer-brand">
+        <img src="logo.png" alt="The New Indie Wave" class="footer-logo">
+        <span class="footer-brand-name">THE NEW INDIE WAVE</span>
+      </a>
+      <p class="footer-bio">
+        Colectivo cultural y plataforma de curaduría independiente. Escuchamos canción por canción para incluirlas en nuestras playlists oficiales de Spotify, difundirlas en redes y programarlas en vivo.
+      </p>
+      
+      <!-- Redes Sociales Oficiales -->
+      <div class="footer-socials">
+        <a href="https://www.instagram.com/the.new.indie.wave/" target="_blank" rel="noopener noreferrer" class="social-icon-btn" title="Instagram @the.new.indie.wave">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+        <a href="https://www.facebook.com/thenewindiewave" target="_blank" rel="noopener noreferrer" class="social-icon-btn" title="Facebook @thenewindiewave">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a href="https://x.com/thenewindiewave" target="_blank" rel="noopener noreferrer" class="social-icon-btn" title="X (Twitter) @thenewindiewave">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="https://www.tiktok.com/@the.new.indie.wave" target="_blank" rel="noopener noreferrer" class="social-icon-btn" title="TikTok @the.new.indie.wave">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/></svg>
+        </a>
+        <a href="https://www.threads.com/@the.new.indie.wave" target="_blank" rel="noopener noreferrer" class="social-icon-btn" title="Threads @the.new.indie.wave">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.225-8.184-3.569C2.249 18.204 1.5 15.344 1.5 11.966 1.5 8.528 2.258 5.67 3.753 3.473 5.612 1.189 8.398 0 12.036 0c3.67 0 6.471 1.202 8.324 3.573 1.579 2.022 2.38 4.873 2.38 8.477 0 .546-.018 1.11-.054 1.68a.936.936 0 0 1-.991.875.938.938 0 0 1-.876-.991c.033-.521.05-.99.05-1.564 0-3.32-.71-5.83-2.112-7.464C17.307 2.859 14.992 1.87 12.036 1.87c-3.155 0-5.467 1.01-6.87 3.003C3.96 6.993 3.37 9.407 3.37 11.966c0 2.923.633 5.378 1.882 7.299 1.488 2.288 3.86 3.084 6.927 3.104 2.898-.019 5.093-1.026 6.347-2.912.441-.663.743-1.493.9-2.47-1.397.669-2.955 1.009-4.63 1.009-4.043 0-6.66-2.182-6.66-5.558 0-3.504 2.766-5.834 6.883-5.834 2.502 0 4.606.887 5.925 2.497.77.94 1.258 2.158 1.45 3.618.06.452.09.928.09 1.427 0 1.263-.12 2.392-.358 3.355-1.516 2.387-4.223 3.657-7.854 3.682zm-.143-8.34c2.259 0 3.87-.96 4.659-2.774-.298-.946-.827-1.74-1.573-2.357-.866-.716-1.954-1.079-3.23-1.079-2.946 0-4.887 1.576-4.887 3.965 0 2.18 1.63 3.245 5.031 3.245z"/></svg>
+        </a>
+        <a href="https://www.youtube.com/@TheNewIndieWave" target="_blank" rel="noopener noreferrer" class="social-icon-btn" title="YouTube @TheNewIndieWave">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Navegación de Plataforma -->
+    <div class="footer-col">
+      <h4 class="footer-heading">PLATAFORMA</h4>
+      <ul class="footer-nav">
+        <li><a href="playlists.html">02. Playlists Oficiales</a></li>
+        <li><a href="artistas.html">03. Artistas en el Radar</a></li>
+        <li><a href="eventos.html">04. Eventos // Live</a></li>
+        <li><a href="manifiesto.html">05. Manifiesto Curatorial</a></li>
+        <li><a href="enviar.html">06. Enviar Canción ↗</a></li>
+      </ul>
+    </div>
+
+    <!-- Legal & Contacto -->
+    <div class="footer-col">
+      <h4 class="footer-heading">LEGAL & CONTACTO</h4>
+      <ul class="footer-nav">
+        <li><a href="terminos.html">Términos de Servicio</a></li>
+        <li><a href="privacidad.html">Política de Privacidad</a></li>
+        <li><a href="contacto.html">Contacto & Prensa</a></li>
+        <li><a href="estado.html">Consultar Estado de Canción</a></li>
+        <li><a href="curador.html" style="color: var(--text-dim); font-size: 12px;">Acceso Curador ↗</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Subfooter Bottom Strip -->
+  <div class="subfooter">
+    <div class="container subfooter-inner">
+      <div>THE NEW INDIE WAVE © 2026 // COLECTIVO INDEPENDIENTE</div>
+      <div>CURADURÍA • PLAYLISTS • EVENTOS • SCOUTING</div>
+    </div>
+  </div>
+</footer>
 
 </body>
 </html>
