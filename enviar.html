@@ -558,30 +558,10 @@
     <form id="submit-form" onsubmit="handleSongSubmit(event)">
       <div class="scouting-form-grid">
         
-        <!-- 1. SPOTIFY URL ARRIBA CON AUTO-FETCH -->
-        <div class="form-full" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-strong); padding: 18px; border-radius: 6px;">
-          <label class="field-label" style="color: var(--accent-lime); font-size: 11.5px;">1. PEGA EL ENLACE DE SPOTIFY DE TU CANCIÓN *</label>
-          <div style="display: flex; gap: 8px; margin-top: 4px;">
-            <input id="pb-spotify" type="url" class="field-input" placeholder="https://open.spotify.com/track/..." required oninput="handleSpotifyLinkInput(this.value)" onchange="handleSpotifyLinkInput(this.value)" onpaste="setTimeout(function(){ handleSpotifyLinkInput(document.getElementById('pb-spotify').value); }, 50)" style="flex: 1;">
-            <button type="button" id="btnDetectSpotify" onclick="handleSpotifyLinkInput(document.getElementById('pb-spotify').value, true)" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 0 16px; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; transition: transform 0.15s ease;">
-              <span>⚡ Detectar</span>
-            </button>
-          </div>
-          <div id="spDetectStatus" style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); margin-top: 6px;">
-            ⚡ Auto-detección: extraeremos el nombre del artista, track y portada automáticamente al pegar.
-          </div>
-
-          <!-- PREVIEW CARD DINÁMICA -->
-          <div id="spotifyPreviewBox" style="display: none; align-items: center; gap: 14px; margin-top: 14px; padding: 12px; background: #000; border-radius: 6px; border: 1px solid var(--border);">
-            <img id="spCover" src="" style="width: 52px; height: 52px; border-radius: 4px; object-fit: cover;">
-            <div>
-              <div id="spTitle" style="font-family: var(--font-heading); font-size: 15px; font-weight: 800; color: #fff;"></div>
-              <div id="spArtist" style="font-size: 12px; color: var(--accent-cyan); font-family: var(--font-mono);"></div>
-            </div>
-            <div style="margin-left: auto; color: var(--accent-lime); font-family: var(--font-mono); font-size: 10.5px;">
-              ✓ Track detectado
-            </div>
-          </div>
+        <!-- ENLACE DE SPOTIFY DE LA CANCIÓN -->
+        <div class="form-full">
+          <label class="field-label">Enlace de Spotify de tu Canción *</label>
+          <input id="pb-spotify" type="url" class="field-input" placeholder="https://open.spotify.com/track/..." required>
         </div>
 
         <div>
@@ -846,127 +826,6 @@
   // 1. Contador de Pitch de 280 caracteres
   function updatePitchCount(el) {
     document.getElementById('charCount').textContent = el.value.length;
-  }
-
-  // 2. Auto-Detección Inteligente de Metadata desde Spotify (100% Estable)
-  var _spTimer = null;
-
-  function extractTrackIdFromUrl(raw) {
-    if (!raw) return null;
-    var str = raw.trim();
-    if (str.includes('track/')) {
-      return str.split('track/')[1].split('?')[0].split('&')[0].split('/')[0].trim();
-    }
-    if (str.includes('spotify:track:')) {
-      return str.split('spotify:track:')[1].split('?')[0].trim();
-    }
-    if (/^[a-zA-Z0-9]{15,30}$/.test(str)) {
-      return str;
-    }
-    return null;
-  }
-
-  async function handleSpotifyLinkInput(rawUrl, isManual) {
-    clearTimeout(_spTimer);
-    var inputEl = document.getElementById('pb-spotify');
-    var inputVal = (rawUrl || (inputEl ? inputEl.value : '') || '').trim();
-    
-    if (!inputVal) {
-      var prevBox = document.getElementById('spotifyPreviewBox');
-      if (prevBox) prevBox.style.display = 'none';
-      return;
-    }
-
-    var trackId = extractTrackIdFromUrl(inputVal);
-    var statusEl = document.getElementById('spDetectStatus');
-    var btn = document.getElementById('btnDetectSpotify');
-
-    if (!trackId) {
-      if (isManual) showToast('⚠️ Ingresa un enlace de canción de Spotify válido');
-      return;
-    }
-
-    if (btn) btn.innerHTML = '<span>⏳ Buscando...</span>';
-    if (statusEl) statusEl.innerHTML = '<span style="color: var(--accent-cyan); font-weight:700;">⏳ Conectando con Spotify...</span>';
-
-    var delay = isManual ? 0 : 200;
-
-    _spTimer = setTimeout(async function() {
-      var data = null;
-
-      // 1. Consultar Endpoint Serverless en Vercel
-      try {
-        var baseApi = (window.location.origin && window.location.origin.startsWith('http')) 
-          ? (window.location.origin + '/api/spotify-lookup') 
-          : 'https://thenewindiewave.online/api/spotify-lookup';
-
-        var res = await fetch(baseApi + '?id=' + encodeURIComponent(trackId));
-        if (res.ok) {
-          data = await res.json();
-        }
-      } catch(e) {}
-
-      // 2. Si falló (ej. en local sin servidor), consultar directamente a producción
-      if (!data || (!data.title && !data.artist)) {
-        try {
-          var prodRes = await fetch('https://thenewindiewave.online/api/spotify-lookup?id=' + encodeURIComponent(trackId));
-          if (prodRes.ok) {
-            data = await prodRes.json();
-          }
-        } catch(e) {}
-      }
-
-      // 3. Fallback de emergencia a oEmbed oficial
-      if (!data || (!data.title && !data.artist)) {
-        try {
-          var oRes = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent('https://open.spotify.com/track/' + trackId));
-          if (oRes.ok) {
-            var oData = await oRes.json();
-            var parts = (oData.title || '').split(' by ');
-            data = {
-              title: parts[0] || oData.title,
-              artist: parts[1] || oData.author_name || '',
-              cover: oData.thumbnail_url || ''
-            };
-          }
-        } catch(e) {}
-      }
-
-      if (data && (data.title || data.artist)) {
-        var titleEl = document.getElementById('pb-title');
-        var artistEl = document.getElementById('pb-artist');
-        
-        if (data.title && titleEl) titleEl.value = data.title;
-        if (data.artist && artistEl) artistEl.value = data.artist;
-
-        var spTitle = document.getElementById('spTitle');
-        var spArtist = document.getElementById('spArtist');
-        var spCover = document.getElementById('spCover');
-        var prevBox = document.getElementById('spotifyPreviewBox');
-
-        if (spTitle) spTitle.textContent = data.title || 'Canción Detectada';
-        if (spArtist) spArtist.textContent = data.artist ? ('por ' + data.artist) : 'Artista en Spotify';
-        
-        if (data.cover && spCover) {
-          spCover.src = data.cover;
-          spCover.style.display = 'block';
-        } else if (spCover) {
-          spCover.style.display = 'none';
-        }
-
-        if (prevBox) prevBox.style.display = 'flex';
-        if (statusEl) statusEl.innerHTML = '<span style="color: var(--accent-lime); font-weight: 700;">✓ Detectado: ' + (data.title || '') + ' — ' + (data.artist || '') + '</span>';
-        if (btn) btn.innerHTML = '<span>✓ Listo</span>';
-        showToast('✓ Detectado: ' + data.title + ' (' + data.artist + ')');
-      } else {
-        if (statusEl) statusEl.textContent = '⚡ No se detectó automáticamente; puedes escribir el nombre abajo.';
-        if (btn) btn.innerHTML = '<span>⚡ Detectar</span>';
-      }
-
-      setTimeout(function() {
-        if (btn) btn.innerHTML = '<span>⚡ Detectar</span>';
-      }, 2500);
-    }, delay);
   }
 
   // 3. Auto-Match Inteligente de Playlist según el Género
