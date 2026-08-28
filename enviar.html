@@ -268,76 +268,94 @@
     padding: 32px;
   }
 
-  /* SPOTIFY VERIFICATION GATE */
-  .gate-verification-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px;
-    background: #09090b;
-    border: 1px solid var(--border-strong);
+  /* PLAYLIST FOLLOW GATE (UBICADO DEBAJO DE LA SELECCIÓN DE PLAYLIST) */
+  .playlist-follow-box {
+    background: rgba(18, 18, 22, 0.9);
+    border: 1px dashed var(--accent-lime);
     border-radius: 6px;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
+    padding: 18px;
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
     gap: 14px;
+    transition: all 0.2s ease;
   }
 
-  .gate-info {
+  .follow-box-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
   }
 
-  .gate-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-  }
-
-  .gate-icon.connected {
-    background: rgba(187,244,81,0.15);
+  .follow-spotify-icon {
+    width: 28px;
+    height: 28px;
     color: var(--accent-lime);
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
-  .gate-title {
+  .follow-title {
     font-family: var(--font-heading);
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
 
-  .gate-sub {
+  .follow-desc {
     font-size: 12px;
     color: var(--text-muted);
+    line-height: 1.4;
+    margin-top: 2px;
   }
 
-  .btn-spotify-connect {
+  .follow-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .btn-follow-playlist {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     background: var(--accent-lime);
     color: #000;
     font-family: var(--font-mono);
     font-size: 11.5px;
     font-weight: 700;
-    padding: 10px 18px;
+    padding: 10px 16px;
     border-radius: 4px;
-    border: none;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+
+  .btn-follow-playlist:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(187,244,81,0.25);
+  }
+
+  .follow-check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-main);
     cursor: pointer;
-    transition: transform var(--duration-quick) var(--ease-bounce);
-    min-height: 44px;
   }
 
-  .btn-spotify-connect:hover {
-    transform: scale(1.03);
-  }
-
-  .btn-spotify-connect.connected {
-    background: transparent;
-    border: 1px solid var(--border-strong);
-    color: var(--accent-lime);
-    cursor: default;
+  .follow-check-label input[type="checkbox"] {
+    accent-color: var(--accent-lime);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
   }
 
   /* FORM FIELDS */
@@ -531,21 +549,7 @@
 
   <div class="scouting-card">
     
-    <!-- SPOTIFY VERIFICATION GATE -->
-    <div class="gate-verification-row">
-      <div class="gate-info">
-        <div class="gate-icon" id="gateIcon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path></svg>
-        </div>
-        <div>
-          <div class="gate-title">Conecta tu cuenta de Spotify</div>
-          <div class="gate-sub" id="gateSub">Verificación rápida: sigue las playlists del colectivo</div>
-        </div>
-      </div>
-      <button type="button" class="btn-connect-spotify" id="btnSpotifyConnect" onclick="handleConnectSpotify()">
-        Conectar con Spotify
-      </button>
-    </div>
+
 
     <!-- FORM CON INGESTA INTELIGENTE -->
     <form id="submit-form" onsubmit="handleSongSubmit(event)">
@@ -609,12 +613,39 @@
 
         <div class="form-full">
           <div style="display: flex; justify-content: space-between; align-items: baseline;">
-            <label class="field-label">Playlist Destino en Spotify</label>
+            <label class="field-label">Playlist Destino en Spotify *</label>
             <span id="autoMatchBadge" style="display: none; font-family: var(--font-mono); font-size: 10px; color: var(--accent-lime);">
               ✨ Auto-Match sugerido según género
             </span>
           </div>
-          <select id="playlist-real-select" class="field-select" required></select>
+          <select id="playlist-real-select" class="field-select" required onchange="handlePlaylistSelectChange(this.value)"></select>
+
+          <!-- REQUISITO DE CURADURÍA: SEGUIR PLAYLIST EN SPOTIFY -->
+          <div class="playlist-follow-box" id="playlistFollowBox" style="display: none;">
+            <div class="follow-box-header">
+              <svg class="follow-spotify-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.308c-.216.353-.675.467-1.028.25-2.816-1.722-6.36-2.112-10.534-1.158-.403.093-.807-.156-.9-.559-.093-.404.156-.808.56-.9 4.568-1.045 8.487-.597 11.653 1.34.352.217.466.674.249 1.027zm1.468-3.265c-.272.443-.853.582-1.296.31-3.224-1.982-8.139-2.555-11.953-1.397-.498.151-1.03-.134-1.18-.633-.151-.498.134-1.03.633-1.18 4.359-1.323 9.774-.683 13.486 1.603.443.272.582.853.31 1.297zm.126-3.41c-3.865-2.296-10.24-2.508-13.929-1.388-.593.18-1.222-.16-1.402-.753-.18-.593.16-1.222.753-1.402 4.238-1.286 11.284-1.038 15.736 1.605.534.317.708 1.01.391 1.545-.316.533-1.009.708-1.549.393z"/>
+              </svg>
+              <div>
+                <div class="follow-title">Requisito Curatorial: Sigue la Playlist</div>
+                <div class="follow-desc">
+                  Para apoyar a los artistas del colectivo y habilitar el botón de envío, abre la playlist seleccionada en Spotify y dale a <strong>"Seguir" (♡)</strong>.
+                </div>
+              </div>
+            </div>
+
+            <div class="follow-actions-row">
+              <a id="btnFollowPlaylistLink" href="https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu" target="_blank" rel="noopener noreferrer" class="btn-follow-playlist" onclick="handleFollowPlaylistClick()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.308c-.216.353-.675.467-1.028.25-2.816-1.722-6.36-2.112-10.534-1.158-.403.093-.807-.156-.9-.559-.093-.404.156-.808.56-.9 4.568-1.045 8.487-.597 11.653 1.34.352.217.466.674.249 1.027zm1.468-3.265c-.272.443-.853.582-1.296.31-3.224-1.982-8.139-2.555-11.953-1.397-.498.151-1.03-.134-1.18-.633-.151-.498.134-1.03.633-1.18 4.359-1.323 9.774-.683 13.486 1.603.443.272.582.853.31 1.297zm.126-3.41c-3.865-2.296-10.24-2.508-13.929-1.388-.593.18-1.222-.16-1.402-.753-.18-.593.16-1.222.753-1.402 4.238-1.286 11.284-1.038 15.736 1.605.534.317.708 1.01.391 1.545-.316.533-1.009.708-1.549.393z"/></svg>
+                <span>1. Abrir y Seguir Playlist en Spotify ↗</span>
+              </a>
+
+              <label class="follow-check-label">
+                <input type="checkbox" id="checkFollowPlaylist" onchange="toggleFollowVerification(this.checked)" required>
+                <span>2. Ya sigo esta playlist en Spotify</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -769,28 +800,60 @@
     if(match) {
       document.getElementById('playlist-real-select').value = match;
       document.getElementById('autoMatchBadge').style.display = 'inline';
+      handlePlaylistSelectChange(match);
       showToast('✨ Auto-Match: ' + match);
     }
   }
 
-  function handleConnectSpotify() {
-    var btn = document.getElementById('btnSpotifyConnect');
-    btn.textContent = 'Verificando...';
-    btn.disabled = true;
+  // MAPA DE ENLACES A LAS PLAYLISTS OFICIALES DE SPOTIFY
+  var playlistLinksMap = {
+    "Rock indie para manejar de noche sin rumbo": "https://open.spotify.com/playlist/2APaz3JDupY9fNUczoKMUP",
+    "Rock indie para cuando no puedes dormir y piensas demasiado": "https://open.spotify.com/playlist/5gh1rPce7FnEENWk1POIse",
+    "Rock indie sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/2QlvwB1vEhxQ4CM4jrbC8g",
+    "Pop indie para estar feliz y triste al mismo tiempo": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl",
+    "Pop indie íntimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "Pop indie suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
+    "Hard rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
+    "Metal intenso para liberar toda tu energía": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
+    "Música urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
+    "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln"
+  };
 
-    setTimeout(function() {
-      state.spotify = true;
-      btn.textContent = '✓ Cuenta Conectada';
-      btn.classList.add('connected');
-      
-      var icon = document.getElementById('gateIcon');
-      icon.classList.add('connected');
-      icon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-lime)" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M8 12.5l2.5 2.5L16 9"></path></svg>';
-      
-      document.getElementById('gateSub').textContent = 'Verificado: listo para enviar tu canción';
-      document.getElementById('btnSubmitSong').disabled = false;
-      showToast('✓ Spotify verificado con éxito');
-    }, 800);
+  function handlePlaylistSelectChange(playlistName) {
+    var box = document.getElementById('playlistFollowBox');
+    var btn = document.getElementById('btnFollowPlaylistLink');
+    var check = document.getElementById('checkFollowPlaylist');
+    
+    if (playlistName && playlistName.trim()) {
+      var link = playlistLinksMap[playlistName] || 'https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu';
+      btn.href = link;
+      box.style.display = 'flex';
+      check.checked = false;
+      toggleFollowVerification(false);
+    } else {
+      box.style.display = 'none';
+      toggleFollowVerification(false);
+    }
+  }
+
+  function handleFollowPlaylistClick() {
+    showToast('✓ Abriendo Spotify... No olvides darle Seguir (♡)');
+  }
+
+  function toggleFollowVerification(isChecked) {
+    var submitBtn = document.getElementById('btnSubmitSong');
+    if (submitBtn) {
+      if (isChecked) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+        showToast('✓ Playlist verificada. Puedes enviar tu canción.');
+      } else {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
+      }
+    }
   }
 
   async function handleSongSubmit(e) {
