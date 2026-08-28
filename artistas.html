@@ -649,6 +649,85 @@
     to { transform: scale(1) translateY(0); opacity: 1; }
   }
 
+  /* BOTÓN DE COMPARTIR Y DEEP LINKING */
+  .modal-share-btn {
+    position: absolute;
+    top: 12px;
+    right: 50px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(9,9,11,0.85);
+    border: 1px solid var(--border-strong);
+    color: var(--accent-lime);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.15s ease;
+  }
+
+  .modal-share-btn:hover {
+    background: var(--accent-lime);
+    color: #000;
+    transform: scale(1.05);
+  }
+
+  .btn-share-artist {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: rgba(187, 244, 81, 0.08);
+    border: 1px dashed var(--accent-lime);
+    border-radius: 6px;
+    color: var(--accent-lime);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.05em;
+    transition: all 0.15s var(--ease-smooth);
+  }
+
+  .btn-share-artist:hover {
+    background: var(--accent-lime);
+    color: #000;
+    border-style: solid;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(187, 244, 81, 0.25);
+  }
+
+  .btn-share-artist:active {
+    transform: scale(0.98);
+  }
+
+  /* TOAST FLOTANTE */
+  .toast-box {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #ffffff;
+    color: #000000;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 14px 22px;
+    border-radius: 6px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.8);
+    transform: translateY(30px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 999999 !important;
+  }
+
+  .toast-box.active { transform: translateY(0); opacity: 1; }
+
   .modal-close-btn {
     position: absolute;
     top: 12px;
@@ -1222,6 +1301,9 @@
 <!-- VENTANA FLOTANTE / MODAL EXPANDIDO (COMPACTO - SIN SCROLLBAR) -->
 <div class="artist-modal-overlay" id="artistModal" onclick="handleModalBackdropClick(event)">
   <div class="artist-modal" role="dialog" aria-modal="true">
+    <button class="modal-share-btn" onclick="shareCurrentArtist()" title="Compartir este Artista" aria-label="Compartir Ficha">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+    </button>
     <button class="modal-close-btn" onclick="closeArtistModal()" aria-label="Cerrar Ficha">✕</button>
     
     <div class="modal-hero-media" id="mHeroMedia"></div>
@@ -1247,6 +1329,12 @@
 
       <!-- ACCIONES -->
       <div class="modal-actions" id="mActions"></div>
+
+      <!-- BOTÓN COMPARTIR FICHA -->
+      <button class="btn-share-artist" onclick="shareCurrentArtist()" title="Compartir enlace de este artista">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        <span>COMPARTIR FICHA DE ARTISTA</span>
+      </button>
     </div>
   </div>
 </div>
@@ -1317,6 +1405,7 @@
       if (data && data.length > 0) {
         artistsList = data;
         renderAllRadarArtists();
+    checkDeepLink();
       }
     });
   }
@@ -1389,15 +1478,94 @@
   // RENDERIZAR ARTISTAS INMEDIATAMENTE AL CARGAR LA PÁGINA
   try {
     renderAllRadarArtists();
+    checkDeepLink();
   } catch(e) {
     console.error('Error renderizando artistas:', e);
   }
 
 
+  var currentOpenArtist = null;
+
+  function showToast(msg) {
+    var box = document.getElementById('toastBox');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'toastBox';
+      box.className = 'toast-box';
+      document.body.appendChild(box);
+    }
+    box.textContent = msg;
+    box.classList.add('active');
+    clearTimeout(box._timer);
+    box._timer = setTimeout(function(){
+      box.classList.remove('active');
+    }, 2800);
+  }
+
+  function shareCurrentArtist() {
+    if (!currentOpenArtist) return;
+    var shareUrl = window.location.origin + window.location.pathname + '?artista=' + encodeURIComponent(currentOpenArtist.id);
+    var shareTitle = currentOpenArtist.name + ' — Artistas en el Radar // The New Indie Wave';
+    var shareText = 'Descubre a ' + currentOpenArtist.name + ' (' + currentOpenArtist.genre + ') en The New Indie Wave:';
+
+    if (navigator.share) {
+      navigator.share({
+        title: shareTitle,
+        text: shareText,
+        url: shareUrl
+      }).catch(function(e){});
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareUrl).then(function(){
+        showToast('✓ ¡Enlace copiado al portapapeles!');
+      }).catch(function(){
+        copyFallback(shareUrl);
+      });
+    } else {
+      copyFallback(shareUrl);
+    }
+  }
+
+  function copyFallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast('✓ ¡Enlace copiado al portapapeles!');
+    } catch(e) {
+      prompt('Copia este enlace para compartir:', text);
+    }
+    document.body.removeChild(ta);
+  }
+
+  function checkDeepLink() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var aId = params.get('artista');
+      if (aId && typeof artistsList !== 'undefined') {
+        var target = artistsList.find(function(a){
+          return a.id === aId || a.name.toLowerCase().replace(/\s+/g, '-') === aId.toLowerCase();
+        });
+        if (target) {
+          setTimeout(function(){
+            openArtistModal(target.id);
+          }, 250);
+        }
+      }
+    } catch(e) {}
+  }
+
   // MODAL LOGIC
   function openArtistModal(id) {
     var artist = artistsList.find(function(a){ return a.id === id; });
     if (!artist) return;
+    currentOpenArtist = artist;
+    try {
+      history.replaceState(null, '', '?artista=' + encodeURIComponent(artist.id));
+    } catch(e) {}
 
     var heroWrap = document.getElementById('mHeroMedia');
     if (artist.media_type === 'video' || (artist.media_url && artist.media_url.endsWith('.mp4'))) {
@@ -1513,6 +1681,10 @@
     if (modal) {
       modal.classList.remove('open');
       document.body.style.overflow = '';
+      currentOpenArtist = null;
+      try {
+        history.replaceState(null, '', window.location.pathname);
+      } catch(e) {}
       var playerWrap = document.getElementById('mPlayerWrap');
       if (playerWrap) playerWrap.innerHTML = '';
     }
