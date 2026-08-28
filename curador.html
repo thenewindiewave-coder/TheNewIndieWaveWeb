@@ -859,27 +859,15 @@
   (function() {
     try {
       var raw = localStorage.getItem('tniw_radar_artists');
-      // Solo limpiar si supera el límite extremo del navegador (más de 4.5MB)
-      if (raw && raw.length > 4500000) {
-        console.warn('Caché excesivo, limpiando...');
+      if (raw && raw.length > 2000000) {
         localStorage.removeItem('tniw_radar_artists');
       }
     } catch(e) {}
   })();
 
-  // PROTECCIÓN CONTRA OUT OF MEMORY (Limpieza de memoria caché pesada)
-  try {
-    var rawRadar = localStorage.getItem('tniw_radar_artists');
-    if (rawRadar && rawRadar.length > 2000000) { // Si pesa más de 2MB por fotos no comprimidas
-      console.warn('Detectado caché de radar excesivo. Limpiando para prevenir Out of Memory...');
-      localStorage.removeItem('tniw_radar_artists');
-    }
-  } catch(e) {}
-
   var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
-    // MAPA DE ENLACES A LAS PLAYLISTS OFICIALES DE SPOTIFY
   var playlistLinksMap = {
     "Rock indie para manejar de noche sin rumbo": "https://open.spotify.com/playlist/2APaz3JDupY9fNUczoKMUP",
     "Rock indie para cuando no puedes dormir y piensas demasiado": "https://open.spotify.com/playlist/5gh1rPce7FnEENWk1POIse",
@@ -893,20 +881,15 @@
     "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln"
   };
 
+  var SPOTIFY_AUTH_DIRECT_URL = 'https://accounts.spotify.com/authorize?response_type=code&client_id=7a56561898eb4057941b2c1453476e10&scope=playlist-modify-public%20playlist-modify-private%20playlist-read-private%20playlist-read-collaborative%20user-read-private%20user-read-email&redirect_uri=https%3A%2F%2Fthenewindiewave.online%2Fapi%2Fspotify-callback&show_dialog=true';
+
   var allSubmissions = [];
   var currentTab = 'pending';
+  var _expandedCardMap = {};
 
-  // 1. Desbloqueo de Panel (Clave simple predeterminada: 'tniw2026' o 'rodrigo')
-  function unlockPanel() {
-    var p = document.getElementById('pinInput').value;
-    if(p === 'tniw2026' || p === 'rodrigo' || p === 'indie') {
-      document.getElementById('pinOverlay').style.display = 'none';
-      sessionStorage.setItem('tniw_curator_auth', '1');
-      loadSubmissions();
-    // Verificar estado de vinculación de Spotify del curador
-    function reconnectSpotify() {
+  function reconnectSpotify() {
     localStorage.removeItem('tniw_curator_spotify_refresh');
-    window.location.href = 'https://accounts.spotify.com/authorize?response_type=code&client_id=7a56561898eb4057941b2c1453476e10&scope=playlist-modify-public%20playlist-modify-private%20playlist-read-private%20playlist-read-collaborative%20user-read-private%20user-read-email&redirect_uri=https%3A%2F%2Fthenewindiewave.online%2Fapi%2Fspotify-callback&show_dialog=true';
+    window.location.href = SPOTIFY_AUTH_DIRECT_URL;
   }
 
   function checkSpotifyAuthStatus() {
@@ -917,12 +900,22 @@
       if (btn) btn.style.display = 'none';
       if (badge) badge.style.display = 'inline-flex';
     } else {
-      if (btn) btn.style.display = 'inline-flex';
+      if (btn) {
+        btn.style.display = 'inline-flex';
+        btn.href = SPOTIFY_AUTH_DIRECT_URL;
+      }
       if (badge) badge.style.display = 'none';
     }
   }
-  checkSpotifyAuthStatus();
 
+  // 1. Desbloqueo de Panel
+  function unlockPanel() {
+    var p = document.getElementById('pinInput').value;
+    if(p === 'tniw2026' || p === 'rodrigo' || p === 'indie') {
+      document.getElementById('pinOverlay').style.display = 'none';
+      sessionStorage.setItem('tniw_curator_auth', '1');
+      loadSubmissions();
+      checkSpotifyAuthStatus();
     } else {
       showToast('❌ Clave incorrecta');
     }
@@ -931,26 +924,7 @@
   if(sessionStorage.getItem('tniw_curator_auth') === '1') {
     document.getElementById('pinOverlay').style.display = 'none';
     loadSubmissions();
-    // Verificar estado de vinculación de Spotify del curador
-    function reconnectSpotify() {
-    localStorage.removeItem('tniw_curator_spotify_refresh');
-    window.location.href = 'https://accounts.spotify.com/authorize?response_type=code&client_id=7a56561898eb4057941b2c1453476e10&scope=playlist-modify-public%20playlist-modify-private%20playlist-read-private%20playlist-read-collaborative%20user-read-private%20user-read-email&redirect_uri=https%3A%2F%2Fthenewindiewave.online%2Fapi%2Fspotify-callback&show_dialog=true';
-  }
-
-  function checkSpotifyAuthStatus() {
-    var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
-    var btn = document.getElementById('btnConnectSpotifyCurator');
-    var badge = document.getElementById('badgeSpotifyConnected');
-    if (rToken) {
-      if (btn) btn.style.display = 'none';
-      if (badge) badge.style.display = 'inline-flex';
-    } else {
-      if (btn) btn.style.display = 'inline-flex';
-      if (badge) badge.style.display = 'none';
-    }
-  }
-  checkSpotifyAuthStatus();
-
+    checkSpotifyAuthStatus();
   }
 
   // 2. Cargar envíos desde Supabase
@@ -974,7 +948,7 @@
   }
 
   function updateMetrics() {
-    var pending = allSubmissions.filter(function(s){ return s.status === 'pending' || s.status === 'queue'; }).length;
+    var pending = allSubmissions.filter(function(s){ return s.status === 'pending' || s.status === 'queue' || s.status === 'listening'; }).length;
     var accepted = allSubmissions.filter(function(s){ return s.status === 'accepted'; }).length;
     document.getElementById('mQueue').textContent = pending;
     document.getElementById('mAccepted').textContent = accepted;
@@ -984,11 +958,17 @@
     document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
     btn.classList.add('active');
     currentTab = tab;
+    
+    var toolbar = document.getElementById('queueToolbar');
+    if (toolbar) {
+      toolbar.style.display = (tab === 'playlists_manager' || tab === 'radar_manager') ? 'none' : 'flex';
+    }
+
     if(tab === 'playlists_manager') {
       loadPlaylistsForManager();
     } else if(tab === 'radar_manager') {
       renderRadarManager();
-    if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
+      if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
     } else {
       renderQueue();
     }
@@ -997,48 +977,67 @@
   function refreshCurrentTab() {
     if(currentTab === 'radar_manager') {
       renderRadarManager();
-    if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
+      if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
       showToast('✓ Artistas en el Radar actualizados');
     } else if(currentTab === 'playlists_manager') {
       loadPlaylistsForManager();
       showToast('✓ Playlists actualizadas');
     } else {
       loadSubmissions();
-    // Verificar estado de vinculación de Spotify del curador
-    function reconnectSpotify() {
-    localStorage.removeItem('tniw_curator_spotify_refresh');
-    window.location.href = 'https://accounts.spotify.com/authorize?response_type=code&client_id=7a56561898eb4057941b2c1453476e10&scope=playlist-modify-public%20playlist-modify-private%20playlist-read-private%20playlist-read-collaborative%20user-read-private%20user-read-email&redirect_uri=https%3A%2F%2Fthenewindiewave.online%2Fapi%2Fspotify-callback&show_dialog=true';
-  }
-
-  function checkSpotifyAuthStatus() {
-    var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
-    var btn = document.getElementById('btnConnectSpotifyCurator');
-    var badge = document.getElementById('badgeSpotifyConnected');
-    if (rToken) {
-      if (btn) btn.style.display = 'none';
-      if (badge) badge.style.display = 'inline-flex';
-    } else {
-      if (btn) btn.style.display = 'inline-flex';
-      if (badge) badge.style.display = 'none';
-    }
-  }
-  checkSpotifyAuthStatus();
-
     }
   }
 
-  // 3. Renderizado de Canciones
+  // 3. Toggle de Acordeón
+  function toggleCardDetail(recordId, e) {
+    if (e && (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('a') || e.target.closest('button'))) {
+      return;
+    }
+    var detailEl = document.getElementById('detail-' + recordId);
+    var chevronEl = document.getElementById('chevron-' + recordId);
+    if (!detailEl) return;
+    var isOpen = detailEl.style.display !== 'none';
+    detailEl.style.display = isOpen ? 'none' : 'block';
+    if (chevronEl) {
+      if (isOpen) chevronEl.classList.remove('open');
+      else chevronEl.classList.add('open');
+    }
+    _expandedCardMap[recordId] = !isOpen;
+  }
+
+  function toggleAllCards(openState) {
+    document.querySelectorAll('.track-detail-body').forEach(function(el) {
+      el.style.display = openState ? 'block' : 'none';
+      var id = el.id.replace('detail-', '');
+      _expandedCardMap[id] = openState;
+    });
+    document.querySelectorAll('.btn-toggle-chevron').forEach(function(ch) {
+      if (openState) ch.classList.add('open');
+      else ch.classList.remove('open');
+    });
+  }
+
+  // 4. Renderizado Compacto de Canciones
   function renderQueue() {
     var container = document.getElementById('queueContainer');
+    var searchVal = (document.getElementById('queueSearchInput') ? document.getElementById('queueSearchInput').value : '').toLowerCase().trim();
+
     var filtered = allSubmissions.filter(function(s) {
-      if(currentTab === 'pending') return s.status === 'pending' || s.status === 'queue';
-      if(currentTab === 'accepted') return s.status === 'accepted';
-      if(currentTab === 'rejected') return s.status === 'rejected' || s.status === 'declined';
+      var matchesTab = true;
+      if(currentTab === 'pending') matchesTab = (s.status === 'pending' || s.status === 'queue' || s.status === 'listening');
+      else if(currentTab === 'accepted') matchesTab = (s.status === 'accepted');
+      else if(currentTab === 'rejected') matchesTab = (s.status === 'rejected' || s.status === 'declined');
+
+      if (!matchesTab) return false;
+
+      if (searchVal) {
+        var fullText = ((s.song_title || '') + ' ' + (s.artist_name || '') + ' ' + (s.playlist || '') + ' ' + (s.genre || '') + ' ' + (s.country || '') + ' ' + (s.email || '')).toLowerCase();
+        return fullText.includes(searchVal);
+      }
       return true;
     });
 
     if(filtered.length === 0) {
-      container.innerHTML = '<div class="empty-box">No hay canciones en este apartado actualmente.</div>';
+      container.innerHTML = '<div class="empty-box">' + (searchVal ? 'No se encontraron canciones que coincidan con la búsqueda.' : 'No hay canciones en este apartado actualmente.') + '</div>';
       return;
     }
 
@@ -1050,7 +1049,6 @@
       var waNumber = item.whatsapp || '';
       var cleanNotes = rawNotes;
 
-      // Extraer WhatsApp si viene empaquetado en notes
       if (!waNumber && rawNotes.includes('[WA:')) {
         var matchWa = rawNotes.match(/\[WA:\s*([^\]]+)\]/);
         if (matchWa) {
@@ -1068,118 +1066,125 @@
       }
 
       var waCleanDigits = waNumber ? waNumber.replace(/[^0-9]/g, '') : '';
+      var isExpanded = !!_expandedCardMap[item.id];
+
+      var actionBlock = '';
+      if (currentTab === 'pending') {
+        actionBlock = `
+          <div class="review-console" style="margin-top: 14px;">
+            <div class="feedback-header">
+              <span>FEEDBACK EDITORIAL PARA EL ARTISTA:</span>
+              <button class="btn-ai-assist" onclick="generateAiFeedback('${item.id}', '${item.genre}', '${item.playlist}')">
+                ✨ Generar Borrador con IA
+              </button>
+            </div>
+            <textarea class="feedback-textarea" id="fb-${item.id}" onfocus="markAsListening('${item.id}')" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
+            <div class="decision-actions">
+              <button class="btn-decline" onclick="updateDecision('${item.id}', 'declined')">
+                ✕ Declinar Envío
+              </button>
+              <button class="btn-accept" onclick="updateDecision('${item.id}', 'accepted')">
+                ✓ Aceptar para Playlist & Redes ↗
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (currentTab === 'accepted') {
+        actionBlock = `
+          <div style="background: rgba(187, 244, 81, 0.04); border: 1px solid rgba(187, 244, 81, 0.25); border-radius: 6px; padding: 14px; margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+              <span style="color: var(--accent-lime); font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
+                ✓ ACEPTADA EN PLAYLIST: ${item.playlist}
+              </span>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button onclick="insertToSpotifyManual('${item.spotify_url}', '${item.playlist}')" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                  ⚡ Insertar / Re-insertar en Spotify
+                </button>
+                <a href="estado.html?id=${encodeURIComponent(item.track_id || '')}" target="_blank" style="background: rgba(255,255,255,0.08); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 6px 12px; border-radius: 4px; text-decoration: none; border: 1px solid var(--border-strong);">
+                  🔗 Magic Link (${item.track_id || 'Ver Estado'}) ↗
+                </a>
+              </div>
+            </div>
+            ${item.feedback ? `
+              <div style="font-size: 12.5px; color: var(--text-main); background: rgba(0,0,0,0.4); padding: 10px 12px; border-radius: 4px; border-left: 3px solid var(--accent-lime);">
+                <strong>Feedback Enviado:</strong> "${item.feedback}"
+              </div>
+            ` : ''}
+          </div>
+        `;
+      } else if (currentTab === 'rejected') {
+        actionBlock = `
+          <div style="background: rgba(239, 68, 68, 0.04); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 14px; margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+              <span style="color: #ef4444; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
+                ✕ SOLICITUD DECLINADA
+              </span>
+              <a href="estado.html?id=${encodeURIComponent(item.track_id || '')}" target="_blank" style="background: rgba(255,255,255,0.08); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 6px 12px; border-radius: 4px; text-decoration: none; border: 1px solid var(--border-strong);">
+                🔗 Magic Link (${item.track_id || 'Ver Estado'}) ↗
+              </a>
+            </div>
+            ${item.feedback ? `
+              <div style="font-size: 12.5px; color: var(--text-main); background: rgba(0,0,0,0.4); padding: 10px 12px; border-radius: 4px; border-left: 3px solid #ef4444;">
+                <strong>Feedback Enviado:</strong> "${item.feedback}"
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
 
       return `
-        <div class="track-item ${isBoost ? 'boost' : ''}" id="item-${item.id}">
-          <div class="track-item-header">
-            <div class="track-meta-left">
-              <div class="track-cover-placeholder">♪</div>
-              <div>
-                <h3 class="track-title">${item.song_title || 'Sin Título'}</h3>
-                <div class="track-artist" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                  <strong>${item.artist_name || 'Artista'}</strong> • 📍 ${item.country || 'N/A'} • ✉️ <a href="mailto:${item.email}" style="color:inherit; text-decoration:underline;">${item.email}</a>
-                  ${waNumber ? ` • <a href="https://wa.me/${waCleanDigits}" target="_blank" style="color: #25D366; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: rgba(37,211,102,0.12); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(37,211,102,0.3); font-size: 11.5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp: ${waNumber} ↗</a>` : ''}
-                </div>
-                <div class="track-tags">
-                  <a href="${playlistLinksMap[item.playlist] || 'https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu'}" target="_blank" rel="noopener noreferrer" class="track-tag" style="color: var(--accent-lime); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; border-color: rgba(187, 244, 81, 0.35); background: rgba(187, 244, 81, 0.08); font-weight: 600;">🎯 Playlist: ${item.playlist} ↗</a>
-                  <span class="track-tag">🏷️ ${item.genre || 'Indie'}</span>
-                  <span class="track-tag">🌐 ${item.language || 'Español'}</span>
-                </div>
+        <div class="track-item compact-card ${isBoost ? 'boost' : ''}" id="item-${item.id}">
+          
+          <!-- FILA COMPACTA PRINCIPAL (Clic para desplegar) -->
+          <div class="compact-header" onclick="toggleCardDetail('${item.id}', event)">
+            <div class="compact-left">
+              <div class="compact-play-icon">▶</div>
+              <div class="compact-info">
+                <span class="compact-title">${item.song_title || 'Sin Título'}</span>
+                <span class="compact-artist">— ${item.artist_name || 'Artista'}</span>
+                <span class="compact-pill">📍 ${item.country || 'N/A'}</span>
+                <span class="compact-pill playlist-pill">🎯 ${item.playlist}</span>
+                <span class="compact-pill">🏷️ ${item.genre || 'Indie'}</span>
               </div>
             </div>
 
-            <div>
-              <span class="sla-badge ${isBoost ? 'sla-urgent' : 'sla-normal'}">
-                ${isBoost ? '⚡ IMPULSO PRIORITARIO' : '⏳ ESTÁNDAR (48H)'}
-              </span>
+            <div class="compact-right">
+              ${isBoost ? '<span class="sla-badge sla-urgent">⚡ IMPULSO</span>' : '<span class="sla-badge sla-normal">⏳ 48H</span>'}
+              ${currentTab === 'accepted' ? '<span class="badge-status-accepted">✓ ACEPTADA</span>' : (currentTab === 'rejected' ? '<span class="badge-status-declined">✕ DECLINADA</span>' : '<span class="badge-status-pending">● EN COLA</span>')}
+              <button class="btn-toggle-chevron ${isExpanded ? 'open' : ''}" id="chevron-${item.id}">▼</button>
             </div>
           </div>
 
-          ${spotifyEmbed ? `
-            <div class="player-embed-box">
-              <iframe style="border-radius:12px" src="${spotifyEmbed}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+          <!-- DETALLE DESPLEGABLE -->
+          <div class="track-detail-body" id="detail-${item.id}" style="display: ${isExpanded ? 'block' : 'none'};">
+            
+            <div class="detail-contact-row">
+              <span>✉️ Correo: <a href="mailto:${item.email}" style="color:inherit; text-decoration:underline;">${item.email}</a></span>
+              ${waNumber ? ` • <a href="https://wa.me/${waCleanDigits}" target="_blank" style="color: #25D366; font-weight: 600; text-decoration: none;">💬 WhatsApp: ${waNumber} ↗</a>` : ''}
+              • <a href="${playlistLinksMap[item.playlist] || 'https://open.spotify.com'}" target="_blank" style="color: var(--accent-lime); text-decoration: underline;">Abrir Playlist en Spotify ↗</a>
+              • <a href="estado.html?id=${encodeURIComponent(item.track_id || '')}" target="_blank" style="color: #38bdf8; text-decoration: underline;">🔗 Magic Link (${item.track_id || 'Ver Estado'}) ↗</a>
             </div>
-          ` : ''}
 
-          ${cleanNotes ? `
-            <div style="font-size: 12.5px; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 4px; margin-bottom: 14px;">
-              💬 <strong>Nota del Artista:</strong> "${cleanNotes}"
-            </div>
-          ` : ''}
+            ${spotifyEmbed ? `
+              <div class="player-embed-box">
+                <iframe style="border-radius:10px" src="${spotifyEmbed}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+              </div>
+            ` : ''}
 
-          ${(function(){
-            if (currentTab === 'pending') {
-              return `
-                <div class="review-console">
-                  <div class="feedback-header">
-                    <span>FEEDBACK EDITORIAL PARA EL ARTISTA:</span>
-                    <button class="btn-ai-assist" onclick="generateAiFeedback('${item.id}', '${item.genre}', '${item.playlist}')">
-                      ✨ Generar Borrador con IA
-                    </button>
-                  </div>
-                  
-                  <textarea class="feedback-textarea" id="fb-${item.id}" onfocus="markAsListening('${item.id}')" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
+            ${cleanNotes ? `
+              <div class="detail-note-box">
+                💬 <strong>Nota del Artista:</strong> "${cleanNotes}"
+              </div>
+            ` : ''}
 
-                  <div class="decision-actions">
-                    <button class="btn-decline" onclick="updateDecision('${item.id}', 'declined')">
-                      ✕ Declinar Envío
-                    </button>
-                    <button class="btn-accept" onclick="updateDecision('${item.id}', 'accepted')">
-                      ✓ Aceptar para Playlist & Redes ↗
-                    </button>
-                  </div>
-                </div>
-              `;
-            } else if (currentTab === 'accepted') {
-              return `
-                <div style="background: rgba(187, 244, 81, 0.04); border: 1px solid rgba(187, 244, 81, 0.25); border-radius: 6px; padding: 16px; margin-top: 14px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
-                    <span style="color: var(--accent-lime); font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
-                      ✓ ACEPTADA EN PLAYLIST
-                    </span>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                      <button onclick="insertToSpotifyManual('${item.spotify_url}', '${item.playlist}')" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: none; padding: 7px 14px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                        ⚡ Insertar / Re-insertar en Spotify
-                      </button>
-                      <a href="estado.html?id=${encodeURIComponent(item.track_id || '')}" target="_blank" style="background: rgba(255,255,255,0.08); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 7px 14px; border-radius: 4px; text-decoration: none; border: 1px solid var(--border-strong);">
-                        🔗 Magic Link (${item.track_id || 'Ver Estado'}) ↗
-                      </a>
-                    </div>
-                  </div>
-                  ${item.feedback ? `
-                    <div style="font-size: 13px; color: var(--text-main); background: rgba(0,0,0,0.4); padding: 10px 14px; border-radius: 4px; border-left: 3px solid var(--accent-lime);">
-                      <strong>Feedback Enviado:</strong> "${item.feedback}"
-                    </div>
-                  ` : ''}
-                </div>
-              `;
-            } else if (currentTab === 'rejected') {
-              return `
-                <div style="background: rgba(239, 68, 68, 0.04); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 16px; margin-top: 14px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
-                    <span style="color: #ef4444; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
-                      ✕ SOLICITUD DECLINADA
-                    </span>
-                    <a href="estado.html?id=${encodeURIComponent(item.track_id || '')}" target="_blank" style="background: rgba(255,255,255,0.08); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 7px 14px; border-radius: 4px; text-decoration: none; border: 1px solid var(--border-strong);">
-                      🔗 Magic Link (${item.track_id || 'Ver Estado'}) ↗
-                    </a>
-                  </div>
-                  ${item.feedback ? `
-                    <div style="font-size: 13px; color: var(--text-main); background: rgba(0,0,0,0.4); padding: 10px 14px; border-radius: 4px; border-left: 3px solid #ef4444;">
-                      <strong>Feedback Enviado:</strong> "${item.feedback}"
-                    </div>
-                  ` : ''}
-                </div>
-              `;
-            }
-            return '';
-          })()}
+            ${actionBlock}
+          </div>
         </div>
       `;
     }).join('');
   }
 
-  // 4. Transformar URL de Spotify en Embed
+  // 5. Utilidades y Helpers
   function getSpotifyEmbedUrl(url) {
     if(!url) return null;
     var match = url.match(/track\/([a-zA-Z0-9]+)/);
@@ -1189,13 +1194,12 @@
     return null;
   }
 
-  // 5. Asistente de Feedback con IA (Borrador inteligente instantáneo)
   function generateAiFeedback(id, genre, playlist) {
     var templates = [
       "Excelente atmósfera en los sintetizadores y buen groove rítmico. Tiene la vibra exacta que buscamos para enriquecer esta lista.",
       "Gran concepto y muy buena interpretación vocal. La producción encaja perfectamente con el mood indie de nuestro colectivo.",
-      "Muy buen trabajo en las guitarras y melodía envolvente. Para este lanzamiento buscamos algo con una dinámica distinta, ¡sigue creando!",
-      "La canción transmite una emoción muy auténtica. Nos encantaría considerarla para nuestros próximos showcases en vivo."
+      "Muy buen trabajo en las guitarras y melodía envolvente. La dinámica encaja muy bien con el estilo de la playlist.",
+      "La canción transmite una emoción muy auténtica y la mezcla suena sólida. ¡Gran lanzamiento independiente!"
     ];
     var randomText = templates[Math.floor(Math.random() * templates.length)];
     var ta = document.getElementById('fb-' + id);
@@ -1205,35 +1209,126 @@
     }
   }
 
-  function refreshCurrentTab() {
-    if(currentTab === 'playlists_manager') {
-      loadPlaylistsForManager();
-    } else {
-      loadSubmissions();
-    // Verificar estado de vinculación de Spotify del curador
-    function reconnectSpotify() {
-    localStorage.removeItem('tniw_curator_spotify_refresh');
-    window.location.href = 'https://accounts.spotify.com/authorize?response_type=code&client_id=7a56561898eb4057941b2c1453476e10&scope=playlist-modify-public%20playlist-modify-private%20playlist-read-private%20playlist-read-collaborative%20user-read-private%20user-read-email&redirect_uri=https%3A%2F%2Fthenewindiewave.online%2Fapi%2Fspotify-callback&show_dialog=true';
+  var _listeningMarks = {};
+  async function markAsListening(recordId) {
+    if (_listeningMarks[recordId]) return;
+    _listeningMarks[recordId] = true;
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ status: 'listening', updated_at: new Date().toISOString() })
+      });
+    } catch(e){}
   }
 
-  function checkSpotifyAuthStatus() {
+  async function insertToSpotifyManual(spotifyUrl, playlistName) {
     var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
-    var btn = document.getElementById('btnConnectSpotifyCurator');
-    var badge = document.getElementById('badgeSpotifyConnected');
-    if (rToken) {
-      if (btn) btn.style.display = 'none';
-      if (badge) badge.style.display = 'inline-flex';
-    } else {
-      if (btn) btn.style.display = 'inline-flex';
-      if (badge) badge.style.display = 'none';
+    showToast('⏳ Conectando con Spotify para insertar track...');
+    try {
+      var res = await fetch('/api/spotify-add-track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          spotify_url: spotifyUrl,
+          playlist_name: playlistName,
+          refresh_token: rToken
+        })
+      });
+      var data = await res.json();
+      if(data.success) {
+        showToast('⚡ ¡Canción insertada físicamente en Spotify con éxito!');
+      } else if (data.needs_auth) {
+        showToast('⚠️ Haz clic en "Vincular Spotify" arriba primero.');
+      } else {
+        showToast('⚠️ ' + (data.error || 'Error al insertar en Spotify'));
+      }
+    } catch(e) {
+      showToast('Error de conexión con Spotify API');
     }
   }
-  checkSpotifyAuthStatus();
 
+  async function updateDecision(recordId, status) {
+    var fbEl = document.getElementById('fb-' + recordId);
+    var fb = fbEl ? fbEl.value : '';
+
+    var item = allSubmissions.find(function(s){ return String(s.id) === String(recordId); });
+    if(item) {
+      item.status = status;
+      item.feedback = fb;
     }
+    renderQueue();
+    updateMetrics();
+
+    showToast(status === 'accepted' ? '🎉 ¡Canción ACEPTADA! Añadiendo a Spotify...' : '✓ Envío marcado como declinado');
+
+    if (status === 'accepted' && item && item.spotify_url && item.playlist) {
+      var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
+      fetch('/api/spotify-add-track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          spotify_url: item.spotify_url,
+          playlist_name: item.playlist,
+          refresh_token: rToken
+        })
+      })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if (data.success) {
+          showToast('⚡ ¡Canción insertada físicamente en tu Playlist de Spotify!');
+        } else if (data.needs_auth) {
+          showToast('⚠️ Vincula tu cuenta de Spotify arriba para inserción automática.');
+        } else {
+          console.warn('Spotify add warning:', data.error);
+        }
+      })
+      .catch(function(err){
+        console.error('Error al insertar en Spotify:', err);
+      });
+    }
+
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          status: status,
+          feedback: fb,
+          updated_at: new Date().toISOString()
+        })
+      });
+
+      if(!res.ok) {
+        await fetch(SUPABASE_URL + '/rest/v1/submissions?track_id=eq.' + recordId, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            status: status,
+            feedback: fb,
+            updated_at: new Date().toISOString()
+          })
+        });
+      }
+    } catch(e) {}
   }
 
-  // 7. GESTOR Y EDITOR DE ETIQUETAS DE PLAYLISTS
+  // 6. GESTIÓN DE PLAYLISTS & ETIQUETAS
   var livePlaylists = [];
   async function loadPlaylistsForManager() {
     var container = document.getElementById('queueContainer');
@@ -1305,669 +1400,37 @@
     showToast('✓ Etiquetas de la playlist actualizadas');
   }
 
-  // 8. Actualizar Decisión en Supabase en Tiempo Real
-    // Función manual para insertar track en Spotify
-  async function insertToSpotifyManual(spotifyUrl, playlistName) {
-    var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
-    showToast('⏳ Conectando con Spotify para insertar track...');
-    try {
-      var res = await fetch('/api/spotify-add-track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          spotify_url: spotifyUrl,
-          playlist_name: playlistName,
-          refresh_token: rToken
-        })
-      });
-      var data = await res.json();
-      if(data.success) {
-        showToast('⚡ ¡Canción insertada físicamente en Spotify con éxito!');
-      } else if (data.needs_auth) {
-        showToast('⚠️ Haz clic en "Vincular Spotify" arriba primero.');
-      } else {
-        showToast('⚠️ ' + (data.error || 'Error al insertar en Spotify'));
-      }
-    } catch(e) {
-      showToast('Error de conexión con Spotify API');
-    }
-  }
-
-  async function updateDecision(recordId, status) {
-    var fbEl = document.getElementById('fb-' + recordId);
-    var fb = fbEl ? fbEl.value : '';
-
-    // Actualización reactiva instantánea en la interfaz
-    var item = allSubmissions.find(function(s){ return String(s.id) === String(recordId); });
-    if(item) {
-      item.status = status;
-      item.feedback = fb;
-    }
-    renderQueue();
-    updateMetrics();
-
-    showToast(status === 'accepted' ? '🎉 ¡Canción ACEPTADA! Añadiendo a Spotify...' : '✓ Envío marcado como declinado');
-
-    // Si fue aceptada, insertar automáticamente en la playlist de Spotify
-    if (status === 'accepted' && item && item.spotify_url && item.playlist) {
-      var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
-      fetch('/api/spotify-add-track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          spotify_url: item.spotify_url,
-          playlist_name: item.playlist,
-          refresh_token: rToken
-        })
-      })
-      .then(function(res){ return res.json(); })
-      .then(function(data){
-        if (data.success) {
-          showToast('⚡ ¡Canción insertada físicamente en tu Playlist de Spotify!');
-        } else if (data.needs_auth) {
-          showToast('⚠️ Vincula tu cuenta de Spotify arriba para inserción automática.');
-        } else {
-          console.warn('Spotify add warning:', data.error);
-        }
-      })
-      .catch(function(err){
-        console.error('Error al insertar en Spotify:', err);
-      });
-    }
-
-    try {
-      var res = await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          status: status,
-          feedback: fb,
-          updated_at: new Date().toISOString()
-        })
-      });
-
-      if(!res.ok) {
-        // Reintentar con track_id si el id fuera personalizado
-        await fetch(SUPABASE_URL + '/rest/v1/submissions?track_id=eq.' + recordId, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({
-            status: status,
-            feedback: fb,
-            updated_at: new Date().toISOString()
-          })
-        });
-      }
-    } catch(err) {
-      console.error('Error al sincronizar decisión con Supabase:', err);
-    }
-  }
-
-  
-  // ==========================================
-  // GESTIÓN DE ARTISTAS EN EL RADAR
-  // ==========================================
+  // 7. GESTOR DE ARTISTAS EN EL RADAR
   function renderRadarManager() {
     var container = document.getElementById('queueContainer');
-    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
-    
-    var top3 = list.filter(function(a){ return a.type === 'top3'; });
-    var secondary = list.filter(function(a){ return a.type === 'secondary'; });
-
-    var html = `
-      <div style="background: linear-gradient(180deg, #18181f 0%, #121216 100%); border: 1px solid var(--border-strong); border-radius: 8px; padding: 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-        <div>
-          <h3 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 4px;">🌟 GESTIÓN DE ARTISTAS EN EL RADAR</h3>
-          <p style="font-size: 13px; color: var(--text-muted);">Administra los 3 artistas Top con fotos/videos y mini-player, y las cards secundarias con fichas expandidas.</p>
-        </div>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button onclick="openRadarModal()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 10px 18px; border-radius: 4px; border: none; cursor: pointer;">
-            + AÑADIR ARTISTA AL RADAR
-          </button>
-          <button onclick="resetRadarToDefaults()" style="background: transparent; color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; padding: 10px 14px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer;">
-            🔄 Restaurar Valores por Defecto
-          </button>
-        </div>
+    var list = (window.RADAR_ARTISTS || []);
+    container.innerHTML = `
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 20px;">
+        <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; margin-bottom: 4px;">🌟 ARTISTAS EN EL RADAR</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">Directorio curado de talentos emergentes publicados en la web oficial.</p>
       </div>
-
-      <!-- SECCIÓN TOP 3 DESTACADOS -->
-      <div style="margin-bottom: 32px;">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-          <span style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 3px;">TOP 3</span>
-          <h4 style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; text-transform: uppercase;">Artistas Destacados (Grandes con Media & Mini Player)</h4>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px;">
-          ${top3.map(function(item, idx) {
-            var mediaThumb = item.media_url || 'logo.png';
-            return `
-              <div class="track-item" style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(187, 244, 81, 0.3);">
-                <div>
-                  <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 14px;">
-                    <img src="${mediaThumb}" style="width: 56px; height: 56px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border);" onerror="this.src='logo.png'">
-                    <div>
-                      <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); font-weight: 700;">#${idx + 1} • ${item.badge || 'TOP RADAR'}</div>
-                      <h4 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: #fff;">${item.name}</h4>
-                      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">📍 ${item.city} • ${item.genre}</div>
-                    </div>
-                  </div>
-                  <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.4; margin-bottom: 12px;">"${item.short_bio}"</p>
-                  <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-cyan); margin-bottom: 14px; background: rgba(56, 189, 248, 0.08); padding: 4px 8px; border-radius: 4px;">
-                    🎵 Spotify ID: ${item.track_id || 'Sin track configurado'}
-                  </div>
-                </div>
-
-                <div style="display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap;">
-                  <button onclick="openRadarModal('${item.id}')" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 8px; border-radius: 4px; cursor: pointer;">
-                    ✏️ Editar
-                  </button>
-                  <button onclick="toggleRadarType('${item.id}', 'secondary')" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; padding: 8px 10px; border-radius: 4px; cursor: pointer;">
-                    ⬇ Bajar a Secundario
-                  </button>
-                  <button onclick="deleteRadarArtist('${item.id}')" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: var(--font-mono); font-size: 11px; padding: 8px 10px; border-radius: 4px; cursor: pointer;">
-                    🗑️
-                  </button>
-                </div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        ${list.map(a => `
+          <div class="track-item" style="padding: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <div>
+                <strong>${a.name}</strong> • <span style="color:var(--text-muted); font-size:12px;">${a.city || ''} (${a.genre || ''})</span>
               </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-
-      <!-- SECCIÓN SECUNDARIOS (11) -->
-      <div>
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-          <span style="background: var(--accent-cyan); color: #000; font-family: var(--font-mono); font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 3px;">SECUNDARIOS</span>
-          <h4 style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; text-transform: uppercase;">Selección Emergente (${secondary.length} Artistas)</h4>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
-          ${secondary.map(function(item) {
-            var mediaThumb = item.media_url || 'logo.png';
-            return `
-              <div class="track-item" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                  <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 10px;">
-                    <img src="${mediaThumb}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border);" onerror="this.src='logo.png'">
-                    <div>
-                      <h4 style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: #fff;">${item.name}</h4>
-                      <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim);">📍 ${item.city}</div>
-                    </div>
-                  </div>
-                  <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan); margin-bottom: 8px;">${item.genre}</div>
-                  <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 12px;">"${item.short_bio}"</p>
-                </div>
-
-                <div style="display: flex; gap: 6px; border-top: 1px solid var(--border); padding-top: 10px;">
-                  <button onclick="toggleRadarType('${item.id}', 'top3')" style="flex: 1; background: rgba(187, 244, 81, 0.1); border: 1px solid rgba(187, 244, 81, 0.3); color: var(--accent-lime); font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; padding: 6px; border-radius: 4px; cursor: pointer;">
-                    ⬆ Subir a Top 3
-                  </button>
-                  <button onclick="openRadarModal('${item.id}')" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
-                    ✏️
-                  </button>
-                  <button onclick="deleteRadarArtist('${item.id}')" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: var(--font-mono); font-size: 10.5px; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
-                    🗑️
-                  </button>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `;
-
-    container.innerHTML = html;
-  }
-
-  function openRadarModal(artistId) {
-    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
-    var artist = artistId ? list.find(function(a){ return a.id === artistId; }) : null;
-
-    var modalHtml = `
-      <div class="artist-modal-overlay open" id="curatorRadarModal" style="display: flex; z-index: 99999;">
-        <div class="artist-modal" style="max-width: 620px; padding: 26px; background: #121217;">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 18px;">
-            <h3 style="font-family: var(--font-heading); font-size: 19px; font-weight: 800; color: #fff;">
-              ${artist ? '✏️ EDITAR ARTISTA EN EL RADAR' : '✨ AÑADIR NUEVO ARTISTA'}
-            </h3>
-            <button onclick="closeRadarModal()" style="background: transparent; border: none; color: #fff; font-size: 18px; cursor: pointer;">✕</button>
+              <span class="track-tag" style="background:rgba(187,244,81,0.1); color:var(--accent-lime);">${a.badge || 'DESTACADO'}</span>
+            </div>
           </div>
-
-          <form onsubmit="handleRadarFormSubmit(event, '${artist ? artist.id : ''}')" style="display: flex; flex-direction: column; gap: 14px; max-height: 72vh; overflow-y: auto; padding-right: 6px;">
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Artista / Banda *</label>
-                <input type="text" id="rfName" required value="${artist ? artist.name : ''}" placeholder="Ej. Lunar Daydream" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
-              </div>
-              <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ciudad / Origen *</label>
-                <input type="text" id="rfCity" required value="${artist ? artist.city : ''}" placeholder="Ej. CIUDAD DE MÉXICO" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género Musical *</label>
-                <select id="rfGenre" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:12.5px; font-weight:700; cursor:pointer;">
-                  <option value="DREAM POP / SHOEGAZE" ${artist && artist.genre === 'DREAM POP / SHOEGAZE' ? 'selected' : ''}>DREAM POP / SHOEGAZE</option>
-                  <option value="POST-PUNK / DARKWAVE" ${artist && artist.genre === 'POST-PUNK / DARKWAVE' ? 'selected' : ''}>POST-PUNK / DARKWAVE</option>
-                  <option value="INDIE POP / FOLK" ${artist && artist.genre === 'INDIE POP / FOLK' ? 'selected' : ''}>INDIE POP / FOLK</option>
-                  <option value="BEDROOM POP / LO-FI" ${artist && artist.genre === 'BEDROOM POP / LO-FI' ? 'selected' : ''}>BEDROOM POP / LO-FI</option>
-                  <option value="INDIE ROCK / GARAJE" ${artist && artist.genre === 'INDIE ROCK / GARAJE' ? 'selected' : ''}>INDIE ROCK / GARAJE</option>
-                  <option value="SYNTH POP / NEW WAVE" ${artist && artist.genre === 'SYNTH POP / NEW WAVE' ? 'selected' : ''}>SYNTH POP / NEW WAVE</option>
-                  <option value="DARKWAVE / EBM" ${artist && artist.genre === 'DARKWAVE / EBM' ? 'selected' : ''}>DARKWAVE / EBM</option>
-                  <option value="SHOEGAZE / NOISE" ${artist && artist.genre === 'SHOEGAZE / NOISE' ? 'selected' : ''}>SHOEGAZE / NOISE</option>
-                  <option value="INDIE FOLK / PSICODELIA" ${artist && artist.genre === 'INDIE FOLK / PSICODELIA' ? 'selected' : ''}>INDIE FOLK / PSICODELIA</option>
-                  <option value="POST-PUNK / GARAJE" ${artist && artist.genre === 'POST-PUNK / GARAJE' ? 'selected' : ''}>POST-PUNK / GARAJE</option>
-                  <option value="LO-FI BEATS / CHILL" ${artist && artist.genre === 'LO-FI BEATS / CHILL' ? 'selected' : ''}>LO-FI BEATS / CHILL</option>
-                  <option value="GOTH ROCK / DARKWAVE" ${artist && artist.genre === 'GOTH ROCK / DARKWAVE' ? 'selected' : ''}>GOTH ROCK / DARKWAVE</option>
-                  <option value="MATH ROCK / EMO INDIE" ${artist && artist.genre === 'MATH ROCK / EMO INDIE' ? 'selected' : ''}>MATH ROCK / EMO INDIE</option>
-                  <option value="INDIE ROCK / ALTERNATIVO" ${artist && artist.genre === 'INDIE ROCK / ALTERNATIVO' ? 'selected' : ''}>INDIE ROCK / ALTERNATIVO</option>
-                  <option value="INDIE POP / ELECTROPOP" ${artist && artist.genre === 'INDIE POP / ELECTROPOP' ? 'selected' : ''}>INDIE POP / ELECTROPOP</option>
-                  <option value="ART ROCK / EXPERIMENTAL" ${artist && artist.genre === 'ART ROCK / EXPERIMENTAL' ? 'selected' : ''}>ART ROCK / EXPERIMENTAL</option>
-                  <option value="HYPERPOP / GLITCH" ${artist && artist.genre === 'HYPERPOP / GLITCH' ? 'selected' : ''}>HYPERPOP / GLITCH</option>
-                  <option value="INDIE R&B / NEO-SOUL" ${artist && artist.genre === 'INDIE R&B / NEO-SOUL' ? 'selected' : ''}>INDIE R&B / NEO-SOUL</option>
-                  <option value="ELECTRO INDIE / DANCE" ${artist && artist.genre === 'ELECTRO INDIE / DANCE' ? 'selected' : ''}>ELECTRO INDIE / DANCE</option>
-                  <option value="URBANO ALTERNATIVO / TRAP INDIE" ${artist && artist.genre === 'URBANO ALTERNATIVO / TRAP INDIE' ? 'selected' : ''}>URBANO ALTERNATIVO / TRAP INDIE</option>
-                  <option value="MIDWEST EMO / SCREAMO" ${artist && artist.genre === 'MIDWEST EMO / SCREAMO' ? 'selected' : ''}>MIDWEST EMO / SCREAMO</option>
-                  <option value="PSICODELIA / SPACE ROCK" ${artist && artist.genre === 'PSICODELIA / SPACE ROCK' ? 'selected' : ''}>PSICODELIA / SPACE ROCK</option>
-                  <option value="PUNK ROCK / HARDCORE" ${artist && artist.genre === 'PUNK ROCK / HARDCORE' ? 'selected' : ''}>PUNK ROCK / HARDCORE</option>
-                  <option value="SKA / SKA-PUNK" ${artist && artist.genre === 'SKA / SKA-PUNK' ? 'selected' : ''}>SKA / SKA-PUNK</option>
-                  <option value="REGGAE / DANCEHALL" ${artist && artist.genre === 'REGGAE / DANCEHALL' ? 'selected' : ''}>REGGAE / DANCEHALL</option>
-                  <option value="AMBIENT / NEOCLÁSICO" ${artist && artist.genre === 'AMBIENT / NEOCLÁSICO' ? 'selected' : ''}>AMBIENT / NEOCLÁSICO</option>
-                  <option value="ELECTRÓNICA / TECHNO / HOUSE" ${artist && artist.genre === 'ELECTRÓNICA / TECHNO / HOUSE' ? 'selected' : ''}>ELECTRÓNICA / TECHNO / HOUSE</option>
-                  <option value="FOLK ROCK / ACÚSTICO" ${artist && artist.genre === 'FOLK ROCK / ACÚSTICO' ? 'selected' : ''}>FOLK ROCK / ACÚSTICO</option>
-                  <option value="JANGLE POP / C86" ${artist && artist.genre === 'JANGLE POP / C86' ? 'selected' : ''}>JANGLE POP / C86</option>
-                  <option value="TRIP HOP / DOWNTEMPO" ${artist && artist.genre === 'TRIP HOP / DOWNTEMPO' ? 'selected' : ''}>TRIP HOP / DOWNTEMPO</option>
-                  <option value="DARK SYNTH / INDUSTRIAL" ${artist && artist.genre === 'DARK SYNTH / INDUSTRIAL' ? 'selected' : ''}>DARK SYNTH / INDUSTRIAL</option>
-                </select>
-              </div>
-              <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Categoría *</label>
-                <select id="rfType" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
-                  <option value="top3" ${artist && artist.type === 'top3' ? 'selected' : ''}>🔥 TOP 3 Destacado</option>
-                  <option value="secondary" ${!artist || artist.type === 'secondary' ? 'selected' : ''}>⚡ Secundario (Lista 11)</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">
-                Clasificación de Artista *
-              </label>
-              <select id="rfBadge" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; font-weight:700; cursor:pointer;">
-                <option value="SOLISTA" ${(artist && artist.badge === 'SOLISTA') ? 'selected' : ''}>SOLISTA</option>
-                <option value="DÚO" ${(artist && artist.badge === 'DÚO') ? 'selected' : ''}>DÚO</option>
-                <option value="TRÍO" ${(artist && artist.badge === 'TRÍO') ? 'selected' : ''}>TRÍO</option>
-                <option value="AGRUPACIÓN" ${(!artist || artist.badge === 'AGRUPACIÓN') ? 'selected' : ''}>AGRUPACIÓN</option>
-                <option value="BANDA" ${(artist && artist.badge === 'BANDA') ? 'selected' : ''}>BANDA</option>
-                <option value="PRODUCER" ${(artist && artist.badge === 'PRODUCER') ? 'selected' : ''}>PRODUCER</option>
-                <option value="DJ" ${(artist && artist.badge === 'DJ') ? 'selected' : ''}>DJ</option>
-                <option value="COLECTIVO" ${(artist && artist.badge === 'COLECTIVO') ? 'selected' : ''}>COLECTIVO</option>
-                <option value="PROYECTO" ${(artist && artist.badge === 'PROYECTO') ? 'selected' : ''}>PROYECTO</option>
-              </select>
-            </div>
-
-            <div>
-              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">
-                Foto o Video del Artista (Cloudinary / URL directa / Archivo de PC)
-              </label>
-              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
-                <input type="text" id="rfMediaUrl" value="${artist ? (artist.media_url || '') : ''}" placeholder="https://res.cloudinary.com/... o pega enlace" style="flex: 1; min-width: 220px; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;" oninput="previewRadarMedia(this.value)">
-                <label for="rfFileInput" style="background: rgba(187, 244, 81, 0.15); border: 1px solid var(--accent-lime); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 9px 14px; border-radius: 4px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
-                  📁 Subir desde PC
-                </label>
-                <input type="file" id="rfFileInput" accept="image/*,video/*" style="display:none;" onchange="handleDirectFileUpload(this)">
-                <span id="rfUploadStatus" style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); font-weight: 700; display: none;"></span>
-              </div>
-              <div id="rfMediaPreview" style="display: ${artist && artist.media_url ? 'inline-block' : 'none'}; margin-top: 6px; background: #000; padding: 6px; border-radius: 6px; border: 1px solid var(--border);">
-                <img id="rfMediaPreviewImg" src="${artist ? (artist.media_url || '') : ''}" style="max-height: 85px; border-radius: 4px; display: block;" onerror="this.parentElement.style.display='none'">
-              </div>
-            </div>
-
-            <div>
-              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 4px;">
-                🎵 Mini-Player (Pega Track ID de Spotify, Link de YouTube o SoundCloud)
-              </label>
-              <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="Ej. 3n3Ppam... (Spotify), https://youtu.be/... (YouTube) o https://soundcloud.com/... (SoundCloud)" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
-            </div>
-
-            <div>
-              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Frase Breve para la Card (< 100 caracteres) *</label>
-              <input type="text" id="rfShortBio" required maxlength="120" value="${artist ? artist.short_bio : ''}" placeholder="Frase corta sobre su propuesta sonora..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
-            </div>
-
-            <div>
-              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Reseña (Para Ficha Expandida) *</label>
-              <textarea id="rfFullReview" required rows="3" placeholder="Texto de la reseña editorial que se mostrará en el modal..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.full_review || '') : ''}</textarea>
-            </div>
-
-            <!-- ENLACES Y REDES SOCIALES (Solo se muestran si se llenan) -->
-            <div style="border-top: 1px solid var(--border); padding-top: 12px;">
-              <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 10px;">
-                🌐 Enlaces & Redes Sociales (Los que dejes vacíos no se mostrarán):
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Spotify (URL)</label>
-                  <input type="url" id="rfSpotifyUrl" value="${artist ? (artist.spotify_url || '') : ''}" placeholder="https://open.spotify.com/artist/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
-                </div>
-                <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Instagram (URL o @usuario)</label>
-                  <input type="text" id="rfInstagram" value="${artist ? (artist.instagram || '') : ''}" placeholder="@usuario o link completo" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Apple Music (URL)</label>
-                  <input type="url" id="rfAppleUrl" value="${artist ? (artist.apple_music_url || '') : ''}" placeholder="https://music.apple.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
-                </div>
-                <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">YouTube (URL)</label>
-                  <input type="url" id="rfYoutubeUrl" value="${artist ? (artist.youtube_url || '') : ''}" placeholder="https://youtube.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">TikTok (URL o @usuario)</label>
-                  <input type="text" id="rfTiktokUrl" value="${artist ? (artist.tiktok_url || '') : ''}" placeholder="@usuario o link" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
-                </div>
-                <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Bandcamp (URL)</label>
-                  <input type="url" id="rfBandcampUrl" value="${artist ? (artist.bandcamp_url || '') : ''}" placeholder="https://artista.bandcamp.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
-                </div>
-                <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">SoundCloud (URL)</label>
-                  <input type="url" id="rfSoundcloudUrl" value="${artist ? (artist.soundcloud_url || '') : ''}" placeholder="https://soundcloud.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Sitio Web Oficial (URL)</label>
-                  <input type="url" id="rfWebsiteUrl" value="${artist ? (artist.website_url || '') : ''}" placeholder="https://miweb.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
-                </div>
-                <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Otro / Linktree (URL)</label>
-                  <input type="url" id="rfOtherUrl" value="${artist ? (artist.other_url || '') : ''}" placeholder="https://linktr.ee/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
-                </div>
-              </div>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px;">
-              <button type="button" onclick="closeRadarModal()" style="background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; padding: 10px 16px; border-radius: 4px; cursor: pointer;">Cancelar</button>
-              <button type="submit" style="background: var(--accent-lime); border: none; color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Guardar Artista ✓</button>
-            </div>
-          </form>
-        </div>
+        `).join('')}
       </div>
     `;
-
-    var oldModal = document.getElementById('curatorRadarModal');
-    if(oldModal) oldModal.remove();
-
-    var div = document.createElement('div');
-    div.innerHTML = modalHtml;
-    document.body.appendChild(div.firstElementChild);
   }
 
-  function closeRadarModal() {
-    var modal = document.getElementById('curatorRadarModal');
-    if(modal) modal.remove();
-  }
-
-  function handleRadarFormSubmit(e, existingId) {
-    e.preventDefault();
-    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
-    
-    var artistData = {
-      id: existingId || ('radar-' + Date.now()),
-      name: document.getElementById('rfName').value.trim(),
-      city: document.getElementById('rfCity').value.trim().toUpperCase(),
-      genre: document.getElementById('rfGenre').value.trim().toUpperCase(),
-      type: document.getElementById('rfType').value,
-      badge: (document.getElementById('rfBadge') ? document.getElementById('rfBadge').value.trim().toUpperCase() : 'AGRUPACIÓN'),
-      media_type: (document.getElementById('rfMediaUrl').value.endsWith('.mp4')) ? 'video' : 'image',
-      media_url: document.getElementById('rfMediaUrl').value.trim(),
-      track_id: document.getElementById('rfTrackId').value.trim(),
-      short_bio: document.getElementById('rfShortBio').value.trim(),
-      full_review: document.getElementById('rfFullReview').value.trim(),
-      spotify_url: (document.getElementById('rfSpotifyUrl') ? document.getElementById('rfSpotifyUrl').value.trim() : ''),
-      instagram: (document.getElementById('rfInstagram') ? document.getElementById('rfInstagram').value.trim() : ''),
-      apple_music_url: (document.getElementById('rfAppleUrl') ? document.getElementById('rfAppleUrl').value.trim() : ''),
-      youtube_url: (document.getElementById('rfYoutubeUrl') ? document.getElementById('rfYoutubeUrl').value.trim() : ''),
-      tiktok_url: (document.getElementById('rfTiktokUrl') ? document.getElementById('rfTiktokUrl').value.trim() : ''),
-      bandcamp_url: (document.getElementById('rfBandcampUrl') ? document.getElementById('rfBandcampUrl').value.trim() : ''),
-      soundcloud_url: (document.getElementById('rfSoundcloudUrl') ? document.getElementById('rfSoundcloudUrl').value.trim() : ''),
-      website_url: (document.getElementById('rfWebsiteUrl') ? document.getElementById('rfWebsiteUrl').value.trim() : ''),
-      other_url: (document.getElementById('rfOtherUrl') ? document.getElementById('rfOtherUrl').value.trim() : '')
-    };
-
-    if(existingId) {
-      var idx = list.findIndex(function(a){ return a.id === existingId; });
-      if(idx !== -1) list[idx] = artistData;
-    } else {
-      list.unshift(artistData);
-    }
-
-    saveRadarArtists(list);
-    if (typeof saveRadarArtistToSupabase === 'function') {
-      saveRadarArtistToSupabase(artistData);
-    }
-    closeRadarModal();
-    renderRadarManager();
-    if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
-    showToast('✓ Artista guardado con éxito');
-  }
-
-  async function toggleRadarType(artistId, newType) {
-    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
-    var item = list.find(function(a){ return a.id === artistId; });
-    if(item) {
-      item.type = newType;
-      saveRadarArtists(list);
-      renderRadarManager();
-    if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
-      showToast('✓ Categoría cambiada a ' + (newType === 'top3' ? 'Top 3' : 'Secundario'));
-
-      try {
-        await fetch(SUPABASE_URL + '/rest/v1/radar_artists?id=eq.' + encodeURIComponent(artistId), {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ type: newType })
-        });
-      } catch(e) {}
-    }
-  }
-
-  async function deleteRadarArtist(artistId) {
-    if(!confirm('¿Seguro que deseas eliminar este artista del radar?')) return;
-    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : [];
-    list = list.filter(function(a){ return a.id !== artistId; });
-    saveRadarArtists(list);
-    renderRadarManager();
-    if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
-    showToast('✓ Artista eliminado del radar');
-
-    try {
-      await fetch(SUPABASE_URL + '/rest/v1/radar_artists?id=eq.' + encodeURIComponent(artistId), {
-        method: 'DELETE',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-        }
-      });
-    } catch(e) {}
-  }
-
-  
-  // GENERADOR DE FIRMA SHA-1 EN EL CLIENTE (Web Crypto API Nativo)
-  async function sha1Hex(str) {
-    var buffer = new TextEncoder().encode(str);
-    var hashBuffer = await crypto.subtle.digest('SHA-1', buffer);
-    var hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-  }
-
-  // SUBIDA STREAMING DIRECTA A CLOUDINARY (0% Memoria RAM, soporta videos hasta 100MB)
-  async function handleDirectFileUpload(input) {
-    if (!input.files || !input.files[0]) return;
-    var file = input.files[0];
-    var statusEl = document.getElementById('rfUploadStatus');
-    var mediaUrlInput = document.getElementById('rfMediaUrl');
-    var isVideo = file.type.startsWith('video');
-
-    // Mostrar vista previa local instantánea con 0 bytes de RAM
-    var localBlobUrl = URL.createObjectURL(file);
-    previewRadarMedia(localBlobUrl);
-
-    if (statusEl) {
-      statusEl.style.display = 'inline-block';
-      statusEl.style.color = 'var(--accent-lime)';
-      statusEl.textContent = '⏳ Preparando ' + file.name + '...';
-    }
-    showToast('⏳ Subiendo a Cloudinary: 0%');
-
-    try {
-      var cloudName = 'ckknw1do';
-      var apiKey = '254625267987334';
-      var apiSecret = 'cm4UMlpil-ixQAovLrfUUkWm-vo';
-      var timestamp = Math.round(new Date().getTime() / 1000);
-      var signature = await sha1Hex('timestamp=' + timestamp + apiSecret);
-
-      var formData = new FormData();
-      formData.append('file', file);
-      formData.append('api_key', apiKey);
-      formData.append('timestamp', timestamp);
-      formData.append('signature', signature);
-
-      var endpoint = isVideo 
-        ? 'https://api.cloudinary.com/v1_1/' + cloudName + '/video/upload'
-        : 'https://api.cloudinary.com/v1_1/' + cloudName + '/image/upload';
-
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', endpoint);
-
-      xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable) {
-          var percent = Math.round((e.loaded / e.total) * 100);
-          if (statusEl) statusEl.textContent = '⏳ Subiendo: ' + percent + '%';
-          showToast('⏳ Subiendo: ' + percent + '%');
-        }
-      };
-
-      xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            var data = JSON.parse(xhr.responseText);
-            if (data && data.secure_url) {
-              mediaUrlInput.value = data.secure_url;
-              previewRadarMedia(data.secure_url);
-              if (statusEl) {
-                statusEl.style.color = 'var(--accent-lime)';
-                statusEl.textContent = '✓ Subido a Cloudinary';
-              }
-              showToast('✓ Archivo subido con éxito a Cloudinary');
-            } else {
-              throw new Error('Respuesta inválida');
-            }
-          } catch(err) {
-            if (statusEl) {
-              statusEl.style.color = '#ef4444';
-              statusEl.textContent = '✕ Error al guardar respuesta';
-            }
-            showToast('✕ Error al procesar respuesta');
-          }
-        } else {
-          var errMsg = 'Error HTTP ' + xhr.status;
-          try {
-            var errData = JSON.parse(xhr.responseText);
-            if (errData.error && errData.error.message) errMsg = errData.error.message;
-          } catch(e) {}
-          if (statusEl) {
-            statusEl.style.color = '#ef4444';
-            statusEl.textContent = '✕ ' + errMsg;
-          }
-          showToast('✕ Error Cloudinary: ' + errMsg);
-        }
-      };
-
-      xhr.onerror = function() {
-        if (statusEl) {
-          statusEl.style.color = '#ef4444';
-          statusEl.textContent = '✕ Error de conexión con Cloudinary';
-        }
-        showToast('✕ Error de red con Cloudinary');
-      };
-
-      xhr.send(formData);
-
-    } catch(err) {
-      console.error('Error durante subida:', err);
-      if (statusEl) {
-        statusEl.style.color = '#ef4444';
-        statusEl.textContent = '✕ Error: ' + err.message;
-      }
-      showToast('✕ Error al iniciar subida');
-    }
-  }
-
-  function previewRadarMedia(url) {
-    var prev = document.getElementById('rfMediaPreview');
-    var prevImg = document.getElementById('rfMediaPreviewImg');
-    if (prev && prevImg) {
-      if (url && url.trim()) {
-        prevImg.src = url.trim();
-        prevImg.style.display = 'block';
-        prev.style.display = 'inline-block';
-      } else {
-        prev.style.display = 'none';
-      }
-    }
-  }
-
-    function saveRadarArtists(artists) {
-    try {
-      var str = JSON.stringify(artists);
-      // Seguridad: si supera límite seguro de 3MB, avisar
-      if (str.length > 3500000) {
-        console.warn('Caché cercano al límite de localStorage');
-      }
-      localStorage.setItem('tniw_radar_artists', str);
-    } catch(e) {
-      console.error('Error guardando radar', e);
-      showToast('⚠️ No se pudo almacenar en caché local (Límite excedido)');
-    }
-  }
-
-    function showToast(msg) {
-    var toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.add('active');
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(function() {
-      toast.classList.remove('active');
-    }, 3200);
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(function() { t.style.display = 'none'; }, 3500);
   }
 </script>
-
 </body>
 </html>
