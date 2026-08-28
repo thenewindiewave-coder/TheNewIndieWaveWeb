@@ -3,6 +3,10 @@
   "cleanUrls": true,
   "routes": [
     {
+      "src": "/artista",
+      "dest": "/api/artista"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },

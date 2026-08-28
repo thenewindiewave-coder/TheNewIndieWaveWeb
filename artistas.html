@@ -1504,9 +1504,16 @@
 
   function shareCurrentArtist() {
     if (!currentOpenArtist) return;
-    var shareUrl = window.location.origin + window.location.pathname + '?artista=' + encodeURIComponent(currentOpenArtist.id);
-    var shareTitle = currentOpenArtist.name + ' — Artistas en el Radar // The New Indie Wave';
-    var shareText = 'Descubre a ' + currentOpenArtist.name + ' (' + currentOpenArtist.genre + ') en The New Indie Wave:';
+    var slug = currentOpenArtist.id;
+    var shareUrl = 'https://thenewindiewave.online/artista?id=' + encodeURIComponent(slug);
+    var shareTitle = currentOpenArtist.name;
+    
+    // FORMATO SOLICITADO:
+    // NOMBRE DEL ARTISTA
+    // "FRASE CORTA"
+    //
+    // Descubre la reseña en The New Indie Wave:
+    var shareText = currentOpenArtist.name + '\n' + (currentOpenArtist.short_bio ? ('"' + currentOpenArtist.short_bio + '"') : '') + '\n\nDescubre la reseña en The New Indie Wave:';
 
     if (navigator.share) {
       navigator.share({
@@ -1515,17 +1522,17 @@
         url: shareUrl
       }).catch(function(e){});
     } else if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(shareUrl).then(function(){
-        showToast('✓ ¡Enlace copiado al portapapeles!');
+      navigator.clipboard.writeText(shareText + '\n' + shareUrl).then(function(){
+        showToast('✓ ¡Mensaje copiado para compartir!');
       }).catch(function(){
-        copyFallback(shareUrl);
+        copyFallback(shareText + '\n' + shareUrl);
       });
     } else {
-      copyFallback(shareUrl);
+      copyFallback(shareText + '\n' + shareUrl);
     }
   }
 
-  function copyFallback(text) {
+    function copyFallback(text) {
     var ta = document.createElement('textarea');
     ta.value = text;
     ta.style.position = 'fixed';
