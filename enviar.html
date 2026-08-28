@@ -840,43 +840,67 @@
     document.getElementById('charCount').textContent = el.value.length;
   }
 
-  // 2. Auto-Detección de Metadata desde Spotify
+  // 2. Auto-Detección Inteligente de Metadata desde Spotify (API oficial + oEmbed Fallback)
   var _spTimer = null;
-  function handleSpotifyLinkInput(url) {
+  function handleSpotifyLinkInput(rawUrl) {
     clearTimeout(_spTimer);
-    if(!url || !url.includes('spotify.com/track/')) {
+    if(!rawUrl || !rawUrl.trim()) {
       document.getElementById('spotifyPreviewBox').style.display = 'none';
       return;
     }
 
+    var clean = rawUrl.trim();
+    // Extraer ID de 22 caracteres de cualquier URL de Spotify (/intl-es/track/ID, ?si=, etc.)
+    var match = clean.match(/track\/([a-zA-Z0-9]{22})/) || clean.match(/spotify:track:([a-zA-Z0-9]{22})/);
+    if (!match) return;
+
+    var trackId = match[1];
+
     _spTimer = setTimeout(async function() {
       try {
-        const oembedUrl = 'https://open.spotify.com/oembed?url=' + encodeURIComponent(url.trim());
-        const res = await fetch(oembedUrl);
-        if(!res.ok) return;
-        const data = await res.json();
-        
-        if(data && data.title) {
-          var parts = data.title.split(' by ');
-          var songTitle = parts[0] || data.title;
-          var artistName = parts[1] || (data.author_name || '');
+        // 1. Consultar endpoint serverless con la API oficial de Spotify
+        var res = await fetch('/api/spotify-lookup?id=' + encodeURIComponent(trackId));
+        var data = null;
 
-          if(songTitle) document.getElementById('pb-title').value = songTitle;
-          if(artistName) document.getElementById('pb-artist').value = artistName;
+        if (res.ok) {
+          data = await res.json();
+        } else {
+          // 2. Fallback a oEmbed con URL limpia
+          var cleanTrackUrl = 'https://open.spotify.com/track/' + trackId;
+          var oembedRes = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(cleanTrackUrl));
+          if (oembedRes.ok) {
+            var odata = await oembedRes.json();
+            var parts = (odata.title || '').split(' by ');
+            data = {
+              title: parts[0] || odata.title,
+              artist: parts[1] || odata.author_name || '',
+              cover: odata.thumbnail_url || ''
+            };
+          }
+        }
 
-          document.getElementById('spTitle').textContent = songTitle;
-          document.getElementById('spArtist').textContent = artistName ? 'por ' + artistName : 'Spotify Track';
-          if(data.thumbnail_url) {
-            document.getElementById('spCover').src = data.thumbnail_url;
+        if (data && (data.title || data.artist)) {
+          if (data.title) document.getElementById('pb-title').value = data.title;
+          if (data.artist) document.getElementById('pb-artist').value = data.artist;
+
+          // Mostrar tarjeta de preview detectada
+          document.getElementById('spTitle').textContent = data.title || 'Canción Detectada';
+          document.getElementById('spArtist').textContent = data.artist ? ('por ' + data.artist) : 'Artista en Spotify';
+          
+          if (data.cover) {
+            document.getElementById('spCover').src = data.cover;
             document.getElementById('spCover').style.display = 'block';
           } else {
             document.getElementById('spCover').style.display = 'none';
           }
+
           document.getElementById('spotifyPreviewBox').style.display = 'flex';
-          showToast('✓ Track detectado: ' + songTitle);
+          showToast('✓ Track detectado: ' + (data.title || 'Listo'));
         }
-      } catch(e){}
-    }, 400);
+      } catch(e) {
+        console.error('Error en auto-detección de Spotify:', e);
+      }
+    }, 250);
   }
 
   // 3. Auto-Match Inteligente de Playlist según el Género
