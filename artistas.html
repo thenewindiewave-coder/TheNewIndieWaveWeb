@@ -1624,9 +1624,9 @@
   if (typeof syncRadarFromSupabase === 'function') {
     syncRadarFromSupabase().then(function(data){
       if (data && data.length > 0) {
-        artistsList = data;
+        artistsList = data.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
         renderAllRadarArtists();
-    checkDeepLink();
+        checkDeepLink();
       }
     });
   }

@@ -368,7 +368,11 @@ function getRadarArtists() {
     var local = localStorage.getItem('tniw_radar_artists');
     if (local) {
       var parsed = JSON.parse(local);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.filter(function(a) {
+          return a && a.id !== 'spotify_auth_config' && a.type !== 'config';
+        });
+      }
     }
   } catch(e) {
     console.error('Error reading radar artists', e);
@@ -379,6 +383,9 @@ function getRadarArtists() {
 function saveRadarArtists(artists) {
   try {
     localStorage.setItem('tniw_radar_artists', JSON.stringify(artists));
+    if (typeof window !== 'undefined') {
+      window.RADAR_ARTISTS = artists;
+    }
   } catch(e) {
     console.error('Error saving radar artists', e);
   }
@@ -388,4 +395,5 @@ if (typeof window !== 'undefined') {
   window.DEFAULT_RADAR_ARTISTS = DEFAULT_RADAR_ARTISTS;
   window.getRadarArtists = getRadarArtists;
   window.saveRadarArtists = saveRadarArtists;
+  window.RADAR_ARTISTS = getRadarArtists();
 }

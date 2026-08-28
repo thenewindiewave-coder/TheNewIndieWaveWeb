@@ -982,6 +982,30 @@
       grid-template-columns: 1fr !important;
       gap: 16px !important;
     }
+
+    /* RADAR MANAGER & MODAL FOR ANDROID */
+    .artist-modal {
+      max-width: 100% !important;
+      max-height: 94vh !important;
+      max-height: 94dvh !important;
+      padding: 16px !important;
+      border-radius: 10px !important;
+    }
+    .radar-form-grid {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+    }
+    .radar-header-actions {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 8px !important;
+    }
+    .radar-header-actions .btn-tool, .radar-header-actions a {
+      width: 100% !important;
+      text-align: center !important;
+      justify-content: center !important;
+    }
   }
 
   @media (max-width: 480px) {
@@ -1699,36 +1723,461 @@
     showToast('✓ Etiquetas de la playlist actualizadas');
   }
 
-  // 7. GESTOR DE ARTISTAS EN EL RADAR
+  // 7. GESTOR DE ARTISTAS EN EL RADAR (OPTIMIZADO PARA ANDROID Y DESKTOP)
   function renderRadarManager() {
     var container = document.getElementById('queueContainer');
-    var list = (window.RADAR_ARTISTS || []);
+    var rawList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var list = rawList.filter(function(a) {
+      return a && a.id !== 'spotify_auth_config' && a.type !== 'config';
+    });
+
+    var top3List = list.filter(function(a){ return a.type === 'top3'; });
+    var secList = list.filter(function(a){ return a.type !== 'top3'; });
+
     container.innerHTML = `
-      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 20px;">
-        <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; margin-bottom: 4px;">🌟 ARTISTAS EN EL RADAR</h3>
-        <p style="font-size: 13px; color: var(--text-muted);">Directorio curado de talentos emergentes publicados en la web oficial.</p>
-      </div>
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        ${list.map(a => `
-          <div class="track-item" style="padding: 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-              <div>
-                <strong>${a.name}</strong> • <span style="color:var(--text-muted); font-size:12px;">${a.city || ''} (${a.genre || ''})</span>
-              </div>
-              <span class="track-tag" style="background:rgba(187,244,81,0.1); color:var(--accent-lime);">${a.badge || 'DESTACADO'}</span>
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div>
+            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 2px;">
+              // DIRECTORIO EDITORIAL
             </div>
+            <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: #fff;">
+              🌟 ARTISTAS EN EL RADAR (${list.length})
+            </h3>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">
+              Directorio oficial publicado en la web. Gestiona talentos, reseñas, fotos y enlaces desde tu celular o PC.
+            </p>
           </div>
-        `).join('')}
+          
+          <div class="radar-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button onclick="openEditArtistModal()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 800; padding: 9px 16px; border: none; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 0 16px rgba(187,244,81,0.25);">
+              ➕ Agregar Artista
+            </button>
+            <button onclick="syncAndRefreshRadar()" class="btn-tool" style="background: rgba(56, 189, 248, 0.12); color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.3);">
+              🔄 Sincronizar Supabase
+            </button>
+            <a href="artistas.html" target="_blank" class="btn-tool" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+              ↗ Ver Web Artistas
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 1: TOP 3 DESTACADOS -->
+      <div style="margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <span style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; color: var(--accent-lime); background: rgba(187,244,81,0.12); border: 1px solid rgba(187,244,81,0.3); padding: 3px 10px; border-radius: 4px;">
+            ⭐ TOP 3 RADAR DESTACADOS (${top3List.length})
+          </span>
+          <span style="font-size: 12px; color: var(--text-muted);">Aparecen en la cabecera principal con reproductor</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          ${top3List.length === 0 ? '<div class="empty-box" style="padding: 24px;">No hay artistas marcados como Top 3.</div>' : top3List.map(a => renderArtistCardHtml(a, true)).join('')}
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: RADAR SECUNDARIO / GENERAL -->
+      <div style="margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <span style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; color: var(--text-main); background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); padding: 3px 10px; border-radius: 4px;">
+            📻 RADAR GENERAL / SECUNDARIO (${secList.length})
+          </span>
+          <span style="font-size: 12px; color: var(--text-muted);">Directorio completo de talentos emergentes</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          ${secList.length === 0 ? '<div class="empty-box" style="padding: 24px;">No hay artistas secundarios registrados.</div>' : secList.map(a => renderArtistCardHtml(a, false)).join('')}
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border);">
+        <button onclick="resetRadarToDefaults()" style="background: transparent; border: 1px dashed var(--border-strong); color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+          ↺ Restaurar Lista Original por Defecto
+        </button>
       </div>
     `;
+  }
+
+  function renderArtistCardHtml(a, isTop) {
+    var mediaPreview = '';
+    if (a.media_url) {
+      if (a.media_url.endsWith('.mp4') || a.media_type === 'video') {
+        mediaPreview = `<video src="${a.media_url}" style="width: 52px; height: 52px; border-radius: 6px; object-fit: cover; background: #000; flex-shrink: 0;" muted></video>`;
+      } else {
+        mediaPreview = `<img src="${a.media_url}" alt="" style="width: 52px; height: 52px; border-radius: 6px; object-fit: cover; background: #141417; flex-shrink: 0;">`;
+      }
+    } else {
+      mediaPreview = `<div style="width: 52px; height: 52px; border-radius: 6px; background: rgba(187,244,81,0.08); border: 1px solid rgba(187,244,81,0.25); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">🎵</div>`;
+    }
+
+    return `
+      <div class="track-item" style="padding: 16px; border-left: 3px solid ${isTop ? 'var(--accent-lime)' : 'var(--border-strong)'};">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          
+          <div style="display: flex; align-items: center; gap: 12px; min-width: 240px; flex: 1;">
+            ${mediaPreview}
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <h4 style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: #fff;">${a.name}</h4>
+                <span class="track-tag" style="background: ${isTop ? 'rgba(187,244,81,0.12)' : 'rgba(255,255,255,0.06)'}; color: ${isTop ? 'var(--accent-lime)' : 'var(--text-muted)'};">
+                  ${a.badge || (isTop ? 'TOP RADAR' : 'RECOMENDADO')}
+                </span>
+                <span class="track-tag" style="background: rgba(56,189,248,0.08); color: var(--accent-cyan);">
+                  ${a.city || 'GLOBAL'}
+                </span>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                ${a.genre || 'Indie'} ${a.spotify_url ? '• <a href="' + a.spotify_url + '" target="_blank" style="color:var(--accent-lime); text-decoration:none;">Spotify ↗</a>' : ''} ${a.instagram ? '• <a href="https://instagram.com/' + a.instagram.replace('@','') + '" target="_blank" style="color:var(--accent-pink); text-decoration:none;">' + a.instagram + ' ↗</a>' : ''}
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button onclick="toggleRadarType('${a.id}', '${isTop ? 'secondary' : 'top3'}')" class="btn-tool" style="font-size: 10.5px; padding: 6px 10px;">
+              ${isTop ? '⬇ Pasar a Secundario' : '⭐ Subir a Top 3'}
+            </button>
+            <button onclick="openEditArtistModal('${a.id}')" style="background: rgba(187,244,81,0.14); border: 1px solid rgba(187,244,81,0.35); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+              ✏️ Editar
+            </button>
+            <button onclick="deleteRadarArtist('${a.id}')" style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
+              🗑️
+            </button>
+          </div>
+
+        </div>
+
+        ${a.short_bio ? `
+          <div style="font-size: 12px; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 4px; margin-top: 10px; border-left: 2px solid var(--border-strong);">
+            "${a.short_bio}"
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  // MODAL FLOTANTE Y RESPONSIVE DE EDICIÓN DE ARTISTA
+  function openEditArtistModal(artistId) {
+    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var artist = artistId ? list.find(function(a){ return a.id === artistId; }) : null;
+    var isNew = !artist;
+
+    var modalHtml = `
+      <div class="artist-modal-overlay" id="curatorRadarModal" onclick="if(event.target===this) closeRadarModal()">
+        <div class="artist-modal" style="padding: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase;">
+                // ${isNew ? 'NUEVO ARTISTA' : 'EDITAR ARTISTA'}
+              </div>
+              <h3 style="font-family: var(--font-heading); font-size: 19px; font-weight: 800; color: #fff;">
+                ${isNew ? '🌟 Añadir Artista al Radar' : '✏️ ' + artist.name}
+              </h3>
+            </div>
+            <button onclick="closeRadarModal()" style="background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; padding: 4px 8px;">✕</button>
+          </div>
+
+          <form onsubmit="handleRadarFormSubmit(event, '${artist ? artist.id : ''}')" style="display: flex; flex-direction: column; gap: 14px;">
+            
+            <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Proyecto / Artista *</label>
+                <input type="text" id="rfName" required value="${artist ? (artist.name || '') : ''}" placeholder="Ej. Lunar Daydream" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ciudad / País *</label>
+                <input type="text" id="rfCity" required value="${artist ? (artist.city || '') : ''}" placeholder="Ej. CIUDAD DE MÉXICO" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+            </div>
+
+            <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género Musical *</label>
+                <input type="text" id="rfGenre" required value="${artist ? (artist.genre || '') : ''}" placeholder="Ej. DREAM POP / SHOEGAZE" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ubicación en la Web *</label>
+                <select id="rfType" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                  <option value="top3" ${artist && artist.type === 'top3' ? 'selected' : ''}>⭐ Top 3 Destacado (Principal)</option>
+                  <option value="secondary" ${!artist || artist.type !== 'top3' ? 'selected' : ''}>📻 Radar Secundario (Directorio)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Formato / Badge</label>
+                <input type="text" id="rfBadge" value="${artist ? (artist.badge || 'AGRUPACIÓN') : 'AGRUPACIÓN'}" placeholder="SOLISTA / DÚO / AGRUPACIÓN" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ID / Enlace Canción (Spotify o YouTube)</label>
+                <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="ID o URL de Spotify / YouTube" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+            </div>
+
+            <!-- FOTO / MULTIMEDIA CON SUBIDA DIRECTA DESDE CELULAR O PC -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 14px;">
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 6px;">
+                📸 FOTO O VIDEO DEL ARTISTA
+              </label>
+              
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px;">
+                <input type="text" id="rfMediaUrl" value="${artist ? (artist.media_url || '') : ''}" oninput="previewRadarMedia(this.value)" placeholder="https://ejemplo.com/foto.jpg o .mp4" style="flex:1; min-width:200px; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                
+                <label style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 9px 14px; border-radius: 4px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
+                  📁 Subir Archivo
+                  <input type="file" accept="image/*,video/*" onchange="handleDirectFileUpload(this)" style="display: none;">
+                </label>
+              </div>
+
+              <div id="rfUploadStatus" style="display:none; font-family: var(--font-mono); font-size: 11px; margin-bottom: 6px;"></div>
+
+              <div id="rfMediaPreview" style="display: ${artist && artist.media_url ? 'block' : 'none'}; margin-top: 6px;">
+                <img id="rfMediaPreviewImg" src="${artist ? (artist.media_url || '') : ''}" style="max-height: 90px; border-radius: 4px; border: 1px solid var(--border); object-fit: cover;">
+              </div>
+            </div>
+
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Biografía Corta (Frase destacada en tarjeta)</label>
+              <textarea id="rfShortBio" rows="2" placeholder="Capas envolventes de reverb y guitarras nostálgicas..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.short_bio || '') : ''}</textarea>
+            </div>
+
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Reseña Editorial Completa (Página del Artista)</label>
+              <textarea id="rfFullReview" rows="3" placeholder="Texto editorial profundo sobre su sonido, propuesta e identidad artística..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.full_review || '') : ''}</textarea>
+            </div>
+
+            <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Trayectoria / Hitos</label>
+                <input type="text" id="rfCareer" value="${artist ? (artist.career_notes || '') : ''}" placeholder="Hitos, escuchas, lanzamientos..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Próximos Eventos / Fechas</label>
+                <input type="text" id="rfEvents" value="${artist ? (artist.events_note || '') : ''}" placeholder="Ej. Showcase TNIW Vol. 04" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+            </div>
+
+            <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Perfil Spotify (URL)</label>
+                <input type="url" id="rfSpotifyUrl" value="${artist ? (artist.spotify_url || '') : ''}" placeholder="https://open.spotify.com/artist/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Instagram (@usuario)</label>
+                <input type="text" id="rfInstagram" value="${artist ? (artist.instagram || '') : ''}" placeholder="@nombreartista" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; flex-wrap: wrap;">
+              <button type="button" onclick="closeRadarModal()" style="background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 11.5px; padding: 10px 18px; border-radius: 4px; cursor: pointer;">
+                Cancelar
+              </button>
+              <button type="submit" style="background: var(--accent-lime); border: none; color: #000; font-family: var(--font-mono); font-size: 12px; font-weight: 800; padding: 10px 24px; border-radius: 4px; cursor: pointer; box-shadow: 0 0 14px rgba(187,244,81,0.3);">
+                Guardar Artista ✓
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    `;
+
+    var oldModal = document.getElementById('curatorRadarModal');
+    if(oldModal) oldModal.remove();
+
+    var div = document.createElement('div');
+    div.innerHTML = modalHtml;
+    document.body.appendChild(div.firstElementChild);
+  }
+
+  function closeRadarModal() {
+    var modal = document.getElementById('curatorRadarModal');
+    if(modal) modal.remove();
+  }
+
+  function handleRadarFormSubmit(e, existingId) {
+    e.preventDefault();
+    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    
+    var mediaUrl = (document.getElementById('rfMediaUrl').value || '').trim();
+    var isVideo = mediaUrl.endsWith('.mp4');
+
+    var artistData = {
+      id: existingId || ('radar-' + Date.now()),
+      name: document.getElementById('rfName').value.trim(),
+      city: document.getElementById('rfCity').value.trim().toUpperCase(),
+      genre: document.getElementById('rfGenre').value.trim().toUpperCase(),
+      type: document.getElementById('rfType').value,
+      badge: document.getElementById('rfBadge').value.trim().toUpperCase() || (document.getElementById('rfType').value === 'top3' ? 'TOP RADAR' : 'RECOMENDADO'),
+      media_type: isVideo ? 'video' : 'image',
+      media_url: mediaUrl,
+      track_id: document.getElementById('rfTrackId').value.trim(),
+      short_bio: document.getElementById('rfShortBio').value.trim(),
+      full_review: document.getElementById('rfFullReview').value.trim(),
+      career_notes: document.getElementById('rfCareer').value.trim(),
+      events_note: document.getElementById('rfEvents').value.trim(),
+      spotify_url: document.getElementById('rfSpotifyUrl').value.trim(),
+      instagram: document.getElementById('rfInstagram').value.trim()
+    };
+
+    if(existingId) {
+      var idx = list.findIndex(function(a){ return a.id === existingId; });
+      if(idx !== -1) list[idx] = artistData;
+      else list.unshift(artistData);
+    } else {
+      list.unshift(artistData);
+    }
+
+    saveRadarArtists(list);
+    if (typeof saveRadarArtistToSupabase === 'function') {
+      saveRadarArtistToSupabase(artistData);
+    }
+
+    closeRadarModal();
+    renderRadarManager();
+    showToast('✓ Artista guardado con éxito');
+  }
+
+  async function toggleRadarType(artistId, newType) {
+    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var item = list.find(function(a){ return a.id === artistId; });
+    if(item) {
+      item.type = newType;
+      saveRadarArtists(list);
+      renderRadarManager();
+      showToast('✓ Categoría cambiada a ' + (newType === 'top3' ? 'Top 3' : 'Secundario'));
+
+      try {
+        await fetch(SUPABASE_URL + '/rest/v1/radar_artists?id=eq.' + encodeURIComponent(artistId), {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ type: newType })
+        });
+      } catch(e) {}
+    }
+  }
+
+  async function deleteRadarArtist(artistId) {
+    if(!confirm('¿Seguro que deseas eliminar este artista del radar?')) return;
+    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    list = list.filter(function(a){ return a.id !== artistId; });
+    saveRadarArtists(list);
+    renderRadarManager();
+    showToast('✓ Artista eliminado del radar');
+
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/radar_artists?id=eq.' + encodeURIComponent(artistId), {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        }
+      });
+    } catch(e) {}
+  }
+
+  async function syncAndRefreshRadar() {
+    showToast('⏳ Sincronizando artistas con Supabase...');
+    if (typeof syncRadarFromSupabase === 'function') {
+      var data = await syncRadarFromSupabase();
+      renderRadarManager();
+      showToast('✓ Artistas sincronizados con la nube');
+    } else {
+      renderRadarManager();
+      showToast('✓ Lista actualizada');
+    }
+  }
+
+  function previewRadarMedia(url) {
+    var prev = document.getElementById('rfMediaPreview');
+    var prevImg = document.getElementById('rfMediaPreviewImg');
+    if (prev && prevImg) {
+      if (url && url.trim()) {
+        prevImg.src = url.trim();
+        prevImg.style.display = 'block';
+        prev.style.display = 'block';
+      } else {
+        prev.style.display = 'none';
+      }
+    }
+  }
+
+  async function handleDirectFileUpload(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    var statusEl = document.getElementById('rfUploadStatus');
+    var mediaUrlInput = document.getElementById('rfMediaUrl');
+    var isVideo = file.type.startsWith('video');
+
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = 'var(--accent-lime)';
+      statusEl.textContent = '⏳ Procesando ' + file.name + '...';
+    }
+
+    var reader = new FileReader();
+    reader.onload = async function(e) {
+      var base64Data = e.target.result;
+      mediaUrlInput.value = base64Data;
+      previewRadarMedia(base64Data);
+
+      try {
+        var res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileData: base64Data,
+            resourceType: isVideo ? 'video' : 'image'
+          })
+        });
+        var data = await res.json();
+        if (data && data.success && data.url) {
+          mediaUrlInput.value = data.url;
+          previewRadarMedia(data.url);
+          if (statusEl) {
+            statusEl.style.color = 'var(--accent-lime)';
+            statusEl.textContent = '✓ Subido a la nube';
+          }
+          showToast('✓ Archivo subido con éxito a la nube');
+        } else {
+          if (statusEl) {
+            statusEl.style.color = 'var(--accent-cyan)';
+            statusEl.textContent = '✓ Guardado localmente';
+          }
+        }
+      } catch(err) {
+        if (statusEl) {
+          statusEl.style.color = 'var(--accent-cyan)';
+          statusEl.textContent = '✓ Guardado localmente';
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function resetRadarToDefaults() {
+    if(!confirm('¿Restaurar la lista original de artistas en el radar?')) return;
+    if(typeof DEFAULT_RADAR_ARTISTS !== 'undefined') {
+      saveRadarArtists(DEFAULT_RADAR_ARTISTS);
+      renderRadarManager();
+      showToast('✓ Valores por defecto restaurados');
+    }
   }
 
   function showToast(msg) {
     var t = document.getElementById('toast');
     if (!t) return;
     t.textContent = msg;
-    t.style.display = 'block';
-    setTimeout(function() { t.style.display = 'none'; }, 3500);
+    t.classList.add('active');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function() {
+      t.classList.remove('active');
+    }, 3200);
   }
 </script>
 
