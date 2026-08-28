@@ -1303,37 +1303,96 @@
 
 
 
+
+<!-- CSS RESPONSIVO PARA MODAL DE HISTORIA -->
+<style>
+  .story-modal-inner {
+    background: #121215;
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 30px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+    position: relative;
+  }
+
+  .story-modal-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 30px;
+    align-items: center;
+    margin-top: 18px;
+  }
+
+  .story-canvas-preview-wrap {
+    background: #09090b;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+  }
+
+  #storyCanvas {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    .story-modal-inner {
+      padding: 20px 16px;
+      max-height: 95vh;
+    }
+    .story-modal-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .story-canvas-preview-wrap {
+      max-width: 280px;
+      margin: 0 auto;
+    }
+  }
+</style>
+
 <!-- MODAL GENERADOR DE HISTORIA DE INSTAGRAM (1080x1920) -->
-<div id="storyModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
-  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 860px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
-    <button onclick="closeStoryModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; z-index: 10;">✕</button>
+<div id="storyModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(14px); z-index: 10000; align-items: center; justify-content: center; padding: 16px;">
+  <div class="story-modal-inner">
+    <button onclick="closeStoryModal()" style="position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff; width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10;">✕</button>
     
-    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// GENERADOR OFICIAL DE HISTORIAS</div>
-    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">Tu Historia Promocional para Instagram & TikTok</h3>
-    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 22px;">
-      Generada automáticamente con tu portada, título y la playlist oficial de The New Indie Wave.
+    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// GENERADOR OFICIAL // RESOLUCIÓN 1080x1920 HD</div>
+    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 4px;">Tu Historia Promocional para Redes</h3>
+    <p style="font-size: 13px; color: var(--text-muted);">
+      Personalizada con tu canción en el puesto #1 de la playlist oficial.
     </p>
 
-    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
-      <!-- Canvas Preview Container -->
-      <div style="background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; justify-content: center; align-items: center;">
-        <canvas id="storyCanvas" width="1080" height="1920" style="width: 100%; max-width: 260px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
+    <div class="story-modal-grid">
+      <!-- Previsualización en Vivo de la Historia -->
+      <div class="story-canvas-preview-wrap">
+        <canvas id="storyCanvas" width="1080" height="1920"></canvas>
       </div>
 
-      <!-- Action Panel & Download -->
+      <!-- Panel de Acciones -->
       <div style="display: flex; flex-direction: column; gap: 14px;">
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 16px;">
-          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); margin-bottom: 4px;">ESTADÍSTICAS DEL MOCKUP:</div>
-          <div style="font-size: 13px; color: #fff; font-weight: 700;" id="storyPreviewTrack">Cargando...</div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="storyPreviewPlaylist">Playlist: ...</div>
-          <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); margin-top: 6px;">Formato: 1080 x 1920 px (9:16 HD)</div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 18px;">
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); margin-bottom: 6px;">TRACK ADMITIDO:</div>
+          <div style="font-size: 15px; color: #fff; font-weight: 700; font-family: var(--font-heading);" id="storyPreviewTrack">Cargando...</div>
+          <div style="font-size: 12.5px; color: var(--text-muted); margin-top: 3px;" id="storyPreviewPlaylist">Playlist: ...</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan); margin-top: 8px;">✓ Formato optimizado para Instagram Stories & TikTok (9:16)</div>
         </div>
 
-        <button onclick="downloadStoryImage()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 14px 20px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25); transition: transform 0.15s;">
+        <button onclick="downloadStoryImage()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 14px 20px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
           📥 Descargar Imagen de Historia (PNG HD)
         </button>
 
-        <button onclick="shareStoryNatively()" style="background: #25D366; color: #000; font-family: var(--font-mono); font-size: 12.5px; font-weight: 800; padding: 12px 20px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <button onclick="shareStoryNatively()" style="background: #25D366; color: #000; font-family: var(--font-mono); font-size: 12.5px; font-weight: 800; padding: 13px 20px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
           📲 Compartir en Instagram / Redes
         </button>
 
@@ -1341,8 +1400,8 @@
           📋 Copiar Imagen al Portapapeles
         </button>
 
-        <div style="font-size: 11.5px; color: var(--text-dim); line-height: 1.4; margin-top: 4px;">
-          💡 <strong>Tip para Stories:</strong> Sube esta imagen a tu Instagram Story, añade el sticker de música con tu canción y etiqueta a <strong>@the.new.indie.wave</strong> para que te reposteemos.
+        <div style="font-size: 12px; color: var(--text-dim); line-height: 1.5; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; border-left: 2px solid var(--accent-lime);">
+          💡 <strong>Tip Pro:</strong> Sube la imagen a tu Story, coloca el sticker oficial de Spotify con tu música de fondo y etiqueta a <strong>@the.new.indie.wave</strong> para que te reposteemos ante nuestra audiencia.
         </div>
       </div>
     </div>
@@ -1353,6 +1412,13 @@
   var _storyBgImage = new Image();
   _storyBgImage.crossOrigin = 'anonymous';
   _storyBgImage.src = 'historia_back.jpg';
+  _storyBgImage.onload = function() {
+    // Si el modal está abierto, redibujar con el fondo ya cargado
+    var modal = document.getElementById('storyModal');
+    if (modal && modal.style.display !== 'none') {
+      openStoryGeneratorModal();
+    }
+  };
 
   var _cachedStoryDataUrl = null;
 
@@ -1391,180 +1457,178 @@
       ctx.fillRect(0, 0, W, H);
     }
 
-    // 2. DIBUJAR MOCKUP SPOTIFY CARD (Centrada)
-    var cardW = 860;
-    var cardH = 1240;
+    // 2. DIBUJAR MOCKUP SPOTIFY CARD (Centrada con Proporciones Perfectas)
+    var cardW = 900;
+    var cardH = 1320;
     var cardX = (W - cardW) / 2;
-    var cardY = (H - cardH) / 2 - 40;
+    var cardY = (H - cardH) / 2 - 20;
 
     // Sombra del Mockup
     ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 40;
-    ctx.shadowOffsetY = 20;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+    ctx.shadowBlur = 45;
+    ctx.shadowOffsetY = 25;
 
     // Fondo oscuro de la tarjeta
-    ctx.fillStyle = 'rgba(18, 18, 22, 0.95)';
+    ctx.fillStyle = 'rgba(14, 14, 18, 0.96)';
     drawRoundRect(ctx, cardX, cardY, cardW, cardH, 28);
     ctx.fill();
     ctx.restore();
 
     // Borde elegante
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 2.5;
     drawRoundRect(ctx, cardX, cardY, cardW, cardH, 28);
     ctx.stroke();
 
     // 3. CABECERA DEL MOCKUP (Artwork / Portada Superior)
-    var headerH = 460;
+    var headerH = 480;
     ctx.save();
     ctx.beginPath();
     drawRoundRect(ctx, cardX, cardY, cardW, headerH, { tl: 28, tr: 28, br: 0, bl: 0 });
     ctx.clip();
 
-    // Gradiente dinámico de portada según género
+    // Gradiente de portada
     var grad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + headerH);
-    grad.addColorStop(0, '#1a2332');
+    grad.addColorStop(0, '#1e293b');
     grad.addColorStop(0.5, '#0f172a');
     grad.addColorStop(1, '#05070a');
     ctx.fillStyle = grad;
     ctx.fillRect(cardX, cardY, cardW, headerH);
 
-    // Patrón decorativo de onda
-    ctx.strokeStyle = 'rgba(187, 244, 81, 0.15)';
-    ctx.lineWidth = 3;
+    // Patrón decorativo sonoro
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.2)';
+    ctx.lineWidth = 3.5;
     ctx.beginPath();
     for (var i = 0; i < cardW; i += 20) {
-      var yOffset = Math.sin(i * 0.05) * 30 + (headerH / 2);
+      var yOffset = Math.sin(i * 0.04) * 35 + (headerH / 2);
       if (i === 0) ctx.moveTo(cardX + i, cardY + yOffset);
       else ctx.lineTo(cardX + i, cardY + yOffset);
     }
     ctx.stroke();
 
     // Texto superior de la cabecera
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.font = '600 22px monospace';
-    ctx.fillText('PLAYLIST OFICIAL SPOTIFY', cardX + 36, cardY + 54);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.font = '700 22px monospace';
+    ctx.fillText('PLAYLIST OFICIAL SPOTIFY', cardX + 44, cardY + 60);
 
     // Título de la Playlist
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 36px sans-serif';
-    wrapText(ctx, playlist, cardX + 36, cardY + 110, cardW - 180, 44);
+    ctx.font = 'bold 42px sans-serif';
+    wrapText(ctx, playlist, cardX + 44, cardY + 125, cardW - 190, 52);
 
     // Marca de Curaduría
     ctx.fillStyle = '#bbf451';
-    ctx.font = 'bold 20px monospace';
-    ctx.fillText('CURADA POR THE NEW INDIE WAVE', cardX + 36, cardY + headerH - 36);
+    ctx.font = 'bold 22px monospace';
+    ctx.fillText('CURADA POR THE NEW INDIE WAVE', cardX + 44, cardY + headerH - 36);
 
     ctx.restore();
 
     // 4. BOTÓN VERDE FLOTANTE SPOTIFY PLAY
-    var playX = cardX + cardW - 74;
-    var playY = cardY + headerH - 24;
-    var playR = 42;
+    var playX = cardX + cardW - 84;
+    var playY = cardY + headerH - 18;
+    var playR = 46;
 
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 16;
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = 20;
     ctx.fillStyle = '#1DB954';
     ctx.beginPath();
     ctx.arc(playX, playY, playR, 0, Math.PI * 2);
     ctx.fill();
 
-    // Triángulo Play blanco
+    // Triángulo Play
     ctx.fillStyle = '#000000';
     ctx.beginPath();
-    ctx.moveTo(playX - 10, playY - 16);
-    ctx.lineTo(playX + 16, playY);
-    ctx.lineTo(playX - 10, playY + 16);
+    ctx.moveTo(playX - 12, playY - 18);
+    ctx.lineTo(playX + 18, playY);
+    ctx.lineTo(playX - 12, playY + 18);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
 
     // 5. SECCIÓN "FEATURING // RECIÉN AÑADIDA"
-    var listStartY = cardY + headerH + 30;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.font = '700 18px monospace';
-    ctx.fillText('FEATURING // RECIÉN AÑADIDA', cardX + 36, listStartY);
+    var listStartY = cardY + headerH + 34;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.font = '800 20px monospace';
+    ctx.fillText('FEATURING // RECIÉN AÑADIDA', cardX + 44, listStartY);
 
     // 6. CANCIÓN ADMITIDA (PUESTO #1 DESTACADO)
     var row1Y = listStartY + 24;
-    var rowH = 110;
+    var rowH = 120;
 
     // Resaltado de fondo para la canción admitida
-    ctx.fillStyle = 'rgba(187, 244, 81, 0.08)';
-    drawRoundRect(ctx, cardX + 20, row1Y, cardW - 40, rowH, 12);
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.09)';
+    drawRoundRect(ctx, cardX + 24, row1Y, cardW - 48, rowH, 14);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(187, 244, 81, 0.3)';
-    ctx.lineWidth = 1.5;
-    drawRoundRect(ctx, cardX + 20, row1Y, cardW - 40, rowH, 12);
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
+    ctx.lineWidth = 2;
+    drawRoundRect(ctx, cardX + 24, row1Y, cardW - 48, rowH, 14);
     ctx.stroke();
 
     // Miniatura carátula track
-    var thumbX = cardX + 38;
+    var thumbX = cardX + 44;
     var thumbY = row1Y + 18;
-    var thumbSize = 74;
+    var thumbSize = 84;
     ctx.fillStyle = '#bbf451';
-    drawRoundRect(ctx, thumbX, thumbY, thumbSize, thumbSize, 8);
+    drawRoundRect(ctx, thumbX, thumbY, thumbSize, thumbSize, 10);
     ctx.fill();
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 28px sans-serif';
-    ctx.fillText('▶', thumbX + 26, thumbY + 48);
+    ctx.font = 'bold 32px sans-serif';
+    ctx.fillText('▶', thumbX + 29, thumbY + 54);
 
     // Título de la canción y Artista
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 28px sans-serif';
-    ctx.fillText(truncateString(song, 22), thumbX + thumbSize + 22, thumbY + 34);
+    ctx.font = 'bold 32px sans-serif';
+    ctx.fillText(truncateString(song, 22), thumbX + thumbSize + 24, thumbY + 38);
 
     ctx.fillStyle = '#bbf451';
-    ctx.font = '600 20px monospace';
-    ctx.fillText(truncateString(artist, 26) + ' • ' + genre, thumbX + thumbSize + 22, thumbY + 64);
+    ctx.font = '700 22px monospace';
+    ctx.fillText(truncateString(artist, 26) + ' • ' + genre, thumbX + thumbSize + 24, thumbY + 72);
 
     // Corazón verde Liked
     ctx.fillStyle = '#1DB954';
-    ctx.font = '28px sans-serif';
-    ctx.fillText('💚', cardX + cardW - 90, thumbY + 48);
+    ctx.font = '34px sans-serif';
+    ctx.fillText('💚', cardX + cardW - 95, thumbY + 54);
 
     // 7. CANCIONES COMPLEMENTARIAS DE LA PLAYLIST (#2, #3, #4)
     var otherTracks = [
       { name: 'After Dark', artist: 'Mr.Kitty' },
       { name: 'Space Song', artist: 'Beach House' },
-      { name: 'A Real Hero', artist: 'College & Electric Youth' },
-      { name: 'Nightcall', artist: 'Kavinsky' }
+      { name: 'A Real Hero', artist: 'College & Electric Youth' }
     ];
 
     for (var t = 0; t < 3; t++) {
       var oTrack = otherTracks[t];
-      var oRowY = row1Y + rowH + 16 + (t * 90);
+      var oRowY = row1Y + rowH + 18 + (t * 96);
 
-      // Mini carátula gris
-      var oThumbX = cardX + 38;
-      var oThumbY = oRowY + 10;
-      var oThumbSize = 58;
+      var oThumbX = cardX + 44;
+      var oThumbY = oRowY + 12;
+      var oThumbSize = 64;
 
       ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-      drawRoundRect(ctx, oThumbX, oThumbY, oThumbSize, oThumbSize, 6);
+      drawRoundRect(ctx, oThumbX, oThumbY, oThumbSize, oThumbSize, 8);
       ctx.fill();
 
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.font = 'bold 22px sans-serif';
-      ctx.fillText(oTrack.name, oThumbX + oThumbSize + 20, oThumbY + 28);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText(oTrack.name, oThumbX + oThumbSize + 22, oThumbY + 30);
 
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.font = '17px monospace';
-      ctx.fillText(oTrack.artist, oThumbX + oThumbSize + 20, oThumbY + 52);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.font = '19px monospace';
+      ctx.fillText(oTrack.artist, oThumbX + oThumbSize + 22, oThumbY + 56);
 
       // Corazón gris
       ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.font = '22px sans-serif';
-      ctx.fillText('🤍', cardX + cardW - 85, oThumbY + 40);
+      ctx.font = '24px sans-serif';
+      ctx.fillText('🤍', cardX + cardW - 90, oThumbY + 44);
     }
 
     // 8. PIE DEL MOCKUP
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.font = '600 16px monospace';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.font = '700 17px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('ESCUCHA ESTE TEMA EN SPOTIFY // THE NEW INDIE WAVE', cardX + (cardW / 2), cardY + cardH - 24);
+    ctx.fillText('ESCUCHA ESTE TEMA EN SPOTIFY // THENNEWINDIEWAVE.ONLINE', cardX + (cardW / 2), cardY + cardH - 26);
     ctx.textAlign = 'left';
 
     _cachedStoryDataUrl = canvas.toDataURL('image/png');
@@ -1609,12 +1673,11 @@
       .then(function(res){ return res.blob(); })
       .then(function(blob){
         navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function(){
-          showToast('✓ ¡Imagen copiada al portapapeles! Pégala en tus historias o chat');
+          showToast('✓ ¡Imagen copiada al portapapeles! Pégala en tus historias');
         });
       });
   }
 
-  // Helpers de Canvas
   function drawRoundRect(ctx, x, y, width, height, radius) {
     if (typeof radius === 'number') {
       radius = { tl: radius, tr: radius, br: radius, bl: radius };
@@ -1656,6 +1719,5 @@
     return str.slice(0, num) + '...';
   }
 </script>
-
 </body>
 </html>
