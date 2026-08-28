@@ -18,9 +18,8 @@ export default async function handler(req, res) {
     `);
   }
 
-  const host = req.headers.host || 'thenewindiewave.online';
-  const protocol = host.includes('localhost') ? 'http' : 'https';
-  const redirectUri = `${protocol}://${host}/api/spotify-callback`;
+  const isLocal = (req.headers.host || '').includes('localhost');
+  const redirectUri = isLocal ? 'http://localhost:3000/api/spotify-callback' : 'https://thenewindiewave.online/api/spotify-callback';
 
   try {
     const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');

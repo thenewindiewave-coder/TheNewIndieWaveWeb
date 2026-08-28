@@ -2,9 +2,8 @@
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || '7a56561898eb4057941b2c1453476e10';
 
 export default async function handler(req, res) {
-  const host = req.headers.host || 'thenewindiewave.online';
-  const protocol = host.includes('localhost') ? 'http' : 'https';
-  const redirectUri = `${protocol}://${host}/api/spotify-callback`;
+  const isLocal = (req.headers.host || '').includes('localhost');
+  const redirectUri = isLocal ? 'http://localhost:3000/api/spotify-callback' : 'https://thenewindiewave.online/api/spotify-callback';
 
   const scopes = [
     'playlist-modify-public',
