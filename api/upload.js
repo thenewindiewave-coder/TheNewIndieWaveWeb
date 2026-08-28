@@ -13,30 +13,39 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { fileData, resourceType = 'auto' } = req.body || {};
+  const { fileData, resourceType = 'auto', apiKey } = req.body || {};
   if (!fileData) {
     return res.status(400).json({ error: 'No file data provided' });
   }
 
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+<<<<<<< HEAD
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
   if (!cloudName || !apiKey || !apiSecret) {
     return res.status(500).json({ error: 'Faltan variables de entorno de Cloudinary' });
   }
+=======
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  const effectiveApiKey = apiKey || process.env.CLOUDINARY_API_KEY;
+>>>>>>> 4aabf515b1e275d199226e069db1ca4070ae6f44
 
   try {
     const timestamp = Math.round(new Date().getTime() / 1000);
-    const signatureStr = `timestamp=${timestamp}${apiSecret}`;
-    const signature = crypto.createHash('sha1').update(signatureStr).digest('hex');
-
     const payload = {
       file: fileData,
-      timestamp: timestamp,
-      api_key: apiKey,
-      signature: signature
+      timestamp: timestamp
     };
+
+    if (effectiveApiKey && apiSecret) {
+      const signatureStr = `timestamp=${timestamp}${apiSecret}`;
+      const signature = crypto.createHash('sha1').update(signatureStr).digest('hex');
+      payload.api_key = effectiveApiKey;
+      payload.signature = signature;
+    } else {
+      payload.upload_preset = 'ml_default';
+    }
 
     const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
     const response = await fetch(uploadUrl, {
@@ -54,7 +63,7 @@ module.exports = async (req, res) => {
         resource_type: result.resource_type
       });
     } else {
-      return res.status(400).json({ error: result.error ? result.error.message : 'Error al subir a Cloudinary' });
+      return res.status(400).json({ error: result.error && result.error.message ? result.error.message : 'Error al subir a Cloudinary' });
     }
   } catch (err) {
     return res.status(500).json({ error: err.message });

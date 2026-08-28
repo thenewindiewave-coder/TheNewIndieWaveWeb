@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS public.submissions (
     feedback TEXT,                                    -- Feedback del curador (mínimo 15 palabras)
     story_video_url TEXT,                             -- URL del video-historia generado si es aceptado
     spotify_added BOOLEAN DEFAULT false,              -- Si ya se insertó automáticamente en la playlist
-    social_broadcasted BOOLEAN DEFAULT false,         -- Si ya se publicó en @the.new.indie.wave y @m.trendvideo
+    social_broadcasted BOOLEAN DEFAULT false,         -- Si ya se publicó en @TNIWave y @MtrendVideo
     response_deadline TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '5 days'),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -49,11 +49,12 @@ FOR INSERT
 TO anon, authenticated
 WITH CHECK (true);
 
--- B) Permitir que cualquier visitante consulte el estado de su canción mediante su track_id (Magic Link)
+-- B) Permitir que solo usuarios autenticados (Curador) consulten directamente
+-- Los usuarios anónimos ahora DEBEN usar /api/status para evitar exposición de datos
 CREATE POLICY "Permitir lectura pública por track_id"
 ON public.submissions
 FOR SELECT
-TO anon, authenticated
+TO authenticated, service_role
 USING (true);
 
 -- C) Solo el rol de servicio o usuarios autenticados (Curador) pueden actualizar estado o feedback
