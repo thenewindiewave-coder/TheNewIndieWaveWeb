@@ -105,7 +105,7 @@ export default async function handler(req, res) {
 
     // 2. Insertar track físicamente en la playlist de Spotify
     const trackUri = `spotify:track:${trackId}`;
-    const addRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+    let addRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/items`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -115,6 +115,19 @@ export default async function handler(req, res) {
         uris: [trackUri]
       })
     });
+
+    if (!addRes.ok && addRes.status === 404) {
+      addRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          uris: [trackUri]
+        })
+      });
+    }
 
     if (!addRes.ok) {
       const addErr = await addRes.json();
