@@ -754,6 +754,264 @@
     border-left: 2px solid var(--border-strong);
   }
 
+  .playlist-edit-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+
+  /* MEDIA QUERIES & RESPONSIVE PERFECTION FOR ANDROID / MOBILE */
+  @media (max-width: 900px) {
+    .navbar {
+      padding: 6px 0;
+    }
+    .nav-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+    }
+    .nav-actions-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .tab-group {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .tab-group::-webkit-scrollbar {
+      display: none;
+    }
+    .tab-btn {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  }
+
+  @media (max-width: 768px) {
+    body {
+      padding-bottom: 60px;
+    }
+    .container {
+      padding: 0 14px;
+    }
+
+    /* HEADER */
+    .brand-logo {
+      font-size: 13.5px;
+      gap: 8px;
+    }
+    .site-logo {
+      height: 24px;
+    }
+    .badge-curator {
+      font-size: 9.5px;
+      padding: 3px 8px;
+    }
+    #btnConnectSpotifyCurator {
+      font-size: 10.5px !important;
+      padding: 5px 10px !important;
+    }
+
+    /* METRICS STRIP */
+    .metrics-strip {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .metric-card {
+      padding: 12px 6px;
+      text-align: center;
+    }
+    .metric-label {
+      font-size: 9px;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .metric-value {
+      font-size: 20px;
+    }
+
+    /* CONTROLS & TABS */
+    .controls-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .tab-group {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 6px;
+    }
+    .tab-btn {
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding: 8px 12px;
+      font-size: 11px;
+      border-radius: 4px;
+    }
+    .btn-refresh {
+      width: 100%;
+      justify-content: center;
+      padding: 9px 14px;
+      font-size: 12px;
+    }
+
+    /* TOOLBAR */
+    .queue-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .queue-search-bar {
+      width: 100%;
+      min-width: 0;
+      font-size: 12px;
+      padding: 8px 12px;
+    }
+    .queue-toggle-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100%;
+      gap: 6px;
+    }
+    .queue-toggle-actions .btn-tool {
+      width: 100%;
+      text-align: center;
+      padding: 8px;
+      font-size: 10.5px;
+    }
+
+    /* TRACK CARDS */
+    .compact-header {
+      padding: 10px 12px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .compact-left {
+      gap: 8px;
+    }
+    .compact-play-icon {
+      width: 28px;
+      height: 28px;
+      font-size: 10px;
+    }
+    .compact-info {
+      gap: 4px 6px;
+    }
+    .compact-title {
+      font-size: 14px;
+      max-width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .compact-artist {
+      font-size: 12px;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .compact-pill {
+      font-size: 9.5px;
+      padding: 2px 5px;
+    }
+    .compact-right {
+      gap: 6px;
+      margin-left: auto;
+    }
+    .sla-badge, .badge-status-accepted, .badge-status-declined, .badge-status-pending {
+      font-size: 9.5px;
+      padding: 2px 6px;
+    }
+    .track-detail-body {
+      padding: 14px 12px;
+    }
+    .detail-contact-row {
+      font-size: 11.5px;
+      gap: 6px;
+    }
+    .detail-note-box {
+      font-size: 12px;
+      padding: 8px 12px;
+    }
+    .review-console {
+      padding: 12px;
+    }
+    .feedback-textarea {
+      font-size: 12.5px;
+      padding: 8px 10px;
+    }
+    .decision-actions {
+      flex-direction: column-reverse;
+      gap: 8px;
+    }
+    .btn-decline, .btn-accept {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+      padding: 11px 14px;
+      font-size: 12px;
+    }
+
+    /* PLAYLIST MANAGER & RADAR */
+    .playlist-edit-row {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .playlist-save-btn {
+      width: 100%;
+      padding: 11px !important;
+      text-align: center;
+      justify-content: center;
+    }
+
+    /* STORY MODAL */
+    .story-modal-grid {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .metrics-strip {
+      gap: 6px;
+    }
+    .metric-card {
+      padding: 10px 4px;
+    }
+    .metric-label {
+      font-size: 8px;
+    }
+    .metric-value {
+      font-size: 17px;
+    }
+    .compact-title {
+      max-width: 140px;
+    }
+    .compact-artist {
+      max-width: 120px;
+    }
+    .toast-box {
+      bottom: 14px;
+      right: 14px;
+      left: 14px;
+      font-size: 11.5px;
+      padding: 12px 16px;
+      text-align: center;
+    }
+  }
 </style>
 <!-- Umami Analytics -->
 <script defer src="https://cloud.umami.is/script.js" data-website-id="40498ef6-8c96-4181-83ff-f3393e6a5b10"></script>
@@ -781,7 +1039,7 @@
       <span>THE NEW INDIE WAVE</span>
     </a>
 
-    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+    <div class="nav-actions-wrap" style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
       <div id="spotifyAuthStatusWrap" style="display: flex; align-items: center; gap: 8px;">
         <a id="btnConnectSpotifyCurator" href="https://accounts.spotify.com/authorize?response_type=code&client_id=7a56561898eb4057941b2c1453476e10&scope=playlist-modify-public%20playlist-modify-private%20playlist-read-private%20playlist-read-collaborative%20user-read-private%20user-read-email&redirect_uri=https%3A%2F%2Fthenewindiewave.online%2Fapi%2Fspotify-callback&show_dialog=true" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 6px 14px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 0 15px rgba(29,185,84,0.3);">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.308c-.216.353-.675.467-1.028.25-2.816-1.722-6.36-2.112-10.534-1.158-.403.093-.807-.156-.9-.559-.093-.404.156-.808.56-.9 4.568-1.045 8.487-.597 11.653 1.34.352.217.466.674.249 1.027zm1.468-3.265c-.272.443-.853.582-1.296.31-3.224-1.982-8.139-2.555-11.953-1.397-.498.151-1.03-.134-1.18-.633-.151-.498.134-1.03.633-1.18 4.359-1.323 9.774-.683 13.486 1.603.443.272.582.853.31 1.297zm.126-3.41c-3.865-2.296-10.24-2.508-13.929-1.388-.593.18-1.222-.16-1.402-.753-.18-.593.16-1.222.753-1.402 4.238-1.286 11.284-1.038 15.736 1.605.534.317.708 1.01.391 1.545-.316.533-1.009.708-1.549.393z"/></svg>
@@ -1329,58 +1587,102 @@
   var livePlaylists = [];
   async function loadPlaylistsForManager() {
     var container = document.getElementById('queueContainer');
-    container.innerHTML = '<div class="empty-box">Cargando playlists desde Spotify API...</div>';
+    container.innerHTML = '<div class="empty-box">⏳ Consultando playlists en vivo desde tu cuenta de Spotify...</div>';
     try {
-      const res = await fetch('/api/playlists');
-      if(!res.ok) throw new Error('Error al cargar');
+      var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
+      var url = '/api/playlists?t=' + Date.now() + (rToken ? ('&refresh_token=' + encodeURIComponent(rToken)) : '');
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('Error de conexión con Spotify API');
       const data = await res.json();
       livePlaylists = data.allPlaylists || [];
+
+      // Actualizar dinámicamente el mapa de enlaces de playlists
+      if (livePlaylists && livePlaylists.length > 0) {
+        livePlaylists.forEach(function(p) {
+          if (p.name && p.spotify_url) {
+            playlistLinksMap[p.name] = p.spotify_url;
+          }
+        });
+      }
+
       renderPlaylistManager();
     } catch(e) {
-      container.innerHTML = '<div class="empty-box">No se pudieron cargar las playlists. Verifica tus credenciales.</div>';
+      container.innerHTML = `
+        <div class="empty-box" style="border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.03);">
+          <div style="color: #ef4444; font-size: 14px; font-weight: 700; margin-bottom: 8px;">❌ No se pudieron cargar las playlists de Spotify</div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">${e.message || 'Verifica tu conexión a internet o tu vinculación.'}</p>
+          <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <button onclick="loadPlaylistsForManager()" class="btn-refresh" style="display: inline-flex;">🔄 Reintentar Carga</button>
+            <button onclick="reconnectSpotify()" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">🟢 Vincular / Re-vincular Spotify</button>
+          </div>
+        </div>
+      `;
     }
   }
 
   function renderPlaylistManager() {
     var container = document.getElementById('queueContainer');
     if(!livePlaylists || livePlaylists.length === 0) {
-      container.innerHTML = '<div class="empty-box">No hay playlists encontradas.</div>';
+      container.innerHTML = `
+        <div class="empty-box">
+          No se encontraron playlists activas en la cuenta vinculada.<br><br>
+          <button onclick="loadPlaylistsForManager()" class="btn-refresh" style="display: inline-flex;">🔄 Reintentar Carga</button>
+        </div>
+      `;
       return;
     }
 
     container.innerHTML = `
-      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 20px;">
-        <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; margin-bottom: 4px;">🏷️ EDITOR DE ETIQUETAS & GÉNEROS DE PLAYLISTS</h3>
-        <p style="font-size: 13px; color: var(--text-muted);">Edita las etiquetas de género y categoría de cada playlist para que los filtros de la web se actualicen a tu gusto.</p>
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 4px;">🏷️ ADMINISTRADOR DE PLAYLISTS & GÉNEROS</h3>
+            <p style="font-size: 12.5px; color: var(--text-muted);">
+              Sincronizado en tiempo real con tu Spotify. Total: <strong style="color: var(--accent-lime);">${livePlaylists.length} playlists detectadas</strong>.
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button onclick="loadPlaylistsForManager()" class="btn-tool" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); border-color: rgba(187, 244, 81, 0.3);">
+              🔄 Sincronizar Cambios de Spotify
+            </button>
+            <a href="https://open.spotify.com" target="_blank" class="btn-tool" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+              🎵 Abrir Spotify App ↗
+            </a>
+          </div>
+        </div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
         ${livePlaylists.map(p => {
           var savedCustom = localStorage.getItem('tniw_tags_' + p.id);
           var currentTags = savedCustom || (p.genres ? p.genres.join(', ') : 'Indie rock, Alternative');
+          var coverImg = p.image ? `<img src="${p.image}" alt="" style="width: 48px; height: 48px; border-radius: 4px; object-fit: cover; flex-shrink: 0;">` : '';
           
           return `
-            <div class="track-item" style="padding: 20px;">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
-                <div>
-                  <h4 style="font-family: var(--font-heading); font-size: 17px; font-weight: 700; color: #fff;">${p.name}</h4>
-                  <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); margin-top: 2px;">
-                    ID: ${p.id} • 👥 ${(p.followers || 0).toLocaleString()} seguidores
+            <div class="track-item" style="padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  ${coverImg}
+                  <div>
+                    <h4 style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 2px;">${p.name}</h4>
+                    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime);">
+                      👥 ${(p.followers || 0).toLocaleString()} seguidores • 🎵 ${(p.tracks_count || 0)} canciones • ID: <span style="color:var(--text-muted);">${p.id}</span>
+                    </div>
                   </div>
                 </div>
-                <a href="${p.spotify_url}" target="_blank" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-decoration: none; border: 1px solid var(--border); padding: 4px 10px; border-radius: 4px;">
-                  Abrir en Spotify ↗
+                <a href="${p.spotify_url}" target="_blank" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-decoration: none; border: 1px solid var(--border-strong); padding: 5px 12px; border-radius: 4px; white-space: nowrap;">
+                  Abrir Playlist ↗
                 </a>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;">
+              <div class="playlist-edit-row">
                 <div>
                   <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">
-                    Etiquetas de Género (separadas por coma):
+                    Etiquetas de Género (separadas por coma para filtros web):
                   </label>
-                  <input type="text" id="tags-input-${p.id}" value="${currentTags}" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); border-radius: 4px; padding: 10px 12px; color: #fff; font-family: var(--font-body); font-size: 13px;">
+                  <input type="text" id="tags-input-${p.id}" value="${currentTags}" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); border-radius: 4px; padding: 9px 12px; color: #fff; font-family: var(--font-body); font-size: 12.5px;">
                 </div>
-                <button onclick="savePlaylistTags('${p.id}')" style="background: var(--accent-lime); color: #000; border: none; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 11px 18px; border-radius: 4px; cursor: pointer; align-self: flex-end;">
+                <button onclick="savePlaylistTags('${p.id}')" class="playlist-save-btn" style="background: var(--accent-lime); color: #000; border: none; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 10px 18px; border-radius: 4px; cursor: pointer; align-self: flex-end; white-space: nowrap;">
                   Guardar Etiquetas ✓
                 </button>
               </div>
@@ -1441,7 +1743,7 @@
       Mockup automático en resolución 1080 x 1920 px listo para publicar en @the.new.indie.wave & @m.trendvideo.
     </p>
 
-    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
+    <div class="story-modal-grid" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
       <!-- Canvas Preview Container -->
       <div style="background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; justify-content: center; align-items: center;">
         <canvas id="curatorStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 260px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
