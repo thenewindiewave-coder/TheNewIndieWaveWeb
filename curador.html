@@ -1856,11 +1856,33 @@
     `;
   }
 
+  // LISTAS MAESTRAS DE GÉNEROS Y FORMATOS
+  var RADAR_GENRES = [
+    "INDIE ROCK", "INDIE POP", "DREAM POP", "SHOEGAZE", "SYNTH POP",
+    "POST-PUNK", "DARKWAVE", "NEW WAVE", "ALTERNATIVE ROCK", "BEDROOM POP",
+    "LO-FI", "ELECTRO POP", "NU-DISCO", "ART POP", "PUNK ROCK",
+    "MATH ROCK", "EMO", "INDIE FOLK", "PSYCHEDELIC ROCK", "GARAGE ROCK",
+    "TRIP HOP", "R&B ALTERNATIVO", "ELECTRONIC", "AMBIENT", "INDUSTRIAL",
+    "HYPERPOP", "FOLK", "POP ALTERNATIVO", "SYNTHWAVE", "COLDWAVE",
+    "GRUNGE", "BRITPOP", "POST-ROCK", "JANGLE POP", "NOISE POP",
+    "CHILLWAVE", "DISCO", "HOUSE", "TECHNO", "EXPERIMENTAL", "OTRO"
+  ];
+
+  var RADAR_BADGES = [
+    "SOLISTA", "DÚO", "TRÍO", "CUARTETO", "AGRUPACIÓN",
+    "BANDA", "DJ", "PRODUCTOR", "CANTANTE", "PROYECTO SOLISTA",
+    "COLECTIVO", "COMPOSITOR", "BEATMAKER", "PERFORMER", "MULTIINSTRUMENTISTA",
+    "TOP RADAR", "RECOMENDADO", "ESTRENO", "DESTACADO", "OTRO"
+  ];
+
   // MODAL FLOTANTE Y RESPONSIVE DE EDICIÓN DE ARTISTA
   function openEditArtistModal(artistId) {
     var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
     var artist = artistId ? list.find(function(a){ return a.id === artistId; }) : null;
     var isNew = !artist;
+
+    var currentGenre = artist ? (artist.genre || 'INDIE ROCK').toUpperCase() : 'INDIE ROCK';
+    var currentBadge = artist ? (artist.badge || 'SOLISTA').toUpperCase() : 'SOLISTA';
 
     var modalHtml = `
       <div class="artist-modal-overlay" id="curatorRadarModal" onclick="if(event.target===this) closeRadarModal()">
@@ -1879,10 +1901,11 @@
 
           <form onsubmit="handleRadarFormSubmit(event, '${artist ? artist.id : ''}')" style="display: flex; flex-direction: column; gap: 14px;">
             
+            <!-- DATOS BÁSICOS -->
             <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Proyecto / Artista *</label>
-                <input type="text" id="rfName" required value="${artist ? (artist.name || '') : ''}" placeholder="Ej. Lunar Daydream" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <input type="text" id="rfName" required value="${artist ? (artist.name || '') : ''}" placeholder="Ej. Rodrigo dl Moral" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ciudad / País *</label>
@@ -1890,10 +1913,17 @@
               </div>
             </div>
 
+            <!-- GÉNERO Y CATEGORÍA (LISTAS DESPLEGABLES) -->
             <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género Musical *</label>
-                <input type="text" id="rfGenre" required value="${artist ? (artist.genre || '') : ''}" placeholder="Ej. SYNTH POP / NEW WAVE" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género Musical (Lista Individual) *</label>
+                <select id="rfGenre" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                  ${RADAR_GENRES.map(function(g){
+                    var sel = (currentGenre === g || currentGenre.includes(g)) ? 'selected' : '';
+                    return '<option value="' + g + '" ' + sel + '>' + g + '</option>';
+                  }).join('')}
+                  ${!RADAR_GENRES.includes(currentGenre) ? '<option value="' + currentGenre + '" selected>' + currentGenre + ' (Personalizado)</option>' : ''}
+                </select>
               </div>
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ubicación en la Web *</label>
@@ -1904,14 +1934,21 @@
               </div>
             </div>
 
+            <!-- FORMATO Y CANCIÓN -->
             <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Formato / Badge</label>
-                <input type="text" id="rfBadge" value="${artist ? (artist.badge || 'SOLISTA') : 'SOLISTA'}" placeholder="SOLISTA / DÚO / AGRUPACIÓN" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Formato / Badge (Lista Desplegable) *</label>
+                <select id="rfBadge" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                  ${RADAR_BADGES.map(function(b){
+                    var sel = (currentBadge === b) ? 'selected' : '';
+                    return '<option value="' + b + '" ' + sel + '>' + b + '</option>';
+                  }).join('')}
+                  ${!RADAR_BADGES.includes(currentBadge) ? '<option value="' + currentBadge + '" selected>' + currentBadge + ' (Personalizado)</option>' : ''}
+                </select>
               </div>
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ID / Enlace Canción (Spotify, YouTube o SoundCloud)</label>
-                <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="Ej. https://youtu.be/... o Spotify URI" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="Ej. https://youtu.be/... o ID Spotify" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
             </div>
 
@@ -1935,6 +1972,7 @@
               <div id="rfMediaPreview" style="display: none; margin-top: 8px;"></div>
             </div>
 
+            <!-- RESEÑAS Y TEXTOS -->
             <div>
               <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Biografía Corta (Frase destacada en tarjeta)</label>
               <textarea id="rfShortBio" rows="2" placeholder="Electrónica, emoción y oscuridad convertidas en canciones que dejan huella." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.short_bio || '') : ''}</textarea>
@@ -1956,14 +1994,54 @@
               </div>
             </div>
 
-            <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Perfil Spotify (URL)</label>
-                <input type="url" id="rfSpotifyUrl" value="${artist ? (artist.spotify_url || '') : ''}" placeholder="https://open.spotify.com/artist/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+            <!-- SECCIÓN COMPLETA DE REDES SOCIALES Y ENLACES OFICIALES -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 14px; margin-top: 4px;">
+              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                🌐 REDES SOCIALES Y ENLACES OFICIALES DEL ARTISTA
               </div>
-              <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Instagram (@usuario o URL)</label>
-                <input type="text" id="rfInstagram" value="${artist ? (artist.instagram || '') : ''}" placeholder="@rodrigodlmoral" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+
+              <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🟢 Spotify Perfil (URL)</label>
+                  <input type="url" id="rfSpotifyUrl" value="${artist ? (artist.spotify_url || '') : ''}" placeholder="https://open.spotify.com/artist/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">📸 Instagram (@usuario o URL)</label>
+                  <input type="text" id="rfInstagram" value="${artist ? (artist.instagram || '') : ''}" placeholder="@rodrigodlmoral" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+              </div>
+
+              <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🔴 YouTube (Canal / Video URL)</label>
+                  <input type="url" id="rfYoutubeUrl" value="${artist ? (artist.youtube_url || '') : ''}" placeholder="https://youtube.com/@... o video" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🖤 TikTok (@usuario o URL)</label>
+                  <input type="text" id="rfTiktokUrl" value="${artist ? (artist.tiktok_url || '') : ''}" placeholder="@usuario" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+              </div>
+
+              <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🍎 Apple Music (URL)</label>
+                  <input type="url" id="rfAppleMusicUrl" value="${artist ? (artist.apple_music_url || '') : ''}" placeholder="https://music.apple.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🟠 SoundCloud (URL)</label>
+                  <input type="url" id="rfSoundcloudUrl" value="${artist ? (artist.soundcloud_url || '') : ''}" placeholder="https://soundcloud.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+              </div>
+
+              <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🔷 Bandcamp (URL)</label>
+                  <input type="url" id="rfBandcampUrl" value="${artist ? (artist.bandcamp_url || '') : ''}" placeholder="https://artista.bandcamp.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🌍 Sitio Web Oficial / Linktree (URL)</label>
+                  <input type="url" id="rfWebsiteUrl" value="${artist ? (artist.website_url || '') : ''}" placeholder="https://miweb.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
               </div>
             </div>
 
@@ -2006,7 +2084,7 @@
     var mediaUrl = (document.getElementById('rfMediaUrl').value || '').trim();
     var isVideo = mediaUrl.includes('/video/') || mediaUrl.endsWith('.mp4') || mediaUrl.endsWith('.webm') || mediaUrl.endsWith('.mov') || mediaUrl.startsWith('data:video');
 
-    // Normalizar Instagram para que siempre guarde un formato limpio
+    // Normalizar Instagram
     var rawIg = (document.getElementById('rfInstagram').value || '').trim();
     var cleanIg = rawIg;
     if (cleanIg.includes('instagram.com/')) {
@@ -2016,13 +2094,21 @@
       cleanIg = '@' + cleanIg;
     }
 
+    // Normalizar TikTok
+    var rawTk = (document.getElementById('rfTiktokUrl') ? document.getElementById('rfTiktokUrl').value : '').trim();
+    var cleanTk = rawTk;
+    if (cleanTk.includes('tiktok.com/@')) {
+      var tkSegs = cleanTk.split('tiktok.com/@')[1].split('/')[0].split('?')[0];
+      if (tkSegs) cleanTk = '@' + tkSegs.replace('@','');
+    }
+
     var artistData = {
       id: existingId || ('radar-' + Date.now()),
       name: document.getElementById('rfName').value.trim(),
       city: document.getElementById('rfCity').value.trim().toUpperCase(),
       genre: document.getElementById('rfGenre').value.trim().toUpperCase(),
       type: document.getElementById('rfType').value,
-      badge: document.getElementById('rfBadge').value.trim().toUpperCase() || (document.getElementById('rfType').value === 'top3' ? 'TOP RADAR' : 'RECOMENDADO'),
+      badge: document.getElementById('rfBadge').value.trim().toUpperCase() || 'SOLISTA',
       media_type: isVideo ? 'video' : 'image',
       media_url: mediaUrl,
       track_id: document.getElementById('rfTrackId').value.trim(),
@@ -2031,7 +2117,13 @@
       career_notes: document.getElementById('rfCareer').value.trim(),
       events_note: document.getElementById('rfEvents').value.trim(),
       spotify_url: document.getElementById('rfSpotifyUrl').value.trim(),
-      instagram: cleanIg
+      instagram: cleanIg,
+      youtube_url: (document.getElementById('rfYoutubeUrl') ? document.getElementById('rfYoutubeUrl').value.trim() : ''),
+      tiktok_url: cleanTk,
+      apple_music_url: (document.getElementById('rfAppleMusicUrl') ? document.getElementById('rfAppleMusicUrl').value.trim() : ''),
+      soundcloud_url: (document.getElementById('rfSoundcloudUrl') ? document.getElementById('rfSoundcloudUrl').value.trim() : ''),
+      bandcamp_url: (document.getElementById('rfBandcampUrl') ? document.getElementById('rfBandcampUrl').value.trim() : ''),
+      website_url: (document.getElementById('rfWebsiteUrl') ? document.getElementById('rfWebsiteUrl').value.trim() : '')
     };
 
     if(existingId) {
