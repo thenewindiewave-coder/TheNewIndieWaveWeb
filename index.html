@@ -458,14 +458,37 @@
     }
   }
 
-  // Detectar si el artista ya envió una canción en este navegador
+  // Detectar y validar con Supabase si el artista realmente tiene una canción en revisión activa
   var lastId = localStorage.getItem('tniw_last_submission_id');
   if(lastId) {
     var banner = document.getElementById('activeStatusBanner');
-    if(banner) {
-      banner.style.display = 'inline-flex';
-      banner.href = 'estado.html?id=' + lastId;
-    }
+    var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
+
+    fetch(SUPABASE_URL + '/rest/v1/submissions?track_id=eq.' + encodeURIComponent(lastId) + '&select=status', {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+      }
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(rows){
+      if(rows && rows.length > 0 && (rows[0].status === 'pending' || rows[0].status === 'queue')) {
+        if(banner) {
+          banner.style.display = 'inline-flex';
+          banner.href = 'estado.html?id=' + encodeURIComponent(lastId);
+        }
+      } else {
+        if(banner) banner.style.display = 'none';
+        if(!rows || rows.length === 0) {
+          localStorage.removeItem('tniw_last_submission_id');
+          localStorage.removeItem('tniw_submission_data');
+        }
+      }
+    })
+    .catch(function(){
+      if(banner) banner.style.display = 'none';
+    });
   }
 </script>
 
