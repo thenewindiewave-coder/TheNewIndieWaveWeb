@@ -719,7 +719,7 @@
     var filtered = allSubmissions.filter(function(s) {
       if(currentTab === 'pending') return s.status === 'pending' || s.status === 'queue';
       if(currentTab === 'accepted') return s.status === 'accepted';
-      if(currentTab === 'rejected') return s.status === 'rejected';
+      if(currentTab === 'rejected') return s.status === 'rejected' || s.status === 'declined';
       return true;
     });
 
@@ -782,7 +782,7 @@
             <textarea class="feedback-textarea" id="fb-${item.id}" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
 
             <div class="decision-actions">
-              <button class="btn-decline" onclick="updateDecision('${item.id}', 'rejected')">
+              <button class="btn-decline" onclick="updateDecision('${item.id}', 'declined')">
                 ✕ Declinar Envío
               </button>
               <button class="btn-accept" onclick="updateDecision('${item.id}', 'accepted')">
@@ -903,7 +903,19 @@
 
   // 8. Actualizar Decisión en Supabase en Tiempo Real
   async function updateDecision(recordId, status) {
-    var fb = document.getElementById('fb-' + recordId).value;
+    var fbEl = document.getElementById('fb-' + recordId);
+    var fb = fbEl ? fbEl.value : '';
+
+    // Actualización reactiva instantánea en la interfaz
+    var item = allSubmissions.find(function(s){ return String(s.id) === String(recordId); });
+    if(item) {
+      item.status = status;
+      item.feedback = fb;
+    }
+    renderQueue();
+    updateMetrics();
+
+    showToast(status === 'accepted' ? '🎉 ¡Canción ACEPTADA para Playlist & Redes!' : '✓ Envío marcado como declinado');
 
     try {
       var res = await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
@@ -921,12 +933,25 @@
         })
       });
 
-      if(!res.ok) throw new Error('Error al actualizar');
-      
-      showToast(status === 'accepted' ? '🎉 ¡Canción ACEPTADA con éxito!' : 'Envío marcado como declinado');
-      loadSubmissions();
+      if(!res.ok) {
+        // Reintentar con track_id si el id fuera personalizado
+        await fetch(SUPABASE_URL + '/rest/v1/submissions?track_id=eq.' + recordId, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            status: status,
+            feedback: fb,
+            updated_at: new Date().toISOString()
+          })
+        });
+      }
     } catch(err) {
-      showToast('Error al actualizar en Supabase');
+      console.error('Error al sincronizar decisión con Supabase:', err);
     }
   }
 
