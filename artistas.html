@@ -1376,6 +1376,14 @@
     }
   }
 
+  // RENDERIZAR ARTISTAS INMEDIATAMENTE AL CARGAR LA PÁGINA
+  try {
+    renderAllRadarArtists();
+  } catch(e) {
+    console.error('Error renderizando artistas:', e);
+  }
+
+
   // MODAL LOGIC
   function openArtistModal(id) {
     var artist = artistsList.find(function(a){ return a.id === id; });
