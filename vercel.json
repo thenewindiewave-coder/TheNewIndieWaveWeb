@@ -4,11 +4,27 @@
   "routes": [
     {
       "src": "/artista",
-      "dest": "/api/artista"
+      "dest": "/api/artista.js"
+    },
+    {
+      "src": "/api/spotify-login",
+      "dest": "/api/spotify-login.js"
+    },
+    {
+      "src": "/api/spotify-callback",
+      "dest": "/api/spotify-callback.js"
+    },
+    {
+      "src": "/api/spotify-add-track",
+      "dest": "/api/spotify-add-track.js"
+    },
+    {
+      "src": "/api/playlists",
+      "dest": "/api/playlists.js"
     },
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "/api/$1.js"
     },
     {
       "src": "/(.*)",
