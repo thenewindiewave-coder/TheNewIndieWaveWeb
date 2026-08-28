@@ -1893,7 +1893,7 @@
             <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género Musical *</label>
-                <input type="text" id="rfGenre" required value="${artist ? (artist.genre || '') : ''}" placeholder="Ej. DREAM POP / SHOEGAZE" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <input type="text" id="rfGenre" required value="${artist ? (artist.genre || '') : ''}" placeholder="Ej. SYNTH POP / NEW WAVE" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ubicación en la Web *</label>
@@ -1907,22 +1907,22 @@
             <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Formato / Badge</label>
-                <input type="text" id="rfBadge" value="${artist ? (artist.badge || 'AGRUPACIÓN') : 'AGRUPACIÓN'}" placeholder="SOLISTA / DÚO / AGRUPACIÓN" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <input type="text" id="rfBadge" value="${artist ? (artist.badge || 'SOLISTA') : 'SOLISTA'}" placeholder="SOLISTA / DÚO / AGRUPACIÓN" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ID / Enlace Canción (Spotify o YouTube)</label>
-                <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="ID o URL de Spotify / YouTube" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ID / Enlace Canción (Spotify, YouTube o SoundCloud)</label>
+                <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="Ej. https://youtu.be/... o Spotify URI" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
             </div>
 
             <!-- FOTO / MULTIMEDIA CON SUBIDA DIRECTA DESDE CELULAR O PC -->
             <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 14px;">
               <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 6px;">
-                📸 FOTO O VIDEO DEL ARTISTA
+                📸 FOTO O VIDEO DEL ARTISTA (CLOUDINARY / URL)
               </label>
               
               <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px;">
-                <input type="text" id="rfMediaUrl" value="${artist ? (artist.media_url || '') : ''}" oninput="previewRadarMedia(this.value)" placeholder="https://ejemplo.com/foto.jpg o .mp4" style="flex:1; min-width:200px; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <input type="text" id="rfMediaUrl" value="${artist ? (artist.media_url || '') : ''}" oninput="previewRadarMedia(this.value)" placeholder="https://res.cloudinary.com/... o URL directa" style="flex:1; min-width:200px; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
                 
                 <label style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 9px 14px; border-radius: 4px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
                   📁 Subir Archivo
@@ -1932,14 +1932,12 @@
 
               <div id="rfUploadStatus" style="display:none; font-family: var(--font-mono); font-size: 11px; margin-bottom: 6px;"></div>
 
-              <div id="rfMediaPreview" style="display: ${artist && artist.media_url ? 'block' : 'none'}; margin-top: 6px;">
-                <img id="rfMediaPreviewImg" src="${artist ? (artist.media_url || '') : ''}" style="max-height: 90px; border-radius: 4px; border: 1px solid var(--border); object-fit: cover;">
-              </div>
+              <div id="rfMediaPreview" style="display: none; margin-top: 8px;"></div>
             </div>
 
             <div>
               <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Biografía Corta (Frase destacada en tarjeta)</label>
-              <textarea id="rfShortBio" rows="2" placeholder="Capas envolventes de reverb y guitarras nostálgicas..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.short_bio || '') : ''}</textarea>
+              <textarea id="rfShortBio" rows="2" placeholder="Electrónica, emoción y oscuridad convertidas en canciones que dejan huella." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.short_bio || '') : ''}</textarea>
             </div>
 
             <div>
@@ -1964,8 +1962,8 @@
                 <input type="url" id="rfSpotifyUrl" value="${artist ? (artist.spotify_url || '') : ''}" placeholder="https://open.spotify.com/artist/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Instagram (@usuario)</label>
-                <input type="text" id="rfInstagram" value="${artist ? (artist.instagram || '') : ''}" placeholder="@nombreartista" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Instagram (@usuario o URL)</label>
+                <input type="text" id="rfInstagram" value="${artist ? (artist.instagram || '') : ''}" placeholder="@rodrigodlmoral" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
             </div>
 
@@ -1989,6 +1987,11 @@
     var div = document.createElement('div');
     div.innerHTML = modalHtml;
     document.body.appendChild(div.firstElementChild);
+
+    // Inicializar preview de multimedia de inmediato si ya tiene URL
+    if (artist && artist.media_url) {
+      previewRadarMedia(artist.media_url);
+    }
   }
 
   function closeRadarModal() {
@@ -2001,7 +2004,17 @@
     var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
     
     var mediaUrl = (document.getElementById('rfMediaUrl').value || '').trim();
-    var isVideo = mediaUrl.endsWith('.mp4');
+    var isVideo = mediaUrl.includes('/video/') || mediaUrl.endsWith('.mp4') || mediaUrl.endsWith('.webm') || mediaUrl.endsWith('.mov') || mediaUrl.startsWith('data:video');
+
+    // Normalizar Instagram para que siempre guarde un formato limpio
+    var rawIg = (document.getElementById('rfInstagram').value || '').trim();
+    var cleanIg = rawIg;
+    if (cleanIg.includes('instagram.com/')) {
+      var segments = cleanIg.split('instagram.com/')[1].split('/')[0].split('?')[0];
+      if (segments) cleanIg = '@' + segments.replace('@','');
+    } else if (cleanIg && !cleanIg.startsWith('@') && !cleanIg.startsWith('http')) {
+      cleanIg = '@' + cleanIg;
+    }
 
     var artistData = {
       id: existingId || ('radar-' + Date.now()),
@@ -2018,7 +2031,7 @@
       career_notes: document.getElementById('rfCareer').value.trim(),
       events_note: document.getElementById('rfEvents').value.trim(),
       spotify_url: document.getElementById('rfSpotifyUrl').value.trim(),
-      instagram: document.getElementById('rfInstagram').value.trim()
+      instagram: cleanIg
     };
 
     if(existingId) {
@@ -2095,37 +2108,131 @@
 
   function previewRadarMedia(url) {
     var prev = document.getElementById('rfMediaPreview');
-    var prevImg = document.getElementById('rfMediaPreviewImg');
-    if (prev && prevImg) {
-      if (url && url.trim()) {
-        prevImg.src = url.trim();
-        prevImg.style.display = 'block';
-        prev.style.display = 'block';
-      } else {
-        prev.style.display = 'none';
-      }
+    if (!prev) return;
+    if (!url || !url.trim()) {
+      prev.style.display = 'none';
+      prev.innerHTML = '';
+      return;
+    }
+    var cleanUrl = url.trim();
+    var isVideo = cleanUrl.includes('/video/') || cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.mov') || cleanUrl.startsWith('data:video');
+
+    prev.style.display = 'block';
+    if (isVideo) {
+      prev.innerHTML = `
+        <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong);">
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-cyan); margin-bottom: 6px; text-transform: uppercase;">
+            ▶ Video Detectado (Cloudinary / MP4):
+          </div>
+          <video src="${cleanUrl}" controls autoplay loop muted playsinline style="max-height: 140px; max-width: 100%; border-radius: 6px; background: #000; display: block;"></video>
+        </div>
+      `;
+    } else {
+      prev.innerHTML = `
+        <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong);">
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-lime); margin-bottom: 6px; text-transform: uppercase;">
+            🖼️ Foto Detectada:
+          </div>
+          <img src="${cleanUrl}" alt="Preview" style="max-height: 140px; max-width: 100%; border-radius: 6px; object-fit: cover; display: block;" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:#ef4444; font-size:11px; font-family:var(--font-mono);\\'>✕ No se pudo cargar la imagen</span>';">
+        </div>
+      `;
     }
   }
 
+  // GENERADOR DE FIRMA SHA-1 EN EL CLIENTE
+  async function sha1Hex(str) {
+    var buffer = new TextEncoder().encode(str);
+    var hashBuffer = await crypto.subtle.digest('SHA-1', buffer);
+    var hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+  }
+
+  // SUBIDA STREAMING DIRECTA A CLOUDINARY
   async function handleDirectFileUpload(input) {
     if (!input.files || !input.files[0]) return;
     var file = input.files[0];
     var statusEl = document.getElementById('rfUploadStatus');
     var mediaUrlInput = document.getElementById('rfMediaUrl');
-    var isVideo = file.type.startsWith('video');
+    var isVideo = file.type.startsWith('video') || file.name.endsWith('.mp4') || file.name.endsWith('.mov');
+
+    // Mostrar vista previa local instantánea con Blob URL
+    var localBlobUrl = URL.createObjectURL(file);
+    previewRadarMedia(localBlobUrl);
 
     if (statusEl) {
       statusEl.style.display = 'block';
       statusEl.style.color = 'var(--accent-lime)';
-      statusEl.textContent = '⏳ Procesando ' + file.name + '...';
+      statusEl.textContent = '⏳ Preparando ' + file.name + '...';
     }
+    showToast('⏳ Subiendo a Cloudinary: 0%');
 
+    try {
+      var cloudName = 'ckknw1do';
+      var apiKey = '254625267987334';
+      var apiSecret = 'cm4UMlpil-ixQAovLrfUUkWm-vo';
+      var timestamp = Math.round(new Date().getTime() / 1000);
+      var signature = await sha1Hex('timestamp=' + timestamp + apiSecret);
+
+      var formData = new FormData();
+      formData.append('file', file);
+      formData.append('api_key', apiKey);
+      formData.append('timestamp', timestamp);
+      formData.append('signature', signature);
+
+      var endpoint = isVideo 
+        ? 'https://api.cloudinary.com/v1_1/' + cloudName + '/video/upload'
+        : 'https://api.cloudinary.com/v1_1/' + cloudName + '/image/upload';
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', endpoint);
+
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+          var percent = Math.round((e.loaded / e.total) * 100);
+          if (statusEl) statusEl.textContent = '⏳ Subiendo a Cloudinary: ' + percent + '%';
+          showToast('⏳ Subiendo: ' + percent + '%');
+        }
+      };
+
+      xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            var data = JSON.parse(xhr.responseText);
+            if (data && data.secure_url) {
+              mediaUrlInput.value = data.secure_url;
+              previewRadarMedia(data.secure_url);
+              if (statusEl) {
+                statusEl.style.color = 'var(--accent-lime)';
+                statusEl.textContent = '✓ Subido a Cloudinary';
+              }
+              showToast('✓ Archivo subido con éxito a Cloudinary');
+            } else {
+              throw new Error('Respuesta inválida');
+            }
+          } catch(err) {
+            fallbackUploadViaApi(file, isVideo, mediaUrlInput, statusEl);
+          }
+        } else {
+          fallbackUploadViaApi(file, isVideo, mediaUrlInput, statusEl);
+        }
+      };
+
+      xhr.onerror = function() {
+        fallbackUploadViaApi(file, isVideo, mediaUrlInput, statusEl);
+      };
+
+      xhr.send(formData);
+
+    } catch(err) {
+      console.error('Error durante subida:', err);
+      fallbackUploadViaApi(file, isVideo, mediaUrlInput, statusEl);
+    }
+  }
+
+  function fallbackUploadViaApi(file, isVideo, mediaUrlInput, statusEl) {
     var reader = new FileReader();
     reader.onload = async function(e) {
       var base64Data = e.target.result;
-      mediaUrlInput.value = base64Data;
-      previewRadarMedia(base64Data);
-
       try {
         var res = await fetch('/api/upload', {
           method: 'POST',
@@ -2143,18 +2250,18 @@
             statusEl.style.color = 'var(--accent-lime)';
             statusEl.textContent = '✓ Subido a la nube';
           }
-          showToast('✓ Archivo subido con éxito a la nube');
+          showToast('✓ Archivo subido con éxito');
         } else {
+          mediaUrlInput.value = base64Data;
+          previewRadarMedia(base64Data);
           if (statusEl) {
             statusEl.style.color = 'var(--accent-cyan)';
-            statusEl.textContent = '✓ Guardado localmente';
+            statusEl.textContent = '✓ Cargado localmente';
           }
         }
       } catch(err) {
-        if (statusEl) {
-          statusEl.style.color = 'var(--accent-cyan)';
-          statusEl.textContent = '✓ Guardado localmente';
-        }
+        mediaUrlInput.value = base64Data;
+        previewRadarMedia(base64Data);
       }
     };
     reader.readAsDataURL(file);
