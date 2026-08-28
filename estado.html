@@ -915,7 +915,7 @@
   </div>
 
   <!-- COUNTDOWN TIMER -->
-  <div class="timer-card">
+  <div class="timer-card" id="countdownTimerCard">
     <div class="timer-left">
       <h3>TIEMPO DE RESPUESTA ESTIMADO</h3>
       <p>Uno de nuestros curadores escuchará tu pista y enviará feedback antes de:</p>
@@ -937,7 +937,7 @@
   </div>
 
   <!-- STEPPER PROCESS -->
-  <div class="stepper-card">
+  <div class="stepper-card" id="stepperCard">
     <div class="stepper-title">// PROGRESO EN VIVO</div>
 
     <div class="stepper-steps">
@@ -1004,16 +1004,39 @@
     </div>
   </div>
 
-  <!-- ACCEPTED STATE -->
-  <div class="accepted-banner" id="acceptedBox" style="display: none;">
-    <h3 style="color: var(--accent-green); font-family: var(--font-heading); font-size: 20px; font-weight: 800; margin-bottom: 6px;">
-      🎉 ¡FELICIDADES! TU CANCIÓN FUE SELECCIONADA
+  <!-- ACCEPTED STATE (TARJETA PRINCIPAL LIMPIA Y COMPLETA) -->
+  <div class="accepted-banner" id="acceptedBox" style="display: none; background: rgba(187, 244, 81, 0.04); border: 1px solid rgba(187, 244, 81, 0.35); border-radius: 8px; padding: 28px; margin-bottom: 24px;">
+    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-lime); letter-spacing: 1px; margin-bottom: 6px;">// REVISIÓN FINALIZADA CON ÉXITO</div>
+    <h3 style="color: #fff; font-family: var(--font-heading); font-size: 24px; font-weight: 800; margin-bottom: 8px;">
+      🎉 ¡CANCIÓN ACEPTADA & EN PLAYLIST!
     </h3>
-    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
-      Tu tema ya ha sido añadido a la playlist oficial y programado para amplificación en nuestras redes sociales (@the.new.indie.wave y @m.trendvideo).
+    <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
+      Tu tema ha superado la curaduría humana y ya fue añadido a la playlist oficial de Spotify. Además, está en cola de difusión para <strong>@the.new.indie.wave</strong> y <strong>@m.trendvideo</strong>.
     </p>
-    <div id="acceptedFeedbackWrap" style="display:none; margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 13px; color: #fff;"></div>
-    <button class="btn-download-story" onclick="openStoryGeneratorModal()" style="cursor: pointer; border: none; font-size: 13px; padding: 12px 22px;">
+
+    <!-- Resumen Conciso de la Canción -->
+    <div class="details-grid" style="margin-bottom: 20px;">
+      <div class="detail-item">
+        <div class="detail-lbl">Canción</div>
+        <div class="detail-val" id="accSong" style="color: var(--accent-lime); font-size: 15px;">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-lbl">Artista / Banda</div>
+        <div class="detail-val" id="accArtist" style="font-size: 15px;">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-lbl">Playlist Destino</div>
+        <div class="detail-val" id="accPlaylist" style="color: #fff; font-size: 14.5px;">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-lbl">Estatus Editorial</div>
+        <div class="detail-val" style="color: var(--accent-lime);">✓ Admitida en Rotación Oficial</div>
+      </div>
+    </div>
+
+    <div id="acceptedFeedbackWrap" style="display:none; margin-bottom: 20px; padding: 14px 16px; background: rgba(0,0,0,0.5); border-radius: 6px; border-left: 3px solid var(--accent-lime); font-size: 13.5px; color: #fff;"></div>
+
+    <button class="btn-download-story" onclick="openStoryGeneratorModal()" style="cursor: pointer; border: none; font-size: 13px; font-weight: 800; padding: 14px 24px; box-shadow: 0 4px 18px rgba(187, 244, 81, 0.3);">
       🎨 Generar Historia para tus Redes (Instagram / TikTok) ↗
     </button>
   </div>
@@ -1093,14 +1116,26 @@
         var accBox = document.getElementById('acceptedBox');
         var decBox = document.getElementById('declinedBox');
 
+        var timerBox = document.getElementById('countdownTimerCard');
+        var stepperBox = document.getElementById('stepperCard');
+
         if(record.status === 'accepted') {
           document.getElementById('badgeText').textContent = 'ACEPTADA EN PLAYLIST';
-          document.getElementById('step1').className = 'step-row completed';
-          document.getElementById('step2').className = 'step-row completed';
-          document.getElementById('step3').className = 'step-row completed';
-          document.getElementById('step4').className = 'step-row completed';
+          // Ocultar temporizador y stepper detallado
+          if (timerBox) timerBox.style.display = 'none';
+          if (stepperBox) stepperBox.style.display = 'none';
+          
+          // Mostrar tarjeta limpia y concisa de aceptación
           if (accBox) accBox.style.display = 'block';
           if (decBox) decBox.style.display = 'none';
+          
+          var aSong = document.getElementById('accSong');
+          var aArt = document.getElementById('accArtist');
+          var aPlay = document.getElementById('accPlaylist');
+          if (aSong) aSong.textContent = record.song_title || 'Tu Canción';
+          if (aArt) aArt.textContent = record.artist_name || 'Tu Proyecto';
+          if (aPlay) aPlay.textContent = record.playlist || 'Playlist Oficial';
+
           if (record.feedback && record.feedback.trim()) {
             var fbW = document.getElementById('acceptedFeedbackWrap');
             if (fbW) {
@@ -1110,17 +1145,17 @@
           }
         } else if(record.status === 'declined' || record.status === 'rejected') {
           document.getElementById('badgeText').textContent = 'REVISIÓN FINALIZADA (DECLINADA)';
-          document.getElementById('step1').className = 'step-row completed';
-          document.getElementById('step2').className = 'step-row completed';
-          document.getElementById('step3').className = 'step-row completed';
-          document.getElementById('step4').className = 'step-row completed';
+          if (timerBox) timerBox.style.display = 'none';
+          if (stepperBox) stepperBox.style.display = 'none';
           if (accBox) accBox.style.display = 'none';
           if (decBox) decBox.style.display = 'block';
           if (record.feedback && record.feedback.trim()) {
-            document.getElementById('declinedFeedback').innerHTML = '<strong>Feedback de Rodrigo DL Moral:</strong><br><br>"' + record.feedback + '"';
+            document.getElementById('declinedFeedback').innerHTML = '<strong>Feedback de Curaduría:</strong><br><br>"' + record.feedback + '"';
           }
         } else if(record.status === 'listening') {
           document.getElementById('badgeText').textContent = 'EN ESCUCHA EDITORIAL (1:30 MIN)';
+          if (timerBox) timerBox.style.display = 'flex';
+          if (stepperBox) stepperBox.style.display = 'block';
           document.getElementById('step1').className = 'step-row completed';
           document.getElementById('step2').className = 'step-row completed';
           document.getElementById('step3').className = 'step-row active';
@@ -1128,6 +1163,8 @@
           if (decBox) decBox.style.display = 'none';
         } else {
           document.getElementById('badgeText').textContent = 'EN COLA DEL CURADOR';
+          if (timerBox) timerBox.style.display = 'flex';
+          if (stepperBox) stepperBox.style.display = 'block';
           document.getElementById('step1').className = 'step-row completed';
           document.getElementById('step2').className = 'step-row active';
           if (accBox) accBox.style.display = 'none';
