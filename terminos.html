@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Términos de Servicio // The New Indie Wave</title>
+  <title>Términos y Condiciones de Servicio // The New Indie Wave</title>
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
       --font-body: 'Inter', sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-main); color: var(--text-main); font-family: var(--font-body); line-height: 1.6; }
+    body { background: var(--bg-main); color: var(--text-main); font-family: var(--font-body); line-height: 1.65; }
     .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
     .navbar { border-bottom: 1px solid var(--border); padding: 18px 0; background: rgba(9,9,11,0.85); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100; }
     .nav-inner { display: flex; justify-content: space-between; align-items: center; }
@@ -34,16 +34,21 @@
     .nav-link { color: var(--text-muted); text-decoration: none; font-size: 13.5px; font-weight: 500; }
     .nav-link:hover { color: #fff; }
     .btn-submit-nav { background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 8px 16px; border-radius: 4px; text-decoration: none; }
-    .legal-content { max-width: 780px; margin: 60px auto 40px auto; }
+    
+    .legal-content { max-width: 820px; margin: 60px auto 40px auto; }
     .legal-header { margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
     .legal-tag { font-family: var(--font-mono); font-size: 12px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 8px; }
-    .legal-title { font-family: var(--font-heading); font-size: 36px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .legal-title { font-family: var(--font-heading); font-size: 38px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; line-height: 1.2; }
     .legal-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); }
-    .legal-section { margin-bottom: 32px; }
-    .legal-section h2 { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 12px; }
-    .legal-section p { color: var(--text-muted); font-size: 14.5px; margin-bottom: 12px; }
-    .legal-section ul { color: var(--text-muted); font-size: 14.5px; margin-left: 20px; margin-bottom: 12px; }
-    .legal-section li { margin-bottom: 6px; }
+    
+    .legal-box-alert { background: rgba(187, 244, 81, 0.05); border: 1px solid rgba(187, 244, 81, 0.25); padding: 18px 22px; border-radius: 6px; margin-bottom: 36px; font-size: 14px; color: #fff; }
+    
+    .legal-section { margin-bottom: 36px; }
+    .legal-section h2 { font-family: var(--font-heading); font-size: 21px; font-weight: 700; color: #fff; margin-bottom: 14px; border-left: 3px solid var(--accent-lime); padding-left: 12px; }
+    .legal-section p { color: var(--text-muted); font-size: 14.5px; margin-bottom: 14px; }
+    .legal-section ul { color: var(--text-muted); font-size: 14.5px; margin-left: 24px; margin-bottom: 14px; }
+    .legal-section li { margin-bottom: 8px; }
+    .legal-section strong { color: #fff; }
     
   /* GLOBAL RICH FOOTER */
   .site-footer {
@@ -198,41 +203,85 @@
   <main class="container">
     <div class="legal-content">
       <div class="legal-header">
-        <div class="legal-tag">// MARCO LEGAL & CONDICIONES</div>
-        <h1 class="legal-title">Términos de Servicio</h1>
+        <div class="legal-tag">// MARCO LEGAL & ACUERDO DE USUARIO</div>
+        <h1 class="legal-title">Términos y Condiciones de Servicio</h1>
         <div class="legal-date">Última actualización: 28 de Agosto, 2026 // The New Indie Wave</div>
       </div>
 
-      <div class="legal-section">
-        <h2>1. Naturaleza del Colectivo y Servicio</h2>
-        <p><strong>The New Indie Wave</strong> es una plataforma y colectivo cultural independiente fundado y curado por Rodrigo DL Moral. Nuestro propósito es la difusión honesta, curaduría editorial de música independiente y programación de eventos en vivo.</p>
-        <p>Al enviar tu música a través de nuestro formulario o utilizar cualquier sección de nuestro sitio web, aceptas los presentes Términos de Servicio en su totalidad.</p>
+      <div class="legal-box-alert">
+        <strong>⚠️ Aceptación Automática y Vinculante:</strong> Al navegar, interactuar, enviar música, consultar estados o utilizar de cualquier manera este sitio web y sus servicios asociados, el usuario, artista, banda, sello o representante acepta de manera plena, expresa, irrevocable e incondicional todos y cada uno de los presentes Términos y Condiciones.
       </div>
 
+      <!-- 1. Estructura y Titularidad -->
       <div class="legal-section">
-        <h2>2. Proceso de Curaduría y Envíos de Canciones</h2>
-        <p>Garantizamos que el <strong>100% de los envíos recibidos son escuchados por un curador humano</strong> con un tiempo mínimo de escucha de 1:30 minutos por pista.</p>
+        <h2>1. Estructura, Titularidad y Naturaleza del Colectivo</h2>
+        <p><strong>The New Indie Wave</strong> es una plataforma independiente y colectivo cultural fundado por <a href="https://www.instagram.com/rodrigodlmora" target="_blank" rel="noopener noreferrer" style="color: var(--accent-lime); font-weight: 700; text-decoration: underline;">@rodrigodlmoral</a> (Rodrigo DL Moral), dedicado al descubrimiento, curaduría editorial, difusión multiplataforma y organización de showcases en vivo para proyectos musicales independientes.</p>
+        <p>Los presentes Términos aplican a todas las actividades, sitios web, subdominios, herramientas, APIs, formularios de envío y canales de difusión operados por The New Indie Wave y sus marcas hermanas y aliadas.</p>
+      </div>
+
+      <!-- 2. Licencia de Difusión y Material de Marketing -->
+      <div class="legal-section">
+        <h2>2. Licencia de Difusión, Redes Sociales y Campañas de Marketing</h2>
+        <p>El artista o representante que envía una pista musical (a través de enlaces de Spotify, audio, video, fotografías o metadatos) declara ser el titular o contar con autorización legal expresa para su distribución, y <strong>otorga a The New Indie Wave, a Rodrigo DL Moral y a sus colaboradores una licencia no exclusiva, mundial, libre de regalías y transferible</strong> para:</p>
         <ul>
-          <li><strong>Criterio Editorial:</strong> La aceptación o declinación de canciones se basa estrictamente en encaje sonoro, estilo de la playlist destino y línea editorial de la plataforma.</li>
-          <li><strong>Feedback Honesto:</strong> Los artistas reciben retroalimentación técnica, de mezcla o apreciación artística directamente en su panel de estado.</li>
-          <li><strong>Sin Garantía de Inclusión Automática:</strong> El envío de un tema no garantiza su aceptación obligatoria en playlists ni la firma de acuerdos contractuales.</li>
+          <li><strong>Inclusión en Playlists:</strong> Agregar y mantener las pistas musicales en las playlists oficiales de Spotify, Apple Music u otras plataformas administradas por el colectivo.</li>
+          <li><strong>Material de Difusión y Redes Sociales:</strong> Utilizar extractos de la pista de audio, portada, fotografías, video-historias, nombres y notas del artista para la creación de contenido, reels, publicaciones, stories, carruseles y material promocional en todas nuestras redes oficiales (Instagram, TikTok, YouTube, Facebook, X, Threads).</li>
+          <li><strong>Campañas de Marketing y Publicidad:</strong> Emplear fragmentos de las canciones aceptadas o presentadas en el Radar para la promoción general del colectivo, showcases en vivo y campañas de marketing digital sin costo de licenciamiento.</li>
         </ul>
       </div>
 
+      <!-- 3. Canal Hermano: M.Trend Video -->
       <div class="legal-section">
-        <h2>3. Propiedad Intelectual y Derechos Musicales</h2>
-        <p>El artista o representante declara y garantiza ser el titular legítimo de los derechos de autor, fonogramas y propiedad intelectual de las pistas enviadas.</p>
-        <p>The New Indie Wave no adquiere ningún derecho de propiedad sobre tu música. Al enviar tu tema, nos autorizas exclusivamente a reproducirlo en plataformas oficiales (Spotify, Apple Music), mencionarte en redes sociales (@the.new.indie.wave) y generar clips promocionales de difusión.</p>
+        <h2>3. Difusión en Plataforma y Canal Hermano: M.Trend Video</h2>
+        <p>The New Indie Wave opera en estrecha sinergia con su canal hermano y plataforma de video musical <strong>M.Trend Video</strong> (<a href="https://www.tiktok.com/@m.trendvideo" target="_blank" rel="noopener noreferrer" style="color: var(--accent-lime); font-weight: 600; text-decoration: underline;">@m.trendvideo en TikTok</a>).</p>
+        <p>Al enviar tu tema y ser seleccionado por la curaduría editorial, autorizas expresamente la difusión, edición y sincronización visual de tu música en videos verticales de formato corto (TikToks, Reels, Shorts) publicados tanto en <strong>@the.new.indie.wave</strong> como en <strong>@m.trendvideo</strong> para maximizar el alcance de tu proyecto ante miles de oyentes.</p>
       </div>
 
+      <!-- 4. Política de Curaduría y Escucha Humana -->
       <div class="legal-section">
-        <h2>4. Contacto y Consultas</h2>
-        <p>Para aclaraciones sobre estos términos, dudas editoriales o prensa, puedes escribirnos a <a href="mailto:the.new.indie.wave@gmail.com" style="color:var(--accent-lime);">the.new.indie.wave@gmail.com</a>.</p>
+        <h2>4. Proceso Editorial y Garantía de Escucha Humana</h2>
+        <p>Nos comprometemos a que el <strong>100% de los envíos recibidos son evaluados por curadores humanos</strong> con un tiempo mínimo de escucha garantizado de <strong>1:30 minutos por canción</strong>.</p>
+        <ul>
+          <li><strong>Criterio Editorial Exclusivo:</strong> La selección se basa estrictamente en calidad de producción, mezcla, originalidad y encaje estético con la playlist correspondiente.</li>
+          <li><strong>Inexistencia de Payola o Inclusión Pagada Obligatoria:</strong> The New Indie Wave no vende posiciones editoriales ni garantiza la permanencia indefinida de una pista en una playlist. Las playlists se actualizan periódicamente según la dinámica editorial.</li>
+          <li><strong>Feedback Editorial:</strong> El feedback proporcionado representa la opinión crítica y honesta del curador y no constituye una asesoría legal o comercial vinculante.</li>
+        </ul>
+      </div>
+
+      <!-- 5. Blindaje Legal y Deslinde de Responsabilidad -->
+      <div class="legal-section">
+        <h2>5. Blindaje Legal, Exclusión de Garantías y Limitación de Responsabilidad</h2>
+        <p>Bajo la máxima extensión permitida por la ley aplicable:</p>
+        <ul>
+          <li><strong>Deslinde Total de Daños:</strong> Ni The New Indie Wave, ni su fundador <strong>Rodrigo DL Moral</strong>, ni ningún curador, evaluador, empleado, socio, diseñador, desarrollador o colaborador será responsable por ningún daño directo, indirecto, incidental, consecuente, pérdida de ingresos, disputas con disqueras, distribuidoras, agregadoras o terceros derivadas del uso del sitio web, envío de pistas, aceptación, declinación o inclusión en playlists.</li>
+          <li><strong>Disponibilidad de Servicios Externos:</strong> No nos hacemos responsables por fallas, caídas de servicio, algoritmos, cancelaciones de cuenta o modificaciones técnicas ocasionadas por plataformas externas de terceros como Spotify, Supabase, Vercel, Meta, TikTok o Google.</li>
+          <li><strong>Indemnización:</strong> El usuario o artista se compromete a defender, indemnizar y mantener indemne a The New Indie Wave y a Rodrigo DL Moral frente a cualquier reclamo, demanda, multa o litigio interpuesto por terceros derivado de infracciones a derechos de autor o falsedad en los datos ingresados en el formulario.</li>
+        </ul>
+      </div>
+
+      <!-- 6. Propiedad Intelectual de la Plataforma -->
+      <div class="legal-section">
+        <h2>6. Marca y Propiedad Intelectual de la Plataforma</h2>
+        <p>El logotipo, diseño gráfico, código fuente, identidad visual, textos y concepto de <strong>The New Indie Wave</strong> son propiedad exclusiva de Rodrigo DL Moral. Queda prohibida su reproducción, clonación o uso no autorizado con fines comerciales sin consentimiento previo por escrito.</p>
+      </div>
+
+      <!-- 7. Modificaciones y Jurisdicción -->
+      <div class="legal-section">
+        <h2>7. Modificaciones del Acuerdo y Jurisdicción</h2>
+        <p>The New Indie Wave se reserva el derecho de actualizar o modificar estos términos en cualquier momento para adecuarse a nuevas normativas o mejoras en la plataforma. Las modificaciones entrarán en vigor a partir de su publicación en esta misma página.</p>
+        <p>Para cualquier controversia que no pueda resolverse de común acuerdo, las partes se someten a la legislación y tribunales competentes de la Ciudad de México, renunciando a cualquier otro fuero que pudiera corresponderles.</p>
+      </div>
+
+      <!-- 8. Contacto Legal -->
+      <div class="legal-section">
+        <h2>8. Contacto Legal & Consultas</h2>
+        <p>Para cualquier notificación legal, solicitud de baja de catálogo o comunicación oficial, dirígete a: <a href="mailto:the.new.indie.wave@gmail.com" style="color:var(--accent-lime); font-weight:700;">the.new.indie.wave@gmail.com</a>.</p>
       </div>
     </div>
   </main>
 
   <!-- FOOTER GLOBAL -->
+<!-- FOOTER GLOBAL -->
 <footer class="site-footer">
   <div class="container footer-grid">
     <!-- Brand Info -->
@@ -242,7 +291,7 @@
         <span class="footer-brand-name">THE NEW INDIE WAVE</span>
       </a>
       <p class="footer-bio">
-        Colectivo cultural y plataforma de curaduría independiente. Escuchamos canción por canción para incluirlas en nuestras playlists oficiales de Spotify, difundirlas en redes y programarlas en vivo.
+        Colectivo cultural y plataforma de curaduría independiente fundado por <a href="https://www.instagram.com/rodrigodlmora" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">@rodrigodlmoral ↗</a>. Escuchamos canción por canción para incluirlas en nuestras playlists oficiales de Spotify, difundirlas en redes y programarlas en vivo.
       </p>
       
       <!-- Redes Sociales Oficiales -->
@@ -301,6 +350,7 @@
     </div>
   </div>
 </footer>
+
 
 </body>
 </html>
