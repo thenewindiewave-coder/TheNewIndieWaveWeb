@@ -558,7 +558,7 @@
         <!-- 1. SPOTIFY URL ARRIBA CON AUTO-FETCH -->
         <div class="form-full" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-strong); padding: 18px; border-radius: 6px;">
           <label class="field-label" style="color: var(--accent-lime); font-size: 11.5px;">1. PEGA EL ENLACE DE SPOTIFY DE TU CANCIÓN</label>
-          <input id="pb-spotify" type="url" class="field-input" placeholder="https://open.spotify.com/track/..." required oninput="handleSpotifyLinkInput(this.value)">
+          <input id="pb-spotify" type="url" class="field-input" placeholder="https://open.spotify.com/track/..." required oninput="handleSpotifyLinkInput(this.value)" onchange="handleSpotifyLinkInput(this.value)" onpaste="setTimeout(function(){ handleSpotifyLinkInput(document.getElementById('pb-spotify').value); }, 50)">
           <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); margin-top: 6px;">
             ⚡ Auto-detección: extraeremos el nombre del artista, track y portada automáticamente.
           </div>
@@ -850,7 +850,6 @@
     }
 
     var clean = rawUrl.trim();
-    // Extraer ID de 22 caracteres de cualquier URL de Spotify (/intl-es/track/ID, ?si=, etc.)
     var match = clean.match(/track\/([a-zA-Z0-9]{22})/) || clean.match(/spotify:track:([a-zA-Z0-9]{22})/);
     if (!match) return;
 
@@ -858,14 +857,18 @@
 
     _spTimer = setTimeout(async function() {
       try {
-        // 1. Consultar endpoint serverless con la API oficial de Spotify
-        var res = await fetch('/api/spotify-lookup?id=' + encodeURIComponent(trackId));
+        var baseApi = (window.location.origin && window.location.origin.startsWith('http')) 
+          ? (window.location.origin + '/api/spotify-lookup') 
+          : 'https://thenewindiewave.online/api/spotify-lookup';
+
+        var res = await fetch(baseApi + '?id=' + encodeURIComponent(trackId));
         var data = null;
 
         if (res.ok) {
           data = await res.json();
-        } else {
-          // 2. Fallback a oEmbed con URL limpia
+        }
+
+        if (!data || (!data.title && !data.artist)) {
           var cleanTrackUrl = 'https://open.spotify.com/track/' + trackId;
           var oembedRes = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(cleanTrackUrl));
           if (oembedRes.ok) {
@@ -895,12 +898,12 @@
           }
 
           document.getElementById('spotifyPreviewBox').style.display = 'flex';
-          showToast('✓ Track detectado: ' + (data.title || 'Listo'));
+          showToast('✓ Track y Artista detectados: ' + (data.title || 'Listo'));
         }
       } catch(e) {
         console.error('Error en auto-detección de Spotify:', e);
       }
-    }, 250);
+    }, 150);
   }
 
   // 3. Auto-Match Inteligente de Playlist según el Género
