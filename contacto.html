@@ -218,38 +218,51 @@
       </p>
     </div>
 
-    <div class="contact-grid">
-      <!-- 1. Correo Oficial & Curaduría -->
-      <div class="contact-card">
-        <div class="contact-card-title">✉️ Correo Oficial & Curaduría</div>
-        <p class="contact-card-desc">Para seguimiento de envíos de canciones, dudas sobre feedback editorial, alianzas de prensa y contacto general de la plataforma.</p>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button onclick="handleContactAction('Curaduría & Prensa', 'the.new.indie.wave@gmail.com', 'Consulta Editorial // The New Indie Wave')" class="contact-link-btn" style="cursor: pointer; border: none;">
-            ✉️ the.new.indie.wave@gmail.com ↗
-          </button>
+        <!-- TARJETA ÚNICA Y UNIFICADA DE CONTACTO -->
+    <div style="max-width: 820px; margin: 30px 0 50px 0;">
+      <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 8px; padding: 32px 36px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
+          <div>
+            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// CANAL OFICIAL DIRECTO</div>
+            <h3 style="font-family: var(--font-heading); font-size: 24px; font-weight: 800; color: #fff;">Correo Oficial & Curaduría</h3>
+          </div>
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border);">
+            Atención Editorial
+          </span>
         </div>
-      </div>
 
-      <!-- 2. Artistas en el Radar & Scouting -->
-      <div class="contact-card">
-        <div class="contact-card-title">🌟 Artistas en el Radar & Scouting</div>
-        <p class="contact-card-desc">Si tienes un proyecto con trayectoria sólida, EP/Álbum publicado y buscas una reseña editorial completa o perfil destacado en nuestra sección oficial de Radar.</p>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button onclick="handleContactAction('Postulación Radar', 'the.new.indie.wave@gmail.com', 'Postulación para Artistas en el Radar // The New Indie Wave')" class="contact-link-btn" style="cursor: pointer; border: none;">
-            🌟 Postular al Radar ↗
-          </button>
-        </div>
-      </div>
+        <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 22px;">
+          Escríbenos directamente para cualquiera de los siguientes motivos:
+        </p>
 
-      <!-- 3. Difusión de Eventos Musicales -->
-      <div class="contact-card">
-        <div class="contact-card-title">📢 Difusión de Eventos Musicales</div>
-        <p class="contact-card-desc">¿Organizas un concierto, festival o tocada independiente? Envíanos tu cartel y detalles para difundirlo en nuestra cartelera de eventos y redes sociales (aunque The New Indie Wave no sea el organizador).</p>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button onclick="handleContactAction('Difusión de Eventos', 'the.new.indie.wave@gmail.com', 'Difusión de Concierto / Evento // The New Indie Wave')" class="contact-link-btn" style="cursor: pointer; border: none;">
-            📢 Solicitar Difusión de Evento ↗
-          </button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px;">
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 16px;">
+            <div style="font-family: var(--font-heading); font-size: 14.5px; font-weight: 700; color: #fff; margin-bottom: 4px;">🎵 Curaduría, Feedback & Prensa</div>
+            <div style="font-size: 12.5px; color: var(--text-dim); line-height: 1.5;">Seguimiento de envíos de canciones, retroalimentación técnica y alianzas editoriales.</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 16px;">
+            <div style="font-family: var(--font-heading); font-size: 14.5px; font-weight: 700; color: #fff; margin-bottom: 4px;">🌟 Artistas en el Radar & Scouting</div>
+            <div style="font-size: 12.5px; color: var(--text-dim); line-height: 1.5;">Postulación de proyectos con álbum o EP publicado para reseña y perfil destacado.</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 16px; grid-column: span 2;">
+            <div style="font-family: var(--font-heading); font-size: 14.5px; font-weight: 700; color: #fff; margin-bottom: 4px;">📢 Difusión de Eventos Musicales</div>
+            <div style="font-size: 12.5px; color: var(--text-dim); line-height: 1.5;">Envíanos el cartel de tu concierto, festival o tocada independiente para difundirlo en nuestra cartelera y redes sociales (aunque The New Indie Wave no sea el organizador).</div>
+          </div>
         </div>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--border); padding-top: 24px;">
+          <a href="https://mail.google.com/mail/?view=cm&fs=1&to=the.new.indie.wave@gmail.com" target="_blank" rel="noopener noreferrer" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 12px 20px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+            ✉️ Redactar en Gmail Web ↗
+          </a>
+          <button onclick="copyContactEmail()" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 12px 18px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            📋 Copiar the.new.indie.wave@gmail.com
+          </button>
+          <a href="mailto:the.new.indie.wave@gmail.com" style="background: transparent; color: var(--text-muted); font-family: var(--font-mono); font-size: 11.5px; text-decoration: underline; padding: 6px 10px;">
+            Abrir en app de correo ↗
+          </a>
+        </div>
+
       </div>
     </div>
 
@@ -376,76 +389,14 @@
 </footer>
 
 
-<!-- MODAL DE CONTACTO INTERACTIVO -->
-<div id="contactModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 8px; max-width: 480px; width: 100%; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); position: relative;">
-    <button onclick="closeContactModal()" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer;">✕</button>
-    
-    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 6px;" id="modalCategoryTag">// CONTACTO</div>
-    <h3 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 12px;" id="modalTitle">Enviar Mensaje</h3>
-    <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">
-      Elige tu método preferido para escribirnos directamente:
-    </p>
-
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-      <!-- Opción 1: Abrir en Gmail Web -->
-      <a id="btnModalGmail" href="#" target="_blank" style="display: flex; align-items: center; justify-content: space-between; background: rgba(234, 67, 53, 0.12); border: 1px solid rgba(234, 67, 53, 0.35); color: #fff; padding: 12px 16px; border-radius: 6px; text-decoration: none; font-family: var(--font-mono); font-size: 12px; font-weight: 700;">
-        <span>✉️ Abrir y Redactar en Gmail Web</span>
-        <span style="color: #ea4335;">↗</span>
-      </a>
-
-      <!-- Opción 2: Abrir en Outlook / App Predeterminada -->
-      <a id="btnModalMailto" href="#" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; padding: 12px 16px; border-radius: 6px; text-decoration: none; font-family: var(--font-mono); font-size: 12px; font-weight: 700;">
-        <span>💻 Abrir en App de Correo Predeterminada</span>
-        <span style="color: var(--text-muted);">↗</span>
-      </a>
-
-      <!-- Opción 3: Copiar Correo al Portapapeles -->
-      <button onclick="copyContactEmail()" style="display: flex; align-items: center; justify-content: space-between; background: rgba(187, 244, 81, 0.1); border: 1px solid rgba(187, 244, 81, 0.3); color: var(--accent-lime); padding: 12px 16px; border-radius: 6px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; font-weight: 700; width: 100%;">
-        <span id="btnCopyLabel">📋 Copiar Correo: the.new.indie.wave@gmail.com</span>
-        <span>✓</span>
-      </button>
-    </div>
-  </div>
-</div>
-
 <!-- TOAST FLOTANTE -->
 <div id="contactToast" style="display: none; position: fixed; bottom: 30px; right: 30px; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 12px 20px; border-radius: 4px; z-index: 10000; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"></div>
 
 <script>
-  var _currentContactEmail = 'the.new.indie.wave@gmail.com';
-
-  function handleContactAction(category, email, subject) {
-    _currentContactEmail = email;
-    var encodedSub = encodeURIComponent(subject);
-    var gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email) + '&su=' + encodedSub;
-    var mailtoUrl = 'mailto:' + email + '?subject=' + encodedSub;
-
-    document.getElementById('modalCategoryTag').textContent = '// ' + category.toUpperCase();
-    document.getElementById('modalTitle').textContent = category;
-    document.getElementById('btnModalGmail').href = gmailUrl;
-    document.getElementById('btnModalMailto').href = mailtoUrl;
-    document.getElementById('btnCopyLabel').textContent = '📋 Copiar Correo: ' + email;
-
-    // Copiar automáticamente al portapapeles de inmediato para conveniencia
-    navigator.clipboard.writeText(email).catch(function(){});
-
-    // Mostrar modal interactivo
-    var modal = document.getElementById('contactModal');
-    if (modal) {
-      modal.style.display = 'flex';
-    }
-  }
-
-  function closeContactModal() {
-    var modal = document.getElementById('contactModal');
-    if (modal) modal.style.display = 'none';
-  }
-
   function copyContactEmail() {
-    navigator.clipboard.writeText(_currentContactEmail).then(function() {
-      showContactToast('✓ Correo ' + _currentContactEmail + ' copiado al portapapeles');
-      setTimeout(closeContactModal, 800);
+    var email = 'the.new.indie.wave@gmail.com';
+    navigator.clipboard.writeText(email).then(function() {
+      showContactToast('✓ Correo ' + email + ' copiado al portapapeles');
     });
   }
 
@@ -457,6 +408,5 @@
     setTimeout(function() { t.style.display = 'none'; }, 3500);
   }
 </script>
-
 </body>
 </html>
