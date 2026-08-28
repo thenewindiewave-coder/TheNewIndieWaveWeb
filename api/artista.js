@@ -27,9 +27,25 @@ module.exports = async (req, res) => {
   const name = artist ? artist.name : 'Artista en el Radar';
   const bio = artist ? (artist.short_bio || 'Descubre los nuevos proyectos musicales en The New Indie Wave.') : 'Descubre los proyectos musicales independientes y talentos emergentes en The New Indie Wave.';
   const genre = artist ? artist.genre : 'Indie Wave';
-  const imgUrl = (artist && artist.media_url && !artist.media_url.endsWith('.mp4')) 
-    ? artist.media_url 
-    : 'https://thenewindiewave.online/logo.png';
+  let imgUrl = 'https://thenewindiewave.online/logo.png';
+
+  if (artist && artist.media_url) {
+    const rawUrl = artist.media_url.trim();
+    if (rawUrl.endsWith('.mp4')) {
+      if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/video/upload/')) {
+        // Generar miniatura automática 1200x630 desde el video de Cloudinary
+        let thumb = rawUrl.replace('/video/upload/', '/video/upload/so_auto,w_1200,h_630,c_fill,q_auto,f_jpg/');
+        if (thumb.endsWith('.mp4')) {
+          thumb = thumb.slice(0, -4) + '.jpg';
+        }
+        imgUrl = thumb;
+      } else if (artist.poster_url) {
+        imgUrl = artist.poster_url.trim();
+      }
+    } else {
+      imgUrl = rawUrl;
+    }
+  }
   const redirectUrl = `https://thenewindiewave.online/artistas.html?artista=${encodeURIComponent(targetId)}`;
 
   const html = `<!DOCTYPE html>
