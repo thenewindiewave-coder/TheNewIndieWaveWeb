@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS public.submissions (
     feedback TEXT,                                    -- Feedback del curador (mínimo 15 palabras)
     story_video_url TEXT,                             -- URL del video-historia generado si es aceptado
     spotify_added BOOLEAN DEFAULT false,              -- Si ya se insertó automáticamente en la playlist
-    social_broadcasted BOOLEAN DEFAULT false,         -- Si ya se publicó en @TNIWave y @MtrendVideo
+    social_broadcasted BOOLEAN DEFAULT false,         -- Si ya se publicó en @the.new.indie.wave y @m.trendvideo
     response_deadline TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '5 days'),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()

@@ -69,7 +69,7 @@ module.exports = async (req, res) => {
 
 <!-- Twitter / X Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@TNIWave">
+<meta name="twitter:site" content="@the.new.indie.wave">
 <meta name="twitter:title" content="${name}">
 <meta name="twitter:description" content="${bio}">
 <meta name="twitter:image" content="${imgUrl}">
