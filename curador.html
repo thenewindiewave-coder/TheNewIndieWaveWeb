@@ -1127,9 +1127,9 @@
 
             <div>
               <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 4px;">
-                Spotify Track ID o URL de Canción (para Mini-Player en Card)
+                🎵 Mini-Player (Pega Track ID de Spotify, Link de YouTube o SoundCloud)
               </label>
-              <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="Ej. 3n3Ppam7vgaVa1iaRUc9Lp o link directo de Spotify" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+              <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="Ej. 3n3Ppam... (Spotify), https://youtu.be/... (YouTube) o https://soundcloud.com/... (SoundCloud)" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
             </div>
 
             <div>
@@ -1170,11 +1170,22 @@
                 </div>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div>
                   <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">TikTok (URL o @usuario)</label>
                   <input type="text" id="rfTiktokUrl" value="${artist ? (artist.tiktok_url || '') : ''}" placeholder="@usuario o link" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Bandcamp (URL)</label>
+                  <input type="url" id="rfBandcampUrl" value="${artist ? (artist.bandcamp_url || '') : ''}" placeholder="https://artista.bandcamp.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">SoundCloud (URL)</label>
+                  <input type="url" id="rfSoundcloudUrl" value="${artist ? (artist.soundcloud_url || '') : ''}" placeholder="https://soundcloud.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
                   <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px;">Sitio Web Oficial (URL)</label>
                   <input type="url" id="rfWebsiteUrl" value="${artist ? (artist.website_url || '') : ''}" placeholder="https://miweb.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
@@ -1229,6 +1240,8 @@
       apple_music_url: (document.getElementById('rfAppleUrl') ? document.getElementById('rfAppleUrl').value.trim() : ''),
       youtube_url: (document.getElementById('rfYoutubeUrl') ? document.getElementById('rfYoutubeUrl').value.trim() : ''),
       tiktok_url: (document.getElementById('rfTiktokUrl') ? document.getElementById('rfTiktokUrl').value.trim() : ''),
+      bandcamp_url: (document.getElementById('rfBandcampUrl') ? document.getElementById('rfBandcampUrl').value.trim() : ''),
+      soundcloud_url: (document.getElementById('rfSoundcloudUrl') ? document.getElementById('rfSoundcloudUrl').value.trim() : ''),
       website_url: (document.getElementById('rfWebsiteUrl') ? document.getElementById('rfWebsiteUrl').value.trim() : ''),
       other_url: (document.getElementById('rfOtherUrl') ? document.getElementById('rfOtherUrl').value.trim() : '')
     };

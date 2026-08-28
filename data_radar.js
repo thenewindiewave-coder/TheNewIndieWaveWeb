@@ -19,7 +19,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "https://www.youtube.com/results?search_query=Lunar+Daydream",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-2",
@@ -40,7 +42,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-3",
@@ -61,7 +65,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-4",
@@ -82,7 +88,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-5",
@@ -103,7 +111,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-6",
@@ -124,7 +134,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-7",
@@ -145,7 +157,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-8",
@@ -166,7 +180,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-9",
@@ -187,7 +203,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-10",
@@ -208,7 +226,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-11",
@@ -229,7 +249,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-12",
@@ -250,7 +272,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-13",
@@ -271,7 +295,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   },
   {
     "id": "radar-14",
@@ -292,7 +318,9 @@ var DEFAULT_RADAR_ARTISTS = [
     "youtube_url": "",
     "tiktok_url": "",
     "website_url": "",
-    "other_url": ""
+    "other_url": "",
+    "bandcamp_url": "",
+    "soundcloud_url": ""
   }
 ];
 
