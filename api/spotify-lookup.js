@@ -37,9 +37,18 @@ module.exports = async (req, res) => {
   let trackId = id;
 
   if (!trackId && url) {
-    // Extraer ID de cualquier formato de URL (incluyendo /intl-es/, ?si=, spotify:track:, etc.)
-    const match = url.match(/track\/([a-zA-Z0-9]{22})/) || url.match(/spotify:track:([a-zA-Z0-9]{22})/);
-    if (match) trackId = match[1];
+    const raw = url.trim();
+    if (raw.includes('track/')) {
+      trackId = raw.split('track/')[1].split('?')[0].split('&')[0].split('/')[0];
+    } else if (raw.includes('spotify:track:')) {
+      trackId = raw.split('spotify:track:')[1].split('?')[0];
+    } else {
+      trackId = raw;
+    }
+  }
+
+  if (trackId) {
+    trackId = trackId.split('?')[0].split('&')[0].split('/')[0].trim();
   }
 
   if (!trackId) {

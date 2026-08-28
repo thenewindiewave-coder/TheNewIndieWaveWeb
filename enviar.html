@@ -845,27 +845,46 @@
     document.getElementById('charCount').textContent = el.value.length;
   }
 
-  // 2. Auto-Detección Inteligente de Metadata desde Spotify (API oficial + oEmbed Fallback)
+  // 2. Auto-Detección Inteligente de Metadata desde Spotify
   var _spTimer = null;
+
+  function extractTrackIdFromUrl(raw) {
+    if (!raw) return null;
+    var str = raw.trim();
+    if (str.includes('track/')) {
+      return str.split('track/')[1].split('?')[0].split('&')[0].split('/')[0].trim();
+    }
+    if (str.includes('spotify:track:')) {
+      return str.split('spotify:track:')[1].split('?')[0].trim();
+    }
+    if (/^[a-zA-Z0-9]{15,30}$/.test(str)) {
+      return str;
+    }
+    return null;
+  }
+
   async function handleSpotifyLinkInput(rawUrl, isManual) {
     clearTimeout(_spTimer);
-    if (!rawUrl || !rawUrl.trim()) {
+    var inputVal = (rawUrl || document.getElementById('pb-spotify').value || '').trim();
+    
+    if (!inputVal) {
       document.getElementById('spotifyPreviewBox').style.display = 'none';
       return;
     }
 
-    var clean = rawUrl.trim();
-    var match = clean.match(/track\/([a-zA-Z0-9]{22})/) || clean.match(/spotify:track:([a-zA-Z0-9]{22})/);
-    if (!match) {
-      if (isManual) showToast('⚠️ Ingresa un enlace válido de Spotify');
+    var trackId = extractTrackIdFromUrl(inputVal);
+    var statusEl = document.getElementById('spDetectStatus');
+    var btn = document.getElementById('btnDetectSpotify');
+
+    if (!trackId) {
+      if (isManual) showToast('⚠️ Ingresa un enlace de canción de Spotify válido');
       return;
     }
 
-    var trackId = match[1];
-    var statusEl = document.getElementById('spDetectStatus');
-    if (statusEl) statusEl.textContent = '⏳ Consultando Spotify API...';
+    if (btn) btn.innerHTML = '<span>⏳ Buscando...</span>';
+    if (statusEl) statusEl.innerHTML = '<span style="color: var(--accent-cyan);">⏳ Conectando con Spotify API...</span>';
 
-    var delay = isManual ? 0 : 200;
+    var delay = isManual ? 0 : 250;
 
     _spTimer = setTimeout(async function() {
       try {
@@ -880,7 +899,7 @@
           data = await res.json();
         }
 
-        // Si falló el endpoint local, probar con la URL completa de producción
+        // Si falló en local o endpoint relativo, consultar producción
         if (!data || (!data.title && !data.artist)) {
           try {
             var prodRes = await fetch('https://thenewindiewave.online/api/spotify-lookup?id=' + encodeURIComponent(trackId));
@@ -889,29 +908,44 @@
         }
 
         if (data && (data.title || data.artist)) {
-          if (data.title) document.getElementById('pb-title').value = data.title;
-          if (data.artist) document.getElementById('pb-artist').value = data.artist;
-
-          // Mostrar tarjeta de preview detectada
-          document.getElementById('spTitle').textContent = data.title || 'Canción Detectada';
-          document.getElementById('spArtist').textContent = data.artist ? ('por ' + data.artist) : 'Artista en Spotify';
+          var titleEl = document.getElementById('pb-title');
+          var artistEl = document.getElementById('pb-artist');
           
-          if (data.cover) {
-            document.getElementById('spCover').src = data.cover;
-            document.getElementById('spCover').style.display = 'block';
-          } else {
-            document.getElementById('spCover').style.display = 'none';
+          if (data.title && titleEl) titleEl.value = data.title;
+          if (data.artist && artistEl) artistEl.value = data.artist;
+
+          // Mostrar tarjeta de preview
+          var spTitle = document.getElementById('spTitle');
+          var spArtist = document.getElementById('spArtist');
+          var spCover = document.getElementById('spCover');
+          var prevBox = document.getElementById('spotifyPreviewBox');
+
+          if (spTitle) spTitle.textContent = data.title || 'Canción Detectada';
+          if (spArtist) spArtist.textContent = data.artist ? ('por ' + data.artist) : 'Artista en Spotify';
+          
+          if (data.cover && spCover) {
+            spCover.src = data.cover;
+            spCover.style.display = 'block';
+          } else if (spCover) {
+            spCover.style.display = 'none';
           }
 
-          document.getElementById('spotifyPreviewBox').style.display = 'flex';
-          if (statusEl) statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Track y artista detectados con éxito</span>';
-          showToast('✓ Detectado: ' + (data.title || '') + ' - ' + (data.artist || ''));
+          if (prevBox) prevBox.style.display = 'flex';
+          if (statusEl) statusEl.innerHTML = '<span style="color: var(--accent-lime); font-weight: 700;">✓ Detectado: ' + data.title + ' — ' + data.artist + '</span>';
+          if (btn) btn.innerHTML = '<span>✓ Listo</span>';
+          showToast('✓ Detectado: ' + data.title + ' (' + data.artist + ')');
         } else {
-          if (statusEl) statusEl.textContent = '⚡ Puedes ingresar el nombre y artista manualmente abajo.';
+          if (statusEl) statusEl.textContent = '⚡ No pudimos auto-detectar los datos; puedes escribirlos abajo.';
+          if (btn) btn.innerHTML = '<span>⚡ Detectar</span>';
         }
       } catch(e) {
-        console.error('Error en auto-detección de Spotify:', e);
-        if (statusEl) statusEl.textContent = '⚡ Puedes ingresar el nombre y artista manualmente abajo.';
+        console.error('Error en detección Spotify:', e);
+        if (statusEl) statusEl.textContent = '⚡ Puedes ingresar el nombre y artista manualmente.';
+        if (btn) btn.innerHTML = '<span>⚡ Detectar</span>';
+      } finally {
+        setTimeout(function() {
+          if (btn) btn.innerHTML = '<span>⚡ Detectar</span>';
+        }, 2500);
       }
     }, delay);
   }
