@@ -1084,27 +1084,13 @@
 
   async function fetchLiveStatus() {
     try {
-      // 1. Intentar consulta directa a Supabase
-      var res = await fetch(SUPABASE_URL + '/rest/v1/submissions?track_id=eq.' + encodeURIComponent(currentId) + '&select=*', {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-        }
-      });
-
       var record = null;
-      if(res.ok) {
-        var rows = await res.json();
-        if(rows && rows.length > 0) record = rows[0];
-      }
 
-      if(!record) {
-        // Fallback a /api/status de Vercel
-        var resApi = await fetch('/api/status?id=' + encodeURIComponent(currentId));
-        if(resApi.ok) {
-          var jsonApi = await resApi.json();
-          if(jsonApi && jsonApi.data) record = jsonApi.data;
-        }
+      // Usar endpoint seguro de Vercel (evita IDOR y oculta keys)
+      var resApi = await fetch('/api/status?id=' + encodeURIComponent(currentId));
+      if(resApi.ok) {
+        var jsonApi = await resApi.json();
+        if(jsonApi && jsonApi.data) record = jsonApi.data;
       }
 
       if(record) {

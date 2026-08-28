@@ -25,8 +25,6 @@ export default async function handler(req, res) {
       artist_name,
       email,
       country,
-        whatsapp: whatsapp || '',
-      whatsapp,
       song_title,
       spotify_url,
       language,
@@ -35,17 +33,39 @@ export default async function handler(req, res) {
       instagram,
       tiktok,
       notes,
-      tier = 'free'
+      tier = 'free',
+      cfResponse
     } = req.body;
 
     if (!artist_name || !email || !song_title || !spotify_url || !playlist) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
 
-    const SUPABASE_URL = process.env.SUPABASE_URL;
-    const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!cfResponse) {
+      return res.status(400).json({ error: 'Validación anti-spam (Captcha) requerida.' });
+    }
 
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    // 1. Validar Captcha Turnstile con Cloudflare
+    const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
+    
+    const verifyData = new URLSearchParams();
+    verifyData.append('secret', TURNSTILE_SECRET);
+    verifyData.append('response', cfResponse);
+
+    const cfVerify = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: verifyData
+    });
+    
+    const cfVerifyResult = await cfVerify.json();
+    if (!cfVerifyResult.success) {
+      return res.status(400).json({ error: 'Fallo la validación anti-spam (Captcha inválido).' });
+    }
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
       // Fallback amigable si aún no se configuran variables de entorno
       return res.status(200).json({
         success: true,
@@ -55,13 +75,47 @@ export default async function handler(req, res) {
       });
     }
 
+    // --- PROTECCIÓN ANTI-SPAM (Por Email e IP) ---
+    // Extraer la IP del cliente (Vercel lo inyecta en x-forwarded-for)
+    const clientIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
+
+    // Consultar envíos de este email O esta IP en los últimos 7 días
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const dateLimit = sevenDaysAgo.toISOString();
+
+    // Filtro or=(email.eq.correo,ip_address.eq.ip)
+    const spamCheckRes = await fetch(`${SUPABASE_URL}/rest/v1/submissions?or=(email.eq.${encodeURIComponent(email)},ip_address.eq.${encodeURIComponent(clientIp)})&created_at=gte.${dateLimit}&select=id,spotify_url,email,ip_address`, {
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+      }
+    });
+
+    if (spamCheckRes.ok) {
+      const recentSubmissions = await spamCheckRes.json();
+      
+      // 1. Validar máximo 5 envíos por semana en total (ya sea misma IP o mismo email)
+      if (recentSubmissions.length >= 5) {
+        return res.status(429).json({ error: 'Has alcanzado el límite de 5 canciones enviadas esta semana. Por favor, intenta de nuevo en unos días.' });
+      }
+
+      // 2. Validar que no envíe el mismo track exacto repetidamente
+      const alreadySubmitted = recentSubmissions.find(sub => sub.spotify_url === spotify_url);
+      if (alreadySubmitted) {
+        return res.status(409).json({ error: 'Ya enviaste esta canción recientemente. Por favor espera a que sea evaluada.' });
+      }
+    }
+    // --- FIN PROTECCIÓN ANTI-SPAM ---
+
     // Insertar vía REST API de Supabase
     const response = await fetch(`${SUPABASE_URL}/rest/v1/submissions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
         'Prefer': 'return=representation'
       },
       body: JSON.stringify({
@@ -69,8 +123,6 @@ export default async function handler(req, res) {
         artist_name,
         email,
         country,
-        whatsapp: whatsapp || '',
-      whatsapp,
         song_title,
         spotify_url,
         language: language || 'Español',
@@ -80,7 +132,8 @@ export default async function handler(req, res) {
         tiktok,
         notes,
         tier,
-        status: 'pending'
+        status: 'pending',
+        ip_address: clientIp
       })
     });
 

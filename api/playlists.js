@@ -2,8 +2,8 @@
 // Sincroniza automáticamente las playlists desde el perfil de Spotify de Rodrigo
 // Perfil: https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu
 
-const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || '7a56561898eb4057941b2c1453476e10';
-const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET || '86ed4df85d3f4f46885eb51013a0ab0f';
+const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
+const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 const SPOTIFY_USER_ID = process.env.SPOTIFY_USER_ID || '31vxac7th7vonsgtzbeyixk32ftu';
 
 // Playlists fijas por defecto (como respaldo seguro)
