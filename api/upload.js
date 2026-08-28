@@ -18,9 +18,13 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'No file data provided' });
   }
 
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'ckknw1do';
-  const apiKey = process.env.CLOUDINARY_API_KEY || '254625267987334';
-  const apiSecret = process.env.CLOUDINARY_API_SECRET || 'cm4UMlpil-ixQAovLrfUUkWm-vo';
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    return res.status(500).json({ error: 'Faltan variables de entorno de Cloudinary' });
+  }
 
   try {
     const timestamp = Math.round(new Date().getTime() / 1000);

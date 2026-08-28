@@ -48,6 +48,9 @@
 }
 </script>
 
+<!-- Cloudflare Turnstile (Anti-Bot) -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Chivo:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -835,6 +838,11 @@
           </label>
         </div>
 
+        <div class="form-full" style="display:flex; justify-content:center; margin-top: 10px;">
+          <!-- Widget de Cloudflare Turnstile -->
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAEfDUwNqFUA0chuc" data-theme="dark"></div>
+        </div>
+
         <div class="form-full">
           <button type="submit" class="btn-submit-main" id="btnSubmitSong" disabled>
             ENVIAR CANCIÓN A REVISIÓN EDITORIAL ↗
@@ -1198,6 +1206,23 @@
 
   async function handleSongSubmit(e) {
     e.preventDefault();
+
+    // 1. Verificación de LocalStorage (Límite por Navegador)
+    var localSubmissions = JSON.parse(localStorage.getItem('tniw_submission_history') || '[]');
+    var nowTime = new Date().getTime();
+    localSubmissions = localSubmissions.filter(time => nowTime - time < 604800000);
+    if(localSubmissions.length >= 5) {
+      showToast('❌ Ya enviaste 5 canciones esta semana desde este navegador.');
+      return;
+    }
+
+    // 2. Verificación del Token de Cloudflare Turnstile
+    const cfResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+    if (!cfResponse) {
+      showToast('⚠️ Por favor completa el Captcha de seguridad antes de enviar.');
+      return;
+    }
+
     var btn = document.getElementById('btnSubmitSong');
     var originalText = btn.textContent;
     btn.textContent = 'Enviando track...';
@@ -1221,7 +1246,8 @@
       genre: document.getElementById('pb-genre').value,
       playlist: document.getElementById('playlist-real-select').value,
       notes: combinedNotes,
-      status: 'pending'
+      status: 'pending',
+      cfResponse: cfResponse
     };
 
     var subId = 'TNIW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -1232,34 +1258,38 @@
     var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
     try {
-      // 1. Enviar directamente a Supabase
-      const res = await fetch(SUPABASE_URL + '/rest/v1/submissions', {
+      // Usar endpoint seguro de Vercel
+      const res = await fetch('/api/submit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-          'Prefer': 'return=minimal'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(Object.assign({ track_id: subId }, payload))
       });
-
+      
+      const data = await res.json();
       if(!res.ok) {
-        // Fallback a endpoint local Vercel
-        await fetch('/api/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(Object.assign({ track_id: subId }, payload))
-        });
+        throw new Error(data.error || 'Ocurrió un error al enviar tu canción.');
       }
+      
+      // Registrar envío en local storage
+      localSubmissions.push(nowTime);
+      localStorage.setItem('tniw_submission_history', JSON.stringify(localSubmissions));
+      
+      showToast('✓ ¡Canción recibida! Abriendo estado en vivo...');
+      setTimeout(function() {
+        window.location.href = 'estado.html?id=' + subId;
+      }, 1000);
+      
     } catch(err) {
-      console.log('Submission saved locally', err);
+      console.error('Submit Error:', err);
+      showToast('❌ ' + err.message);
+      // Rehabilitar botón
+      var btn = document.getElementById('btnSubmitSong');
+      if (btn) {
+        btn.textContent = 'ENVIAR A CURADURÍA ↗';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
     }
-
-    showToast('✓ ¡Canción recibida! Abriendo estado en vivo...');
-    setTimeout(function() {
-      window.location.href = 'estado.html?id=' + subId;
-    }, 1000);
   }
 
   function showToast(msg) {

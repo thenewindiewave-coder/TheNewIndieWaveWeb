@@ -664,14 +664,10 @@
     var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
     var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
-    fetch(SUPABASE_URL + '/rest/v1/submissions?track_id=eq.' + encodeURIComponent(lastId) + '&select=status', {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-      }
-    })
+    fetch('/api/status?id=' + encodeURIComponent(lastId))
     .then(function(res){ return res.json(); })
-    .then(function(rows){
+    .then(function(json){
+      var rows = json.data ? [json.data] : [];
       if(rows && rows.length > 0 && (rows[0].status === 'pending' || rows[0].status === 'queue')) {
         if(banner) {
           banner.style.display = 'inline-flex';
