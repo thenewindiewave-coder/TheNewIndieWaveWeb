@@ -12,8 +12,21 @@ async function syncRadarFromSupabase() {
     if (res.ok) {
       var data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        localStorage.setItem('tniw_radar_artists', JSON.stringify(data));
-        return data;
+        var cleanList = data.map(function(item) {
+          if (item.other_url && item.other_url.startsWith('{')) {
+            try {
+              var parsed = JSON.parse(item.other_url);
+              if (parsed.career_notes) item.career_notes = parsed.career_notes;
+              if (parsed.events_note) item.events_note = parsed.events_note;
+            } catch(e) {}
+          }
+          return item;
+        });
+        localStorage.setItem('tniw_radar_artists', JSON.stringify(cleanList));
+        if (typeof window !== 'undefined') {
+          window.RADAR_ARTISTS = cleanList.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
+        }
+        return cleanList;
       }
     }
   } catch(e) {}
@@ -22,7 +35,34 @@ async function syncRadarFromSupabase() {
 
 async function saveRadarArtistToSupabase(artist) {
   try {
-    await fetch(SUPABASE_URL + '/rest/v1/radar_artists', {
+    var otherData = {};
+    if (artist.career_notes) otherData.career_notes = artist.career_notes;
+    if (artist.events_note) otherData.events_note = artist.events_note;
+
+    var payload = {
+      id: artist.id,
+      name: artist.name || '',
+      city: artist.city || '',
+      genre: artist.genre || '',
+      type: artist.type || 'secondary',
+      badge: artist.badge || 'SOLISTA',
+      media_type: artist.media_type || 'image',
+      media_url: artist.media_url || '',
+      track_id: artist.track_id || '',
+      short_bio: artist.short_bio || '',
+      full_review: artist.full_review || '',
+      spotify_url: artist.spotify_url || '',
+      instagram: artist.instagram || '',
+      apple_music_url: artist.apple_music_url || '',
+      youtube_url: artist.youtube_url || '',
+      tiktok_url: artist.tiktok_url || '',
+      bandcamp_url: artist.bandcamp_url || '',
+      soundcloud_url: artist.soundcloud_url || '',
+      website_url: artist.website_url || '',
+      other_url: Object.keys(otherData).length > 0 ? JSON.stringify(otherData) : (artist.other_url || '')
+    };
+
+    var res = await fetch(SUPABASE_URL + '/rest/v1/radar_artists', {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
@@ -30,10 +70,12 @@ async function saveRadarArtistToSupabase(artist) {
         'Content-Type': 'application/json',
         'Prefer': 'resolution=merge-duplicates'
       },
-      body: JSON.stringify(artist)
+      body: JSON.stringify(payload)
     });
+    return res.ok;
   } catch(e) {
     console.warn('Supabase sync no disponible:', e);
+    return false;
   }
 }
 

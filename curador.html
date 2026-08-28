@@ -2077,7 +2077,7 @@
     if(modal) modal.remove();
   }
 
-  function handleRadarFormSubmit(e, existingId) {
+  async function handleRadarFormSubmit(e, existingId) {
     e.preventDefault();
     var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
     
@@ -2135,13 +2135,14 @@
     }
 
     saveRadarArtists(list);
+    showToast('⏳ Sincronizando con Supabase...');
     if (typeof saveRadarArtistToSupabase === 'function') {
-      saveRadarArtistToSupabase(artistData);
+      await saveRadarArtistToSupabase(artistData);
     }
 
     closeRadarModal();
     renderRadarManager();
-    showToast('✓ Artista guardado con éxito');
+    showToast('✓ Artista guardado y sincronizado en la nube');
   }
 
   async function toggleRadarType(artistId, newType) {
