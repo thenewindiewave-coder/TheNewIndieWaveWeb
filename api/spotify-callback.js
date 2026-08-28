@@ -44,8 +44,20 @@ export default async function handler(req, res) {
 
     const tokenData = await tokenRes.json();
     const refreshToken = tokenData.refresh_token;
+    const accessToken = tokenData.access_token;
 
-    // Guardar refresh_token en Supabase para persistencia en servidor
+    // Obtener información del usuario conectado en Spotify
+    let userProfile = { id: 'Desconocido', display_name: 'Curador', email: '' };
+    try {
+      const meRes = await fetch('https://api.spotify.com/v1/me', {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      if (meRes.ok) {
+        userProfile = await meRes.json();
+      }
+    } catch(meErr) {}
+
+    // Guardar refresh_token en Supabase para persistencia
     if (refreshToken) {
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/radar_artists`, {
@@ -58,7 +70,8 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({
             id: 'spotify_auth_config',
-            name: 'Spotify Curator Auth',
+            name: userProfile.display_name || 'Spotify Curator Auth',
+            city: userProfile.id || null,
             genre: 'CONFIG',
             type: 'config',
             short_bio: refreshToken
@@ -69,24 +82,28 @@ export default async function handler(req, res) {
       }
     }
 
-    // Retornar script HTML que guarda el token en el panel de curador
     return res.send(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Spotify Conectado con Éxito</title>
+          <title>Spotify Conectado</title>
           <style>
             body { background: #09090b; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
-            .card { background: #141417; border: 1px solid #27272a; padding: 40px; border-radius: 12px; text-align: center; max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+            .card { background: #141417; border: 1px solid #27272a; padding: 40px; border-radius: 12px; text-align: center; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
             h2 { color: #bbf451; font-size: 24px; margin-bottom: 12px; }
-            p { color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+            p { color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+            .account-badge { background: rgba(187,244,81,0.1); border: 1px solid rgba(187,244,81,0.3); padding: 10px 16px; border-radius: 6px; color: #bbf451; font-family: monospace; font-size: 13px; margin-bottom: 24px; display: inline-block; }
             .btn { background: #bbf451; color: #000; font-weight: bold; padding: 12px 28px; border-radius: 6px; text-decoration: none; display: inline-block; font-size: 14px; }
           </style>
         </head>
         <body>
           <div class="card">
             <h2>🎉 ¡Spotify Conectado con Éxito!</h2>
-            <p>Tu cuenta de curador de Spotify ha quedado vinculada en la nube y en tu navegador. Ahora, al hacer clic en <strong>"Aceptar"</strong>, los temas se añadirán físicamente a tus playlists oficiales.</p>
+            <div class="account-badge">
+              👤 Cuenta: <strong>${userProfile.display_name}</strong> (ID: ${userProfile.id})<br>
+              ✉️ ${userProfile.email || 'Email verificado'}
+            </div>
+            <p>Tu cuenta ha quedado autorizada con permisos de modificación de playlist en la nube y en tu navegador.</p>
             <a href="/curador.html" class="btn">Volver al Panel de Curaduría ↗</a>
           </div>
           <script>
@@ -95,7 +112,7 @@ export default async function handler(req, res) {
             }
             setTimeout(function() {
               window.location.href = '/curador.html';
-            }, 2000);
+            }, 3000);
           </script>
         </body>
       </html>
