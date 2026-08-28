@@ -944,7 +944,7 @@
 
   <div class="top3-grid" id="top3Container">
     <!-- TOP 1 -->
-    <div class="top3-card" onclick="openArtistModal('radar-1')">
+    <div class="top3-card">
       <div class="top3-media-wrap">
         <div class="top3-badge">AGRUPACIÓN</div>
         <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=900&q=80" alt="Lunar Daydream" loading="lazy">
@@ -963,7 +963,7 @@
     </div>
 
     <!-- TOP 2 -->
-    <div class="top3-card" onclick="openArtistModal('radar-2')">
+    <div class="top3-card">
       <div class="top3-media-wrap">
         <div class="top3-badge">DÚO</div>
         <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80" alt="Distorsión Fría" loading="lazy">
@@ -982,7 +982,7 @@
     </div>
 
     <!-- TOP 3 -->
-    <div class="top3-card" onclick="openArtistModal('radar-3')">
+    <div class="top3-card">
       <div class="top3-media-wrap">
         <div class="top3-badge">SOLISTA</div>
         <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=80" alt="Cero Tardes" loading="lazy">
@@ -1269,12 +1269,11 @@
   } catch(e) {}
 
   // FUNCIÓN UNIVERSAL PARA MINI-REPRODUCTOR (Spotify, YouTube, SoundCloud)
-  function buildMiniPlayerEmbed(input, height) {
+  function buildMiniPlayerEmbed(input, isModal) {
     if (!input || !input.trim()) return '';
     var clean = input.trim();
-    var h = height || 80;
 
-    // 1. YouTube
+    // 1. YouTube (Permite reproducir directo en la card y en el modal)
     if (clean.includes('youtube.com') || clean.includes('youtu.be')) {
       var ytId = '';
       if (clean.includes('youtu.be/')) {
@@ -1282,22 +1281,24 @@
       } else if (clean.includes('v=')) {
         ytId = clean.split('v=')[1].split('&')[0].split('?')[0];
       } else if (clean.includes('/embed/')) {
-        ytId = clean.split('/embed/')[1].split('?')[0];
+        ytId = clean.split('/embed/')[1].split('?')[0].split('&')[0];
       }
       if (ytId) {
-        return '<iframe src="https://www.youtube-nocookie.com/embed/' + ytId + '" width="100%" height="' + h + '" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" style="border-radius:8px; display:block;"></iframe>';
+        var h = isModal ? '230' : '175';
+        var originParam = (typeof window !== 'undefined' && window.location && window.location.origin) ? ('&origin=' + encodeURIComponent(window.location.origin)) : '';
+        return '<iframe src="https://www.youtube.com/embed/' + ytId + '?enablejsapi=1&playsinline=1&modestbranding=1&rel=0' + originParam + '" width="100%" height="' + h + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy" style="border-radius:8px; display:block; width:100%;"></iframe>';
       }
     }
 
     // 2. SoundCloud
     if (clean.includes('soundcloud.com')) {
       var scEncoded = encodeURIComponent(clean);
-      return '<iframe width="100%" height="' + h + '" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=' + scEncoded + '&color=%23bbf451&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false" loading="lazy" style="border-radius:8px; display:block;"></iframe>';
+      return '<iframe width="100%" height="80" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=' + scEncoded + '&color=%23bbf451&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false" loading="lazy" style="border-radius:8px; display:block; width:100%;"></iframe>';
     }
 
     // 3. Spotify (ID o URL)
     var cleanId = clean.replace('spotify:track:', '').split('?')[0].split('/').pop();
-    return '<iframe src="https://open.spotify.com/embed/track/' + cleanId + '?utm_source=generator&theme=0" width="100%" height="' + h + '" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style="border-radius:8px; display:block;"></iframe>';
+    return '<iframe src="https://open.spotify.com/embed/track/' + cleanId + '?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style="border-radius:8px; display:block; width:100%;"></iframe>';
   }
 
   // RENDER DINÁMICO EN TIEMPO REAL DESDE CURADURÍA
@@ -1308,7 +1309,6 @@
     var top3Cont = document.getElementById('top3Container');
     if (top3Cont && top3.length > 0) {
       top3Cont.innerHTML = top3.map(function(artist){
-        var cleanId = (artist.track_id || '').replace('spotify:track:', '').split('?')[0].split('/').pop();
         var mediaHtml = '';
         if (artist.media_type === 'video' || (artist.media_url && artist.media_url.endsWith('.mp4'))) {
           mediaHtml = '<video src="' + artist.media_url + '" autoplay loop muted playsinline></video>';
@@ -1317,23 +1317,23 @@
         }
 
         return `
-          <div class="top3-card" onclick="openArtistModal('${artist.id}')">
-            <div class="top3-media-wrap">
+          <div class="top3-card">
+            <div class="top3-media-wrap" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">
               <div class="top3-badge">${artist.badge || 'AGRUPACIÓN'}</div>
               ${mediaHtml}
               <div class="top3-media-overlay"></div>
               <div class="top3-origin">📍 ${artist.city}</div>
             </div>
             <div class="top3-body">
-              <h3 class="top3-name">${artist.name}</h3>
+              <h3 class="top3-name" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">${artist.name}</h3>
               <div class="top3-genre">${artist.genre}</div>
-              <p class="top3-desc">"${artist.short_bio}"</p>
+              <p class="top3-desc" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">"${artist.short_bio}"</p>
               ${artist.track_id ? `
-                <div class="mini-player-box" onclick="event.stopPropagation()">
-                  ${buildMiniPlayerEmbed(artist.track_id, 80)}
+                <div class="mini-player-box" onclick="event.stopPropagation()" style="position:relative; z-index:10;">
+                  ${buildMiniPlayerEmbed(artist.track_id, false)}
                 </div>
               ` : ''}
-              <div class="top3-footer-btn">VER FICHA & BIOGRAFÍA <span>↗</span></div>
+              <div class="top3-footer-btn" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">VER FICHA & BIOGRAFÍA <span>↗</span></div>
             </div>
           </div>
         `;
@@ -1345,7 +1345,7 @@
       secCont.innerHTML = sec.map(function(artist, idx){
         var num = (idx + 1 < 10 ? '0' : '') + (idx + 1);
         return `
-          <div class="secondary-row" onclick="openArtistModal('${artist.id}')">
+          <div class="secondary-row" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">
             <div class="sec-row-left">
               <span class="sec-row-num">${num}</span>
               <img src="${artist.media_url || 'logo.png'}" class="sec-row-avatar" alt="${artist.name}" loading="lazy" onerror="this.src='logo.png'">
@@ -1365,13 +1365,6 @@
       }).join('');
     }
   }
-
-  // Si hay datos personalizados guardados en localStorage, renderizar dinámicamente
-  try {
-    if (localStorage.getItem('tniw_radar_artists')) {
-      renderAllRadarArtists();
-    }
-  } catch(e) {}
 
   // MODAL LOGIC
   function openArtistModal(id) {
@@ -1394,7 +1387,7 @@
     // Universal Mini Player (Spotify / YouTube / SoundCloud)
     var playerWrap = document.getElementById('mPlayerWrap');
     if (artist.track_id && artist.track_id.trim()) {
-      playerWrap.innerHTML = buildMiniPlayerEmbed(artist.track_id, 80);
+      playerWrap.innerHTML = buildMiniPlayerEmbed(artist.track_id, true);
       playerWrap.style.display = 'block';
     } else {
       playerWrap.innerHTML = '';
