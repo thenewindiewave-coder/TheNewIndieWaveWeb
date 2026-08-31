@@ -145,6 +145,7 @@
   .tab-group {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
   }
 
   .tab-btn {
@@ -1110,6 +1111,7 @@
       <button class="tab-btn" onclick="switchTab('rejected', this)">[ HISTORIAL DECLINADAS ]</button>
       <button class="tab-btn" onclick="switchTab('playlists_manager', this)">[ 🏷️ GESTIÓN DE PLAYLISTS & ETIQUETAS ]</button>
       <button class="tab-btn" onclick="switchTab('radar_manager', this)">[ 🌟 ARTISTAS EN EL RADAR ]</button>
+      <button class="tab-btn" onclick="switchTab('auto_message', this)">[ 🤖 MENSAJE AUTOMÁTICO ]</button>
     </div>
 
     <button class="btn-refresh" onclick="refreshCurrentTab()">
@@ -1243,7 +1245,7 @@
     
     var toolbar = document.getElementById('queueToolbar');
     if (toolbar) {
-      toolbar.style.display = (tab === 'playlists_manager' || tab === 'radar_manager') ? 'none' : 'flex';
+      toolbar.style.display = (tab === 'playlists_manager' || tab === 'radar_manager' || tab === 'auto_message') ? 'none' : 'flex';
     }
 
     if(tab === 'playlists_manager') {
@@ -1251,6 +1253,8 @@
     } else if(tab === 'radar_manager') {
       renderRadarManager();
       if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
+    } else if(tab === 'auto_message') {
+      renderAutoMessageTool();
     } else {
       renderQueue();
     }
@@ -1264,6 +1268,9 @@
     } else if(currentTab === 'playlists_manager') {
       loadPlaylistsForManager();
       showToast('✓ Playlists actualizadas');
+    } else if(currentTab === 'auto_message') {
+      renderAutoMessageTool();
+      showToast('✓ Herramienta de Mensaje Automático actualizada');
     } else {
       loadSubmissions();
     }
@@ -2377,6 +2384,341 @@
     }
   }
 
+  // 8. HERRAMIENTA DE MENSAJE AUTOMÁTICO & GENERADOR DE STORY
+  function renderAutoMessageTool() {
+    var container = document.getElementById('queueContainer');
+    var radarArtists = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var cleanArtists = radarArtists.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
+
+    var playlistNames = Object.keys(playlistLinksMap);
+    if (livePlaylists && livePlaylists.length > 0) {
+      livePlaylists.forEach(function(p){
+        if (p.name && !playlistNames.includes(p.name)) {
+          playlistNames.push(p.name);
+          if (p.spotify_url) playlistLinksMap[p.name] = p.spotify_url;
+        }
+      });
+    }
+
+    var defaultArtist = cleanArtists[0] || null;
+    var defaultRadarUrl = defaultArtist ? ('https://thenewindiewave.online/artistas.html?artista=' + defaultArtist.id) : 'https://thenewindiewave.online/artistas.html';
+    var defaultPlaylistName = playlistNames[0] || 'Rock indie para manejar de noche sin rumbo';
+    var defaultPlaylistUrl = playlistLinksMap[defaultPlaylistName] || 'https://open.spotify.com';
+
+    container.innerHTML = `
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+          <div>
+            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">
+              // HERRAMIENTA EDITORIAL // AUTOMATIZACIÓN DE NOTIFICACIONES
+            </div>
+            <h3 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #fff;">
+              🤖 Generador de Mensaje Automático & Story Promocional
+            </h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px; max-width: 760px;">
+              Genera automáticamente el mensaje oficial de felicitación para compartir con el artista por WhatsApp o redes, junto con la historia visual en HD (1080x1920) lista para publicar en Instagram.
+            </p>
+          </div>
+        </div>
+
+        <form onsubmit="handleAutoMessageFormSubmit(event)" style="display: flex; flex-direction: column; gap: 18px;">
+          
+          <!-- CAMPO 1: ARTISTA DEL RADAR -->
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-strong); border-radius: 6px; padding: 16px;">
+            <label style="display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 8px;">
+              1. PUESTO / ARTISTA EN EL RADAR *
+            </label>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; align-items: center; margin-bottom: 8px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Seleccionar Artista del Directorio:</label>
+                <select id="amRadarSelect" onchange="onAutoMessageRadarSelect(this.value)" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
+                  ${cleanArtists.map(function(a){
+                    var tag = a.type === 'top3' ? '⭐ TOP 9' : '📻 RADAR';
+                    return '<option value="' + a.id + '">' + tag + ' — ' + a.name + ' (' + (a.city || 'Global') + ')</option>';
+                  }).join('')}
+                  <option value="custom">✏️ [ Ingresar enlace personalizado / manual ]</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Link de Artistas del Radar (se insertará en el mensaje):</label>
+                <input type="text" id="amRadarUrl" required value="${defaultRadarUrl}" placeholder="https://thenewindiewave.online/artistas.html?artista=radar-1" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-lime); border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
+              </div>
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">
+              ℹ️ Al seleccionar un artista, se actualiza automáticamente el enlace de su ficha editorial en la web.
+            </div>
+          </div>
+
+          <!-- CAMPO 2: URL DE TRACK DE SPOTIFY -->
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-strong); border-radius: 6px; padding: 16px;">
+            <label style="display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 8px;">
+              2. URL DEL TRACK DE SPOTIFY *
+            </label>
+
+            <div style="margin-bottom: 10px;">
+              <input type="text" id="amSpotifyUrl" oninput="handleAutoMessageTrackInput(this.value)" placeholder="https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp o ID de canción..." style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: #fff; border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
+            </div>
+
+            <div id="amTrackLookupStatus" style="display: none; font-family: var(--font-mono); font-size: 11.5px; margin-bottom: 12px; padding: 6px 10px; background: rgba(0,0,0,0.4); border-radius: 4px; border-left: 3px solid var(--accent-cyan);"></div>
+
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Tema / Canción *</label>
+                <input type="text" id="amSongTitle" required placeholder="Ej. ¿Qué Es Lo Que Harías?" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Artista / Proyecto *</label>
+                <input type="text" id="amArtistName" required value="${defaultArtist ? defaultArtist.name : ''}" placeholder="Ej. Rodrigo dl Moral" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género (Para Story)</label>
+                <input type="text" id="amGenre" value="${defaultArtist ? defaultArtist.genre : 'INDIE POP'}" placeholder="Ej. SYNTH POP" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- CAMPO 3: PLAYLIST DE SPOTIFY -->
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-strong); border-radius: 6px; padding: 16px;">
+            <label style="display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-pink); text-transform: uppercase; margin-bottom: 8px;">
+              3. PLAYLIST OFICIAL DE SPOTIFY DISPONIBLE *
+            </label>
+
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; align-items: center; margin-bottom: 6px;">
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Selecciona la Playlist de destino:</label>
+                <select id="amPlaylistSelect" onchange="onAutoMessagePlaylistChange(this.value)" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
+                  ${playlistNames.map(function(pName){
+                    return '<option value="' + pName + '">' + pName + '</option>';
+                  }).join('')}
+                </select>
+              </div>
+
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Enlace de la Playlist Seleccionada:</label>
+                <input type="text" id="amPlaylistUrl" readonly value="${defaultPlaylistUrl}" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-pink); border-radius: 4px; font-size: 12.5px; font-family: var(--font-mono);">
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTÓN GENERAR -->
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+            <button type="submit" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 14px 28px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(187,244,81,0.35);">
+              ⚡ Generar Mensaje y Story para Redes ↗
+            </button>
+          </div>
+
+        </form>
+      </div>
+    `;
+
+    // Si el artista por defecto tiene track_id, inicializarlo
+    if (defaultArtist && defaultArtist.track_id) {
+      var initialTrackUrl = defaultArtist.track_id.includes('http') ? defaultArtist.track_id : ('https://open.spotify.com/track/' + defaultArtist.track_id);
+      document.getElementById('amSpotifyUrl').value = initialTrackUrl;
+      handleAutoMessageTrackInput(initialTrackUrl);
+    }
+  }
+
+  var _autoMessageLookupTimer = null;
+  function handleAutoMessageTrackInput(val) {
+    clearTimeout(_autoMessageLookupTimer);
+    if (!val || !val.trim()) {
+      var statusEl = document.getElementById('amTrackLookupStatus');
+      if (statusEl) statusEl.style.display = 'none';
+      return;
+    }
+    _autoMessageLookupTimer = setTimeout(function(){
+      lookupSpotifyTrackForAutoMessage(val.trim());
+    }, 450);
+  }
+
+  async function lookupSpotifyTrackForAutoMessage(urlOrId) {
+    var statusEl = document.getElementById('amTrackLookupStatus');
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.innerHTML = '<span style="color: var(--accent-cyan);">⏳ Consultando información en Spotify API...</span>';
+    }
+
+    try {
+      var res = await fetch('/api/spotify-lookup?url=' + encodeURIComponent(urlOrId));
+      if (res.ok) {
+        var data = await res.json();
+        if (data && data.title) {
+          if (document.getElementById('amSongTitle')) document.getElementById('amSongTitle').value = data.title;
+          if (document.getElementById('amArtistName') && data.artist) document.getElementById('amArtistName').value = data.artist;
+          if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Track detectado: <strong>' + data.title + '</strong> — ' + (data.artist || '') + '</span>';
+          }
+          return;
+        }
+      }
+    } catch(e) {}
+
+    // Fallback oEmbed
+    try {
+      var cleanUrl = urlOrId.includes('http') ? urlOrId : ('https://open.spotify.com/track/' + urlOrId);
+      var res2 = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(cleanUrl));
+      if (res2.ok) {
+        var d2 = await res2.json();
+        if (d2 && d2.title) {
+          if (document.getElementById('amSongTitle')) document.getElementById('amSongTitle').value = d2.title;
+          if (document.getElementById('amArtistName') && d2.author_name) document.getElementById('amArtistName').value = d2.author_name;
+          if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Track detectado: <strong>' + d2.title + '</strong>' + (d2.author_name ? (' — ' + d2.author_name) : '') + '</span>';
+          }
+          return;
+        }
+      }
+    } catch(e2) {}
+
+    if (statusEl) {
+      statusEl.innerHTML = '<span style="color: var(--text-muted);">ℹ️ Puedes escribir o ajustar el título de la canción manualmente abajo.</span>';
+    }
+  }
+
+  function onAutoMessageRadarSelect(artistId) {
+    if (artistId === 'custom') {
+      document.getElementById('amRadarUrl').value = 'https://thenewindiewave.online/artistas.html?artista=';
+      document.getElementById('amRadarUrl').focus();
+      return;
+    }
+    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var artist = list.find(function(a){ return a.id === artistId; });
+    if (artist) {
+      document.getElementById('amRadarUrl').value = 'https://thenewindiewave.online/artistas.html?artista=' + artist.id;
+      if (artist.name) {
+        document.getElementById('amArtistName').value = artist.name;
+      }
+      if (artist.genre) {
+        document.getElementById('amGenre').value = artist.genre;
+      }
+      if (artist.track_id && !document.getElementById('amSpotifyUrl').value) {
+        var trackLink = artist.track_id.includes('http') ? artist.track_id : ('https://open.spotify.com/track/' + artist.track_id);
+        document.getElementById('amSpotifyUrl').value = trackLink;
+        handleAutoMessageTrackInput(trackLink);
+      }
+    }
+  }
+
+  function onAutoMessagePlaylistChange(pName) {
+    var pUrl = playlistLinksMap[pName] || 'https://open.spotify.com';
+    document.getElementById('amPlaylistUrl').value = pUrl;
+  }
+
+  var _curCachedAmStoryDataUrl = null;
+  var _curAmSongTitle = '';
+
+  function handleAutoMessageFormSubmit(e) {
+    e.preventDefault();
+    var radarUrl = (document.getElementById('amRadarUrl').value || '').trim();
+    var songTitle = (document.getElementById('amSongTitle').value || '').trim();
+    var artistName = (document.getElementById('amArtistName').value || '').trim();
+    var playlistName = document.getElementById('amPlaylistSelect').value;
+    var playlistUrl = (document.getElementById('amPlaylistUrl').value || '').trim();
+    var genre = (document.getElementById('amGenre').value || 'INDIE').trim().toUpperCase();
+
+    if (!radarUrl) {
+      showToast('⚠️ Por favor ingresa el enlace del artista en el radar');
+      return;
+    }
+    if (!songTitle) {
+      showToast('⚠️ Por favor ingresa el título de la canción');
+      return;
+    }
+
+    _curAmSongTitle = songTitle;
+
+    var fullMessage = `¡Felicidades! ¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
+${radarUrl}
+
+te invitamos a que compartas con tus seguidores esta reseña y que sigan creciendo los éxitos. También es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+${playlistUrl}
+
+Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras redes:
+Instagram:
+@the.new.indie.wave
+@rodrigodlmoral`;
+
+    document.getElementById('amGeneratedMessageText').value = fullMessage;
+
+    // Generar Story en amStoryCanvas
+    generateCuratorStoryCanvas(artistName, songTitle, playlistName, genre, 'amStoryCanvas');
+
+    var modal = document.getElementById('autoMessageModal');
+    if (modal) modal.style.display = 'flex';
+    showToast('✓ Mensaje y Story generados con éxito');
+  }
+
+  function closeAutoMessageModal() {
+    var modal = document.getElementById('autoMessageModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function copyAutoMessageText() {
+    var txt = document.getElementById('amGeneratedMessageText').value;
+    if (!txt) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function(){
+        showToast('✓ ¡Mensaje copiado al portapapeles!');
+      }).catch(function(){
+        fallbackCopyText(txt);
+      });
+    } else {
+      fallbackCopyText(txt);
+    }
+  }
+
+  function fallbackCopyText(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast('✓ ¡Mensaje copiado al portapapeles!');
+    } catch(e) {
+      showToast('⚠️ Selecciona y copia el texto manualmente.');
+    }
+    document.body.removeChild(ta);
+  }
+
+  function shareAutoMessageWhatsApp() {
+    var txt = document.getElementById('amGeneratedMessageText').value;
+    if (!txt) return;
+    var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(txt);
+    window.open(waUrl, '_blank');
+  }
+
+  function downloadAutoMessageStory() {
+    if (!_curCachedAmStoryDataUrl) return;
+    var a = document.createElement('a');
+    a.download = 'Historia_TNIW_' + _curAmSongTitle.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+    a.href = _curCachedAmStoryDataUrl;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('✓ Descargando Historia (1080x1920 HD)...');
+  }
+
+  function copyAutoMessageStoryToClipboard() {
+    if (!navigator.clipboard || !window.ClipboardItem || !_curCachedAmStoryDataUrl) {
+      showToast('⚠️ Tu navegador no soporta copiado directo');
+      return;
+    }
+    fetch(_curCachedAmStoryDataUrl)
+      .then(function(res){ return res.blob(); })
+      .then(function(blob){
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function(){
+          showToast('✓ ¡Imagen de historia copiada al portapapeles!');
+        });
+      })
+      .catch(function(){
+        showToast('⚠️ No se pudo copiar la imagen automáticamente. Usa el botón descargar.');
+      });
+  }
+
   function showToast(msg) {
     var t = document.getElementById('toast');
     if (!t) return;
@@ -2548,8 +2890,9 @@
     if (modal) modal.style.display = 'none';
   }
 
-  function generateCuratorStoryCanvas(artist, song, playlist, genre, spotifyUrl) {
-    var canvas = document.getElementById('curatorStoryCanvas');
+  function generateCuratorStoryCanvas(artist, song, playlist, genre, targetCanvasId) {
+    var canvasId = (typeof targetCanvasId === 'string' && targetCanvasId) ? targetCanvasId : 'curatorStoryCanvas';
+    var canvas = document.getElementById(canvasId);
     if (!canvas) return;
     var ctx = canvas.getContext('2d');
     var W = 1080;
@@ -2760,7 +3103,12 @@
 
     ctx.restore(); // Termina clip de la tarjeta
 
-    _curCachedStoryDataUrl = canvas.toDataURL('image/png');
+    var dataUrl = canvas.toDataURL('image/png');
+    if (canvasId === 'amStoryCanvas') {
+      _curCachedAmStoryDataUrl = dataUrl;
+    } else {
+      _curCachedStoryDataUrl = dataUrl;
+    }
   }
 
   function wrapTextCenteredCur(ctx, text, centerX, startY, maxWidth, lineHeight) {
@@ -2852,6 +3200,67 @@
     return str.slice(0, num) + '...';
   }
 </script>
+
+<!-- MODAL MENSAJE AUTOMÁTICO & STORY PARA CURADOR -->
+<div id="autoMessageModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 960px; width: 100%; max-height: 92vh; overflow-y: auto; padding: 26px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
+    <button onclick="closeAutoMessageModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; z-index: 10;">✕</button>
+    
+    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// RESULTADO // MENSAJE AUTOMÁTICO & STORY GENERADA</div>
+    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">🎉 Notificación Oficial Lista para Enviar</h3>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+      Copia el mensaje para el artista y descarga o copia la historia visual en HD (1080x1920) para tus redes sociales.
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start;">
+      
+      <!-- COLUMNA 1: MENSAJE LISTO PARA COPIAR -->
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase;">
+            💬 MENSAJE LISTO PARA COPIAR
+          </div>
+          <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">Editable</span>
+        </div>
+
+        <textarea id="amGeneratedMessageText" rows="14" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); border-radius: 6px; padding: 12px; color: #fff; font-family: var(--font-mono); font-size: 12px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button onclick="copyAutoMessageText()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 12.5px; font-weight: 800; padding: 12px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
+            📋 Copiar Mensaje al Portapapeles
+          </button>
+          <button onclick="shareAutoMessageWhatsApp()" style="background: #25D366; color: #000; font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 10px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            🟢 Enviar / Abrir en WhatsApp ↗
+          </button>
+        </div>
+      </div>
+
+      <!-- COLUMNA 2: STORY GENERADA LISTA PARA DESCARGAR -->
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-pink); text-transform: uppercase;">
+            🎨 STORY PROMOCIONAL (1080x1920)
+          </div>
+          <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">9:16 HD</span>
+        </div>
+
+        <div style="background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; justify-content: center; align-items: center;">
+          <canvas id="amStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 220px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button onclick="downloadAutoMessageStory()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 12.5px; font-weight: 800; padding: 12px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
+            📥 Descargar Imagen de Historia (PNG HD)
+          </button>
+          <button onclick="copyAutoMessageStoryToClipboard()" style="background: rgba(255,255,255,0.06); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
+            📋 Copiar Imagen al Portapapeles
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
