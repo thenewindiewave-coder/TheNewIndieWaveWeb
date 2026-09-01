@@ -1205,6 +1205,7 @@
       sessionStorage.setItem('tniw_curator_auth', '1');
       loadSubmissions();
       checkSpotifyAuthStatus();
+      preloadPlaylistsMetadata();
     } else {
       showToast('❌ Clave incorrecta');
     }
@@ -1214,6 +1215,7 @@
     document.getElementById('pinOverlay').style.display = 'none';
     loadSubmissions();
     checkSpotifyAuthStatus();
+    preloadPlaylistsMetadata();
   }
 
   // 2. Cargar envíos desde Supabase
@@ -1632,11 +1634,23 @@
       const data = await res.json();
       livePlaylists = data.allPlaylists || [];
 
-      // Actualizar dinámicamente el mapa de enlaces de playlists
+      // Actualizar dinámicamente el mapa de enlaces y portadas de playlists
       if (livePlaylists && livePlaylists.length > 0) {
         livePlaylists.forEach(function(p) {
           if (p.name && p.spotify_url) {
             playlistLinksMap[p.name] = p.spotify_url;
+          }
+          if (p.image) {
+            if (p.name) _livePlaylistCoversMap[p.name] = p.image;
+            if (p.spotify_url) _livePlaylistCoversMap[p.spotify_url] = p.image;
+            if (p.id) _livePlaylistCoversMap[p.id] = p.image;
+
+            var preImg = new Image();
+            preImg.crossOrigin = 'anonymous';
+            preImg.onload = function() {
+              _loadedPlaylistCoverImages[p.image] = preImg;
+            };
+            preImg.src = p.image;
           }
         });
       }
@@ -1654,6 +1668,37 @@
         </div>
       `;
     }
+  }
+
+  async function preloadPlaylistsMetadata() {
+    try {
+      var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
+      var url = '/api/playlists?t=' + Date.now() + (rToken ? ('&refresh_token=' + encodeURIComponent(rToken)) : '');
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.allPlaylists && data.allPlaylists.length > 0) {
+          livePlaylists = data.allPlaylists;
+          livePlaylists.forEach(function(p) {
+            if (p.name && p.spotify_url) {
+              playlistLinksMap[p.name] = p.spotify_url;
+            }
+            if (p.image) {
+              if (p.name) _livePlaylistCoversMap[p.name] = p.image;
+              if (p.spotify_url) _livePlaylistCoversMap[p.spotify_url] = p.image;
+              if (p.id) _livePlaylistCoversMap[p.id] = p.image;
+
+              var preImg = new Image();
+              preImg.crossOrigin = 'anonymous';
+              preImg.onload = function() {
+                _loadedPlaylistCoverImages[p.image] = preImg;
+              };
+              preImg.src = p.image;
+            }
+          });
+        }
+      }
+    } catch(e) {}
   }
 
   function renderPlaylistManager() {
@@ -1780,17 +1825,17 @@
         </div>
       </div>
 
-      <!-- SECCIÓN 1: TOP 9 DESTACADOS -->
+      <!-- SECCIÓN 1: TOP 10 DESTACADOS -->
       <div style="margin-bottom: 24px;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; color: var(--accent-lime); background: rgba(187,244,81,0.12); border: 1px solid rgba(187,244,81,0.3); padding: 3px 10px; border-radius: 4px;">
-            ⭐ TOP 9 RADAR DESTACADOS (${top3List.length})
+            ⭐ TOP 10 RADAR DESTACADOS (${top3List.length})
           </span>
           <span style="font-size: 12px; color: var(--text-muted);">Aparecen en la cabecera principal con reproductor</span>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
-          ${top3List.length === 0 ? '<div class="empty-box" style="padding: 24px;">No hay artistas marcados como Top 9.</div>' : top3List.map((a, idx) => renderArtistCardHtml(a, true, idx, top3List.length, list.indexOf(a))).join('')}
+          ${top3List.length === 0 ? '<div class="empty-box" style="padding: 24px;">No hay artistas marcados como Top 10.</div>' : top3List.map((a, idx) => renderArtistCardHtml(a, true, idx, top3List.length, list.indexOf(a))).join('')}
         </div>
       </div>
 
@@ -1873,7 +1918,7 @@
             </div>
 
             <button onclick="toggleRadarType('${a.id}', '${isTop ? 'secondary' : 'top3'}')" class="btn-tool" style="font-size: 10.5px; padding: 6px 10px;">
-              ${isTop ? '⬇ Pasar a Secundario' : '⭐ Subir a Top 9'}
+              ${isTop ? '⬇ Pasar a Secundario' : '⭐ Subir a Top 10'}
             </button>
             <button onclick="openEditArtistModal('${a.id}')" style="background: rgba(187,244,81,0.14); border: 1px solid rgba(187,244,81,0.35); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
               ✏️ Editar
@@ -2102,7 +2147,7 @@
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ubicación en la Web *</label>
                 <select id="rfType" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
-                  <option value="top3" ${artist && artist.type === 'top3' ? 'selected' : ''}>⭐ Top 9 Destacado (Principal)</option>
+                  <option value="top3" ${artist && artist.type === 'top3' ? 'selected' : ''}>⭐ Top 10 Destacado (Principal)</option>
                   <option value="secondary" ${!artist || artist.type !== 'top3' ? 'selected' : ''}>📻 Radar Secundario (Directorio)</option>
                 </select>
               </div>
@@ -2352,7 +2397,7 @@
       list.forEach(function(it, i){ it.order = i + 1; });
       saveRadarArtists(list);
       renderRadarManager();
-      showToast('✓ Categoría cambiada a ' + (newType === 'top3' ? 'Top 9' : 'Secundario'));
+      showToast('✓ Categoría cambiada a ' + (newType === 'top3' ? 'Top 10' : 'Secundario'));
 
       if (typeof saveAllRadarArtistsOrders === 'function') {
         await saveAllRadarArtistsOrders(list);
@@ -2612,7 +2657,7 @@
                 <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Seleccionar Artista del Directorio:</label>
                 <select id="amRadarSelect" onchange="onAutoMessageRadarSelect(this.value)" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
                   ${cleanArtists.map(function(a){
-                    var tag = a.type === 'top3' ? '⭐ TOP 9' : '📻 RADAR';
+                    var tag = a.type === 'top3' ? '⭐ TOP 10' : '📻 RADAR';
                     return '<option value="' + a.id + '">' + tag + ' — ' + a.name + ' (' + (a.city || 'Global') + ')</option>';
                   }).join('')}
                   <option value="custom">✏️ [ Ingresar enlace personalizado / manual ]</option>
@@ -2805,6 +2850,19 @@
             _livePlaylistTracksMap[data.title] = data.tracks;
             if (data.spotify_url) _livePlaylistTracksMap[data.spotify_url] = data.tracks;
           }
+          if (data.cover) {
+            _livePlaylistCoversMap[urlOrId] = data.cover;
+            _livePlaylistCoversMap[data.title] = data.cover;
+            if (data.spotify_url) _livePlaylistCoversMap[data.spotify_url] = data.cover;
+            if (data.playlist_id) _livePlaylistCoversMap[data.playlist_id] = data.cover;
+
+            var preImg = new Image();
+            preImg.crossOrigin = 'anonymous';
+            preImg.onload = function() {
+              _loadedPlaylistCoverImages[data.cover] = preImg;
+            };
+            preImg.src = data.cover;
+          }
           if (statusEl) {
             var trackInfo = (Array.isArray(data.tracks) && data.tracks.length > 0)
               ? (' (' + data.tracks.length + ' temas reales detectados)')
@@ -2824,6 +2882,18 @@
         var d2 = await res2.json();
         if (d2 && d2.title) {
           if (document.getElementById('amPlaylistName')) document.getElementById('amPlaylistName').value = d2.title;
+          if (d2.thumbnail_url) {
+            _livePlaylistCoversMap[urlOrId] = d2.thumbnail_url;
+            _livePlaylistCoversMap[d2.title] = d2.thumbnail_url;
+            if (cleanUrl) _livePlaylistCoversMap[cleanUrl] = d2.thumbnail_url;
+
+            var preImg2 = new Image();
+            preImg2.crossOrigin = 'anonymous';
+            preImg2.onload = function() {
+              _loadedPlaylistCoverImages[d2.thumbnail_url] = preImg2;
+            };
+            preImg2.src = d2.thumbnail_url;
+          }
           if (statusEl) {
             statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Playlist detectada: <strong>' + d2.title + '</strong></span>';
           }
@@ -3070,6 +3140,8 @@ Instagram:
   _curStoryBgImage.src = 'historia_back.jpg';
   var _curCachedStoryDataUrl = null;
   var _livePlaylistTracksMap = {};
+  var _livePlaylistCoversMap = {};
+  var _loadedPlaylistCoverImages = {};
 
   // CANCIONES 100% REALES EXTRAÍDAS DE TUS PLAYLISTS OFICIALES DE SPOTIFY
   var _curatedPlaylistTracks = {
@@ -3227,6 +3299,47 @@ Instagram:
     return _curatedPlaylistTracks["Metal intenso para liberar toda tu energía"];
   }
 
+  function getCoverForPlaylist(playlistName, playlistUrl) {
+    var normPName = normalizeTniwStr(playlistName || '');
+    var normPUrl = (playlistUrl || '').toLowerCase().trim();
+
+    // 1. Coincidencia directa por URL o ID
+    if (playlistUrl && _livePlaylistCoversMap[playlistUrl]) {
+      return _livePlaylistCoversMap[playlistUrl];
+    }
+    if (playlistUrl) {
+      var rawId = playlistUrl.split('playlist/')[1];
+      if (rawId) {
+        rawId = rawId.split('?')[0].split('&')[0];
+        if (_livePlaylistCoversMap[rawId]) return _livePlaylistCoversMap[rawId];
+      }
+    }
+
+    // 2. Coincidencia directa por Nombre
+    if (playlistName && _livePlaylistCoversMap[playlistName]) {
+      return _livePlaylistCoversMap[playlistName];
+    }
+
+    // 3. Coincidencia normalizada con claves registradas
+    for (var key in _livePlaylistCoversMap) {
+      if (_livePlaylistCoversMap[key] && normalizeTniwStr(key) === normPName) {
+        return _livePlaylistCoversMap[key];
+      }
+    }
+
+    // 4. Buscar en livePlaylists de Spotify
+    if (livePlaylists && livePlaylists.length > 0) {
+      var p = livePlaylists.find(function(item) {
+        return (playlistUrl && item.spotify_url === playlistUrl) ||
+               (playlistName && item.name === playlistName) ||
+               (playlistName && normalizeTniwStr(item.name) === normPName);
+      });
+      if (p && p.image) return p.image;
+    }
+
+    return null;
+  }
+
   var _curSongName = 'historia_tniw';
 
   function openCuratorStoryGenerator(encArtist, encSong, encPlaylist, encGenre, encPlaylistUrl) {
@@ -3258,6 +3371,26 @@ Instagram:
     var ctx = canvas.getContext('2d');
     var W = 1080;
     var H = 1920;
+
+    // Verificar si existe portada personalizada para esta playlist
+    var coverUrl = getCoverForPlaylist(playlist, optionalPlaylistUrl);
+    var coverImg = null;
+    if (coverUrl) {
+      if (_loadedPlaylistCoverImages[coverUrl] && _loadedPlaylistCoverImages[coverUrl] !== 'error') {
+        coverImg = _loadedPlaylistCoverImages[coverUrl];
+      } else if (!_loadedPlaylistCoverImages[coverUrl]) {
+        var imgToLoad = new Image();
+        imgToLoad.crossOrigin = 'anonymous';
+        imgToLoad.onload = function() {
+          _loadedPlaylistCoverImages[coverUrl] = imgToLoad;
+          generateCuratorStoryCanvas(artist, song, playlist, genre, targetCanvasId, optionalPlaylistUrl);
+        };
+        imgToLoad.onerror = function() {
+          _loadedPlaylistCoverImages[coverUrl] = 'error';
+        };
+        imgToLoad.src = coverUrl;
+      }
+    }
 
     // 1. Fondo Oficial
     if (_curStoryBgImage.complete && _curStoryBgImage.naturalWidth > 0) {
@@ -3298,12 +3431,42 @@ Instagram:
     // 3. CABECERA EDITORIAL DE ALTO IMPACTO (Height 475px)
     var headerH = 475;
     ctx.save();
+    
+    // Fondo base degradado oscuro
     var grad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + headerH);
     grad.addColorStop(0, '#101726');
     grad.addColorStop(0.5, '#0a0e17');
     grad.addColorStop(1, '#040609');
     ctx.fillStyle = grad;
     ctx.fillRect(cardX, cardY, cardW, headerH);
+
+    // Si la playlist tiene portada personalizada en Spotify, dibujarla en el fondo con crop y overlay
+    if (coverImg && coverImg.complete && (coverImg.naturalWidth > 0 || coverImg.width > 0)) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(cardX, cardY, cardW, headerH);
+      ctx.clip();
+
+      var imgW = coverImg.naturalWidth || coverImg.width;
+      var imgH = coverImg.naturalHeight || coverImg.height;
+      var scale = Math.max(cardW / imgW, headerH / imgH);
+      var drawW = imgW * scale;
+      var drawH = imgH * scale;
+      var drawX = cardX + (cardW - drawW) / 2;
+      var drawY = cardY + (headerH - drawH) / 2;
+
+      ctx.drawImage(coverImg, drawX, drawY, drawW, drawH);
+
+      // Overlay cinematográfico oscuro para legibilidad y elegancia editorial impecable
+      var coverOverlay = ctx.createLinearGradient(cardX, cardY, cardX, cardY + headerH);
+      coverOverlay.addColorStop(0, 'rgba(8, 12, 20, 0.65)');
+      coverOverlay.addColorStop(0.35, 'rgba(6, 8, 14, 0.75)');
+      coverOverlay.addColorStop(0.8, 'rgba(4, 6, 9, 0.90)');
+      coverOverlay.addColorStop(1, '#040609');
+      ctx.fillStyle = coverOverlay;
+      ctx.fillRect(cardX, cardY, cardW, headerH);
+      ctx.restore();
+    }
 
     // Ecualizador gráfico / espectro de audio decorativo
     var eqBarCount = 28;
@@ -3313,7 +3476,7 @@ Instagram:
     var eqStartX = cardX + (cardW - totalEqW) / 2;
     var eqBaseY = cardY + headerH - 65;
 
-    ctx.fillStyle = 'rgba(187, 244, 81, 0.12)';
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.18)';
     for (var b = 0; b < eqBarCount; b++) {
       var hFactor = Math.abs(Math.sin((b + 3) * 0.45) * Math.cos(b * 0.25));
       var barHeight = 12 + (hFactor * 48);
@@ -3326,10 +3489,13 @@ Instagram:
     var badgeH = 34;
     var badgeX = cardX + (cardW - badgeW) / 2;
     var badgeY = cardY + 32;
-    ctx.fillStyle = 'rgba(187, 244, 81, 0.12)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
     drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 6);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.15)';
+    drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 6);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.5)';
     ctx.lineWidth = 1.5;
     drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 6);
     ctx.stroke();
@@ -3342,14 +3508,14 @@ Instagram:
     // Título Editorial en MAYÚSCULAS con Tipografía Imponente
     var upperPlaylist = (playlist || 'ROCK INDIE').toUpperCase();
     ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-    ctx.shadowBlur = 16;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+    ctx.shadowBlur = 18;
     ctx.font = '900 44px "Space Grotesk", "Outfit", "Syne", -apple-system, sans-serif';
     wrapTextCenteredCur(ctx, upperPlaylist, cardX + (cardW / 2), cardY + 125, cardW - 140, 52);
     ctx.shadowBlur = 0;
 
     // Sello Editorial Centrado
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
     ctx.font = '700 14px monospace';
     ctx.fillText('CURADURÍA EDITORIAL OFICIAL', cardX + (cardW / 2), cardY + headerH - 38);
 
@@ -3464,11 +3630,15 @@ Instagram:
 
     ctx.restore(); // Termina clip de la tarjeta
 
-    var dataUrl = canvas.toDataURL('image/png');
-    if (canvasId === 'amStoryCanvas') {
-      _curCachedAmStoryDataUrl = dataUrl;
-    } else {
-      _curCachedStoryDataUrl = dataUrl;
+    try {
+      var dataUrl = canvas.toDataURL('image/png');
+      if (canvasId === 'amStoryCanvas') {
+        _curCachedAmStoryDataUrl = dataUrl;
+      } else {
+        _curCachedStoryDataUrl = dataUrl;
+      }
+    } catch(e) {
+      console.warn('Canvas toDataURL notice:', e);
     }
   }
 
