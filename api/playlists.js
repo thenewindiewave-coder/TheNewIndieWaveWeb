@@ -77,6 +77,7 @@ function extractGenres(name, description) {
     'hard rock', 'alternative metal', 'nu metal', 'stoner',
     'metalcore', 'hardcore', 'thrash metal', 'death metal', 'metal',
     'urbano', 'reggaetón', 'trap', 'dembow', 'latin trap', 'afrobeat',
+    'corridos tumbados', 'regional mexicano', 'regional urbano',
     'darkwave', 'synthwave', 'coldwave', 'gothic rock', 'industrial'
   ];
 
@@ -95,7 +96,7 @@ function detectCategory(name, description) {
   if (text.includes('metal') || text.includes('hard rock') || text.includes('grunge')) cats.push('heavy');
   if (text.includes('pop') || text.includes('bedroom') || text.includes('suave') || text.includes('cuarto')) cats.push('pop');
   if (text.includes('darkwave') || text.includes('post-punk') || text.includes('gothic') || text.includes('madrugada')) cats.push('darkwave');
-  if (text.includes('urbano') || text.includes('trap') || text.includes('reggaetón') || text.includes('dembow') || text.includes('flow')) cats.push('urbano');
+  if (text.includes('urbano') || text.includes('trap') || text.includes('reggaetón') || text.includes('dembow') || text.includes('flow') || text.includes('corridos') || text.includes('regional')) cats.push('urbano');
   if (text.includes('shoegaze') || text.includes('dream pop') || text.includes('slowcore')) cats.push('shoegaze');
   if (text.includes('folk') || text.includes('acoustic') || text.includes('acústico')) cats.push('folk');
   if (text.includes('punk') || text.includes('garage') || text.includes('garaje')) cats.push('punk');
