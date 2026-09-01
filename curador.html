@@ -1156,12 +1156,17 @@
     "Rock indie para manejar de noche sin rumbo": "https://open.spotify.com/playlist/2APaz3JDupY9fNUczoKMUP",
     "Rock indie para cuando no puedes dormir y piensas demasiado": "https://open.spotify.com/playlist/5gh1rPce7FnEENWk1POIse",
     "Rock indie sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/2QlvwB1vEhxQ4CM4jrbC8g",
+    "Punk sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/2QlvwB1vEhxQ4CM4jrbC8g",
     "Pop indie para estar feliz y triste al mismo tiempo": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl",
+    "SynthPop para cuando solo quieres bailar": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl",
     "Pop indie íntimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "Dream Pop intimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
     "Pop indie suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
+    "Soft Pop suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
     "Hard rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
     "Metal intenso para liberar toda tu energía": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
     "Música urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
+    "Mezcla de rolas urbanas para farmear Aura": "https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB",
     "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln"
   };
 
@@ -1389,7 +1394,7 @@
                 <button onclick="insertToSpotifyManual('${item.spotify_url}', '${item.playlist}')" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                   ⚡ Insertar / Re-insertar en Spotify
                 </button>
-                <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                   🎨 Generar Historia Story ↗
                 </button>
               </div>
@@ -3050,116 +3055,6 @@ Instagram:
 
   // CANCIONES 100% REALES EXTRAÍDAS DE TUS PLAYLISTS OFICIALES DE SPOTIFY
   var _curatedPlaylistTracks = {
-    "Rock indie para manejar de noche sin rumbo": [
-      { name: "Blue Monday", artist: "Rodrigo dl Moral" },
-      { name: "Déjate llevar", artist: "Rodrigo dl Moral" },
-      { name: "Midnight Dance 90's - Remix", artist: "Rodrigo dl Moral" },
-      { name: "Guerra Fría", artist: "Blue Larimar Music" },
-      { name: "OASIS", artist: "AarǿnViz" },
-      { name: "conexion infinita", artist: "victor manuel jaquez lantigua" },
-      { name: "cada que...", artist: "te vi en un planetario, Santa Madero" },
-      { name: "Eres Mi Todo", artist: "Arwil" }
-    ],
-    "Rock indie para cuando no puedes dormir y piensas demasiado": [
-      { name: "Parapapa", artist: "Longchamps" },
-      { name: "La Edad No Me Deja Pensar", artist: "Suerte Campeón" },
-      { name: "Indefenso - Bolero", artist: "TOVAR" },
-      { name: "Ya no más", artist: "Mi113r" },
-      { name: "Tu ciudad", artist: "ASHLI" },
-      { name: "No Te Drogues, Bonita", artist: "Loncheras De Perro" },
-      { name: "perros", artist: "mil ataris por segundo" },
-      { name: "Infrarrojos", artist: "Los Niños Vudú" }
-    ],
-    "Rock indie sucio y crudo para sentirte rebelde": [
-      { name: "Fiesta y Degenere", artist: "DEGENERACIÖN 89" },
-      { name: "Ratas", artist: "Sindrome" },
-      { name: "Todos Somos Punks", artist: "Fe D' Ratas" },
-      { name: "zona liberada", artist: "Manu Sousax" },
-      { name: "Museo del Chopo", artist: "Rebel'd Punk" },
-      { name: "Cuatro Sudakas", artist: "Mal Pasar" },
-      { name: "Escupelos", artist: "Gesto Punk" },
-      { name: "El Punk Salvo Mi Vida", artist: "Acidez" }
-    ],
-    "Punk sucio y crudo para sentirte rebelde": [
-      { name: "Fiesta y Degenere", artist: "DEGENERACIÖN 89" },
-      { name: "Ratas", artist: "Sindrome" },
-      { name: "Todos Somos Punks", artist: "Fe D' Ratas" },
-      { name: "zona liberada", artist: "Manu Sousax" },
-      { name: "Museo del Chopo", artist: "Rebel'd Punk" },
-      { name: "Cuatro Sudakas", artist: "Mal Pasar" },
-      { name: "Escupelos", artist: "Gesto Punk" },
-      { name: "El Punk Salvo Mi Vida", artist: "Acidez" }
-    ],
-    "Pop indie para estar feliz y triste al mismo tiempo": [
-      { name: "Solitarium", artist: "MART.INN" },
-      { name: "Eres Mi Todo", artist: "Arwil" },
-      { name: "cada que...", artist: "te vi en un planetario, Santa Madero" },
-      { name: "conexion infinita", artist: "victor manuel jaquez lantigua" },
-      { name: "OASIS", artist: "AarǿnViz" },
-      { name: "Guerra Fría", artist: "Blue Larimar Music" },
-      { name: "Déjate llevar", artist: "Rodrigo dl Moral" },
-      { name: "Midnight Dance 90's - Remix", artist: "Rodrigo dl Moral" }
-    ],
-    "SynthPop para cuando solo quieres bailar": [
-      { name: "Solitarium", artist: "MART.INN" },
-      { name: "Eres Mi Todo", artist: "Arwil" },
-      { name: "cada que...", artist: "te vi en un planetario, Santa Madero" },
-      { name: "conexion infinita", artist: "victor manuel jaquez lantigua" },
-      { name: "OASIS", artist: "AarǿnViz" },
-      { name: "Guerra Fría", artist: "Blue Larimar Music" },
-      { name: "Déjate llevar", artist: "Rodrigo dl Moral" },
-      { name: "Blue Monday", artist: "Rodrigo dl Moral" }
-    ],
-    "Pop indie íntimo para escuchar solo en tu cuarto": [
-      { name: "Indefenso - Bolero", artist: "TOVAR" },
-      { name: "Ya no más", artist: "Mi113r" },
-      { name: "Tu ciudad", artist: "ASHLI" },
-      { name: "No Te Drogues, Bonita", artist: "Loncheras De Perro" },
-      { name: "perros", artist: "mil ataris por segundo" },
-      { name: "tu bitácora emocional", artist: "mil ataris por segundo" },
-      { name: "Necesito Decirte", artist: "Lagrima De Risa" },
-      { name: "Infrarrojos", artist: "Los Niños Vudú" }
-    ],
-    "Dream Pop intimo para escuchar solo en tu cuarto": [
-      { name: "Indefenso - Bolero", artist: "TOVAR" },
-      { name: "Ya no más", artist: "Mi113r" },
-      { name: "Tu ciudad", artist: "ASHLI" },
-      { name: "No Te Drogues, Bonita", artist: "Loncheras De Perro" },
-      { name: "perros", artist: "mil ataris por segundo" },
-      { name: "tu bitácora emocional", artist: "mil ataris por segundo" },
-      { name: "Necesito Decirte", artist: "Lagrima De Risa" },
-      { name: "Infrarrojos", artist: "Los Niños Vudú" }
-    ],
-    "Pop indie suave para domingos sin hacer nada": [
-      { name: "Corazón en Fuga", artist: "Breneli R" },
-      { name: "Lo Que Alguna Vez Fue Hermoso", artist: "Los Dinosaurios Murieron Ayer" },
-      { name: "Vampira", artist: "Usted Solitario" },
-      { name: "Dapa", artist: "El Picnic Era Ayer" },
-      { name: "1500 Calorías", artist: "Bruno Bardo" },
-      { name: "Mecanismos de Defensa", artist: "Blackthony Startano" },
-      { name: "no cesara", artist: "NOTA" },
-      { name: "Historia de una Flor", artist: "D-Lirios" }
-    ],
-    "Soft Pop suave para domingos sin hacer nada": [
-      { name: "Corazón en Fuga", artist: "Breneli R" },
-      { name: "Lo Que Alguna Vez Fue Hermoso", artist: "Los Dinosaurios Murieron Ayer" },
-      { name: "Vampira", artist: "Usted Solitario" },
-      { name: "Dapa", artist: "El Picnic Era Ayer" },
-      { name: "1500 Calorías", artist: "Bruno Bardo" },
-      { name: "Mecanismos de Defensa", artist: "Blackthony Startano" },
-      { name: "no cesara", artist: "NOTA" },
-      { name: "Historia de una Flor", artist: "D-Lirios" }
-    ],
-    "Hard rock para sacar la rabia y el enojo acumulado": [
-      { name: "Fiesta y Degenere", artist: "DEGENERACIÖN 89" },
-      { name: "Ratas", artist: "Sindrome" },
-      { name: "Todos Somos Punks", artist: "Fe D' Ratas" },
-      { name: "zona liberada", artist: "Manu Sousax" },
-      { name: "Museo del Chopo", artist: "Rebel'd Punk" },
-      { name: "Cuatro Sudakas", artist: "Mal Pasar" },
-      { name: "Escupelos", artist: "Gesto Punk" },
-      { name: "El Punk Salvo Mi Vida", artist: "Acidez" }
-    ],
     "Metal intenso para liberar toda tu energía": [
       { name: "Díganme", artist: "Jose Macario, Zxmyr, Ladrones" },
       { name: "Crónica De Una Peda Anunciada", artist: "Cabezä de Perro" },
@@ -3168,7 +3063,29 @@ Instagram:
       { name: "PRENDELA", artist: "DELICTIVO, Coko Yamasaki" },
       { name: "Charcos de Sudor", artist: "Desmembramiento Eterno" },
       { name: "Fuego En El Corazón", artist: "The Metal Nomad" },
-      { name: "A Batalla Vamos", artist: "Yaotl Mictlan" }
+      { name: "A Batalla Vamos", artist: "Yaotl Mictlan" },
+      { name: "In-Pulso", artist: "Vulgar Addiction" },
+      { name: "Black Svn", artist: "Deconception" }
+    ],
+    "Mezcla de rolas urbanas para farmear Aura": [
+      { name: "Nuestro Juramento", artist: "Maskafé" },
+      { name: "Despertar en Ti", artist: "Escathárys" },
+      { name: "Excepto Tú", artist: "Radio Revuelta" },
+      { name: "Todo por Amor", artist: "Gran Matador" },
+      { name: "Seria", artist: "Médanos" },
+      { name: "Perdedor", artist: "Radio Revuelta" },
+      { name: "Tu mirar", artist: "Modorros" },
+      { name: "Adiós", artist: "Chicle y Pega Ska" }
+    ],
+    "Darkwave oscuro y atmosférico para la madrugada": [
+      { name: "Bang!", artist: "Rey Rata" },
+      { name: "Ritmo Triple Seis", artist: "Rey Rata" },
+      { name: "Tenerla Adentro", artist: "El Muertho De Tijuana" },
+      { name: "Los inocentes", artist: "EESCA" },
+      { name: "Reflejos", artist: "Vacíos Cuerpos" },
+      { name: "Death Song", artist: "Stranger and Lovers" },
+      { name: "Lápidas de Sal", artist: "Funeralz" },
+      { name: "En las Telarañas de Tu Ternura", artist: "Khristian De Los Muertos" }
     ],
     "Música urbana con flow y ritmo para moverte": [
       { name: "Nalguita y Teta", artist: "Neton Vega" },
@@ -3180,20 +3097,71 @@ Instagram:
       { name: "El Pais De Las Maravillas", artist: "Baston" },
       { name: "Que Me Entierren Con La Banda", artist: "El Chivo" }
     ],
-    "Darkwave oscuro y atmosférico para la madrugada": [
-      { name: "Bang!", artist: "Rey Rata" },
-      { name: "Ritmo Triple Seis", artist: "Rey Rata" },
-      { name: "Tenerla Adentro", artist: "El Muertho De Tijuana" },
-      { name: "Los inocentes", artist: "EESCA" },
-      { name: "Reflejos", artist: "Vacíos Cuerpos" },
-      { name: "Death Song", artist: "Stranger and Lovers" },
-      { name: "Lápidas de Sal", artist: "Funeralz" },
-      { name: "En las Telarañas de Tu Ternura", artist: "Khristian De Los Muertos" }
+    "Hard rock para sacar la rabia y el enojo acumulado": [
+      { name: "Fiesta y Degenere", artist: "DEGENERACIÖN 89" },
+      { name: "Ratas", artist: "Sindrome" },
+      { name: "Todos Somos Punks", artist: "Fe D' Ratas" },
+      { name: "zona liberada", artist: "Manu Sousax" },
+      { name: "Museo del Chopo", artist: "Rebel'd Punk" },
+      { name: "Cuatro Sudakas", artist: "Mal Pasar" },
+      { name: "Escupelos", artist: "Gesto Punk" },
+      { name: "Barrio Bajos", artist: "DEGENERACIÖN 89" }
+    ],
+    "Soft Pop suave para domingos sin hacer nada": [
+      { name: "Corazón en Fuga", artist: "Breneli R" },
+      { name: "Lo Que Alguna Vez Fue Hermoso", artist: "Los Dinosaurios Murieron Ayer" },
+      { name: "Vampira", artist: "Usted Solitario" },
+      { name: "Dapa", artist: "El Picnic Era Ayer" },
+      { name: "1500 Calorías", artist: "Bruno Bardo" },
+      { name: "Mecanismos de Defensa en las Ligas Mayores", artist: "Blackthony Startano" },
+      { name: "no cesara", artist: "NOTA" },
+      { name: "Historia de una Flor", artist: "D-Lirios" }
+    ],
+    "Dream Pop intimo para escuchar solo en tu cuarto": [
+      { name: "Indefenso - Bolero", artist: "TOVAR" },
+      { name: "Ya no más", artist: "Mi113r" },
+      { name: "Tu ciudad", artist: "ASHLI" },
+      { name: "No Te Drogues, Bonita", artist: "Loncheras De Perro" },
+      { name: "perros", artist: "mil ataris por segundo" },
+      { name: "tu bitácora emocional", artist: "mil ataris por segundo" },
+      { name: "Necesito Decirte", artist: "Lagrima De Risa" },
+      { name: "Infrarrojos", artist: "Los Niños Vudú" }
+    ],
+    "SynthPop para cuando solo quieres bailar": [
+      { name: "Solitarium", artist: "MART.INN" },
+      { name: "Eres Mi Todo", artist: "Arwil" },
+      { name: "cada que...", artist: "te vi en un planetario, Santa Madero, Poder Fantasma" },
+      { name: "conexion infinita", artist: "victor manuel jaquez lantigua" },
+      { name: "OASIS", artist: "AarǿnViz" },
+      { name: "Guerra Fría", artist: "Blue Larimar Music" },
+      { name: "Déjate llevar", artist: "Rodrigo dl Moral" },
+      { name: "Blue Monday", artist: "Rodrigo dl Moral" }
+    ],
+    "Rock indie para manejar de noche sin rumbo": [
+      { name: "Blue Monday", artist: "Rodrigo dl Moral" },
+      { name: "Déjate llevar", artist: "Rodrigo dl Moral" },
+      { name: "Midnight Dance 90's - Remix", artist: "Rodrigo dl Moral" },
+      { name: "Guerra Fría", artist: "Blue Larimar Music" },
+      { name: "OASIS", artist: "AarǿnViz" },
+      { name: "conexion infinita", artist: "victor manuel jaquez lantigua" },
+      { name: "cada que...", artist: "te vi en un planetario" },
+      { name: "Eres Mi Todo", artist: "Arwil" }
     ]
   };
 
+  function normalizeTniwStr(str) {
+    return (str || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
+
   function getTracksForPlaylist(playlistName, playlistUrl) {
-    // 1. Verificar si hay canciones reales obtenidas en vivo para esta URL o nombre
+    var normPName = normalizeTniwStr(playlistName);
+    var normPUrl = (playlistUrl || '').toLowerCase().trim();
+
+    // 1. Si hay canciones detectadas en tiempo real desde la API de Spotify
     if (playlistUrl && _livePlaylistTracksMap[playlistUrl] && _livePlaylistTracksMap[playlistUrl].length > 0) {
       return _livePlaylistTracksMap[playlistUrl];
     }
@@ -3201,29 +3169,44 @@ Instagram:
       return _livePlaylistTracksMap[playlistName];
     }
 
-    // 2. Coincidencia exacta con playlists oficiales
-    if (_curatedPlaylistTracks[playlistName]) {
-      return _curatedPlaylistTracks[playlistName];
+    // 2. Coincidencia por Palabras Clave Esenciales (Garantiza 100% de éxito con mayúsculas/acentos)
+    if (normPName.includes('metal') || normPName.includes('energia') || normPUrl.includes('5olib')) {
+      return _curatedPlaylistTracks["Metal intenso para liberar toda tu energía"];
+    }
+    if (normPName.includes('darkwave') || normPName.includes('madrugada') || normPName.includes('goth') || normPUrl.includes('4mcjj')) {
+      return _curatedPlaylistTracks["Darkwave oscuro y atmosférico para la madrugada"];
+    }
+    if (normPName.includes('aura') || normPName.includes('farmear') || normPUrl.includes('79sku')) {
+      return _curatedPlaylistTracks["Mezcla de rolas urbanas para farmear Aura"];
+    }
+    if (normPName.includes('urbano') || normPName.includes('flow') || normPName.includes('trap') || normPName.includes('reggaeton') || normPName.includes('corridos') || normPUrl.includes('7bbyp')) {
+      return _curatedPlaylistTracks["Música urbana con flow y ritmo para moverte"];
+    }
+    if (normPName.includes('hard rock') || normPName.includes('rabia') || normPName.includes('enojo') || normPName.includes('punk') || normPName.includes('rebelde') || normPUrl.includes('6cuh') || normPUrl.includes('2qlvw')) {
+      return _curatedPlaylistTracks["Hard rock para sacar la rabia y el enojo acumulado"];
+    }
+    if (normPName.includes('synth') || normPName.includes('bailar') || normPName.includes('dance') || normPName.includes('feliz') || normPUrl.includes('36rib')) {
+      return _curatedPlaylistTracks["SynthPop para cuando solo quieres bailar"];
+    }
+    if (normPName.includes('dream') || normPName.includes('intimo') || normPName.includes('cuarto') || normPUrl.includes('0ty7t')) {
+      return _curatedPlaylistTracks["Dream Pop intimo para escuchar solo en tu cuarto"];
+    }
+    if (normPName.includes('suave') || normPName.includes('domingo') || normPName.includes('soft') || normPName.includes('folk') || normPName.includes('acustico') || normPUrl.includes('20uf7')) {
+      return _curatedPlaylistTracks["Soft Pop suave para domingos sin hacer nada"];
+    }
+    if (normPName.includes('noche') || normPName.includes('rumbo') || normPName.includes('rock') || normPUrl.includes('2apaz') || normPUrl.includes('5gh1r')) {
+      return _curatedPlaylistTracks["Rock indie para manejar de noche sin rumbo"];
     }
 
-    // 3. Coincidencia parcial con playlists oficiales
+    // 3. Coincidencia exacta o normalizada con claves del objeto
     for (var key in _curatedPlaylistTracks) {
-      if (playlistName && (playlistName.toLowerCase().includes(key.toLowerCase().substring(0, 12)) || key.toLowerCase().includes(playlistName.toLowerCase().substring(0, 12)))) {
+      if (normalizeTniwStr(key) === normPName) {
         return _curatedPlaylistTracks[key];
       }
     }
 
-    // 4. Si es una lista no registrada y no cargó en vivo, devolver la selección representativa de artistas TNIW
-    return [
-      { name: "Blue Monday", artist: "Rodrigo dl Moral" },
-      { name: "Solitarium", artist: "MART.INN" },
-      { name: "Indefenso - Bolero", artist: "TOVAR" },
-      { name: "Corazón en Fuga", artist: "Breneli R" },
-      { name: "Fiesta y Degenere", artist: "DEGENERACIÖN 89" },
-      { name: "Bang!", artist: "Rey Rata" },
-      { name: "Nalguita y Teta", artist: "Neton Vega" },
-      { name: "Díganme", artist: "Jose Macario" }
-    ];
+    // 4. Fallback con temas reales de Metal / Rock TNIW
+    return _curatedPlaylistTracks["Metal intenso para liberar toda tu energía"];
   }
 
   var _curSongName = 'historia_tniw';
