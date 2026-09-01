@@ -3,12 +3,18 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIs
 
 module.exports = async (req, res) => {
   const { id, artista } = req.query || {};
-  const targetId = id || artista || 'radar-1';
+  const targetId = id || artista || 'radar-01';
+  let altId = targetId;
+  if (/^radar-\d$/.test(targetId)) {
+    altId = targetId.replace('radar-', 'radar-0');
+  } else if (/^radar-0\d$/.test(targetId)) {
+    altId = targetId.replace('radar-0', 'radar-');
+  }
 
   let artist = null;
 
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/radar_artists?id=eq.${encodeURIComponent(targetId)}&select=*`, {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/radar_artists?or=(id.eq.${encodeURIComponent(targetId)},id.eq.${encodeURIComponent(altId)})&select=*`, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`

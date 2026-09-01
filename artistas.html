@@ -1777,8 +1777,9 @@
       var params = new URLSearchParams(window.location.search);
       var aId = params.get('artista');
       if (aId && typeof artistsList !== 'undefined') {
+        var altId = aId.replace(/^radar-(\d)$/, 'radar-0$1').replace(/^radar-0(\d)$/, 'radar-$1');
         var target = artistsList.find(function(a){
-          return a.id === aId || a.name.toLowerCase().replace(/\s+/g, '-') === aId.toLowerCase();
+          return a.id === aId || a.id === altId || a.name.toLowerCase().replace(/\s+/g, '-') === aId.toLowerCase();
         });
         if (target) {
           setTimeout(function(){
@@ -1791,7 +1792,8 @@
 
   // MODAL LOGIC
   function openArtistModal(id) {
-    var artist = artistsList.find(function(a){ return a.id === id; });
+    var altId = id ? (id.replace(/^radar-(\d)$/, 'radar-0$1').replace(/^radar-0(\d)$/, 'radar-$1')) : '';
+    var artist = artistsList.find(function(a){ return a.id === id || a.id === altId; });
     if (!artist) return;
     currentOpenArtist = artist;
     try {

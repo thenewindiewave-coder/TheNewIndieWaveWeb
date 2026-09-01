@@ -127,7 +127,7 @@ async function saveAllRadarArtistsOrders(list) {
 // Base de datos oficial de ARTISTAS EN EL RADAR - THE NEW INDIE WAVE
 var DEFAULT_RADAR_ARTISTS = [
   {
-    "id": "radar-1",
+    "id": "radar-01",
     "name": "Lunar Daydream",
     "city": "CIUDAD DE MÉXICO",
     "genre": "DREAM POP / SHOEGAZE",
@@ -150,7 +150,7 @@ var DEFAULT_RADAR_ARTISTS = [
     "soundcloud_url": ""
   },
   {
-    "id": "radar-2",
+    "id": "radar-02",
     "name": "Distorsión Fría",
     "city": "BUENOS AIRES",
     "genre": "POST-PUNK / DARKWAVE",
@@ -173,7 +173,7 @@ var DEFAULT_RADAR_ARTISTS = [
     "soundcloud_url": ""
   },
   {
-    "id": "radar-3",
+    "id": "radar-03",
     "name": "Cero Tardes",
     "city": "BOGOTÁ",
     "genre": "INDIE POP / FOLK",
@@ -196,7 +196,7 @@ var DEFAULT_RADAR_ARTISTS = [
     "soundcloud_url": ""
   },
   {
-    "id": "radar-4",
+    "id": "radar-04",
     "name": "Siluetas de Verano",
     "city": "SANTIAGO DE CHILE",
     "genre": "BEDROOM POP / LO-FI",
@@ -219,7 +219,7 @@ var DEFAULT_RADAR_ARTISTS = [
     "soundcloud_url": ""
   },
   {
-    "id": "radar-5",
+    "id": "radar-05",
     "name": "Los Extraviados",
     "city": "MADRID / CDMX",
     "genre": "INDIE ROCK / GARAJE",
@@ -242,7 +242,7 @@ var DEFAULT_RADAR_ARTISTS = [
     "soundcloud_url": ""
   },
   {
-    "id": "radar-6",
+    "id": "radar-06",
     "name": "Frecuencia Marina",
     "city": "LIMA",
     "genre": "DREAM POP / SYNTH",
@@ -265,7 +265,7 @@ var DEFAULT_RADAR_ARTISTS = [
     "soundcloud_url": ""
   },
   {
-    "id": "radar-7",
+    "id": "radar-07",
     "name": "Sombras de Neón",
     "city": "MONTERREY",
     "genre": "DARKWAVE / EBM",
@@ -288,7 +288,7 @@ var DEFAULT_RADAR_ARTISTS = [
     "soundcloud_url": ""
   },
   {
-    "id": "radar-8",
+    "id": "radar-08",
     "name": "La Última Niebla",
     "city": "VALPARAÍSO",
     "genre": "SHOEGAZE / NOISE",
@@ -311,7 +311,7 @@ var DEFAULT_RADAR_ARTISTS = [
     "soundcloud_url": ""
   },
   {
-    "id": "radar-9",
+    "id": "radar-09",
     "name": "Río Salvaje",
     "city": "GUADALAJARA",
     "genre": "INDIE FOLK / PSICODELIA",
