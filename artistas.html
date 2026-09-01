@@ -1633,6 +1633,9 @@
 
   // RENDER DINÁMICO EN TIEMPO REAL DESDE CURADURÍA
   function renderAllRadarArtists() {
+    artistsList.sort(function(a, b){
+      return (parseInt(a.order, 10) || 999) - (parseInt(b.order, 10) || 999);
+    });
     var top3 = artistsList.filter(function(a){ return a.type === 'top3'; });
     var sec = artistsList.filter(function(a){ return a.type === 'secondary'; });
 

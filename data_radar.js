@@ -3,7 +3,7 @@ var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 async function syncRadarFromSupabase() {
   try {
-    var res = await fetch(SUPABASE_URL + '/rest/v1/radar_artists?select=*&order=created_at.asc', {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/radar_artists?select=*', {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
@@ -19,10 +19,23 @@ async function syncRadarFromSupabase() {
               if (parsed.career_notes) item.career_notes = parsed.career_notes;
               if (parsed.events_note) item.events_note = parsed.events_note;
               if (parsed.facebook_url) item.facebook_url = parsed.facebook_url;
+              if (parsed.order !== undefined && parsed.order !== null && !isNaN(parsed.order)) {
+                item.order = parseInt(parsed.order, 10);
+              }
             } catch(e) {}
+          }
+          if (item.order === undefined || item.order === null || isNaN(item.order)) {
+            var match = (item.id || '').match(/radar-(\d+)/);
+            item.order = match ? parseInt(match[1], 10) : 999;
           }
           return item;
         });
+
+        // Ordenamiento determinista y fijo según la posición guardada
+        cleanList.sort(function(a, b) {
+          return (parseInt(a.order, 10) || 999) - (parseInt(b.order, 10) || 999);
+        });
+
         localStorage.setItem('tniw_radar_artists', JSON.stringify(cleanList));
         if (typeof window !== 'undefined') {
           window.RADAR_ARTISTS = cleanList.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
@@ -37,9 +50,19 @@ async function syncRadarFromSupabase() {
 async function saveRadarArtistToSupabase(artist) {
   try {
     var otherData = {};
+    if (artist.other_url) {
+      if (typeof artist.other_url === 'object') {
+        otherData = Object.assign({}, artist.other_url);
+      } else if (typeof artist.other_url === 'string' && artist.other_url.startsWith('{')) {
+        try { otherData = JSON.parse(artist.other_url); } catch(e) {}
+      }
+    }
     if (artist.career_notes) otherData.career_notes = artist.career_notes;
     if (artist.events_note) otherData.events_note = artist.events_note;
     if (artist.facebook_url) otherData.facebook_url = artist.facebook_url;
+    if (artist.order !== undefined && artist.order !== null && !isNaN(artist.order)) {
+      otherData.order = parseInt(artist.order, 10);
+    }
 
     var payload = {
       id: artist.id,
@@ -64,7 +87,7 @@ async function saveRadarArtistToSupabase(artist) {
       bandcamp_url: artist.bandcamp_url || '',
       soundcloud_url: artist.soundcloud_url || '',
       website_url: artist.website_url || '',
-      other_url: artist.other_url || ''
+      other_url: JSON.stringify(otherData)
     };
 
     var res = await fetch(SUPABASE_URL + '/rest/v1/radar_artists', {
@@ -81,6 +104,23 @@ async function saveRadarArtistToSupabase(artist) {
   } catch(e) {
     console.warn('Supabase sync no disponible:', e);
     return false;
+  }
+}
+
+async function saveAllRadarArtistsOrders(list) {
+  if (!list || !Array.isArray(list)) return;
+  for (var i = 0; i < list.length; i++) {
+    list[i].order = i + 1;
+  }
+  saveRadarArtists(list);
+
+  try {
+    var promises = list.map(function(artist) {
+      return saveRadarArtistToSupabase(artist);
+    });
+    await Promise.all(promises);
+  } catch(e) {
+    console.warn('Error batch syncing orders to Supabase:', e);
   }
 }
 
@@ -442,5 +482,8 @@ if (typeof window !== 'undefined') {
   window.DEFAULT_RADAR_ARTISTS = DEFAULT_RADAR_ARTISTS;
   window.getRadarArtists = getRadarArtists;
   window.saveRadarArtists = saveRadarArtists;
+  window.saveRadarArtistToSupabase = saveRadarArtistToSupabase;
+  window.saveAllRadarArtistsOrders = saveAllRadarArtistsOrders;
+  window.syncRadarFromSupabase = syncRadarFromSupabase;
   window.RADAR_ARTISTS = getRadarArtists();
 }

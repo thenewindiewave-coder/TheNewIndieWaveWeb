@@ -1730,12 +1730,17 @@
     showToast('✓ Etiquetas de la playlist actualizadas');
   }
 
-  // 7. GESTOR DE ARTISTAS EN EL RADAR (OPTIMIZADO PARA ANDROID Y DESKTOP)
+  // 7. GESTOR DE ARTISTAS EN EL RADAR (OPTIMIZADO PARA ANDROID Y DESKTOP CON POSICIONES FIJAS)
   function renderRadarManager() {
     var container = document.getElementById('queueContainer');
     var rawList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
     var list = rawList.filter(function(a) {
       return a && a.id !== 'spotify_auth_config' && a.type !== 'config';
+    });
+
+    // Ordenamiento estricto por posición fija (#1, #2, #3...)
+    list.sort(function(a, b) {
+      return (parseInt(a.order, 10) || 999) - (parseInt(b.order, 10) || 999);
     });
 
     var top3List = list.filter(function(a){ return a.type === 'top3'; });
@@ -1746,13 +1751,13 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
           <div>
             <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 2px;">
-              // DIRECTORIO EDITORIAL
+              // DIRECTORIO EDITORIAL CON POSICIONES FIJAS
             </div>
             <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: #fff;">
               🌟 ARTISTAS EN EL RADAR (${list.length})
             </h3>
             <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">
-              Directorio oficial publicado en la web. Gestiona talentos, reseñas, fotos y enlaces desde tu celular o PC.
+              Directorio con posiciones inamovibles. Reordena con las flechas ▲/▼ o define el puesto exacto al editar.
             </p>
           </div>
           
@@ -1780,7 +1785,7 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
-          ${top3List.length === 0 ? '<div class="empty-box" style="padding: 24px;">No hay artistas marcados como Top 9.</div>' : top3List.map(a => renderArtistCardHtml(a, true)).join('')}
+          ${top3List.length === 0 ? '<div class="empty-box" style="padding: 24px;">No hay artistas marcados como Top 9.</div>' : top3List.map((a, idx) => renderArtistCardHtml(a, true, idx, top3List.length, list.indexOf(a))).join('')}
         </div>
       </div>
 
@@ -1794,7 +1799,7 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
-          ${secList.length === 0 ? '<div class="empty-box" style="padding: 24px;">No hay artistas secundarios registrados.</div>' : secList.map(a => renderArtistCardHtml(a, false)).join('')}
+          ${secList.length === 0 ? '<div class="empty-box" style="padding: 24px;">No hay artistas secundarios registrados.</div>' : secList.map((a, idx) => renderArtistCardHtml(a, false, idx, secList.length, list.indexOf(a))).join('')}
         </div>
       </div>
 
@@ -1806,7 +1811,7 @@
     `;
   }
 
-  function renderArtistCardHtml(a, isTop) {
+  function renderArtistCardHtml(a, isTop, indexInCat, totalInCat, globalIdx) {
     var mediaPreview = '';
     if (a.media_url) {
       if (a.media_url.endsWith('.mp4') || a.media_type === 'video') {
@@ -1818,11 +1823,21 @@
       mediaPreview = `<div style="width: 52px; height: 52px; border-radius: 6px; background: rgba(187,244,81,0.08); border: 1px solid rgba(187,244,81,0.25); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">🎵</div>`;
     }
 
+    var posNumber = (indexInCat + 1 < 10 ? '0' : '') + (indexInCat + 1);
+
     return `
-      <div class="track-item" style="padding: 16px; border-left: 3px solid ${isTop ? 'var(--accent-lime)' : 'var(--border-strong)'};">
+      <div class="track-item" style="padding: 14px 16px; border-left: 3px solid ${isTop ? 'var(--accent-lime)' : 'var(--border-strong)'};">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           
           <div style="display: flex; align-items: center; gap: 12px; min-width: 240px; flex: 1;">
+            
+            <!-- BADGE DE POSICIÓN FIJA -->
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 44px; height: 44px; background: rgba(0,0,0,0.6); border: 1px solid ${isTop ? 'rgba(187,244,81,0.35)' : 'var(--border-strong)'}; border-radius: 6px; flex-shrink: 0;">
+              <span style="font-family: var(--font-mono); font-size: 13px; font-weight: 800; color: ${isTop ? 'var(--accent-lime)' : 'var(--accent-cyan)'};">
+                #${posNumber}
+              </span>
+            </div>
+
             ${mediaPreview}
             <div>
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
@@ -1840,7 +1855,18 @@
             </div>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            
+            <!-- CONTROLES DE POSICIÓN SUBIR / BAJAR -->
+            <div style="display: flex; gap: 3px; background: rgba(0,0,0,0.5); padding: 3px 5px; border-radius: 4px; border: 1px solid var(--border-strong);">
+              <button onclick="moveRadarArtist('${a.id}', 'up')" title="Mover un puesto arriba" ${indexInCat === 0 ? 'disabled' : ''} style="background: ${indexInCat === 0 ? 'transparent' : 'rgba(187,244,81,0.15)'}; border: 1px solid ${indexInCat === 0 ? 'transparent' : 'rgba(187,244,81,0.3)'}; color: ${indexInCat === 0 ? 'var(--text-dim)' : 'var(--accent-lime)'}; font-family: var(--font-mono); font-size: 11.5px; font-weight: 800; cursor: ${indexInCat === 0 ? 'not-allowed' : 'pointer'}; padding: 4px 7px; border-radius: 3px; opacity: ${indexInCat === 0 ? '0.3' : '1'};">
+                ▲ Subir
+              </button>
+              <button onclick="moveRadarArtist('${a.id}', 'down')" title="Mover un puesto abajo" ${indexInCat === totalInCat - 1 ? 'disabled' : ''} style="background: ${indexInCat === totalInCat - 1 ? 'transparent' : 'rgba(187,244,81,0.15)'}; border: 1px solid ${indexInCat === totalInCat - 1 ? 'transparent' : 'rgba(187,244,81,0.3)'}; color: ${indexInCat === totalInCat - 1 ? 'var(--text-dim)' : 'var(--accent-lime)'}; font-family: var(--font-mono); font-size: 11.5px; font-weight: 800; cursor: ${indexInCat === totalInCat - 1 ? 'not-allowed' : 'pointer'}; padding: 4px 7px; border-radius: 3px; opacity: ${indexInCat === totalInCat - 1 ? '0.3' : '1'};">
+                ▼ Bajar
+              </button>
+            </div>
+
             <button onclick="toggleRadarType('${a.id}', '${isTop ? 'secondary' : 'top3'}')" class="btn-tool" style="font-size: 10.5px; padding: 6px 10px;">
               ${isTop ? '⬇ Pasar a Secundario' : '⭐ Subir a Top 9'}
             </button>
@@ -1863,16 +1889,56 @@
     `;
   }
 
+  // REORDENAR ARTISTAS SUBIENDO / BAJANDO DE PUESTO
+  async function moveRadarArtist(artistId, direction) {
+    var rawList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var list = rawList.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
+    list.sort(function(a, b){ return (parseInt(a.order, 10) || 999) - (parseInt(b.order, 10) || 999); });
+
+    var idx = list.findIndex(function(a){ return a.id === artistId; });
+    if (idx === -1) return;
+
+    var currentItem = list[idx];
+    var isTop = currentItem.type === 'top3';
+
+    var sameCategoryIndices = [];
+    list.forEach(function(item, i) {
+      if ((isTop && item.type === 'top3') || (!isTop && item.type !== 'top3')) {
+        sameCategoryIndices.push(i);
+      }
+    });
+
+    var posInCat = sameCategoryIndices.indexOf(idx);
+    if (direction === 'up' && posInCat > 0) {
+      var targetIdx = sameCategoryIndices[posInCat - 1];
+      var temp = list[idx];
+      list[idx] = list[targetIdx];
+      list[targetIdx] = temp;
+    } else if (direction === 'down' && posInCat < sameCategoryIndices.length - 1) {
+      var targetIdx = sameCategoryIndices[posInCat + 1];
+      var temp = list[idx];
+      list[idx] = list[targetIdx];
+      list[targetIdx] = temp;
+    } else {
+      return;
+    }
+
+    list.forEach(function(item, i){ item.order = i + 1; });
+    saveRadarArtists(list);
+    renderRadarManager();
+    showToast('✓ Posición actualizada (# ' + (list.findIndex(function(a){ return a.id === artistId; }) + 1) + ')');
+
+    if (typeof saveAllRadarArtistsOrders === 'function') {
+      await saveAllRadarArtistsOrders(list);
+    }
+  }
+
   // LISTAS MAESTRAS DE GÉNEROS Y FORMATOS
   var RADAR_GENRES = [
     "INDIE ROCK", "INDIE POP", "DREAM POP", "SHOEGAZE", "SYNTH POP",
     "POST-PUNK", "DARKWAVE", "NEW WAVE", "ALTERNATIVE ROCK", "BEDROOM POP",
     "LO-FI", "ELECTRO POP", "NU-DISCO", "ART POP", "PUNK ROCK",
-    "MATH ROCK", "EMO", "INDIE FOLK", "PSYCHEDELIC ROCK", "GARAGE ROCK",
-    "TRIP HOP", "R&B ALTERNATIVO", "ELECTRONIC", "AMBIENT", "INDUSTRIAL",
-    "HYPERPOP", "FOLK", "POP ALTERNATIVO", "SYNTHWAVE", "COLDWAVE",
-    "GRUNGE", "BRITPOP", "POST-ROCK", "JANGLE POP", "NOISE POP",
-    "CHILLWAVE", "DISCO", "HOUSE", "TECHNO", "EXPERIMENTAL", "OTRO"
+    "LATINO BOHEMIO", "LATINO", "SKA / SKA-PUNK", "WORLD MUSIC", "ROCK ALTERNATIVO", "OTRO"
   ];
 
   var RADAR_BADGES = [
@@ -1882,14 +1948,18 @@
     "TOP RADAR", "RECOMENDADO", "ESTRENO", "DESTACADO", "OTRO"
   ];
 
-  // MODAL FLOTANTE Y RESPONSIVE DE EDICIÓN DE ARTISTA
+  // MODAL FLOTANTE Y RESPONSIVE DE EDICIÓN DE ARTISTA CON LUGAR FIJO
   function openEditArtistModal(artistId) {
-    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var rawList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var list = rawList.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
+    list.sort(function(a, b){ return (parseInt(a.order, 10) || 999) - (parseInt(b.order, 10) || 999); });
+
     var artist = artistId ? list.find(function(a){ return a.id === artistId; }) : null;
     var isNew = !artist;
 
     var currentGenre = artist ? (artist.genre || 'INDIE ROCK').toUpperCase() : 'INDIE ROCK';
     var currentBadge = artist ? (artist.badge || 'SOLISTA').toUpperCase() : 'SOLISTA';
+    var currentOrder = artist ? (artist.order || (list.indexOf(artist) + 1)) : (list.length + 1);
 
     var modalHtml = `
       <div class="artist-modal-overlay" id="curatorRadarModal" onclick="if(event.target===this) closeRadarModal()">
@@ -1897,7 +1967,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
             <div>
               <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase;">
-                // ${isNew ? 'NUEVO ARTISTA' : 'EDITAR ARTISTA'}
+                // ${isNew ? 'NUEVO ARTISTA CON LUGAR FIJO' : 'EDITAR ARTISTA'}
               </div>
               <h3 style="font-family: var(--font-heading); font-size: 19px; font-weight: 800; color: #fff;">
                 ${isNew ? '🌟 Añadir Artista al Radar' : '✏️ ' + artist.name}
@@ -1920,10 +1990,10 @@
               </div>
             </div>
 
-            <!-- GÉNERO Y CATEGORÍA (LISTAS DESPLEGABLES) -->
-            <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <!-- GÉNERO, UBICACIÓN Y POSICIÓN FIJA -->
+            <div class="radar-form-grid" style="display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 12px;">
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género Musical (Lista Individual) *</label>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género Musical *</label>
                 <select id="rfGenre" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
                   ${RADAR_GENRES.map(function(g){
                     var sel = (currentGenre === g || currentGenre.includes(g)) ? 'selected' : '';
@@ -1938,6 +2008,10 @@
                   <option value="top3" ${artist && artist.type === 'top3' ? 'selected' : ''}>⭐ Top 9 Destacado (Principal)</option>
                   <option value="secondary" ${!artist || artist.type !== 'top3' ? 'selected' : ''}>📻 Radar Secundario (Directorio)</option>
                 </select>
+              </div>
+              <div>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">Puesto / Posición (#) *</label>
+                <input type="number" id="rfOrder" min="1" max="${list.length + 5}" value="${currentOrder}" style="width:100%; background:#09090b; border:1px solid rgba(187,244,81,0.4); padding:9px 12px; color:var(--accent-lime); font-family:var(--font-mono); font-weight:800; border-radius:4px; font-size:13px;">
               </div>
             </div>
 
@@ -2064,7 +2138,7 @@
                 Cancelar
               </button>
               <button type="submit" style="background: var(--accent-lime); border: none; color: #000; font-family: var(--font-mono); font-size: 12px; font-weight: 800; padding: 10px 24px; border-radius: 4px; cursor: pointer; box-shadow: 0 0 14px rgba(187,244,81,0.3);">
-                Guardar Artista ✓
+                Guardar en Posición Fija ✓
               </button>
             </div>
 
@@ -2080,7 +2154,6 @@
     div.innerHTML = modalHtml;
     document.body.appendChild(div.firstElementChild);
 
-    // Inicializar preview de multimedia de inmediato si ya tiene URL
     if (artist && artist.media_url) {
       previewRadarMedia(artist.media_url);
     }
@@ -2093,7 +2166,9 @@
 
   async function handleRadarFormSubmit(e, existingId) {
     e.preventDefault();
-    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var rawList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var list = rawList.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
+    list.sort(function(a, b){ return (parseInt(a.order, 10) || 999) - (parseInt(b.order, 10) || 999); });
     
     var mediaUrl = (document.getElementById('rfMediaUrl').value || '').trim();
     var isVideo = mediaUrl.includes('/video/') || mediaUrl.endsWith('.mp4') || mediaUrl.endsWith('.webm') || mediaUrl.endsWith('.mov') || mediaUrl.startsWith('data:video');
@@ -2116,12 +2191,16 @@
       if (tkSegs) cleanTk = '@' + tkSegs.replace('@','');
     }
 
+    var targetOrder = parseInt(document.getElementById('rfOrder').value, 10);
+    if (isNaN(targetOrder) || targetOrder < 1) targetOrder = list.length + 1;
+
     var artistData = {
       id: existingId || ('radar-' + Date.now()),
       name: document.getElementById('rfName').value.trim(),
       city: document.getElementById('rfCity').value.trim().toUpperCase(),
       genre: document.getElementById('rfGenre').value.trim().toUpperCase(),
       type: document.getElementById('rfType').value,
+      order: targetOrder,
       badge: document.getElementById('rfBadge').value.trim().toUpperCase() || 'SOLISTA',
       media_type: isVideo ? 'video' : 'image',
       media_url: mediaUrl,
@@ -2142,51 +2221,53 @@
     };
 
     if(existingId) {
-      var idx = list.findIndex(function(a){ return a.id === existingId; });
-      if(idx !== -1) list[idx] = artistData;
-      else list.unshift(artistData);
-    } else {
-      list.unshift(artistData);
+      var oldIdx = list.findIndex(function(a){ return a.id === existingId; });
+      if(oldIdx !== -1) {
+        list.splice(oldIdx, 1);
+      }
     }
 
+    var insertIdx = Math.min(Math.max(0, targetOrder - 1), list.length);
+    list.splice(insertIdx, 0, artistData);
+
+    list.forEach(function(item, i){ item.order = i + 1; });
+
     saveRadarArtists(list);
-    showToast('⏳ Sincronizando con Supabase...');
-    if (typeof saveRadarArtistToSupabase === 'function') {
+    showToast('⏳ Sincronizando orden fijo con Supabase...');
+
+    if (typeof saveAllRadarArtistsOrders === 'function') {
+      await saveAllRadarArtistsOrders(list);
+    } else if (typeof saveRadarArtistToSupabase === 'function') {
       await saveRadarArtistToSupabase(artistData);
     }
 
     closeRadarModal();
     renderRadarManager();
-    showToast('✓ Artista guardado y sincronizado en la nube');
+    showToast('✓ Artista guardado en posición fija #' + (insertIdx + 1));
   }
 
   async function toggleRadarType(artistId, newType) {
-    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var rawList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var list = rawList.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
     var item = list.find(function(a){ return a.id === artistId; });
     if(item) {
       item.type = newType;
+      list.forEach(function(it, i){ it.order = i + 1; });
       saveRadarArtists(list);
       renderRadarManager();
       showToast('✓ Categoría cambiada a ' + (newType === 'top3' ? 'Top 9' : 'Secundario'));
 
-      try {
-        await fetch(SUPABASE_URL + '/rest/v1/radar_artists?id=eq.' + encodeURIComponent(artistId), {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ type: newType })
-        });
-      } catch(e) {}
+      if (typeof saveAllRadarArtistsOrders === 'function') {
+        await saveAllRadarArtistsOrders(list);
+      }
     }
   }
 
   async function deleteRadarArtist(artistId) {
     if(!confirm('¿Seguro que deseas eliminar este artista del radar?')) return;
-    var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
-    list = list.filter(function(a){ return a.id !== artistId; });
+    var rawList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var list = rawList.filter(function(a){ return a.id !== artistId && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
+    list.forEach(function(item, i){ item.order = i + 1; });
     saveRadarArtists(list);
     renderRadarManager();
     showToast('✓ Artista eliminado del radar');
