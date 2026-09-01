@@ -2736,8 +2736,13 @@
             </div>
           </div>
 
-          <!-- BOTÓN GENERAR -->
-          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+          <!-- BOTÓN GENERAR Y OPCIONES -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 8px;">
+            <label style="display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--text-main); cursor: pointer; user-select: none; background: rgba(255,255,255,0.03); padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);">
+              <input type="checkbox" id="amIncludeUrls" checked style="accent-color: var(--accent-lime); width: 16px; height: 16px; cursor: pointer;">
+              <span style="font-weight: 600;">Compartir URL en el mensaje</span>
+            </label>
+
             <button type="submit" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 14px 28px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(187,244,81,0.35);">
               ⚡ Generar Mensaje y Story para Redes ↗
             </button>
@@ -2980,11 +2985,13 @@
 
     _curAmSongTitle = songTitle;
 
+    var includeUrls = document.getElementById('amIncludeUrls') ? document.getElementById('amIncludeUrls').checked : true;
     var cleanRadarUrl = (radarUrl && radarUrl !== 'https://thenewindiewave.online/artistas.html?artista=') ? radarUrl : '';
 
     var fullMessage = '';
-    if (cleanRadarUrl) {
-      fullMessage = `¡Felicidades! ¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
+    if (includeUrls) {
+      if (cleanRadarUrl) {
+        fullMessage = `¡Felicidades! ¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
 ${cleanRadarUrl}
 
 te invitamos a que compartas con tus seguidores esta reseña y que sigan creciendo los éxitos. También es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
@@ -2994,8 +3001,8 @@ Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras 
 Instagram:
 @the.new.indie.wave
 @rodrigodlmoral`;
-    } else {
-      fullMessage = `¡Felicidades! Es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+      } else {
+        fullMessage = `¡Felicidades! Es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
 ${playlistUrl}
 
 Te invitamos a compartirlo con tus seguidores para que sigan creciendo los éxitos.
@@ -3004,6 +3011,29 @@ Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras 
 Instagram:
 @the.new.indie.wave
 @rodrigodlmoral`;
+      }
+    } else {
+      if (cleanRadarUrl) {
+        fullMessage = `¡Felicidades! ¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
+
+te invitamos a que compartas con tus seguidores esta reseña y que sigan creciendo los éxitos. También es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+Mandame Dm para compartirte el link de la playlist.
+
+Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras redes:
+Instagram:
+@the.new.indie.wave
+@rodrigodlmoral`;
+      } else {
+        fullMessage = `¡Felicidades! Es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+Mandame Dm para compartirte el link de la playlist.
+
+Te invitamos a compartirlo con tus seguidores para que sigan creciendo los éxitos.
+
+Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras redes:
+Instagram:
+@the.new.indie.wave
+@rodrigodlmoral`;
+      }
     }
 
     document.getElementById('amGeneratedMessageText').value = fullMessage;
