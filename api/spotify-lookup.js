@@ -94,6 +94,28 @@ export default async function handler(req, res) {
       const cover = (pData.images && pData.images.length > 0) ? pData.images[0].url : '';
       const spotify_url = pData.external_urls ? pData.external_urls.spotify : `https://open.spotify.com/playlist/${targetId}`;
 
+      // Extraer lista real de canciones desde el embed de Spotify
+      let realTracks = [];
+      try {
+        const embedRes = await fetch(`https://open.spotify.com/embed/playlist/${targetId}`);
+        if (embedRes.ok) {
+          const html = await embedRes.text();
+          const match = html.match(/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/);
+          if (match) {
+            const embedData = JSON.parse(match[1]);
+            const entity = embedData?.props?.pageProps?.state?.data?.entity;
+            if (entity && Array.isArray(entity.trackList) && entity.trackList.length > 0) {
+              realTracks = entity.trackList.slice(0, 15).map(t => ({
+                name: t.title,
+                artist: t.subtitle || ''
+              }));
+            }
+          }
+        }
+      } catch (errTracks) {
+        console.warn('No se pudieron extraer canciones del embed:', errTracks.message);
+      }
+
       return res.status(200).json({
         success: true,
         type: 'playlist',
@@ -103,7 +125,8 @@ export default async function handler(req, res) {
         cover,
         spotify_url,
         followers: pData.followers ? pData.followers.total : 0,
-        tracks_total: pData.tracks ? pData.tracks.total : 0
+        tracks_total: pData.tracks ? pData.tracks.total : (realTracks.length || 0),
+        tracks: realTracks
       });
     }
 
