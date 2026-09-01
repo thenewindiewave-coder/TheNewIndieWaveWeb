@@ -2601,10 +2601,10 @@
 
         <form onsubmit="handleAutoMessageFormSubmit(event)" style="display: flex; flex-direction: column; gap: 18px;">
           
-          <!-- CAMPO 1: ARTISTA DEL RADAR -->
+          <!-- CAMPO 1: ARTISTA DEL RADAR (OPCIONAL) -->
           <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-strong); border-radius: 6px; padding: 16px;">
             <label style="display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 8px;">
-              1. PUESTO / ARTISTA EN EL RADAR *
+              1. PUESTO / ARTISTA EN EL RADAR (OPCIONAL)
             </label>
             
             <div style="display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; align-items: center; margin-bottom: 8px;">
@@ -2616,16 +2616,17 @@
                     return '<option value="' + a.id + '">' + tag + ' — ' + a.name + ' (' + (a.city || 'Global') + ')</option>';
                   }).join('')}
                   <option value="custom">✏️ [ Ingresar enlace personalizado / manual ]</option>
+                  <option value="none">🚫 [ Sin enlace de radar / Solo Playlist ]</option>
                 </select>
               </div>
 
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Link de Artistas del Radar (se insertará en el mensaje):</label>
-                <input type="text" id="amRadarUrl" required value="${defaultRadarUrl}" placeholder="https://thenewindiewave.online/artistas.html?artista=radar-1" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-lime); border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Link de Artistas del Radar (Opcional):</label>
+                <input type="text" id="amRadarUrl" value="${defaultRadarUrl}" placeholder="https://thenewindiewave.online/artistas.html?artista=radar-1 (Opcional)" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-lime); border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
               </div>
             </div>
             <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">
-              ℹ️ Al seleccionar un artista, se actualiza automáticamente el enlace de su ficha editorial en la web.
+              ℹ️ Opcional. Si se incluye enlace, se agregará al mensaje de felicitación de ARTISTAS DEL RADAR.
             </div>
           </div>
 
@@ -2854,8 +2855,14 @@
   }
 
   function onAutoMessageRadarSelect(artistId) {
+    if (artistId === 'none') {
+      document.getElementById('amRadarUrl').value = '';
+      return;
+    }
     if (artistId === 'custom') {
-      document.getElementById('amRadarUrl').value = 'https://thenewindiewave.online/artistas.html?artista=';
+      if (!document.getElementById('amRadarUrl').value || document.getElementById('amRadarUrl').value.includes('artista=')) {
+        document.getElementById('amRadarUrl').value = 'https://thenewindiewave.online/artistas.html?artista=';
+      }
       document.getElementById('amRadarUrl').focus();
       return;
     }
@@ -2889,10 +2896,6 @@
     var playlistUrl = (document.getElementById('amPlaylistUrl').value || '').trim();
     var genre = (document.getElementById('amGenre').value || 'INDIE').trim().toUpperCase();
 
-    if (!radarUrl) {
-      showToast('⚠️ Por favor ingresa el enlace del artista en el radar');
-      return;
-    }
     if (!songTitle) {
       showToast('⚠️ Por favor ingresa el título de la canción');
       return;
@@ -2907,8 +2910,12 @@
 
     _curAmSongTitle = songTitle;
 
-    var fullMessage = `¡Felicidades! ¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
-${radarUrl}
+    var cleanRadarUrl = (radarUrl && radarUrl !== 'https://thenewindiewave.online/artistas.html?artista=') ? radarUrl : '';
+
+    var fullMessage = '';
+    if (cleanRadarUrl) {
+      fullMessage = `¡Felicidades! ¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
+${cleanRadarUrl}
 
 te invitamos a que compartas con tus seguidores esta reseña y que sigan creciendo los éxitos. También es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
 ${playlistUrl}
@@ -2917,6 +2924,17 @@ Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras 
 Instagram:
 @the.new.indie.wave
 @rodrigodlmoral`;
+    } else {
+      fullMessage = `¡Felicidades! Es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+${playlistUrl}
+
+Te invitamos a compartirlo con tus seguidores para que sigan creciendo los éxitos.
+
+Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras redes:
+Instagram:
+@the.new.indie.wave
+@rodrigodlmoral`;
+    }
 
     document.getElementById('amGeneratedMessageText').value = fullMessage;
 
