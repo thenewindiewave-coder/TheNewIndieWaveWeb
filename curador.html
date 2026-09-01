@@ -2649,25 +2649,35 @@
             </div>
           </div>
 
-          <!-- CAMPO 3: PLAYLIST DE SPOTIFY -->
+          <!-- CAMPO 3: URL DE LA PLAYLIST DE SPOTIFY (DETECCIÓN AUTOMÁTICA) -->
           <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-strong); border-radius: 6px; padding: 16px;">
             <label style="display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-pink); text-transform: uppercase; margin-bottom: 8px;">
-              3. PLAYLIST OFICIAL DE SPOTIFY DISPONIBLE *
+              3. URL DE LA PLAYLIST DE SPOTIFY (DETECCIÓN AUTOMÁTICA) *
             </label>
 
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; align-items: center; margin-bottom: 6px;">
+            <!-- INPUT MANUAL DE URL O ID DE PLAYLIST -->
+            <div style="margin-bottom: 10px;">
+              <input type="text" id="amPlaylistUrl" required oninput="handleAutoMessagePlaylistInput(this.value)" value="${defaultPlaylistUrl}" placeholder="https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl o ID de playlist..." style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-pink); border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
+            </div>
+
+            <!-- BADGE DE ESTADO DE DETECCIÓN EN VIVO -->
+            <div id="amPlaylistLookupStatus" style="display: none; font-family: var(--font-mono); font-size: 11.5px; margin-bottom: 12px; padding: 6px 10px; background: rgba(0,0,0,0.4); border-radius: 4px; border-left: 3px solid var(--accent-pink);"></div>
+
+            <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; align-items: center;">
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Selecciona la Playlist de destino:</label>
-                <select id="amPlaylistSelect" onchange="onAutoMessagePlaylistChange(this.value)" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
-                  ${playlistNames.map(function(pName){
-                    return '<option value="' + pName + '">' + pName + '</option>';
-                  }).join('')}
-                </select>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre de la Playlist (Detectado desde Spotify / Editable) *</label>
+                <input type="text" id="amPlaylistName" required value="${defaultPlaylistName}" placeholder="Ej. SynthPop para cuando solo quieres bailar" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
               </div>
 
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Enlace de la Playlist Seleccionada:</label>
-                <input type="text" id="amPlaylistUrl" readonly value="${defaultPlaylistUrl}" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-pink); border-radius: 4px; font-size: 12.5px; font-family: var(--font-mono);">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">⚡ O Seleccionar Playlist Guardada:</label>
+                <select id="amPlaylistQuickSelect" onchange="onAutoMessageQuickPlaylistSelect(this.value)" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: var(--text-muted); border-radius: 4px; font-size: 12px;">
+                  <option value="">-- Elige una playlist rápida --</option>
+                  ${playlistNames.map(function(pName){
+                    var pUrl = playlistLinksMap[pName] || ('https://open.spotify.com/playlist/' + pName);
+                    return '<option value="' + pUrl + '">' + pName + '</option>';
+                  }).join('')}
+                </select>
               </div>
             </div>
           </div>
@@ -2688,6 +2698,11 @@
       var initialTrackUrl = defaultArtist.track_id.includes('http') ? defaultArtist.track_id : ('https://open.spotify.com/track/' + defaultArtist.track_id);
       document.getElementById('amSpotifyUrl').value = initialTrackUrl;
       handleAutoMessageTrackInput(initialTrackUrl);
+    }
+
+    // Inicializar detección de la playlist inicial
+    if (defaultPlaylistUrl) {
+      handleAutoMessagePlaylistInput(defaultPlaylistUrl);
     }
   }
 
@@ -2748,6 +2763,80 @@
     }
   }
 
+  // DETECCIÓN AUTOMÁTICA EN TIEMPO REAL DE PLAYLISTS DE SPOTIFY
+  var _autoMessagePlaylistLookupTimer = null;
+  function handleAutoMessagePlaylistInput(val) {
+    clearTimeout(_autoMessagePlaylistLookupTimer);
+    if (!val || !val.trim()) {
+      var statusEl = document.getElementById('amPlaylistLookupStatus');
+      if (statusEl) statusEl.style.display = 'none';
+      return;
+    }
+    _autoMessagePlaylistLookupTimer = setTimeout(function(){
+      lookupSpotifyPlaylistForAutoMessage(val.trim());
+    }, 450);
+  }
+
+  async function lookupSpotifyPlaylistForAutoMessage(urlOrId) {
+    var statusEl = document.getElementById('amPlaylistLookupStatus');
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.innerHTML = '<span style="color: var(--accent-pink);">⏳ Detectando información oficial de la playlist en Spotify...</span>';
+    }
+
+    // 1. Intentar consultar endpoint /api/spotify-lookup?type=playlist
+    try {
+      var res = await fetch('/api/spotify-lookup?type=playlist&url=' + encodeURIComponent(urlOrId));
+      if (res.ok) {
+        var data = await res.json();
+        if (data && data.title) {
+          if (document.getElementById('amPlaylistName')) document.getElementById('amPlaylistName').value = data.title;
+          if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Playlist detectada: <strong>' + data.title + '</strong>' + (data.tracks_total ? (' (' + data.tracks_total + ' canciones)') : '') + '</span>';
+          }
+          return;
+        }
+      }
+    } catch(e) {}
+
+    // 2. Fallback oEmbed de Spotify
+    try {
+      var cleanUrl = urlOrId.includes('http') ? urlOrId : ('https://open.spotify.com/playlist/' + urlOrId);
+      var res2 = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(cleanUrl));
+      if (res2.ok) {
+        var d2 = await res2.json();
+        if (d2 && d2.title) {
+          if (document.getElementById('amPlaylistName')) document.getElementById('amPlaylistName').value = d2.title;
+          if (statusEl) {
+            statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Playlist detectada: <strong>' + d2.title + '</strong></span>';
+          }
+          return;
+        }
+      }
+    } catch(e2) {}
+
+    // 3. Fallback mapeo de playlists registradas
+    for (var name in playlistLinksMap) {
+      if (playlistLinksMap[name] && urlOrId.includes(playlistLinksMap[name].split('playlist/')[1] || 'XYZ_NONE')) {
+        if (document.getElementById('amPlaylistName')) document.getElementById('amPlaylistName').value = name;
+        if (statusEl) {
+          statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Playlist reconocida: <strong>' + name + '</strong></span>';
+        }
+        return;
+      }
+    }
+
+    if (statusEl) {
+      statusEl.innerHTML = '<span style="color: var(--text-muted);">ℹ️ Enlace ingresado. Puedes escribir o ajustar el nombre de la playlist arriba.</span>';
+    }
+  }
+
+  function onAutoMessageQuickPlaylistSelect(pUrl) {
+    if (!pUrl) return;
+    document.getElementById('amPlaylistUrl').value = pUrl;
+    handleAutoMessagePlaylistInput(pUrl);
+  }
+
   function onAutoMessageRadarSelect(artistId) {
     if (artistId === 'custom') {
       document.getElementById('amRadarUrl').value = 'https://thenewindiewave.online/artistas.html?artista=';
@@ -2772,11 +2861,6 @@
     }
   }
 
-  function onAutoMessagePlaylistChange(pName) {
-    var pUrl = playlistLinksMap[pName] || 'https://open.spotify.com';
-    document.getElementById('amPlaylistUrl').value = pUrl;
-  }
-
   var _curCachedAmStoryDataUrl = null;
   var _curAmSongTitle = '';
 
@@ -2785,7 +2869,7 @@
     var radarUrl = (document.getElementById('amRadarUrl').value || '').trim();
     var songTitle = (document.getElementById('amSongTitle').value || '').trim();
     var artistName = (document.getElementById('amArtistName').value || '').trim();
-    var playlistName = document.getElementById('amPlaylistSelect').value;
+    var playlistName = (document.getElementById('amPlaylistName').value || '').trim();
     var playlistUrl = (document.getElementById('amPlaylistUrl').value || '').trim();
     var genre = (document.getElementById('amGenre').value || 'INDIE').trim().toUpperCase();
 
@@ -2796,6 +2880,13 @@
     if (!songTitle) {
       showToast('⚠️ Por favor ingresa el título de la canción');
       return;
+    }
+    if (!playlistUrl) {
+      showToast('⚠️ Por favor ingresa la URL de la playlist de Spotify');
+      return;
+    }
+    if (!playlistName) {
+      playlistName = 'Playlist Oficial The New Indie Wave';
     }
 
     _curAmSongTitle = songTitle;

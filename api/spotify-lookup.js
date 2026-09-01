@@ -44,31 +44,71 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { url, id } = req.query || {};
-  let trackId = id;
+  const { url, id, type } = req.query || {};
+  let targetId = id;
+  let isPlaylist = type === 'playlist';
 
-  if (!trackId && url) {
+  if (!targetId && url) {
     const raw = url.trim();
-    if (raw.includes('track/')) {
-      trackId = raw.split('track/')[1].split('?')[0].split('&')[0].split('/')[0];
+    if (raw.includes('playlist/')) {
+      isPlaylist = true;
+      targetId = raw.split('playlist/')[1].split('?')[0].split('&')[0].split('/')[0];
+    } else if (raw.includes('spotify:playlist:')) {
+      isPlaylist = true;
+      targetId = raw.split('spotify:playlist:')[1].split('?')[0];
+    } else if (raw.includes('track/')) {
+      isPlaylist = false;
+      targetId = raw.split('track/')[1].split('?')[0].split('&')[0].split('/')[0];
     } else if (raw.includes('spotify:track:')) {
-      trackId = raw.split('spotify:track:')[1].split('?')[0];
+      isPlaylist = false;
+      targetId = raw.split('spotify:track:')[1].split('?')[0];
     } else {
-      trackId = raw;
+      targetId = raw;
     }
   }
 
-  if (trackId) {
-    trackId = trackId.split('?')[0].split('&')[0].split('/')[0].trim();
+  if (targetId) {
+    targetId = targetId.split('?')[0].split('&')[0].split('/')[0].trim();
   }
 
-  if (!trackId) {
-    return res.status(400).json({ error: 'No se encontró un ID de track de Spotify válido.' });
+  if (!targetId) {
+    return res.status(400).json({ error: 'No se encontró un enlace o ID de Spotify válido.' });
   }
 
   try {
     const token = await getAccessToken();
-    const trackRes = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
+
+    // 1. Manejo de Playlists
+    if (isPlaylist) {
+      const pRes = await fetch(`https://api.spotify.com/v1/playlists/${targetId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!pRes.ok) {
+        return res.status(404).json({ error: 'Playlist no encontrada en Spotify.' });
+      }
+
+      const pData = await pRes.json();
+      const title = pData.name;
+      const description = pData.description || '';
+      const cover = (pData.images && pData.images.length > 0) ? pData.images[0].url : '';
+      const spotify_url = pData.external_urls ? pData.external_urls.spotify : `https://open.spotify.com/playlist/${targetId}`;
+
+      return res.status(200).json({
+        success: true,
+        type: 'playlist',
+        playlist_id: targetId,
+        title,
+        description,
+        cover,
+        spotify_url,
+        followers: pData.followers ? pData.followers.total : 0,
+        tracks_total: pData.tracks ? pData.tracks.total : 0
+      });
+    }
+
+    // 2. Manejo de Tracks
+    const trackRes = await fetch(`https://api.spotify.com/v1/tracks/${targetId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
@@ -82,11 +122,12 @@ export default async function handler(req, res) {
     const cover = (track.album && track.album.images && track.album.images.length > 0)
       ? track.album.images[0].url
       : '';
-    const spotify_url = track.external_urls ? track.external_urls.spotify : `https://open.spotify.com/track/${trackId}`;
+    const spotify_url = track.external_urls ? track.external_urls.spotify : `https://open.spotify.com/track/${targetId}`;
 
     return res.status(200).json({
       success: true,
-      track_id: trackId,
+      type: 'track',
+      track_id: targetId,
       title,
       artist,
       cover,
