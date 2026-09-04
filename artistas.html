@@ -664,6 +664,17 @@
     .secondary-row { padding: 12px 14px; }
   }
 
+  .empty-radar-box {
+    text-align: center;
+    padding: 36px 20px;
+    border: 1px dashed var(--border-strong);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
   /* ==========================================================================
      MODAL FLOTANTE EXPANDIDO (ADAPTABLE - 100% RESPONSIVE ANDROID / iOS / DESKTOP)
      ========================================================================== */
@@ -1305,205 +1316,7 @@
     <h2 class="section-heading">⚡ EN EL RADAR // SELECCIÓN EMERGENTE</h2>
   </div>
 
-  <div class="secondary-list" id="secondaryContainer">
-    <!-- 01 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-4')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">01</span>
-        <img src="https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=400&q=80" class="sec-row-avatar" alt="Siluetas de Verano" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">Siluetas de Verano</h4>
-          <span class="sec-row-genre">BEDROOM POP / LO-FI</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Texturas de cinta de 4 canales con armonías íntimas grabadas en casa."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 SANTIAGO DE CHILE</span>
-        <span class="sec-row-badge">SOLISTA</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-
-    <!-- 02 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-5')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">02</span>
-        <img src="https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=400&q=80" class="sec-row-avatar" alt="Los Extraviados" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">Los Extraviados</h4>
-          <span class="sec-row-genre">INDIE ROCK / GARAJE</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Potencia rítmica directa, guitarras crudas y coros enérgicos urbanos."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 MADRID / CDMX</span>
-        <span class="sec-row-badge">AGRUPACIÓN</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-
-    <!-- 03 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-6')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">03</span>
-        <img src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&q=80" class="sec-row-avatar" alt="Frecuencia Marina" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">Frecuencia Marina</h4>
-          <span class="sec-row-genre">DREAM POP / SYNTH</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Sintetizadores acuáticos y melodías envolventes de la bruma costera."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 LIMA</span>
-        <span class="sec-row-badge">TRÍO</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-
-    <!-- 04 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-7')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">04</span>
-        <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&q=80" class="sec-row-avatar" alt="Sombras de Neón" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">Sombras de Neón</h4>
-          <span class="sec-row-genre">DARKWAVE / EBM</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Secuencias industriales bailables y estéticas retro-futuristas nocturnas."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 MONTERREY</span>
-        <span class="sec-row-badge">DÚO</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-
-    <!-- 05 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-8')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">05</span>
-        <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80" class="sec-row-avatar" alt="La Última Niebla" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">La Última Niebla</h4>
-          <span class="sec-row-genre">SHOEGAZE / NOISE</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Murallas sónicas de distorsión dulce y melodías sumergidas en delay."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 VALPARAÍSO</span>
-        <span class="sec-row-badge">AGRUPACIÓN</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-
-    <!-- 06 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-9')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">06</span>
-        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80" class="sec-row-avatar" alt="Río Salvaje" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">Río Salvaje</h4>
-          <span class="sec-row-genre">INDIE FOLK / PSICODELIA</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Guitarras acústicas hipnóticas y poesía introspectiva sobre la naturaleza."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 GUADALAJARA</span>
-        <span class="sec-row-badge">SOLISTA</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-
-    <!-- 07 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-10')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">07</span>
-        <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80" class="sec-row-avatar" alt="Autopista Central" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">Autopista Central</h4>
-          <span class="sec-row-genre">POST-PUNK / GARAJE</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Energía cruda con baterías veloces y guitarras filosas llenas de adrenalina."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 SAN JOSÉ</span>
-        <span class="sec-row-badge">AGRUPACIÓN</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-
-    <!-- 08 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-11')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">08</span>
-        <img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80" class="sec-row-avatar" alt="Cintas Magnéticas" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">Cintas Magnéticas</h4>
-          <span class="sec-row-genre">LO-FI BEATS / CHILL</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Samples de vinilo cálidos, pianos nostálgicos y bajos suaves lo-fi."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 MEDELLÍN</span>
-        <span class="sec-row-badge">PRODUCER</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-
-    <!-- 09 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-12')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">09</span>
-        <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&q=80" class="sec-row-avatar" alt="Velo Nocturno" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">Velo Nocturno</h4>
-          <span class="sec-row-genre">GOTH ROCK / DARKWAVE</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Lirismo gótico elegante, guitarras con flanger y una voz profunda única."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 PUEBLA</span>
-        <span class="sec-row-badge">AGRUPACIÓN</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-
-    <!-- 10 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-13')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">10</span>
-        <img src="https://images.unsplash.com/photo-1520523839898-50712825e617?w=400&q=80" class="sec-row-avatar" alt="Satélites Olvidados" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">Satélites Olvidados</h4>
-          <span class="sec-row-genre">MATH ROCK / EMO INDIE</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Compases intrincados, guitarras tapping brillantes y fuerza catárquica."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 BARCELONA</span>
-        <span class="sec-row-badge">AGRUPACIÓN</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-
-    <!-- 11 -->
-    <div class="secondary-row" onclick="openArtistModal('radar-14')">
-      <div class="sec-row-left">
-        <span class="sec-row-num">11</span>
-        <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80" class="sec-row-avatar" alt="Aurora Estéreo" loading="lazy">
-        <div class="sec-row-titles">
-          <h4 class="sec-row-name">Aurora Estéreo</h4>
-          <span class="sec-row-genre">SYNTH POP / NEW WAVE</span>
-        </div>
-      </div>
-      <div class="sec-row-quote">"Melodías pop luminosas con sintetizadores brillantes y groove bailable."</div>
-      <div class="sec-row-right">
-        <span class="sec-row-city">📍 MONTEVIDEO</span>
-        <span class="sec-row-badge">DÚO</span>
-        <span class="sec-row-arrow">↗</span>
-      </div>
-    </div>
-  </div>
+  <div class="secondary-list" id="secondaryContainer"></div>
 
   <!-- BANNER DISCRETO DE POSTULACIÓN AL RADAR -->
   <div class="radar-submit-banner">
@@ -1572,7 +1385,9 @@
     } catch(e) {}
   })();
 
-  var artistsList = (typeof DEFAULT_RADAR_ARTISTS !== 'undefined') ? DEFAULT_RADAR_ARTISTS : [];
+  var artistsList = (typeof getRadarArtists === 'function') 
+    ? getRadarArtists() 
+    : ((typeof DEFAULT_RADAR_ARTISTS !== 'undefined') ? DEFAULT_RADAR_ARTISTS : []);
 
   try {
     var stored = localStorage.getItem('tniw_radar_artists');
@@ -1582,7 +1397,9 @@
       } else {
         var parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          artistsList = parsed;
+          artistsList = parsed.filter(function(a) {
+            return a && a.id !== 'spotify_auth_config' && a.type !== 'config';
+          });
         }
       }
     }
@@ -1674,28 +1491,32 @@
     }
 
     var secCont = document.getElementById('secondaryContainer');
-    if (secCont && sec.length > 0) {
-      secCont.innerHTML = sec.map(function(artist, idx){
-        var num = (idx + 1 < 10 ? '0' : '') + (idx + 1);
-        return `
-          <div class="secondary-row" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">
-            <div class="sec-row-left">
-              <span class="sec-row-num">${num}</span>
-              <img src="${artist.media_url || 'logo.png'}" class="sec-row-avatar" alt="${artist.name}" loading="lazy" onerror="this.src='logo.png'">
-              <div class="sec-row-titles">
-                <h4 class="sec-row-name">${artist.name}</h4>
-                <span class="sec-row-genre">${artist.genre}</span>
+    if (secCont) {
+      if (sec.length > 0) {
+        secCont.innerHTML = sec.map(function(artist, idx){
+          var num = (idx + 1 < 10 ? '0' : '') + (idx + 1);
+          return `
+            <div class="secondary-row" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">
+              <div class="sec-row-left">
+                <span class="sec-row-num">${num}</span>
+                <img src="${artist.media_url || 'logo.png'}" class="sec-row-avatar" alt="${artist.name}" loading="lazy" onerror="this.src='logo.png'">
+                <div class="sec-row-titles">
+                  <h4 class="sec-row-name">${artist.name}</h4>
+                  <span class="sec-row-genre">${artist.genre}</span>
+                </div>
+              </div>
+              <div class="sec-row-quote">"${artist.short_bio}"</div>
+              <div class="sec-row-right">
+                <span class="sec-row-city">📍 ${artist.city}</span>
+                <span class="sec-row-badge">${artist.badge || 'AGRUPACIÓN'}</span>
+                <span class="sec-row-arrow">↗</span>
               </div>
             </div>
-            <div class="sec-row-quote">"${artist.short_bio}"</div>
-            <div class="sec-row-right">
-              <span class="sec-row-city">📍 ${artist.city}</span>
-              <span class="sec-row-badge">${artist.badge || 'AGRUPACIÓN'}</span>
-              <span class="sec-row-arrow">↗</span>
-            </div>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      } else {
+        secCont.innerHTML = '<div class="empty-radar-box">No hay artistas secundarios en el radar en este momento.</div>';
+      }
     }
   }
 
