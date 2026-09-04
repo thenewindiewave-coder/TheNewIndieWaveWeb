@@ -1262,6 +1262,9 @@
       if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
     } else if(tab === 'auto_message') {
       renderAutoMessageTool();
+      preloadPlaylistsMetadata().then(function(){
+        if(currentTab === 'auto_message') renderAutoMessageTool();
+      });
     } else {
       renderQueue();
     }
@@ -1276,8 +1279,10 @@
       loadPlaylistsForManager();
       showToast('✓ Playlists actualizadas');
     } else if(currentTab === 'auto_message') {
-      renderAutoMessageTool();
-      showToast('✓ Herramienta de Mensaje Automático actualizada');
+      preloadPlaylistsMetadata().then(function(){
+        renderAutoMessageTool();
+        showToast('✓ Playlists y datos actualizados desde Spotify');
+      });
     } else {
       loadSubmissions();
     }
@@ -2613,14 +2618,12 @@
     var radarArtists = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
     var cleanArtists = radarArtists.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
 
-    var playlistNames = Object.keys(playlistLinksMap);
+    // Si hay playlists en vivo de Spotify vinculadas, usar exclusivamente las de la cuenta
+    var playlistNames = [];
     if (livePlaylists && livePlaylists.length > 0) {
-      livePlaylists.forEach(function(p){
-        if (p.name && !playlistNames.includes(p.name)) {
-          playlistNames.push(p.name);
-          if (p.spotify_url) playlistLinksMap[p.name] = p.spotify_url;
-        }
-      });
+      playlistNames = livePlaylists.map(function(p){ return p.name; }).filter(Boolean);
+    } else {
+      playlistNames = Object.keys(playlistLinksMap);
     }
 
     var defaultArtist = cleanArtists[0] || null;
