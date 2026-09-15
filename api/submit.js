@@ -173,7 +173,7 @@ export default async function handler(req, res) {
 
 async function sendTelegramNotification(item) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN || '8942664442:AAEDXBeqpfsYGZMkPVg6dpn2ndZRnHJZX9I';
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const chatId = process.env.TELEGRAM_CHAT_ID || '5821470884';
 
   if (!botToken || !chatId) {
     return;
