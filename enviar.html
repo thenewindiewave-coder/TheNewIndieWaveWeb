@@ -838,9 +838,16 @@
           </label>
         </div>
 
-        <div class="form-full" style="display:flex; justify-content:center; margin-top: 10px;">
-          <!-- Widget de Cloudflare Turnstile -->
-          <div class="cf-turnstile" data-sitekey="0x4AAAAAAEfDUwNqFUA0chuc" data-theme="dark"></div>
+        <div class="form-full" style="display:flex; flex-direction:column; align-items:center; justify-content:center; margin-top: 10px; gap: 8px;">
+          <!-- Widget de Cloudflare Turnstile con Auto-Refresh y Manejo de Expiración -->
+          <div class="cf-turnstile" 
+               id="tniw-turnstile-widget"
+               data-sitekey="0x4AAAAAAEfDUwNqFUA0chuc" 
+               data-theme="dark"
+               data-callback="onTurnstileSuccess"
+               data-expired-callback="onTurnstileExpired"
+               data-error-callback="onTurnstileError"></div>
+          <div id="turnstileHelpText" style="display: none; font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-align: center;"></div>
         </div>
 
         <div class="form-full">
@@ -1314,10 +1321,51 @@
       // Rehabilitar botón
       var btn = document.getElementById('btnSubmitSong');
       if (btn) {
-        btn.textContent = 'ENVIAR A CURADURÍA ↗';
+        btn.textContent = 'ENVIAR CANCIÓN A REVISIÓN EDITORIAL ↗';
         btn.disabled = false;
         btn.style.opacity = '1';
       }
+      // Si falló por Captcha o cualquier motivo, reiniciar automáticamente Turnstile para nuevo intento fresco
+      resetTurnstile();
+    }
+  }
+
+  // --- MANEJO ROBUSTO DE CLOUDFLARE TURNSTILE ---
+  function onTurnstileSuccess(token) {
+    var help = document.getElementById('turnstileHelpText');
+    if (help) {
+      help.style.display = 'none';
+      help.textContent = '';
+    }
+  }
+
+  function onTurnstileExpired() {
+    console.warn('Turnstile token expired. Auto-refreshing...');
+    var help = document.getElementById('turnstileHelpText');
+    if (help) {
+      help.style.display = 'block';
+      help.textContent = '🔄 Renovando verificación de seguridad...';
+    }
+    resetTurnstile();
+  }
+
+  function onTurnstileError() {
+    console.warn('Turnstile encountered an error.');
+    var help = document.getElementById('turnstileHelpText');
+    if (help) {
+      help.style.display = 'block';
+      help.style.color = '#ef4444';
+      help.textContent = '⚠️ Error temporal con Captcha. Haz clic para reintentar.';
+    }
+  }
+
+  function resetTurnstile() {
+    try {
+      if (window.turnstile && typeof window.turnstile.reset === 'function') {
+        window.turnstile.reset();
+      }
+    } catch(e) {
+      console.warn('No se pudo resetear turnstile:', e);
     }
   }
 

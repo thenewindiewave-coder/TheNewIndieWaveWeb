@@ -59,7 +59,12 @@ export default async function handler(req, res) {
     
     const cfVerifyResult = await cfVerify.json();
     if (!cfVerifyResult.success) {
-      return res.status(400).json({ error: 'Fallo la validación anti-spam (Captcha inválido).' });
+      const errorCodes = cfVerifyResult['error-codes'] || [];
+      console.warn('Cloudflare Turnstile failure:', errorCodes);
+      if (errorCodes.includes('timeout-or-duplicate')) {
+        return res.status(400).json({ error: 'La verificación de seguridad expiró por tiempo. Se ha renovado automáticamente, por favor presiona "Enviar" nuevamente.' });
+      }
+      return res.status(400).json({ error: 'Fallo la verificación de seguridad (Captcha). Se ha renovado, intenta presionar "Enviar" de nuevo.' });
     }
 
     const SUPABASE_URL = process.env.SUPABASE_URL;
