@@ -67,11 +67,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Fallo la verificación de seguridad (Captcha). Se ha renovado, intenta presionar "Enviar" de nuevo.' });
     }
 
-    const SUPABASE_URL = process.env.SUPABASE_URL;
-    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.supabase.co';
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-      return res.status(500).json({ error: 'Error de configuración: Falta SUPABASE_SERVICE_ROLE_KEY en Vercel.' });
+      return res.status(500).json({ error: 'Error de configuración en base de datos. Por favor contacta a soporte.' });
     }
 
     // --- PROTECCIÓN ANTI-SPAM (Por Email e IP) ---
