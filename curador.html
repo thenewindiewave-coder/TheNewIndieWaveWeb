@@ -1263,8 +1263,11 @@
     if(tab === 'playlists_manager') {
       loadPlaylistsForManager();
     } else if(tab === 'radar_manager') {
-      renderRadarManager();
-      if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
+      if (typeof syncRadarFromSupabase === 'function') {
+        syncRadarFromSupabase().then(function(){ renderRadarManager(); });
+      } else {
+        renderRadarManager();
+      }
     } else if(tab === 'auto_message') {
       renderAutoMessageTool();
       preloadPlaylistsMetadata().then(function(){
@@ -1277,9 +1280,15 @@
 
   function refreshCurrentTab() {
     if(currentTab === 'radar_manager') {
-      renderRadarManager();
-      if (typeof syncRadarFromSupabase === 'function') { syncRadarFromSupabase().then(function(d){ if(d) renderRadarManager(); }); }
-      showToast('✓ Artistas en el Radar actualizados');
+      if (typeof syncRadarFromSupabase === 'function') {
+        syncRadarFromSupabase().then(function(){
+          renderRadarManager();
+          showToast('✓ Artistas en el Radar actualizados');
+        });
+      } else {
+        renderRadarManager();
+        showToast('✓ Artistas en el Radar actualizados');
+      }
     } else if(currentTab === 'playlists_manager') {
       loadPlaylistsForManager();
       showToast('✓ Playlists actualizadas');
@@ -1862,11 +1871,6 @@
           ${secList.length === 0 ? '<div class="empty-box" style="padding: 24px;">No hay artistas secundarios registrados.</div>' : secList.map((a, idx) => renderArtistCardHtml(a, false, idx, secList.length, list.indexOf(a))).join('')}
         </div>
       </div>
-
-      <div style="text-align: center; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border);">
-        <button onclick="resetRadarToDefaults()" style="background: transparent; border: 1px dashed var(--border-strong); color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-          ↺ Restaurar Lista Original por Defecto
-        </button>
       </div>
     `;
   }
@@ -2608,14 +2612,6 @@
     reader.readAsDataURL(file);
   }
 
-  function resetRadarToDefaults() {
-    if(!confirm('¿Restaurar la lista original de artistas en el radar?')) return;
-    if(typeof DEFAULT_RADAR_ARTISTS !== 'undefined') {
-      saveRadarArtists(DEFAULT_RADAR_ARTISTS);
-      renderRadarManager();
-      showToast('✓ Valores por defecto restaurados');
-    }
-  }
 
   // 8. HERRAMIENTA DE MENSAJE AUTOMÁTICO & GENERADOR DE STORY
   function renderAutoMessageTool() {

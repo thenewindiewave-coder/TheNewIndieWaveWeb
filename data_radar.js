@@ -11,8 +11,12 @@ async function syncRadarFromSupabase() {
     });
     if (res.ok) {
       var data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        var cleanList = data.map(function(item) {
+      if (Array.isArray(data)) {
+        var realArtists = data.filter(function(a){
+          return a && a.id !== 'spotify_auth_config' && a.type !== 'config';
+        });
+
+        var cleanList = realArtists.map(function(item) {
           if (item.other_url && item.other_url.startsWith('{')) {
             try {
               var parsed = JSON.parse(item.other_url);
@@ -38,7 +42,7 @@ async function syncRadarFromSupabase() {
 
         localStorage.setItem('tniw_radar_artists', JSON.stringify(cleanList));
         if (typeof window !== 'undefined') {
-          window.RADAR_ARTISTS = cleanList.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
+          window.RADAR_ARTISTS = cleanList;
         }
         return cleanList;
       }
@@ -124,338 +128,15 @@ async function saveAllRadarArtistsOrders(list) {
   }
 }
 
-// Base de datos oficial de ARTISTAS EN EL RADAR - THE NEW INDIE WAVE
-var DEFAULT_RADAR_ARTISTS = [
-  {
-    "id": "radar-01",
-    "name": "Lunar Daydream",
-    "city": "CIUDAD DE MÉXICO",
-    "genre": "DREAM POP / SHOEGAZE",
-    "type": "top3",
-    "order": 1,
-    "badge": "AGRUPACIÓN",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=900&q=80",
-    "track_id": "3n3Ppam7vgaVa1iaRUc9Lp",
-    "short_bio": "Capas envolventes de reverb, sintetizadores análogos nostálgicos y una melodía hipnótica perfecta para la noche.",
-    "full_review": "Originarios del sur de la Ciudad de México, Lunar Daydream mezcla guitarras espaciales cargadas de chorus con cajas de ritmos vintage y melodías etéreas.",
-    "spotify_url": "https://open.spotify.com/artist/3n3Ppam7vgaVa1iaRUc9Lp",
-    "instagram": "@lunardaydream",
-    "apple_music_url": "",
-    "youtube_url": "https://www.youtube.com/results?search_query=Lunar+Daydream",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-02",
-    "name": "Distorsión Fría",
-    "city": "BUENOS AIRES",
-    "genre": "POST-PUNK / DARKWAVE",
-    "type": "top3",
-    "order": 2,
-    "badge": "DÚO",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80",
-    "track_id": "0VjIjW4GlUZAMYd2vXMi3b",
-    "short_bio": "Líneas de bajo penetrantes, cajas de ritmo ochenteras y líricas existenciales con una ejecución en vivo demoledora.",
-    "full_review": "Desde los sótanos de Buenos Aires, este dúo post-punk revitaliza las texturas frías de los sintetizadores analógicos con bajos distorsionados y voces graves.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@distorsionfria",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-03",
-    "name": "Cero Tardes",
-    "city": "BOGOTÁ",
-    "genre": "INDIE POP / FOLK",
-    "type": "top3",
-    "order": 3,
-    "badge": "SOLISTA",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=80",
-    "track_id": "7qiZfU4dY1lWllzX7mPBI3",
-    "short_bio": "Frescura acústica con arreglos de cuerdas sutiles y ganchos vocales inolvidables para escuchar al atardecer.",
-    "full_review": "Con una instrumentación orgánica que combina guitarras acústicas afinadas en abierto, percusiones suaves y armonías vocales a dos voces, Cero Tardes crea paisajes sonoros íntimos.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@cerotardes",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-04",
-    "name": "Siluetas de Verano",
-    "city": "SANTIAGO DE CHILE",
-    "genre": "BEDROOM POP / LO-FI",
-    "type": "top3",
-    "order": 4,
-    "badge": "SOLISTA",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=600&q=80",
-    "track_id": "4cOdK2wGLETKBW3PvgPWqT",
-    "short_bio": "Texturas de cinta de 4 canales con armonías íntimas grabadas en casa.",
-    "full_review": "Composiciones caseras con melodías de ensueño con guitarras jangle y sintes casio.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@siluetasdeverano",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-05",
-    "name": "Los Extraviados",
-    "city": "MADRID / CDMX",
-    "genre": "INDIE ROCK / GARAJE",
-    "type": "top3",
-    "order": 5,
-    "badge": "AGRUPACIÓN",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=600&q=80",
-    "track_id": "3jjujdUJ72nuh5eMFTpqQB",
-    "short_bio": "Potencia rítmica directa, guitarras crudas y coros enérgicos urbanos.",
-    "full_review": "Riffs veloces y actitud punk melódica con letras honestas sobre la vida urbana contemporánea.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@losextraviados",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-06",
-    "name": "Frecuencia Marina",
-    "city": "LIMA",
-    "genre": "DREAM POP / SYNTH",
-    "type": "top3",
-    "order": 6,
-    "badge": "TRÍO",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&q=80",
-    "track_id": "1xK59OXxi2TAAAbmZK0hp9",
-    "short_bio": "Sintetizadores acuáticos y melodías envolventes de la bruma costera.",
-    "full_review": "Atmósferas espaciales que fusionan el shoegaze latino con beats electrónicos elegantes.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@frecuenciamarina",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-07",
-    "name": "Sombras de Neón",
-    "city": "MONTERREY",
-    "genre": "DARKWAVE / EBM",
-    "type": "top3",
-    "order": 7,
-    "badge": "DÚO",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&q=80",
-    "track_id": "2takcwOaAZWiRsqPHPb7uy",
-    "short_bio": "Secuencias industriales bailables y estéticas retro-futuristas nocturnas.",
-    "full_review": "Bajo arpegiado analógico implacable con cajas de ritmo potentes para clubes oscuros.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@sombrasdeneon",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-08",
-    "name": "La Última Niebla",
-    "city": "VALPARAÍSO",
-    "genre": "SHOEGAZE / NOISE",
-    "type": "top3",
-    "order": 8,
-    "badge": "AGRUPACIÓN",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80",
-    "track_id": "7qiZfU4dY1lWllzX7mPBI3",
-    "short_bio": "Murallas sónicas de distorsión dulce y melodías sumergidas en delay.",
-    "full_review": "Exploración sonora intensa inspirada en el shoegaze de los 90s con un toque sudamericano moderno.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@laultimaniebla",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-09",
-    "name": "Río Salvaje",
-    "city": "GUADALAJARA",
-    "genre": "INDIE FOLK / PSICODELIA",
-    "type": "top3",
-    "order": 9,
-    "badge": "SOLISTA",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80",
-    "track_id": "0VjIjW4GlUZAMYd2vXMi3b",
-    "short_bio": "Guitarras acústicas hipnóticas y poesía introspectiva sobre la naturaleza.",
-    "full_review": "Folk psicodélico que evoca caminos de montaña y fogatas al aire libre con coros expansivos.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@riosalvaje.musica",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-10",
-    "name": "Autopista Central",
-    "city": "SAN JOSÉ",
-    "genre": "POST-PUNK / GARAJE",
-    "type": "secondary",
-    "order": 10,
-    "badge": "AGRUPACIÓN",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&q=80",
-    "track_id": "3n3Ppam7vgaVa1iaRUc9Lp",
-    "short_bio": "Energía cruda con baterías veloces y guitarras filosas llenas de adrenalina.",
-    "full_review": "Canciones directas de menos de tres minutos que retratan el caos y la juventud urbana.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@autopistacentral",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-11",
-    "name": "Cintas Magnéticas",
-    "city": "MEDELLÍN",
-    "genre": "LO-FI BEATS / CHILL",
-    "type": "secondary",
-    "order": 11,
-    "badge": "PRODUCER",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&q=80",
-    "track_id": "4cOdK2wGLETKBW3PvgPWqT",
-    "short_bio": "Samples de vinilo cálidos, pianos nostálgicos y bajos suaves lo-fi.",
-    "full_review": "Productor independiente que rescata grabaciones de boleros viejos y las fusiona con texturas modernas.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@cintasmagneticas",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-12",
-    "name": "Velo Nocturno",
-    "city": "PUEBLA",
-    "genre": "GOTH ROCK / DARKWAVE",
-    "type": "secondary",
-    "order": 12,
-    "badge": "AGRUPACIÓN",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&q=80",
-    "track_id": "3jjujdUJ72nuh5eMFTpqQB",
-    "short_bio": "Lirismo gótico elegante, guitarras con flanger y una voz profunda única.",
-    "full_review": "Atmósferas victorianas combinadas con ritmos bailables inspirados en el rock gótico clásico.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@velonocturno",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-13",
-    "name": "Satélites Olvidados",
-    "city": "BARCELONA",
-    "genre": "MATH ROCK / EMO INDIE",
-    "type": "secondary",
-    "order": 13,
-    "badge": "AGRUPACIÓN",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1520523839898-50712825e617?w=600&q=80",
-    "track_id": "1xK59OXxi2TAAAbmZK0hp9",
-    "short_bio": "Compases intrincados, guitarras tapping brillantes y fuerza catárquica.",
-    "full_review": "Técnica musical depurada al servicio de canciones cargadas de nostalgia y fuerza juvenil.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@satelitesolvidados",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  },
-  {
-    "id": "radar-14",
-    "name": "Aurora Estéreo",
-    "city": "MONTEVIDEO",
-    "genre": "SYNTH POP / NEW WAVE",
-    "type": "secondary",
-    "order": 14,
-    "badge": "DÚO",
-    "media_type": "image",
-    "media_url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80",
-    "track_id": "2takcwOaAZWiRsqPHPb7uy",
-    "short_bio": "Melodías pop luminosas con sintetizadores brillantes y groove bailable.",
-    "full_review": "Herederos del pop refinado del Río de la Plata con arreglos vocales sofisticados.",
-    "spotify_url": "https://open.spotify.com/",
-    "instagram": "@auroraestereo",
-    "apple_music_url": "",
-    "youtube_url": "",
-    "tiktok_url": "",
-    "website_url": "",
-    "other_url": "",
-    "bandcamp_url": "",
-    "soundcloud_url": ""
-  }
-];
+// Artistas en el radar: sin datos mockeados. Únicamente provienen de Supabase.
+var DEFAULT_RADAR_ARTISTS = [];
 
 function getRadarArtists() {
   try {
     var local = localStorage.getItem('tniw_radar_artists');
     if (local) {
       var parsed = JSON.parse(local);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return parsed.filter(function(a) {
           return a && a.id !== 'spotify_auth_config' && a.type !== 'config';
         });
@@ -464,14 +145,14 @@ function getRadarArtists() {
   } catch(e) {
     console.error('Error reading radar artists', e);
   }
-  return DEFAULT_RADAR_ARTISTS;
+  return [];
 }
 
 function saveRadarArtists(artists) {
   try {
-    localStorage.setItem('tniw_radar_artists', JSON.stringify(artists));
+    localStorage.setItem('tniw_radar_artists', JSON.stringify(artists || []));
     if (typeof window !== 'undefined') {
-      window.RADAR_ARTISTS = artists;
+      window.RADAR_ARTISTS = artists || [];
     }
   } catch(e) {
     console.error('Error saving radar artists', e);
@@ -479,7 +160,7 @@ function saveRadarArtists(artists) {
 }
 
 if (typeof window !== 'undefined') {
-  window.DEFAULT_RADAR_ARTISTS = DEFAULT_RADAR_ARTISTS;
+  window.DEFAULT_RADAR_ARTISTS = [];
   window.getRadarArtists = getRadarArtists;
   window.saveRadarArtists = saveRadarArtists;
   window.saveRadarArtistToSupabase = saveRadarArtistToSupabase;

@@ -1252,64 +1252,7 @@
     <h2 class="section-heading">🔥 TOP 10 ARTISTAS DESTACADOS</h2>
   </div>
 
-  <div class="top3-grid" id="top3Container">
-    <!-- TOP 1 -->
-    <div class="top3-card">
-      <div class="top3-media-wrap">
-        <div class="top3-badge">AGRUPACIÓN</div>
-        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=900&q=80" alt="Lunar Daydream" loading="lazy">
-        <div class="top3-media-overlay"></div>
-        <div class="top3-origin">📍 CIUDAD DE MÉXICO</div>
-      </div>
-      <div class="top3-body">
-        <h3 class="top3-name">Lunar Daydream</h3>
-        <div class="top3-genre">DREAM POP / SHOEGAZE</div>
-        <p class="top3-desc">"Capas envolventes de reverb, sintes nostálgicos y una melodía hipnótica para la noche."</p>
-        <div class="mini-player-box" onclick="event.stopPropagation()">
-          <iframe src="https://open.spotify.com/embed/track/3n3Ppam7vgaVa1iaRUc9Lp?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-        <div class="top3-footer-btn">VER FICHA & BIOGRAFÍA <span>↗</span></div>
-      </div>
-    </div>
-
-    <!-- TOP 2 -->
-    <div class="top3-card">
-      <div class="top3-media-wrap">
-        <div class="top3-badge">DÚO</div>
-        <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80" alt="Distorsión Fría" loading="lazy">
-        <div class="top3-media-overlay"></div>
-        <div class="top3-origin">📍 BUENOS AIRES</div>
-      </div>
-      <div class="top3-body">
-        <h3 class="top3-name">Distorsión Fría</h3>
-        <div class="top3-genre">POST-PUNK / DARKWAVE</div>
-        <p class="top3-desc">"Líneas de bajo penetrantes, cajas de ritmo ochenteras y líricas existenciales demoledoras."</p>
-        <div class="mini-player-box" onclick="event.stopPropagation()">
-          <iframe src="https://open.spotify.com/embed/track/0VjIjW4GlUZAMYd2vXMi3b?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-        <div class="top3-footer-btn">VER FICHA & BIOGRAFÍA <span>↗</span></div>
-      </div>
-    </div>
-
-    <!-- TOP 3 -->
-    <div class="top3-card">
-      <div class="top3-media-wrap">
-        <div class="top3-badge">SOLISTA</div>
-        <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=80" alt="Cero Tardes" loading="lazy">
-        <div class="top3-media-overlay"></div>
-        <div class="top3-origin">📍 BOGOTÁ</div>
-      </div>
-      <div class="top3-body">
-        <h3 class="top3-name">Cero Tardes</h3>
-        <div class="top3-genre">INDIE POP / FOLK</div>
-        <p class="top3-desc">"Frescura acústica con arreglos sutiles y ganchos vocales inolvidables para el atardecer."</p>
-        <div class="mini-player-box" onclick="event.stopPropagation()">
-          <iframe src="https://open.spotify.com/embed/track/7qiZfU4dY1lWllzX7mPBI3?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-        <div class="top3-footer-btn">VER FICHA & BIOGRAFÍA <span>↗</span></div>
-      </div>
-    </div>
-  </div>
+  <div class="top3-grid" id="top3Container"></div>
 
   <!-- SECTION 2: 11 ARTISTAS EN EL RADAR (FILAS HORIZONTALES ESCALONADAS CON TEXTO BREVE) -->
   <div class="section-label-bar" style="border-color: var(--accent-cyan);">
@@ -1440,11 +1383,9 @@
   // Sincronización en tiempo real desde base de datos Supabase
   if (typeof syncRadarFromSupabase === 'function') {
     syncRadarFromSupabase().then(function(data){
-      if (data && data.length > 0) {
-        artistsList = data.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
-        renderAllRadarArtists();
-        checkDeepLink();
-      }
+      artistsList = (data || []).filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
+      renderAllRadarArtists();
+      checkDeepLink();
     });
   }
 
@@ -1457,37 +1398,41 @@
     var sec = artistsList.filter(function(a){ return a.type === 'secondary'; });
 
     var top3Cont = document.getElementById('top3Container');
-    if (top3Cont && top3.length > 0) {
-      top3Cont.innerHTML = top3.map(function(artist){
-        var mediaHtml = '';
-        if (artist.media_type === 'video' || (artist.media_url && artist.media_url.endsWith('.mp4'))) {
-          mediaHtml = '<video src="' + artist.media_url + '" autoplay loop muted playsinline></video>';
-        } else {
-          mediaHtml = '<img src="' + (artist.media_url || 'logo.png') + '" alt="' + artist.name + '" loading="lazy">';
-        }
+    if (top3Cont) {
+      if (top3.length > 0) {
+        top3Cont.innerHTML = top3.map(function(artist){
+          var mediaHtml = '';
+          if (artist.media_type === 'video' || (artist.media_url && artist.media_url.endsWith('.mp4'))) {
+            mediaHtml = '<video src="' + artist.media_url + '" autoplay loop muted playsinline></video>';
+          } else {
+            mediaHtml = '<img src="' + (artist.media_url || 'logo.png') + '" alt="' + artist.name + '" loading="lazy">';
+          }
 
-        return `
-          <div class="top3-card">
-            <div class="top3-media-wrap" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">
-              <div class="top3-badge">${artist.badge || 'AGRUPACIÓN'}</div>
-              ${mediaHtml}
-              <div class="top3-media-overlay"></div>
-              <div class="top3-origin">📍 ${artist.city}</div>
+          return `
+            <div class="top3-card">
+              <div class="top3-media-wrap" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">
+                <div class="top3-badge">${artist.badge || 'AGRUPACIÓN'}</div>
+                ${mediaHtml}
+                <div class="top3-media-overlay"></div>
+                <div class="top3-origin">📍 ${artist.city}</div>
+              </div>
+              <div class="top3-body">
+                <h3 class="top3-name" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">${artist.name}</h3>
+                <div class="top3-genre">${artist.genre}</div>
+                <p class="top3-desc" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">"${artist.short_bio}"</p>
+                ${artist.track_id ? `
+                  <div class="mini-player-box" onclick="event.stopPropagation()" style="position:relative; z-index:10;">
+                    ${buildMiniPlayerEmbed(artist.track_id, false)}
+                  </div>
+                ` : ''}
+                <div class="top3-footer-btn" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">VER FICHA & BIOGRAFÍA <span>↗</span></div>
+              </div>
             </div>
-            <div class="top3-body">
-              <h3 class="top3-name" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">${artist.name}</h3>
-              <div class="top3-genre">${artist.genre}</div>
-              <p class="top3-desc" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">"${artist.short_bio}"</p>
-              ${artist.track_id ? `
-                <div class="mini-player-box" onclick="event.stopPropagation()" style="position:relative; z-index:10;">
-                  ${buildMiniPlayerEmbed(artist.track_id, false)}
-                </div>
-              ` : ''}
-              <div class="top3-footer-btn" onclick="openArtistModal('${artist.id}')" style="cursor:pointer;">VER FICHA & BIOGRAFÍA <span>↗</span></div>
-            </div>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      } else {
+        top3Cont.innerHTML = '<div class="empty-radar-box" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--text-dim); font-family: var(--font-mono); font-size: 12px; border: 1px dashed var(--border); border-radius: 8px;">No hay artistas destacados en el radar actualmente.</div>';
+      }
     }
 
     var secCont = document.getElementById('secondaryContainer');
