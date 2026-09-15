@@ -142,10 +142,73 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    return res.status(200).json({ success: true, data: data[0] || data });
+    const insertedItem = data[0] || data;
+
+    // --- NOTIFICACIÓN EN TIEMPO REAL A TELEGRAM ---
+    try {
+      await sendTelegramNotification({
+        artist_name,
+        song_title,
+        genre,
+        playlist,
+        country,
+        email,
+        instagram,
+        tiktok,
+        notes,
+        spotify_url,
+        track_id: insertedItem.track_id || track_id
+      });
+    } catch (tgErr) {
+      console.warn('Telegram notification failed non-critically:', tgErr.message);
+    }
+
+    return res.status(200).json({ success: true, data: insertedItem });
 
   } catch (error) {
     console.error('Submit API error:', error);
     return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
+}
+
+async function sendTelegramNotification(item) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN || '8942664442:AAEDXBeqpfsYGZMkPVg6dpn2ndZRnHJZX9I';
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!botToken || !chatId) {
+    return;
+  }
+
+  const message = [
+    `🎵 *¡NUEVA CANCIÓN RECIBIDA EN CURADURÍA!*`,
+    ``,
+    `👤 *Artista:* ${escapeMarkdown(item.artist_name || 'N/A')}`,
+    `🎶 *Track:* ${escapeMarkdown(item.song_title || 'N/A')}`,
+    `🏷️ *Género:* ${escapeMarkdown(item.genre || 'Indie')}`,
+    `🎯 *Playlist:* ${escapeMarkdown(item.playlist || 'N/A')}`,
+    `📍 *País:* ${escapeMarkdown(item.country || 'N/A')}`,
+    `✉️ *Email:* ${escapeMarkdown(item.email || 'N/A')}`,
+    item.instagram ? `📸 *Instagram:* @${escapeMarkdown(item.instagram.replace('@',''))}` : null,
+    item.tiktok ? `📱 *TikTok:* @${escapeMarkdown(item.tiktok.replace('@',''))}` : null,
+    item.notes ? `💬 *Nota:* _"${escapeMarkdown(item.notes)}"_` : null,
+    ``,
+    `🔗 [Abrir Canción en Spotify](${item.spotify_url})`,
+    `🎛️ [Abrir Panel de Curador](https://thenewindiewave.online/curador.html)`
+  ].filter(Boolean).join('\n');
+
+  await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: message,
+      parse_mode: 'Markdown',
+      disable_web_page_preview: false
+    })
+  });
+}
+
+function escapeMarkdown(text) {
+  if (!text) return '';
+  return text.toString().replace(/([_*[\]()~`>#+\-=|{}.!])/g, '\\$1');
 }
