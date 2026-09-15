@@ -950,68 +950,92 @@
   }
 
   var realPlaylists = [
-    "Rock indie para manejar de noche sin rumbo",
-    "Rock indie para cuando no puedes dormir y piensas demasiado",
-    "Rock indie sucio y crudo para sentirte rebelde",
-    "Pop indie para estar feliz y triste al mismo tiempo",
-    "Pop indie íntimo para escuchar solo en tu cuarto",
-    "Pop indie suave para domingos sin hacer nada",
-    "Hard rock para sacar la rabia y el enojo acumulado",
-    "Metal intenso para liberar toda tu energía",
+    "Mezcla de rolas urbanas para farmear Aura",
+    "Darkwave oscuro y atmosférico para la madrugada",
     "Música urbana con flow y ritmo para moverte",
-    "Darkwave oscuro y atmosférico para la madrugada"
+    "Metal intenso para liberar toda tu energía",
+    "Rock para sacar la rabia y el enojo acumulado",
+    "Soft Pop suave para esos domingos sin hacer nada",
+    "Dream Pop intimo para escuchar solo en tu cuarto",
+    "SynthPop para cuando solo quieres bailar"
   ];
-  var playlistRealSel = document.getElementById('playlist-real-select');
-  if(playlistRealSel) {
-    playlistRealSel.innerHTML = '<option value="" disabled selected>Selecciona la playlist ideal para tu track</option>' + realPlaylists.map(function(p, i){ return '<option value="'+p+'">'+(i+1)+'. '+p+'</option>'; }).join('');
+
+  // MAPA OFICIAL DE ENLACES A SPOTIFY
+  var playlistLinksMap = {
+    "Mezcla de rolas urbanas para farmear Aura": "https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB",
+    "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln",
+    "Música urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
+    "Metal intenso para liberar toda tu energía": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
+    "Rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
+    "Soft Pop suave para esos domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
+    "Dream Pop intimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "SynthPop para cuando solo quieres bailar": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl"
+  };
+
+  function renderPlaylistOptions(list) {
+    var playlistRealSel = document.getElementById('playlist-real-select');
+    if(!playlistRealSel) return;
+    var currentVal = playlistRealSel.value;
+    playlistRealSel.innerHTML = '<option value="" disabled selected>Selecciona la playlist ideal para tu track</option>' + list.map(function(p, i){
+      var pName = (typeof p === 'object' && p.name) ? p.name : p;
+      return '<option value="'+pName+'">'+(i+1)+'. '+pName+'</option>';
+    }).join('');
+    if (currentVal && list.some(function(item){ return (typeof item === 'object' ? item.name : item) === currentVal; })) {
+      playlistRealSel.value = currentVal;
+    }
   }
+
+  // Render inicial inmediato con las 8 playlists oficiales
+  renderPlaylistOptions(realPlaylists);
+
+  // Sincronización en vivo desde Spotify API
+  async function fetchLivePlaylists() {
+    try {
+      var res = await fetch('/api/playlists');
+      if (!res.ok) return;
+      var data = await res.json();
+      var fetched = data.allPlaylists || [];
+      if (fetched.length > 0) {
+        realPlaylists = fetched.map(function(p){ return p.name; }).filter(Boolean);
+        fetched.forEach(function(p){
+          if(p.name && p.spotify_url) {
+            playlistLinksMap[p.name] = p.spotify_url;
+          }
+        });
+        renderPlaylistOptions(realPlaylists);
+      }
+    } catch(e) {
+      console.log('Utilizando catálogo oficial offline para playlists');
+    }
+  }
+  fetchLivePlaylists();
 
   // 1. Contador de Pitch de 280 caracteres
   function updatePitchCount(el) {
     document.getElementById('charCount').textContent = el.value.length;
   }
 
-  // 3. Auto-Match Inteligente de Playlist según el Género
+  // 3. Auto-Match Inteligente de Playlist según el Género hacia las 8 Playlists Oficiales
   var genreToPlaylistMap = {
-    "Indie Rock": "Rock indie para manejar de noche sin rumbo",
-    "Alternative Rock": "Rock indie para manejar de noche sin rumbo",
-    "Britpop": "Rock indie para manejar de noche sin rumbo",
-    "Power Pop": "Rock indie para manejar de noche sin rumbo",
-    "Garage Rock": "Rock indie sucio y crudo para sentirte rebelde",
-    "Post-Punk": "Rock indie sucio y crudo para sentirte rebelde",
-    "Punk Rock": "Rock indie sucio y crudo para sentirte rebelde",
-    "Dance-Punk": "Rock indie sucio y crudo para sentirte rebelde",
-    "Ska": "Rock indie sucio y crudo para sentirte rebelde",
-    "Ska-Punk": "Rock indie sucio y crudo para sentirte rebelde",
-    "Surf Rock": "Rock indie sucio y crudo para sentirte rebelde",
-    "Noise Rock": "Rock indie sucio y crudo para sentirte rebelde",
-    "Slowcore": "Rock indie para cuando no puedes dormir y piensas demasiado",
-    "Post-Rock": "Rock indie para cuando no puedes dormir y piensas demasiado",
-    "Math Rock": "Rock indie para cuando no puedes dormir y piensas demasiado",
-    "Emo / Midwest Emo": "Rock indie para cuando no puedes dormir y piensas demasiado",
-    "Dream Pop": "Pop indie para estar feliz y triste al mismo tiempo",
-    "Indie Pop": "Pop indie para estar feliz y triste al mismo tiempo",
-    "Shoegaze": "Pop indie para estar feliz y triste al mismo tiempo",
-    "Noise Pop": "Pop indie para estar feliz y triste al mismo tiempo",
-    "C86 / Jangle Pop": "Pop indie para estar feliz y triste al mismo tiempo",
-    "Twee Pop": "Pop indie para estar feliz y triste al mismo tiempo",
-    "Art Pop": "Pop indie para estar feliz y triste al mismo tiempo",
-    "Bedroom Pop": "Pop indie íntimo para escuchar solo en tu cuarto",
-    "Lo-Fi / Bedroom": "Pop indie íntimo para escuchar solo en tu cuarto",
-    "Indie R&B": "Pop indie íntimo para escuchar solo en tu cuarto",
-    "Neo-Soul": "Pop indie íntimo para escuchar solo en tu cuarto",
-    "Chillwave": "Pop indie suave para domingos sin hacer nada",
-    "Acoustic / Acústico": "Pop indie suave para domingos sin hacer nada",
-    "Folk / Folk Rock": "Pop indie suave para domingos sin hacer nada",
-    "Indie Folk": "Pop indie suave para domingos sin hacer nada",
-    "Ambient": "Pop indie suave para domingos sin hacer nada",
-    "Neoclásico": "Pop indie suave para domingos sin hacer nada",
-    "Downtempo": "Pop indie suave para domingos sin hacer nada",
-    "Hard Rock": "Hard rock para sacar la rabia y el enojo acumulado",
-    "Grunge": "Hard rock para sacar la rabia y el enojo acumulado",
-    "Stoner Rock": "Hard rock para sacar la rabia y el enojo acumulado",
-    "Glam Rock": "Hard rock para sacar la rabia y el enojo acumulado",
+    // Rock / Punk / Heavy
+    "Indie Rock": "Rock para sacar la rabia y el enojo acumulado",
+    "Alternative Rock": "Rock para sacar la rabia y el enojo acumulado",
+    "Britpop": "Rock para sacar la rabia y el enojo acumulado",
+    "Power Pop": "Rock para sacar la rabia y el enojo acumulado",
+    "Garage Rock": "Rock para sacar la rabia y el enojo acumulado",
+    "Post-Punk": "Darkwave oscuro y atmosférico para la madrugada",
+    "Punk Rock": "Rock para sacar la rabia y el enojo acumulado",
+    "Dance-Punk": "SynthPop para cuando solo quieres bailar",
+    "Ska": "Mezcla de rolas urbanas para farmear Aura",
+    "Ska-Punk": "Rock para sacar la rabia y el enojo acumulado",
+    "Surf Rock": "Rock para sacar la rabia y el enojo acumulado",
+    "Noise Rock": "Rock para sacar la rabia y el enojo acumulado",
+    "Hard Rock": "Rock para sacar la rabia y el enojo acumulado",
+    "Grunge": "Rock para sacar la rabia y el enojo acumulado",
+    "Stoner Rock": "Rock para sacar la rabia y el enojo acumulado",
+    "Glam Rock": "Rock para sacar la rabia y el enojo acumulado",
     "Heavy Metal": "Metal intenso para liberar toda tu energía",
+    "Metal": "Metal intenso para liberar toda tu energía",
     "Metalcore": "Metal intenso para liberar toda tu energía",
     "Death Metal": "Metal intenso para liberar toda tu energía",
     "Thrash Metal": "Metal intenso para liberar toda tu energía",
@@ -1020,37 +1044,69 @@
     "Melodic Hardcore": "Metal intenso para liberar toda tu energía",
     "Post-Hardcore": "Metal intenso para liberar toda tu energía",
     "Screamo": "Metal intenso para liberar toda tu energía",
-    "Urbano Alternativo": "Música urbana con flow y ritmo para moverte",
+
+    // Dream Pop / Shoegaze / Lo-Fi / Cuarto
+    "Dream Pop": "Dream Pop intimo para escuchar solo en tu cuarto",
+    "Shoegaze": "Dream Pop intimo para escuchar solo en tu cuarto",
+    "Bedroom Pop": "Dream Pop intimo para escuchar solo en tu cuarto",
+    "Lo-Fi / Bedroom": "Dream Pop intimo para escuchar solo en tu cuarto",
+    "Lo-Fi": "Dream Pop intimo para escuchar solo en tu cuarto",
+    "Slowcore": "Dream Pop intimo para escuchar solo en tu cuarto",
+    "Post-Rock": "Dream Pop intimo para escuchar solo en tu cuarto",
+    "Math Rock": "Dream Pop intimo para escuchar solo en tu cuarto",
+    "Emo / Midwest Emo": "Dream Pop intimo para escuchar solo en tu cuarto",
+    "Indie R&B": "Dream Pop intimo para escuchar solo en tu cuarto",
+    "Neo-Soul": "Dream Pop intimo para escuchar solo en tu cuarto",
+
+    // Soft Pop / Acústico / Chill
+    "Indie Pop": "Soft Pop suave para esos domingos sin hacer nada",
+    "Chillwave": "Soft Pop suave para esos domingos sin hacer nada",
+    "Acoustic / Acústico": "Soft Pop suave para esos domingos sin hacer nada",
+    "Acoustic / Folk": "Soft Pop suave para esos domingos sin hacer nada",
+    "Folk / Folk Rock": "Soft Pop suave para esos domingos sin hacer nada",
+    "Indie Folk": "Soft Pop suave para esos domingos sin hacer nada",
+    "Ambient": "Soft Pop suave para esos domingos sin hacer nada",
+    "Neoclásico": "Soft Pop suave para esos domingos sin hacer nada",
+    "Downtempo": "Soft Pop suave para esos domingos sin hacer nada",
+    "C86 / Jangle Pop": "Soft Pop suave para esos domingos sin hacer nada",
+    "Twee Pop": "Soft Pop suave para esos domingos sin hacer nada",
+    "Art Pop": "Soft Pop suave para esos domingos sin hacer nada",
+
+    // Urbano / Barrio / Flow
+    "Urbano Alternativo": "Mezcla de rolas urbanas para farmear Aura",
+    "Urbano / Trap": "Música urbana con flow y ritmo para moverte",
     "Trap / Trap Latino": "Música urbana con flow y ritmo para moverte",
-    "Corridos Tumbados": "Música urbana con flow y ritmo para moverte",
-    "Regional Mexicano": "Música urbana con flow y ritmo para moverte",
-    "Regional Urbano": "Música urbana con flow y ritmo para moverte",
+    "Corridos Tumbados": "Mezcla de rolas urbanas para farmear Aura",
+    "Regional Mexicano": "Mezcla de rolas urbanas para farmear Aura",
+    "Regional Urbano": "Mezcla de rolas urbanas para farmear Aura",
     "Dancehall": "Música urbana con flow y ritmo para moverte",
-    "Reggae": "Música urbana con flow y ritmo para moverte",
-    "Trip Hop": "Música urbana con flow y ritmo para moverte",
-    "Hyperpop": "Música urbana con flow y ritmo para moverte",
-    "Glitch Pop": "Música urbana con flow y ritmo para moverte",
+    "Reggae": "Mezcla de rolas urbanas para farmear Aura",
+    "Trip Hop": "Mezcla de rolas urbanas para farmear Aura",
+
+    // Synth / Darkwave / Baile
     "Darkwave": "Darkwave oscuro y atmosférico para la madrugada",
     "Coldwave": "Darkwave oscuro y atmosférico para la madrugada",
     "Goth Rock": "Darkwave oscuro y atmosférico para la madrugada",
-    "Synth-Pop": "Darkwave oscuro y atmosférico para la madrugada",
+    "Synth-Pop": "SynthPop para cuando solo quieres bailar",
     "Synthwave": "Darkwave oscuro y atmosférico para la madrugada",
-    "New Wave": "Darkwave oscuro y atmosférico para la madrugada",
+    "New Wave": "SynthPop para cuando solo quieres bailar",
     "EBM / Industrial": "Darkwave oscuro y atmosférico para la madrugada",
     "Dark Synth": "Darkwave oscuro y atmosférico para la madrugada",
     "Industrial Rock": "Darkwave oscuro y atmosférico para la madrugada",
-    "Electro-Pop": "Darkwave oscuro y atmosférico para la madrugada",
-    "Electrónica / Dance": "Darkwave oscuro y atmosférico para la madrugada",
-    "Indie Dance": "Darkwave oscuro y atmosférico para la madrugada",
-    "Techno / House": "Darkwave oscuro y atmosférico para la madrugada",
-    "Psychedelic Rock": "Rock indie para manejar de noche sin rumbo",
-    "Neo-Psychedelia": "Rock indie para manejar de noche sin rumbo",
-    "Space Rock": "Rock indie para manejar de noche sin rumbo",
-    "Art Rock": "Rock indie para manejar de noche sin rumbo",
-    "Prog Rock": "Rock indie para manejar de noche sin rumbo"
+    "Electro-Pop": "SynthPop para cuando solo quieres bailar",
+    "Electrónica / Dance": "SynthPop para cuando solo quieres bailar",
+    "Indie Dance": "SynthPop para cuando solo quieres bailar",
+    "Techno / House": "SynthPop para cuando solo quieres bailar",
+    "Hyperpop": "SynthPop para cuando solo quieres bailar",
+    "Glitch Pop": "SynthPop para cuando solo quieres bailar",
+    "Psychedelic Rock": "Rock para sacar la rabia y el enojo acumulado",
+    "Neo-Psychedelia": "Rock para sacar la rabia y el enojo acumulado",
+    "Space Rock": "Darkwave oscuro y atmosférico para la madrugada",
+    "Art Rock": "Rock para sacar la rabia y el enojo acumulado",
+    "Prog Rock": "Rock para sacar la rabia y el enojo acumulado"
   };
 
-    function handleSpotifyLinkInput(url) {
+  function handleSpotifyLinkInput(url) {
     clearTimeout(_spTimer);
     if(!url || !url.includes('spotify.com/track/')) {
       document.getElementById('spotifyPreviewBox').style.display = 'none';
@@ -1089,26 +1145,6 @@
     }, 400);
   }
 
-  // 3. Auto-Match Inteligente de Playlist según el Género
-  var genreToPlaylistMap = {
-    "Indie Rock": "Rock indie para manejar de noche sin rumbo",
-    "Slowcore": "Rock indie para cuando no puedes dormir y piensas demasiado",
-    "Garage Rock": "Rock indie sucio y crudo para sentirte rebelde",
-    "Post-Punk": "Rock indie sucio y crudo para sentirte rebelde",
-    "Dream Pop": "Pop indie para estar feliz y triste al mismo tiempo",
-    "Indie Pop": "Pop indie para estar feliz y triste al mismo tiempo",
-    "Bedroom Pop": "Pop indie íntimo para escuchar solo en tu cuarto",
-    "Lo-Fi": "Pop indie íntimo para escuchar solo en tu cuarto",
-    "Chillwave": "Pop indie suave para domingos sin hacer nada",
-    "Acoustic / Folk": "Pop indie suave para domingos sin hacer nada",
-    "Hard Rock": "Hard rock para sacar la rabia y el enojo acumulado",
-    "Grunge": "Hard rock para sacar la rabia y el enojo acumulado",
-    "Metal": "Metal intenso para liberar toda tu energía",
-    "Metalcore": "Metal intenso para liberar toda tu energía",
-    "Urbano / Trap": "Música urbana con flow y ritmo para moverte",
-    "Darkwave": "Darkwave oscuro y atmosférico para la madrugada"
-  };
-
   function autoMatchPlaylist(genre) {
     var match = genreToPlaylistMap[genre];
     if(match) {
@@ -1118,20 +1154,6 @@
       showToast('✨ Auto-Match: ' + match);
     }
   }
-
-  // MAPA DE ENLACES A LAS PLAYLISTS OFICIALES DE SPOTIFY
-  var playlistLinksMap = {
-    "Rock indie para manejar de noche sin rumbo": "https://open.spotify.com/playlist/2APaz3JDupY9fNUczoKMUP",
-    "Rock indie para cuando no puedes dormir y piensas demasiado": "https://open.spotify.com/playlist/5gh1rPce7FnEENWk1POIse",
-    "Rock indie sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/2QlvwB1vEhxQ4CM4jrbC8g",
-    "Pop indie para estar feliz y triste al mismo tiempo": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl",
-    "Pop indie íntimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
-    "Pop indie suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
-    "Hard rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
-    "Metal intenso para liberar toda tu energía": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
-    "Música urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
-    "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln"
-  };
 
   var hasOpenedPlaylistInSpotify = false;
 

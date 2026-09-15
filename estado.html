@@ -1446,6 +1446,15 @@
   var _cachedStoryDataUrl = null;
 
   var _curatedPlaylistTracks = {
+    "Mezcla de rolas urbanas para farmear Aura": [
+      { name: "Canguro", artist: "WOS" },
+      { name: "Andar Conmigo", artist: "Julieta Venegas" },
+      { name: "Frijolero", artist: "Molotov" },
+      { name: "Mal Bicho", artist: "Los Fabulosos Cadillacs" },
+      { name: "Puto", artist: "Molotov" },
+      { name: "Tócate", artist: "Bomba Estéreo" },
+      { name: "Gimme Tha Power", artist: "Molotov" }
+    ],
     "Darkwave oscuro y atmosférico para la madrugada": [
       { name: "Nightcall", artist: "Kavinsky" },
       { name: "Resonance", artist: "HOME" },
@@ -1456,65 +1465,85 @@
       { name: "The Perfect Girl", artist: "Mareux" },
       { name: "Dark Beach", artist: "Pastel Ghost" }
     ],
-    "Rock indie para manejar de noche sin rumbo": [
-      { name: "Midnight City", artist: "M83" },
-      { name: "Reptilia", artist: "The Strokes" },
-      { name: "Do I Wanna Know?", artist: "Arctic Monkeys" },
-      { name: "Sweater Weather", artist: "The Neighbourhood" },
-      { name: "Somebody Else", artist: "The 1975" },
-      { name: "Sex on Fire", artist: "Kings of Leon" },
-      { name: "Obstacle 1", artist: "Interpol" },
-      { name: "Cigarette Daydreams", artist: "Cage The Elephant" }
+    "Música urbana con flow y ritmo para moverte": [
+      { name: "Monaco", artist: "Bad Bunny" },
+      { name: "Classy 101", artist: "Feid" },
+      { name: "Columbia", artist: "Quevedo" },
+      { name: "LALA", artist: "Myke Towers" },
+      { name: "Baby Hello", artist: "Rauw Alejandro" },
+      { name: "Holanda", artist: "Jhayco" }
     ],
-    "Rock indie para cuando no puedes dormir y piensas demasiado": [
-      { name: "Chamber of Reflection", artist: "Mac DeMarco" },
-      { name: "Apocalypse", artist: "Cigarettes After Sex" },
-      { name: "Freaks", artist: "Surf Curse" },
-      { name: "Are You Bored Yet?", artist: "Wallows" },
-      { name: "Duvet", artist: "bôa" },
-      { name: "Lovers Rock", artist: "TV Girl" },
-      { name: "YKWIM?", artist: "Yot Club" },
-      { name: "Show Me How", artist: "Men I Trust" }
+    "Metal intenso para liberar toda tu energía": [
+      { name: "Psychosocial", artist: "Slipknot" },
+      { name: "Chop Suey!", artist: "System of a Down" },
+      { name: "Duality", artist: "Slipknot" },
+      { name: "Bulls on Parade", artist: "Rage Against the Machine" },
+      { name: "Tears Don't Fall", artist: "Bullet For My Valentine" },
+      { name: "Down with the Sickness", artist: "Disturbed" }
     ],
-    "Rock indie sucio y crudo para sentirte rebelde": [
+    "Rock para sacar la rabia y el enojo acumulado": [
       { name: "Fell in Love with a Girl", artist: "The White Stripes" },
       { name: "Take Me Out", artist: "Franz Ferdinand" },
       { name: "Brianstorm", artist: "Arctic Monkeys" },
       { name: "Last Nite", artist: "The Strokes" },
       { name: "Seven Nation Army", artist: "The White Stripes" },
-      { name: "I Wanna Be Yours", artist: "Arctic Monkeys" },
       { name: "Song 2", artist: "Blur" },
       { name: "Rope", artist: "Foo Fighters" }
     ],
-    "Pop indie para estar feliz y triste al mismo tiempo": [
-      { name: "Tongue Tied", artist: "GROUPLOVE" },
-      { name: "Electric Feel", artist: "MGMT" },
-      { name: "Walking On A Dream", artist: "Empire of the Sun" },
-      { name: "Riptide", artist: "Vance Joy" },
-      { name: "Safe and Sound", artist: "Capital Cities" },
-      { name: "Shut Up and Dance", artist: "WALK THE MOON" },
-      { name: "What You Know", artist: "Two Door Cinema Club" },
-      { name: "Young Folks", artist: "Peter Bjorn and John" }
+    "Soft Pop suave para esos domingos sin hacer nada": [
+      { name: "Bloom", artist: "The Paper Kites" },
+      { name: "Ophelia", artist: "The Lumineers" },
+      { name: "Holocene", artist: "Bon Iver" },
+      { name: "First Day of My Life", artist: "Bright Eyes" },
+      { name: "Flightless Bird", artist: "Iron & Wine" },
+      { name: "Skinny Love", artist: "Bon Iver" }
     ],
-    "Pop indie íntimo para escuchar solo en tu cuarto": [
+    "Dream Pop intimo para escuchar solo en tu cuarto": [
       { name: "Lover Is a Day", artist: "Cuco" },
       { name: "Sofia", artist: "Clairo" },
       { name: "Bubble Gum", artist: "Clairo" },
       { name: "Affection", artist: "Cigarettes After Sex" },
       { name: "Show Me How", artist: "Men I Trust" },
       { name: "Telephones", artist: "Vacations" },
-      { name: "Pretty Girl", artist: "Clairo" },
-      { name: "My Jinji", artist: "Sunset Rollercoaster" }
+      { name: "Pretty Girl", artist: "Clairo" }
+    ],
+    "SynthPop para cuando solo quieres bailar": [
+      { name: "Midnight City", artist: "M83" },
+      { name: "Electric Feel", artist: "MGMT" },
+      { name: "Walking On A Dream", artist: "Empire of the Sun" },
+      { name: "Safe and Sound", artist: "Capital Cities" },
+      { name: "Tongue Tied", artist: "GROUPLOVE" },
+      { name: "Shut Up and Dance", artist: "WALK THE MOON" }
+    ],
+    // Compatibilidad con nombres anteriores
+    "Rock indie para manejar de noche sin rumbo": [
+      { name: "Midnight City", artist: "M83" },
+      { name: "Reptilia", artist: "The Strokes" },
+      { name: "Do I Wanna Know?", artist: "Arctic Monkeys" }
+    ],
+    "Rock indie para cuando no puedes dormir y piensas demasiado": [
+      { name: "Chamber of Reflection", artist: "Mac DeMarco" },
+      { name: "Apocalypse", artist: "Cigarettes After Sex" }
+    ],
+    "Rock indie sucio y crudo para sentirte rebelde": [
+      { name: "Fell in Love with a Girl", artist: "The White Stripes" },
+      { name: "Brianstorm", artist: "Arctic Monkeys" }
+    ],
+    "Pop indie para estar feliz y triste al mismo tiempo": [
+      { name: "Tongue Tied", artist: "GROUPLOVE" },
+      { name: "Electric Feel", artist: "MGMT" }
+    ],
+    "Pop indie íntimo para escuchar solo en tu cuarto": [
+      { name: "Lover Is a Day", artist: "Cuco" },
+      { name: "Sofia", artist: "Clairo" }
     ],
     "Pop indie suave para domingos sin hacer nada": [
       { name: "Bloom", artist: "The Paper Kites" },
-      { name: "Ophelia", artist: "The Lumineers" },
-      { name: "Holocene", artist: "Bon Iver" },
-      { name: "First Day of My Life", artist: "Bright Eyes" },
-      { name: "Flightless Bird", artist: "Iron & Wine" },
-      { name: "Rivers and Roads", artist: "The Head and the Heart" },
-      { name: "Stubborn Love", artist: "The Lumineers" },
-      { name: "Skinny Love", artist: "Bon Iver" }
+      { name: "Ophelia", artist: "The Lumineers" }
+    ],
+    "Hard rock para sacar la rabia y el enojo acumulado": [
+      { name: "Fell in Love with a Girl", artist: "The White Stripes" },
+      { name: "Seven Nation Army", artist: "The White Stripes" }
     ]
   };
 

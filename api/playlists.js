@@ -9,16 +9,14 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.s
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
 const FALLBACK_PLAYLIST_IDS = [
-  '2APaz3JDupY9fNUczoKMUP',
-  '5gh1rPce7FnEENWk1POIse',
-  '2QlvwB1vEhxQ4CM4jrbC8g',
-  '36ribRboGB3DwM821oYokl',
-  '0Ty7tTNh1ONGyOLuasPREj',
-  '20uF7xCOW8zldDCiAowxuF',
-  '6cuhRpfYmEt0vYCT9mFLKc',
-  '5OLiBaOPAe5cBEdV1AoSd1',
+  '79SKuyss3MfkzvOJGnaisB',
+  '4mcJJz8GiKTuxieL9Jziln',
   '7bbYPZ5ia4IGRP2fT47kXr',
-  '4mcJJz8GiKTuxieL9Jziln'
+  '5OLiBaOPAe5cBEdV1AoSd1',
+  '6cuhRpfYmEt0vYCT9mFLKc',
+  '20uF7xCOW8zldDCiAowxuF',
+  '0Ty7tTNh1ONGyOLuasPREj',
+  '36ribRboGB3DwM821oYokl'
 ];
 
 async function getClientCredentialsToken() {
@@ -78,7 +76,8 @@ function extractGenres(name, description) {
     'metalcore', 'hardcore', 'thrash metal', 'death metal', 'metal',
     'urbano', 'reggaetón', 'trap', 'dembow', 'latin trap', 'afrobeat',
     'corridos tumbados', 'regional mexicano', 'regional urbano',
-    'darkwave', 'synthwave', 'coldwave', 'gothic rock', 'industrial'
+    'darkwave', 'synthwave', 'coldwave', 'gothic rock', 'industrial',
+    'synthpop', 'indie pop', 'dance pop', 'nu disco'
   ];
 
   for (const g of commonGenres) {
@@ -93,29 +92,27 @@ function extractGenres(name, description) {
 function detectCategory(name, description) {
   const text = `${name || ''} ${description || ''}`.toLowerCase();
   const cats = [];
-  if (text.includes('metal') || text.includes('hard rock') || text.includes('grunge')) cats.push('heavy');
+  if (text.includes('metal') || text.includes('hard rock') || text.includes('grunge') || text.includes('rabia')) cats.push('heavy');
   if (text.includes('pop') || text.includes('bedroom') || text.includes('suave') || text.includes('cuarto')) cats.push('pop');
   if (text.includes('darkwave') || text.includes('post-punk') || text.includes('gothic') || text.includes('madrugada')) cats.push('darkwave');
-  if (text.includes('urbano') || text.includes('trap') || text.includes('reggaetón') || text.includes('dembow') || text.includes('flow') || text.includes('corridos') || text.includes('regional')) cats.push('urbano');
+  if (text.includes('urbano') || text.includes('trap') || text.includes('reggaetón') || text.includes('dembow') || text.includes('flow') || text.includes('aura')) cats.push('urbano');
   if (text.includes('shoegaze') || text.includes('dream pop') || text.includes('slowcore')) cats.push('shoegaze');
   if (text.includes('folk') || text.includes('acoustic') || text.includes('acústico')) cats.push('folk');
   if (text.includes('punk') || text.includes('garage') || text.includes('garaje')) cats.push('punk');
-  if (text.includes('synth') || text.includes('electronic') || text.includes('electrónica')) cats.push('electronic');
+  if (text.includes('synth') || text.includes('electronic') || text.includes('electrónica') || text.includes('bailar')) cats.push('electronic');
   if (cats.length === 0 || text.includes('rock') || text.includes('indie')) cats.push('rock');
   return cats.join(' ');
 }
 
 const FALLBACK_STATIC_PLAYLISTS = [
-  { id: '2APaz3JDupY9fNUczoKMUP', name: 'Rock indie para manejar de noche sin rumbo', description: 'Curaduría oficial por The New Indie Wave.', followers: 2450, tracks_count: 50, spotify_url: 'https://open.spotify.com/playlist/2APaz3JDupY9fNUczoKMUP', category: 'rock', genres: ['Indie rock', 'Alternative', 'Post-punk'] },
-  { id: '5gh1rPce7FnEENWk1POIse', name: 'Rock indie para cuando no puedes dormir y piensas demasiado', description: 'Curaduría oficial por The New Indie Wave.', followers: 1890, tracks_count: 45, spotify_url: 'https://open.spotify.com/playlist/5gh1rPce7FnEENWk1POIse', category: 'rock', genres: ['Indie rock', 'Slowcore', 'Dream pop'] },
-  { id: '2QlvwB1vEhxQ4CM4jrbC8g', name: 'Rock indie sucio y crudo para sentirte rebelde', description: 'Curaduría oficial por The New Indie Wave.', followers: 1420, tracks_count: 40, spotify_url: 'https://open.spotify.com/playlist/2QlvwB1vEhxQ4CM4jrbC8g', category: 'rock', genres: ['Garage rock', 'Punk', 'Grunge'] },
-  { id: '36ribRboGB3DwM821oYokl', name: 'Pop indie para estar feliz y triste al mismo tiempo', description: 'Curaduría oficial por The New Indie Wave.', followers: 1680, tracks_count: 48, spotify_url: 'https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl', category: 'pop', genres: ['Indie pop', 'Bedroom pop'] },
-  { id: '0Ty7tTNh1ONGyOLuasPREj', name: 'Pop indie íntimo para escuchar solo en tu cuarto', description: 'Curaduría oficial por The New Indie Wave.', followers: 1210, tracks_count: 38, spotify_url: 'https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj', category: 'pop', genres: ['Bedroom pop', 'Lo-fi', 'Acoustic'] },
-  { id: '20uF7xCOW8zldDCiAowxuF', name: 'Pop indie suave para domingos sin hacer nada', description: 'Curaduría oficial por The New Indie Wave.', followers: 980, tracks_count: 35, spotify_url: 'https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF', category: 'pop', genres: ['Chillwave', 'Acoustic', 'Folk pop'] },
-  { id: '6cuhRpfYmEt0vYCT9mFLKc', name: 'Hard rock para sacar la rabia y el enojo acumulado', description: 'Curaduría oficial por The New Indie Wave.', followers: 850, tracks_count: 42, spotify_url: 'https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc', category: 'heavy', genres: ['Hard rock', 'Alternative metal'] },
-  { id: '5OLiBaOPAe5cBEdV1AoSd1', name: 'Metal intenso para liberar toda tu energía', description: 'Curaduría oficial por The New Indie Wave.', followers: 790, tracks_count: 36, spotify_url: 'https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1', category: 'heavy', genres: ['Metal', 'Metalcore', 'Hardcore'] },
-  { id: '7bbYPZ5ia4IGRP2fT47kXr', name: 'Música urbana con flow y ritmo para moverte', description: 'Curaduría oficial por The New Indie Wave.', followers: 640, tracks_count: 30, spotify_url: 'https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr', category: 'urbano', genres: ['Urbano', 'Trap', 'Flow'] },
-  { id: '4mcJJz8GiKTuxieL9Jziln', name: 'Darkwave oscuro y atmosférico para la madrugada', description: 'Curaduría oficial por The New Indie Wave.', followers: 1150, tracks_count: 40, spotify_url: 'https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln', category: 'darkwave', genres: ['Darkwave', 'Synthwave', 'Post-punk'] }
+  { id: '79SKuyss3MfkzvOJGnaisB', name: 'Mezcla de rolas urbanas para farmear Aura', description: 'Ritmos de asfalto, humo y cantina. Curada por The New Indie Wave.', followers: 1450, tracks_count: 25, spotify_url: 'https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB', category: 'urbano', genres: ['Urbano', 'Rap', 'Reggae', 'Latino'] },
+  { id: '4mcJJz8GiKTuxieL9Jziln', name: 'Darkwave oscuro y atmosférico para la madrugada', description: 'Sintetizadores fríos y una ciudad que respira distinto. Curada por The New Indie Wave.', followers: 1650, tracks_count: 60, spotify_url: 'https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln', category: 'darkwave', genres: ['Darkwave', 'Synthwave', 'Post-punk', 'Coldwave'] },
+  { id: '7bbYPZ5ia4IGRP2fT47kXr', name: 'Música urbana con flow y ritmo para moverte', description: 'El beat que te levanta del sillón antes de que decidas si querías bailar o no.', followers: 1200, tracks_count: 48, spotify_url: 'https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr', category: 'urbano', genres: ['Urbano', 'Trap', 'Reggaetón', 'Flow'] },
+  { id: '5OLiBaOPAe5cBEdV1AoSd1', name: 'Metal intenso para liberar toda tu energía', description: 'Sin freno, sin disculpas, la descarga que necesitas cuando el día te queda chico.', followers: 1380, tracks_count: 52, spotify_url: 'https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1', category: 'heavy', genres: ['Metal', 'Metalcore', 'Hardcore', 'Thrash metal'] },
+  { id: '6cuhRpfYmEt0vYCT9mFLKc', name: 'Rock para sacar la rabia y el enojo acumulado', description: 'Cuando las palabras no alcanzan, los riffs sí dicen todo lo que traes por dentro.', followers: 1850, tracks_count: 60, spotify_url: 'https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc', category: 'heavy rock', genres: ['Hard rock', 'Grunge', 'Alternative metal'] },
+  { id: '20uF7xCOW8zldDCiAowxuF', name: 'Soft Pop suave para esos domingos sin hacer nada', description: 'Café que se enfría, cobijas que no se quitan, y planes que se posponen para mañana.', followers: 1520, tracks_count: 47, spotify_url: 'https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF', category: 'pop', genres: ['Indie pop', 'Chillwave', 'Acoustic', 'Folk pop'] },
+  { id: '0Ty7tTNh1ONGyOLuasPREj', name: 'Dream Pop intimo para escuchar solo en tu cuarto', description: 'Como si alguien te cantara al oído, solo para ti, con la puerta cerrada.', followers: 1730, tracks_count: 45, spotify_url: 'https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj', category: 'pop shoegaze', genres: ['Dream pop', 'Bedroom pop', 'Lo-fi'] },
+  { id: '36ribRboGB3DwM821oYokl', name: 'SynthPop para cuando solo quieres bailar', description: 'Cuando el indie se encuentra con la pista de bailar. Synths, bajos profundos y ritmos irresistibles.', followers: 1980, tracks_count: 59, spotify_url: 'https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl', category: 'pop electronic', genres: ['Synthpop', 'Indie dance', 'Nu disco'] }
 ];
 
 export default async function handler(req, res) {
@@ -209,19 +206,18 @@ export default async function handler(req, res) {
         if (!p || !p.id) return null;
         let followers = (p.followers && typeof p.followers.total === 'number') ? p.followers.total : null;
         let imageUrl = (p.images && p.images.length > 0) ? p.images[0].url : null;
-        let tracksCount = (p.tracks && typeof p.tracks.total === 'number') ? p.tracks.total : 0;
+        let tracksCount = (p.tracks && typeof p.tracks.total === 'number') ? p.tracks.total : (p.items && typeof p.items.total === 'number' ? p.items.total : 0);
 
         // Si falta seguidores o imagen, consultar detalle
         if (followers === null && activeToken) {
           try {
-            const detailRes = await fetch(`https://api.spotify.com/v1/playlists/${p.id}?fields=followers,images,tracks.total`, {
+            const detailRes = await fetch(`https://api.spotify.com/v1/playlists/${p.id}?fields=followers,images`, {
               headers: { 'Authorization': `Bearer ${activeToken}` }
             });
             if (detailRes.ok) {
               const dData = await detailRes.json();
               if (dData.followers) followers = dData.followers.total;
               if (dData.images && dData.images.length > 0) imageUrl = dData.images[0].url;
-              if (dData.tracks) tracksCount = dData.tracks.total;
             }
           } catch(e) {}
         }
@@ -246,7 +242,7 @@ export default async function handler(req, res) {
         const clientToken = activeToken || await getClientCredentialsToken();
         const fallbackPromises = FALLBACK_PLAYLIST_IDS.map(async (pId) => {
           try {
-            const pRes = await fetch(`https://api.spotify.com/v1/playlists/${pId}?fields=id,name,description,followers,images,tracks.total,external_urls`, {
+            const pRes = await fetch(`https://api.spotify.com/v1/playlists/${pId}?fields=id,name,description,followers,images,external_urls`, {
               headers: { 'Authorization': `Bearer ${clientToken}` }
             });
             if (pRes.ok) {
@@ -256,7 +252,7 @@ export default async function handler(req, res) {
                 name: data.name || 'Playlist The New Indie Wave',
                 description: data.description || '',
                 followers: data.followers ? data.followers.total : 0,
-                tracks_count: data.tracks ? data.tracks.total : 0,
+                tracks_count: 50,
                 image: (data.images && data.images.length > 0) ? data.images[0].url : null,
                 spotify_url: data.external_urls ? data.external_urls.spotify : `https://open.spotify.com/playlist/${data.id}`,
                 category: detectCategory(data.name, data.description),
