@@ -1341,7 +1341,8 @@
         var parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
           artistsList = parsed.filter(function(a) {
-            return a && a.id !== 'spotify_auth_config' && a.type !== 'config';
+            var isArch = (typeof isArtistArchived === 'function') ? isArtistArchived(a) : (a.type === 'archived');
+            return a && a.id !== 'spotify_auth_config' && a.type !== 'config' && !isArch;
           });
         }
       }
@@ -1383,7 +1384,10 @@
   // Sincronización en tiempo real desde base de datos Supabase
   if (typeof syncRadarFromSupabase === 'function') {
     syncRadarFromSupabase().then(function(data){
-      artistsList = (data || []).filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
+      artistsList = (data || []).filter(function(a){
+        var isArch = (typeof isArtistArchived === 'function') ? isArtistArchived(a) : (a.type === 'archived');
+        return a && a.id !== 'spotify_auth_config' && a.type !== 'config' && !isArch;
+      });
       renderAllRadarArtists();
       checkDeepLink();
     });
@@ -1541,30 +1545,51 @@
   function checkDeepLink() {
     try {
       var params = new URLSearchParams(window.location.search);
-      var aId = params.get('artista');
-      if (aId && typeof artistsList !== 'undefined') {
+      var aId = params.get('artista') || params.get('id') || params.get('artist');
+      if (aId) {
         var altId = aId.replace(/^radar-(\d)$/, 'radar-0$1').replace(/^radar-0(\d)$/, 'radar-$1');
-        var target = artistsList.find(function(a){
-          return a.id === aId || a.id === altId || a.name.toLowerCase().replace(/\s+/g, '-') === aId.toLowerCase();
+        var list = (typeof artistsList !== 'undefined' && Array.isArray(artistsList)) ? artistsList : [];
+        var target = list.find(function(a){
+          return a && (a.id === aId || a.id === altId || (a.name && a.name.toLowerCase().replace(/\s+/g, '-') === aId.toLowerCase()));
         });
         if (target) {
           setTimeout(function(){
-            openArtistModal(target.id);
+            openArtistModal(target);
           }, 250);
+        } else {
+          // Si no está en el radar activo, buscar en Supabase (puede ser un artista del archivo histórico)
+          if (typeof getSingleRadarArtistFromSupabase === 'function') {
+            getSingleRadarArtistFromSupabase(aId).then(function(archivedArtist){
+              if (archivedArtist) {
+                setTimeout(function(){
+                  openArtistModal(archivedArtist);
+                }, 150);
+              }
+            });
+          }
         }
       }
     } catch(e) {}
   }
 
   // MODAL LOGIC
-  function openArtistModal(id) {
-    var altId = id ? (id.replace(/^radar-(\d)$/, 'radar-0$1').replace(/^radar-0(\d)$/, 'radar-$1')) : '';
-    var artist = artistsList.find(function(a){ return a.id === id || a.id === altId; });
+  function openArtistModal(artistOrId) {
+    var artist = null;
+    if (artistOrId && typeof artistOrId === 'object') {
+      artist = artistOrId;
+    } else if (artistOrId) {
+      var id = String(artistOrId);
+      var altId = id.replace(/^radar-(\d)$/, 'radar-0$1').replace(/^radar-0(\d)$/, 'radar-$1');
+      var list = (typeof artistsList !== 'undefined' && Array.isArray(artistsList)) ? artistsList : [];
+      artist = list.find(function(a){ return a && (a.id === id || a.id === altId); });
+    }
     if (!artist) return;
     currentOpenArtist = artist;
     try {
       history.replaceState(null, '', '?artista=' + encodeURIComponent(artist.id));
     } catch(e) {}
+
+    var isArchived = (typeof isArtistArchived === 'function') ? isArtistArchived(artist) : (artist.type === 'archived');
 
     var heroWrap = document.getElementById('mHeroMedia');
     if (artist.media_type === 'video' || (artist.media_url && artist.media_url.endsWith('.mp4'))) {
@@ -1574,7 +1599,11 @@
       heroWrap.innerHTML = '<img src="' + imgUrl + '" alt="' + artist.name + '"><div class="modal-hero-overlay"></div>';
     }
 
-    document.getElementById('mBadgeStrip').innerHTML = '<span class="top3-badge" style="position:static;">' + (artist.badge || 'ARTISTA') + '</span>';
+    var badgeHtml = isArchived
+      ? '<span class="top3-badge" style="position:static; background:#6366f1; color:#fff; border-color:#818cf8;">📁 ARCHIVO HISTÓRICO</span> <span class="top3-badge" style="position:static;">' + (artist.badge || 'ARTISTA') + '</span>'
+      : '<span class="top3-badge" style="position:static;">' + (artist.badge || 'ARTISTA') + '</span>';
+
+    document.getElementById('mBadgeStrip').innerHTML = badgeHtml;
     document.getElementById('mTitle').textContent = artist.name;
     document.getElementById('mCity').textContent = '📍 ' + artist.city;
     document.getElementById('mGenre').textContent = '• ' + artist.genre;

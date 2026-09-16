@@ -26,6 +26,27 @@ module.exports = async (req, res) => {
         artist = data[0];
       }
     }
+
+    // Búsqueda alternativa por coincidencia exacta o normalizada de nombre si no se encontró por ID
+    if (!artist && targetId && targetId !== 'radar-01') {
+      const normTarget = targetId.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const allRes = await fetch(`${SUPABASE_URL}/rest/v1/radar_artists?select=*`, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
+      if (allRes.ok) {
+        const allData = await allRes.json();
+        if (Array.isArray(allData)) {
+          artist = allData.find(a => {
+            if (!a || !a.name) return false;
+            const normName = a.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            return normName === normTarget || normName.includes(normTarget) || normTarget.includes(normName);
+          });
+        }
+      }
+    }
   } catch (err) {
     console.error('Error fetching artist:', err);
   }
@@ -52,7 +73,8 @@ module.exports = async (req, res) => {
       imgUrl = rawUrl;
     }
   }
-  const redirectUrl = `https://thenewindiewave.online/artistas.html?artista=${encodeURIComponent(targetId)}`;
+  const canonicalId = artist ? artist.id : targetId;
+  const redirectUrl = `https://thenewindiewave.online/artistas.html?artista=${encodeURIComponent(canonicalId)}`;
 
   const html = `<!DOCTYPE html>
 <html lang="es">

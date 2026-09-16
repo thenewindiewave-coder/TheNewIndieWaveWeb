@@ -1871,8 +1871,33 @@
           ${secList.length === 0 ? '<div class="empty-box" style="padding: 24px;">No hay artistas secundarios registrados.</div>' : secList.map((a, idx) => renderArtistCardHtml(a, false, idx, secList.length, list.indexOf(a))).join('')}
         </div>
       </div>
+
+      <!-- SECCIÓN 3: ARCHIVO HISTÓRICO DEL RADAR (RESEÑAS PRESERVADAS) -->
+      <div style="margin-top: 28px; border-top: 1px dashed var(--border-strong); padding-top: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; color: #a78bfa; background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.3); padding: 3px 10px; border-radius: 4px;">
+              📁 ARCHIVO HISTÓRICO DEL RADAR
+            </span>
+            <span style="font-size: 12px; color: var(--text-muted);">Artistas retirados del radar activo. Sus reseñas y links exclusivos siguen activos.</span>
+          </div>
+          <button onclick="loadAndRenderRadarArchive()" class="btn-tool" style="background: rgba(167,139,250,0.1); color: #a78bfa; border-color: rgba(167,139,250,0.3); font-size: 11px;">
+            🔄 Actualizar Archivo
+          </button>
+        </div>
+
+        <div id="radarArchiveListContainer">
+          <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim); padding: 14px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px dashed var(--border);">
+            ⏳ Cargando archivo histórico...
+          </div>
+        </div>
+      </div>
       </div>
     `;
+
+    setTimeout(function(){
+      loadAndRenderRadarArchive();
+    }, 50);
   }
 
   function renderArtistCardHtml(a, isTop, indexInCat, totalInCat, globalIdx) {
@@ -1888,6 +1913,7 @@
     }
 
     var posNumber = (indexInCat + 1 < 10 ? '0' : '') + (indexInCat + 1);
+    var artistUrl = 'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(a.id);
 
     return `
       <div class="track-item" style="padding: 14px 16px; border-left: 3px solid ${isTop ? 'var(--accent-lime)' : 'var(--border-strong)'};">
@@ -1934,11 +1960,14 @@
             <button onclick="toggleRadarType('${a.id}', '${isTop ? 'secondary' : 'top3'}')" class="btn-tool" style="font-size: 10.5px; padding: 6px 10px;">
               ${isTop ? '⬇ Pasar a Secundario' : '⭐ Subir a Top 10'}
             </button>
+            <button onclick="copyRadarArtistLink('${a.id}')" title="Copiar enlace exclusivo de la reseña" style="background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.35); color: var(--accent-cyan); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              🔗 Copiar Link
+            </button>
             <button onclick="openEditArtistModal('${a.id}')" style="background: rgba(187,244,81,0.14); border: 1px solid rgba(187,244,81,0.35); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
               ✏️ Editar
             </button>
-            <button onclick="deleteRadarArtist('${a.id}')" style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
-              🗑️
+            <button onclick="deleteRadarArtist('${a.id}')" title="Mover a Archivo Histórico (su link sigue activo)" style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              📦 Archivar
             </button>
           </div>
 
@@ -2131,6 +2160,17 @@
             </div>
             <button onclick="closeRadarModal()" style="background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; padding: 4px 8px;">✕</button>
           </div>
+
+          ${!isNew ? `
+            <div style="background: rgba(187,244,81,0.06); border: 1px solid rgba(187,244,81,0.25); border-radius: 6px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis;">
+                🔗 Enlace permanente y exclusivo: <strong style="color: var(--accent-lime);">${'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(artist.id)}</strong>
+              </div>
+              <button type="button" onclick="copyRadarArtistLink('${artist.id}')" style="background: var(--accent-lime); color: #000; border: none; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 4px; cursor: pointer;">
+                Copiar Link
+              </button>
+            </div>
+          ` : ''}
 
           <form onsubmit="handleRadarFormSubmit(event, '${artist ? artist.id : ''}')" style="display: flex; flex-direction: column; gap: 14px;">
             
@@ -2420,14 +2460,62 @@
   }
 
   async function deleteRadarArtist(artistId) {
-    if(!confirm('¿Seguro que deseas eliminar este artista del radar?')) return;
     var rawList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var targetArtist = rawList.find(function(a){ return a.id === artistId; });
+    var artistName = targetArtist ? ('"' + targetArtist.name + '"') : 'este artista';
+
+    var confirmArchive = confirm(
+      '¿Deseas enviar a ' + artistName + ' al Archivo Histórico del Radar?\n\n' +
+      '✓ Se retirará del Top 10 / Secundario activo para dar lugar a nuevas propuestas.\n' +
+      '✓ Su reseña, fotos, música y link único seguirán funcionando para siempre.\n' +
+      '✓ Podrás consultarlo o restaurarlo en cualquier momento desde la sección "Archivo Histórico".'
+    );
+    if (!confirmArchive) return;
+
+    // Retirar de lista local activa
     var list = rawList.filter(function(a){ return a.id !== artistId && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
     list.forEach(function(item, i){ item.order = i + 1; });
     saveRadarArtists(list);
     renderRadarManager();
-    showToast('✓ Artista eliminado del radar');
+    showToast('⏳ Archivando artista y preservando reseña...');
 
+    try {
+      if (typeof archiveRadarArtistInSupabase === 'function') {
+        await archiveRadarArtistInSupabase(artistId);
+      }
+      showToast('✓ Artista enviado al Archivo Histórico (su link sigue activo)');
+      renderRadarManager();
+    } catch(e) {
+      console.error('Error archivando:', e);
+      showToast('⚠️ No se pudo sincronizar el archivo con Supabase');
+    }
+  }
+
+  async function restoreRadarArtist(artistId) {
+    showToast('⏳ Restaurando artista al radar activo...');
+    try {
+      if (typeof unarchiveRadarArtistInSupabase === 'function') {
+        await unarchiveRadarArtistInSupabase(artistId, 'secondary');
+      }
+      if (typeof syncRadarFromSupabase === 'function') {
+        await syncRadarFromSupabase();
+      }
+      renderRadarManager();
+      showToast('✓ Artista restaurado al radar activo');
+    } catch(e) {
+      console.error('Error restaurando artista:', e);
+      showToast('⚠️ Error al restaurar artista');
+    }
+  }
+
+  async function permanentlyDeleteRadarArtist(artistId) {
+    var confirmPermanent = confirm(
+      '⚠️ ATENCIÓN: ¿Estás completamente seguro de ELIMINAR DEFINITIVAMENTE este artista de Supabase?\n\n' +
+      'Esta acción no se puede deshacer. La reseña se borrará y el enlace dejará de funcionar.'
+    );
+    if (!confirmPermanent) return;
+
+    showToast('⏳ Eliminando definitivamente de Supabase...');
     try {
       await fetch(SUPABASE_URL + '/rest/v1/radar_artists?id=eq.' + encodeURIComponent(artistId), {
         method: 'DELETE',
@@ -2436,7 +2524,87 @@
           'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
         }
       });
-    } catch(e) {}
+      showToast('✓ Artista eliminado definitivamente');
+      loadAndRenderRadarArchive();
+    } catch(e) {
+      showToast('⚠️ Error eliminando de base de datos');
+    }
+  }
+
+  function copyRadarArtistLink(artistId) {
+    var fullUrl = 'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(artistId);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(fullUrl).then(function(){
+        showToast('✓ Link exclusivo copiado: ' + fullUrl);
+      }).catch(function(){
+        prompt('Copia este link exclusivo:', fullUrl);
+      });
+    } else {
+      prompt('Copia este link exclusivo:', fullUrl);
+    }
+  }
+
+  async function loadAndRenderRadarArchive() {
+    var cont = document.getElementById('radarArchiveListContainer');
+    if (!cont) return;
+    try {
+      var archived = (typeof getArchivedRadarArtistsFromSupabase === 'function') 
+        ? await getArchivedRadarArtistsFromSupabase() 
+        : [];
+      if (!archived || archived.length === 0) {
+        cont.innerHTML = '<div class="empty-box" style="padding: 20px; font-size: 12px; border: 1px dashed var(--border);">No hay artistas en el archivo histórico todavía. Cuando archives artistas activos para renovar tu Top 10, aparecerán aquí para que sus reseñas y links sigan funcionando siempre.</div>';
+        return;
+      }
+      cont.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          ${archived.map(function(a){
+            var artistUrl = 'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(a.id);
+            var dateStr = a.archived_at ? new Date(a.archived_at).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Archivado';
+            var thumb = a.media_url || 'logo.png';
+            return `
+              <div class="track-item" style="padding: 12px 16px; border-left: 3px solid #a78bfa; background: rgba(167,139,250,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                  <div style="display: flex; align-items: center; gap: 12px; min-width: 240px; flex: 1;">
+                    <img src="${thumb}" alt="" style="width: 46px; height: 46px; border-radius: 6px; object-fit: cover; background: #141417; flex-shrink: 0;" onerror="this.src='logo.png'">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <h4 style="font-family: var(--font-heading); font-size: 15px; font-weight: 700; color: #fff;">${a.name}</h4>
+                        <span class="track-tag" style="background: rgba(167,139,250,0.15); color: #c4b5fd;">
+                          📁 ARCHIVADO (${dateStr})
+                        </span>
+                        <span class="track-tag" style="background: rgba(56,189,248,0.08); color: var(--accent-cyan);">
+                          ${a.city || 'GLOBAL'}
+                        </span>
+                      </div>
+                      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 3px; word-break: break-all;">
+                        Link permanente: <a href="${artistUrl}" target="_blank" style="color: var(--accent-lime); text-decoration: none;">${artistUrl} ↗</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <button onclick="copyRadarArtistLink('${a.id}')" title="Copiar enlace permanente" style="background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.35); color: var(--accent-cyan); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                      🔗 Copiar Link
+                    </button>
+                    <a href="${artistUrl}" target="_blank" title="Ver reseña en la web" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 6px 10px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                      👁️ Ver Reseña ↗
+                    </a>
+                    <button onclick="restoreRadarArtist('${a.id}')" title="Regresar al radar activo" style="background: rgba(187,244,81,0.14); border: 1px solid rgba(187,244,81,0.35); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
+                      🔄 Restaurar
+                    </button>
+                    <button onclick="permanentlyDeleteRadarArtist('${a.id}')" title="Borrar definitivamente de la base de datos" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #ef4444; font-family: var(--font-mono); font-size: 11px; padding: 6px 8px; border-radius: 4px; cursor: pointer;">
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    } catch(e) {
+      cont.innerHTML = '<div class="empty-box" style="padding: 16px; color: #ef4444;">Error cargando archivo histórico.</div>';
+    }
   }
 
   async function syncAndRefreshRadar() {
@@ -2671,7 +2839,12 @@
 
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Link de Artistas del Radar (Opcional):</label>
-                <input type="text" id="amRadarUrl" value="${defaultRadarUrl}" placeholder="https://thenewindiewave.online/artistas.html?artista=radar-1 (Opcional)" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-lime); border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
+                <div style="display: flex; gap: 6px;">
+                  <input type="text" id="amRadarUrl" value="${defaultRadarUrl}" placeholder="https://thenewindiewave.online/artistas.html?artista=... (Opcional)" style="flex: 1; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-lime); border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
+                  <button type="button" onclick="copyAmRadarUrl()" style="background: rgba(187,244,81,0.15); border: 1px solid rgba(187,244,81,0.35); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 0 14px; border-radius: 4px; cursor: pointer; white-space: nowrap;">
+                    📋 Copiar
+                  </button>
+                </div>
               </div>
             </div>
             <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">
@@ -2933,6 +3106,23 @@
     handleAutoMessagePlaylistInput(pUrl);
   }
 
+  function copyAmRadarUrl() {
+    var val = (document.getElementById('amRadarUrl').value || '').trim();
+    if (!val) {
+      showToast('⚠️ No hay enlace ingresado para copiar');
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(val).then(function(){
+        showToast('✓ Link copiado al portapapeles');
+      }).catch(function(){
+        prompt('Copia este link:', val);
+      });
+    } else {
+      prompt('Copia este link:', val);
+    }
+  }
+
   function onAutoMessageRadarSelect(artistId) {
     if (artistId === 'none') {
       document.getElementById('amRadarUrl').value = '';
@@ -2948,7 +3138,8 @@
     var list = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
     var artist = list.find(function(a){ return a.id === artistId; });
     if (artist) {
-      document.getElementById('amRadarUrl').value = 'https://thenewindiewave.online/artistas.html?artista=' + artist.id;
+      var fullUrl = 'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(artist.id);
+      document.getElementById('amRadarUrl').value = fullUrl;
       if (artist.name) {
         document.getElementById('amArtistName').value = artist.name;
       }
