@@ -74,7 +74,8 @@ function extractGenres(name, description) {
     'chillwave', 'acoustic', 'folk pop', 'soft rock',
     'hard rock', 'alternative metal', 'nu metal', 'stoner',
     'metalcore', 'hardcore', 'thrash metal', 'death metal', 'metal',
-    'urbano', 'reggaetón', 'trap', 'dembow', 'latin trap', 'afrobeat',
+    'urbano', 'reggaetón', 'reggaeton', 'trap', 'dembow', 'latin trap', 'afrobeat',
+    'funk', 'disco', 'pop punk', 'soul', 'r&b',
     'corridos tumbados', 'regional mexicano', 'regional urbano',
     'darkwave', 'synthwave', 'coldwave', 'gothic rock', 'industrial',
     'synthpop', 'indie pop', 'dance pop', 'nu disco'
