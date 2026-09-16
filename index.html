@@ -306,11 +306,35 @@
 
   /* HERO */
   .hero-wrapper {
-    padding: 100px 0 120px;
+    position: relative;
+    padding: 90px 0 110px;
     max-width: 920px;
+    z-index: 2;
+  }
+
+  /* Interactive Audio Waves Canvas */
+  .hero-waves-container {
+    position: absolute;
+    top: -20px;
+    right: -60px;
+    width: min(720px, 95vw);
+    height: 115%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.85;
+    mask-image: radial-gradient(circle at 65% 50%, black 25%, transparent 75%);
+    -webkit-mask-image: radial-gradient(circle at 65% 50%, black 25%, transparent 75%);
+  }
+
+  #heroWavesCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
   }
 
   .hero-kicker {
+    position: relative;
+    z-index: 2;
     display: inline-block;
     font-family: var(--font-mono);
     font-size: 12px;
@@ -321,9 +345,12 @@
     border-radius: 4px;
     margin-bottom: 24px;
     letter-spacing: 0.05em;
+    animation: textBlurReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both, kickerGlow 4s ease-in-out infinite 1s;
   }
 
   .hero-title {
+    position: relative;
+    z-index: 2;
     font-family: var(--font-heading);
     font-size: clamp(34px, 5.5vw, 68px);
     font-weight: 900;
@@ -331,37 +358,187 @@
     line-height: 1.05;
     margin-bottom: 24px;
     text-transform: uppercase;
+    animation: textBlurReveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
   }
 
   .lime-hl {
     color: var(--accent-lime);
+    text-shadow: 0 0 24px rgba(187, 244, 81, 0.3);
   }
 
   .hero-description {
+    position: relative;
+    z-index: 2;
     font-size: clamp(15px, 2vw, 19px);
     color: var(--text-muted);
     max-width: 720px;
     line-height: 1.6;
     margin-bottom: 40px;
+    animation: textBlurReveal 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
   }
 
+  .hero-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    animation: textBlurReveal 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+  }
+
+  /* BOTÓN CTA CON BORDER BEAM ILUMINADO */
   .btn-hero-cta {
+    position: relative;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     background: var(--accent-lime);
-    color: #000;
+    color: #000 !important;
     font-family: var(--font-mono);
     font-size: 15px;
     font-weight: 800;
     padding: 16px 28px;
-    border-radius: 4px;
+    border-radius: 6px;
     text-decoration: none;
-    transition: transform 0.2s var(--ease-bounce);
+    transition: transform 0.2s var(--ease-bounce), box-shadow 0.25s ease;
     min-height: 52px;
+    overflow: hidden;
+    isolation: isolate;
+    box-shadow: 0 0 20px rgba(187, 244, 81, 0.25);
   }
 
   .btn-hero-cta:hover {
-    transform: scale(1.05);
+    transform: scale(1.04);
+    box-shadow: 0 0 35px rgba(187, 244, 81, 0.45);
+  }
+
+  .btn-hero-cta .btn-content {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-hero-cta .btn-beam {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .btn-hero-cta .btn-beam::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background: conic-gradient(from 0deg, transparent 0% 70%, rgba(255, 255, 255, 0.95) 85%, #000 95%, transparent 100%);
+    animation: beamRotate 3.2s linear infinite;
+  }
+
+  @keyframes beamRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes textBlurReveal {
+    0% {
+      opacity: 0;
+      filter: blur(10px);
+      transform: translateY(14px);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes kickerGlow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(187, 244, 81, 0);
+    }
+    50% {
+      box-shadow: 0 0 12px 2px rgba(187, 244, 81, 0.25);
+    }
+  }
+
+  /* CINTA TRANSPORTADORA INFINITA (MARQUEE) */
+  .marquee-strip {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    overflow: hidden;
+    background: #0b0b0e;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 0;
+    margin-bottom: 60px;
+    user-select: none;
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marqueeScroll 34s linear infinite;
+  }
+
+  .marquee-strip:hover .marquee-track {
+    animation-play-state: paused;
+  }
+
+  .marquee-group {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding-right: 32px;
+    flex-shrink: 0;
+  }
+
+  .marquee-item {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    transition: color 0.2s ease;
+  }
+
+  .marquee-item:hover {
+    color: var(--text-main);
+  }
+
+  .marquee-star {
+    color: var(--accent-lime);
+    font-size: 10px;
+    text-shadow: 0 0 8px rgba(187, 244, 81, 0.8);
+  }
+
+  @keyframes marqueeScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-title, .hero-kicker, .hero-description, .hero-actions { animation: none !important; }
+    .marquee-track { animation: none !important; }
+    .btn-hero-cta .btn-beam::before { animation: none !important; }
   }
 
   /* FOOTER */
@@ -541,23 +718,53 @@
   .home-grid-2 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    gap: 22px;
+    perspective: 1200px;
   }
   .home-card {
+    position: relative;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 24px;
+    border-radius: 8px;
+    padding: 26px;
     text-decoration: none;
     color: inherit;
-    transition: border-color 0.2s, transform 0.2s;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transform-style: preserve-3d;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease-out;
+    overflow: hidden;
+    will-change: transform;
+    isolation: isolate;
+  }
+  /* Spotlight radial glow que sigue al ratón */
+  .home-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      450px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(187, 244, 81, 0.14),
+      transparent 65%
+    );
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .home-card:hover::before {
+    opacity: 1;
   }
   .home-card:hover {
-    border-color: var(--accent-lime);
-    transform: translateY(-2px);
+    border-color: rgba(187, 244, 81, 0.45);
+    box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.6), 0 0 24px -6px rgba(187, 244, 81, 0.16);
+  }
+  .home-card > * {
+    position: relative;
+    z-index: 2;
+    transform: translateZ(10px);
   }
   .home-card-tag {
     font-family: var(--font-mono);
@@ -678,6 +885,11 @@
 <!-- MAIN CONTENT VIEW -->
 <main class="container">
   <div class="hero-wrapper">
+    <!-- Interactive Audio Waves Canvas (Fondo dinámico) -->
+    <div class="hero-waves-container" id="heroWavesContainer" aria-hidden="true">
+      <canvas id="heroWavesCanvas"></canvas>
+    </div>
+
     <span class="hero-kicker">// PLATAFORMA & COLECTIVO CULTURAL</span>
     
     <h1 class="hero-title">
@@ -688,14 +900,43 @@
       The New Indie Wave es una plataforma y colectivo cultural independiente. Escuchamos canción por canción para incluirlas en nuestras playlists oficiales de Spotify, difundirlas en nuestras redes sociales, programarlas en eventos en vivo y conectar a los artistas emergentes con nuevas audiencias en México, Latinoamérica y el mundo.
     </p>
 
-    <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
+    <div class="hero-actions">
       <a href="/enviar" class="btn-hero-cta">
-        ENVIAR TU CANCIÓN ↗
+        <span class="btn-beam" aria-hidden="true"></span>
+        <span class="btn-content">ENVIAR TU CANCIÓN ↗</span>
       </a>
       <a href="/estado" id="activeStatusBanner" style="display: none; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--accent-lime); background: rgba(187, 244, 81, 0.08); border: 1px solid rgba(187, 244, 81, 0.25); padding: 14px 20px; border-radius: 4px; text-decoration: none; min-height: 48px;">
         <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-lime); display: inline-block;"></span>
         <span>Tienes 1 canción en revisión // <strong>Ver Estado en Vivo ↗</strong></span>
       </a>
+    </div>
+  </div>
+
+  <!-- CINTA TRANSPORTADORA INFINITA (MARQUEE) -->
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-track">
+      <div class="marquee-group">
+        <span class="marquee-item">INDIE ROCK <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">BEDROOM POP <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">POST-PUNK <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">SHOEGAZE <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">DARKWAVE <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">DREAM POP <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">CURADURÍA 100% HUMANA <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">SPOTIFY OFFICIAL PLAYLISTS <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">EMERGENTES MÉXICO & LATAM <span class="marquee-star">✦</span></span>
+      </div>
+      <div class="marquee-group" aria-hidden="true">
+        <span class="marquee-item">INDIE ROCK <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">BEDROOM POP <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">POST-PUNK <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">SHOEGAZE <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">DARKWAVE <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">DREAM POP <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">CURADURÍA 100% HUMANA <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">SPOTIFY OFFICIAL PLAYLISTS <span class="marquee-star">✦</span></span>
+        <span class="marquee-item">EMERGENTES MÉXICO & LATAM <span class="marquee-star">✦</span></span>
+      </div>
     </div>
   </div>
 
@@ -910,6 +1151,176 @@
       if(banner) banner.style.display = 'none';
     });
   }
+
+  // ==========================================
+  // EFECTO 01: ONDAS DE AUDIO INTERACTIVAS (HERO)
+  // ==========================================
+  (function initHeroWaves() {
+    var canvas = document.getElementById('heroWavesCanvas');
+    var container = document.getElementById('heroWavesContainer');
+    if (!canvas || !container) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var ctx = canvas.getContext('2d');
+    var width, height, dpr;
+    var animationId = null;
+    var isVisible = true;
+    var mouse = { x: -999, y: -999, targetX: -999, targetY: -999, active: false };
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = container.offsetWidth;
+      height = container.offsetHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resize, { passive: true });
+    resize();
+
+    var hero = document.querySelector('.hero-wrapper');
+    if (hero) {
+      hero.addEventListener('mousemove', function(e) {
+        var rect = container.getBoundingClientRect();
+        mouse.targetX = e.clientX - rect.left;
+        mouse.targetY = e.clientY - rect.top;
+        mouse.active = true;
+      }, { passive: true });
+
+      hero.addEventListener('mouseleave', function() {
+        mouse.active = false;
+      }, { passive: true });
+
+      hero.addEventListener('touchmove', function(e) {
+        if (e.touches && e.touches[0]) {
+          var rect = container.getBoundingClientRect();
+          mouse.targetX = e.touches[0].clientX - rect.left;
+          mouse.targetY = e.touches[0].clientY - rect.top;
+          mouse.active = true;
+        }
+      }, { passive: true });
+
+      hero.addEventListener('touchend', function() {
+        mouse.active = false;
+      }, { passive: true });
+    }
+
+    var waves = [
+      { freq: 0.007, amp: 26, speed: 0.015, color: 'rgba(187, 244, 81, 0.40)', lineWidth: 2 },
+      { freq: 0.011, amp: 38, speed: -0.012, color: 'rgba(187, 244, 81, 0.25)', lineWidth: 1.5 },
+      { freq: 0.005, amp: 46, speed: 0.008, color: 'rgba(215, 255, 130, 0.20)', lineWidth: 1.5 },
+      { freq: 0.015, amp: 20, speed: -0.020, color: 'rgba(187, 244, 81, 0.30)', lineWidth: 1 },
+      { freq: 0.009, amp: 30, speed: 0.012, color: 'rgba(140, 230, 80, 0.16)', lineWidth: 1.2 }
+    ];
+
+    var step = 0;
+
+    function render() {
+      if (!isVisible) return;
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (mouse.active) {
+        mouse.x += (mouse.targetX - mouse.x) * 0.08;
+        mouse.y += (mouse.targetY - mouse.y) * 0.08;
+      } else {
+        mouse.x += (-999 - mouse.x) * 0.05;
+        mouse.y += (-999 - mouse.y) * 0.05;
+      }
+
+      step += 1;
+      var centerY = height * 0.52;
+
+      for (var i = 0; i < waves.length; i++) {
+        var wave = waves[i];
+        ctx.beginPath();
+        ctx.lineWidth = wave.lineWidth;
+        ctx.strokeStyle = wave.color;
+
+        for (var x = 0; x <= width; x += 4) {
+          var baseSin = Math.sin(x * wave.freq + step * wave.speed + i);
+          var subSin = Math.cos(x * (wave.freq * 0.6) + step * (wave.speed * 0.8));
+          var yOffset = (baseSin + subSin * 0.5) * wave.amp;
+
+          if (mouse.active) {
+            var dist = Math.abs(x - mouse.x);
+            if (dist < 200) {
+              var influence = (1 - dist / 200);
+              var mouseOffset = Math.sin(dist * 0.05 - step * 0.08) * 35 * influence;
+              yOffset += mouseOffset;
+            }
+          }
+
+          var y = centerY + yOffset;
+          if (x === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.stroke();
+      }
+
+      animationId = requestAnimationFrame(render);
+    }
+
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          isVisible = entry.isIntersecting;
+          if (isVisible && !animationId) {
+            animationId = requestAnimationFrame(render);
+          } else if (!isVisible && animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+          }
+        });
+      }, { threshold: 0.05 });
+      observer.observe(container);
+    } else {
+      animationId = requestAnimationFrame(render);
+    }
+  })();
+
+  // ==========================================
+  // EFECTO 02: CARDS CON 3D TILT Y SPOTLIGHT GLOW
+  // ==========================================
+  (function initTiltAndSpotlight() {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+
+    var cards = document.querySelectorAll('.home-card');
+    cards.forEach(function(card) {
+      var rect = null;
+
+      card.addEventListener('mouseenter', function() {
+        rect = card.getBoundingClientRect();
+      });
+
+      card.addEventListener('mousemove', function(e) {
+        if (!rect) rect = card.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+
+        card.style.setProperty('--mouse-x', x + 'px');
+        card.style.setProperty('--mouse-y', y + 'px');
+
+        var centerX = rect.width / 2;
+        var centerY = rect.height / 2;
+        var rotateX = ((y - centerY) / centerY) * -5.5;
+        var rotateY = ((x - centerX) / centerX) * 5.5;
+
+        card.style.transform = 'perspective(1000px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-3px)';
+      });
+
+      card.addEventListener('mouseleave', function() {
+        rect = null;
+        card.style.setProperty('--mouse-x', '-999px');
+        card.style.setProperty('--mouse-y', '-999px');
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+      });
+    });
+  })();
 </script>
 
 </body>
