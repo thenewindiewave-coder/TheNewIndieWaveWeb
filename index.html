@@ -684,11 +684,68 @@
     color: var(--text-dim);
   }
 
+  @media (max-width: 850px) {
+    .site-footer {
+      padding-top: 48px;
+    }
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 36px 20px;
+      padding-bottom: 36px;
+    }
+    .footer-col.brand-col {
+      grid-column: 1 / -1;
+    }
+    .footer-bio {
+      max-width: 100%;
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+    .subfooter-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+  }
+
+  /* BOTÓN OUTLINE / SECUNDARIO */
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #fff !important;
+    border: 1px solid var(--border-strong) !important;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 13px 22px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    min-height: 46px;
+    box-shadow: none !important;
+  }
+
+  .btn-outline:hover {
+    background: rgba(187, 244, 81, 0.1) !important;
+    border-color: var(--accent-lime) !important;
+    color: var(--accent-lime) !important;
+    transform: translateY(-2px);
+  }
+
   /* SECCIONES ENRIQUECIDAS HOME (SEO & CONTENT) */
   .home-section {
-    margin-bottom: 80px;
+    margin-bottom: 70px;
     border-top: 1px solid var(--border);
-    padding-top: 50px;
+    padding-top: 45px;
   }
   .home-sec-tag {
     font-family: var(--font-mono);
@@ -713,27 +770,28 @@
     color: var(--text-muted);
     max-width: 720px;
     line-height: 1.6;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
   }
   .home-grid-2 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 22px;
+    gap: 16px;
     perspective: 1200px;
   }
   .home-card {
     position: relative;
-    background: var(--bg-card);
+    background: #111115;
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 26px;
+    padding: 18px 20px;
     text-decoration: none;
     color: inherit;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    min-height: 165px;
     transform-style: preserve-3d;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease-out;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease-out;
     overflow: hidden;
     will-change: transform;
     isolation: isolate;
@@ -745,7 +803,7 @@
     inset: 0;
     border-radius: inherit;
     background: radial-gradient(
-      450px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      380px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
       rgba(187, 244, 81, 0.14),
       transparent 65%
     );
@@ -759,33 +817,60 @@
   }
   .home-card:hover {
     border-color: rgba(187, 244, 81, 0.45);
-    box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.6), 0 0 24px -6px rgba(187, 244, 81, 0.16);
+    box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.6), 0 0 16px -4px rgba(187, 244, 81, 0.16);
   }
   .home-card > * {
     position: relative;
     z-index: 2;
-    transform: translateZ(10px);
+  }
+  .home-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
   }
   .home-card-tag {
     font-family: var(--font-mono);
-    font-size: 10.5px;
+    font-size: 10px;
     color: var(--accent-lime);
-    margin-bottom: 8px;
+    letter-spacing: 1px;
     text-transform: uppercase;
+    font-weight: 600;
+  }
+  .home-card-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(187, 244, 81, 0.1);
+    color: var(--accent-lime);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    transition: all 0.2s ease;
+  }
+  .home-card:hover .home-card-icon {
+    background: var(--accent-lime);
+    color: #000;
+    transform: scale(1.1);
   }
   .home-card-h3 {
     font-family: var(--font-heading);
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: #fff;
-    line-height: 1.3;
+    line-height: 1.35;
   }
   .home-card-p {
-    font-size: 13.5px;
+    font-size: 12.5px;
     color: var(--text-muted);
-    line-height: 1.5;
-    margin-bottom: 18px;
+    line-height: 1.45;
+    margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .home-card-link {
     font-family: var(--font-mono);
@@ -795,6 +880,29 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    transition: transform 0.15s ease;
+  }
+  .home-card:hover .home-card-link {
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 640px) {
+    .home-grid-2 {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .home-card {
+      padding: 14px 16px;
+      min-height: auto;
+    }
+    .home-card-h3 {
+      font-size: 14px;
+    }
+    .home-card-p {
+      font-size: 12px;
+      margin-bottom: 10px;
+      -webkit-line-clamp: 2;
+    }
   }
   .faq-list {
     display: flex;
@@ -950,38 +1058,50 @@
     <div class="home-grid-2">
       <a href="/playlists" class="home-card">
         <div>
-          <span class="home-card-tag">Indie Rock // Nocturno</span>
+          <div class="home-card-header">
+            <span class="home-card-tag">Indie Rock // Nocturno</span>
+            <span class="home-card-icon" aria-hidden="true">▶</span>
+          </div>
           <h3 class="home-card-h3">Rock indie para manejar de noche sin rumbo</h3>
           <p class="home-card-p">Guitarras melancólicas, bajos profundos y atmósferas nocturnas pensadas para viajes solitarios en carretera y contemplación urbana.</p>
         </div>
-        <span class="home-card-link">Escuchar y explorar playlist ↗</span>
+        <span class="home-card-link">Escuchar playlist ↗</span>
       </a>
 
       <a href="/playlists" class="home-card">
         <div>
-          <span class="home-card-tag">Bedroom Pop // Melancolía</span>
+          <div class="home-card-header">
+            <span class="home-card-tag">Bedroom Pop // Melancolía</span>
+            <span class="home-card-icon" aria-hidden="true">▶</span>
+          </div>
           <h3 class="home-card-h3">Pop indie para estar feliz y triste al mismo tiempo</h3>
           <p class="home-card-p">Sintetizadores nostálgicos, baterías lo-fi y líricas agridulces nacidas en cuartos independientes y estudios caseros de toda Iberoamérica.</p>
         </div>
-        <span class="home-card-link">Escuchar y explorar playlist ↗</span>
+        <span class="home-card-link">Escuchar playlist ↗</span>
       </a>
 
       <a href="/playlists" class="home-card">
         <div>
-          <span class="home-card-tag">Hard Rock // Post-Hardcore</span>
+          <div class="home-card-header">
+            <span class="home-card-tag">Hard Rock // Post-Hardcore</span>
+            <span class="home-card-icon" aria-hidden="true">▶</span>
+          </div>
           <h3 class="home-card-h3">Hard rock para sacar la rabia y el enojo acumulado</h3>
           <p class="home-card-p">Riffs potentes, distorsión cruda y catarsis sonora para liberar la energía acumulada con bandas emergentes y pesadas de la escena.</p>
         </div>
-        <span class="home-card-link">Escuchar y explorar playlist ↗</span>
+        <span class="home-card-link">Escuchar playlist ↗</span>
       </a>
 
       <a href="/playlists" class="home-card">
         <div>
-          <span class="home-card-tag">Shoegaze & Darkwave // Ecos</span>
+          <div class="home-card-header">
+            <span class="home-card-tag">Shoegaze & Darkwave // Ecos</span>
+            <span class="home-card-icon" aria-hidden="true">▶</span>
+          </div>
           <h3 class="home-card-h3">Shoegaze, Post-Punk & Texturas Alternativas</h3>
           <p class="home-card-p">Murallas de reverb, cajas de ritmos ochenteras y atmósferas etéreas para los amantes del sonido oscuro, dreampop y vanguardia independiente.</p>
         </div>
-        <span class="home-card-link">Ver catálogo completo de playlists ↗</span>
+        <span class="home-card-link">Ver catálogo completo ↗</span>
       </a>
     </div>
   </section>
@@ -994,10 +1114,10 @@
       Nuestro equipo editorial rastrea permanentemente la escena musical de México, Latinoamérica y España para destacar a los proyectos con identidad propia, sonido honesto y propuesta visual única antes de que exploten en las grandes ligas.
     </p>
     <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px;">
-      <a href="/artistas" class="btn-hero-cta" style="padding: 13px 22px; font-size: 13px;">
+      <a href="/artistas" class="btn-hero-cta" style="padding: 13px 22px; font-size: 13px; min-height: 46px;">
         EXPLORAR ARTISTAS EN EL RADAR ↗
       </a>
-      <a href="/manifiesto" class="btn-hero-cta" style="padding: 13px 22px; font-size: 13px; background: transparent; color: var(--text-main); border: 1px solid var(--border-strong);">
+      <a href="/manifiesto" class="btn-outline">
         LEER NUESTRO MANIFIESTO EDITORIAL ↗
       </a>
     </div>
