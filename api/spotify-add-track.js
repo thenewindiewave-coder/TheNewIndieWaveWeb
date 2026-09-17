@@ -23,7 +23,9 @@ const PLAYLIST_ID_MAP = {
   "Rock indie sucio y crudo para sentirte rebelde": "6cuhRpfYmEt0vYCT9mFLKc",
   "Punk sucio y crudo para sentirte rebelde": "6cuhRpfYmEt0vYCT9mFLKc",
   "Rock indie para manejar de noche sin rumbo": "6cuhRpfYmEt0vYCT9mFLKc",
-  "Rock indie para cuando no puedes dormir y piensas demasiado": "0Ty7tTNh1ONGyOLuasPREj"
+  "Rock indie para cuando no puedes dormir y piensas demasiado": "0Ty7tTNh1ONGyOLuasPREj",
+  "Dreamy Songs para escuchar en la intimidad de tu habitación": "0Ty7tTNh1ONGyOLuasPREj",
+  "Dreamy Songs para escuchar en la intimidad de tu habitacion": "0Ty7tTNh1ONGyOLuasPREj"
 };
 
 function extractTrackId(input) {
@@ -84,11 +86,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Enlace de track de Spotify no válido' });
   }
 
-  const playlistId = PLAYLIST_ID_MAP[playlist_name];
-  if (!playlistId) {
-    return res.status(400).json({ error: 'Playlist destino no reconocida: ' + playlist_name });
-  }
-
   try {
     // 1. Obtener Access Token fresco desde el Refresh Token
     const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
@@ -111,6 +108,46 @@ export default async function handler(req, res) {
 
     const tokenData = await refreshRes.json();
     const accessToken = tokenData.access_token;
+
+    // Resolver Playlist ID dinámicamente
+    let playlistId = PLAYLIST_ID_MAP[playlist_name];
+    
+    if (!playlistId) {
+      const normalize = str => (str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+      const normalizedInput = normalize(playlist_name);
+      
+      // Buscar en el mapa con nombre normalizado
+      for (const [key, val] of Object.entries(PLAYLIST_ID_MAP)) {
+        if (normalize(key) === normalizedInput) {
+          playlistId = val;
+          break;
+        }
+      }
+      
+      // Si aún no se encuentra, buscar en el perfil del usuario
+      if (!playlistId) {
+        let url = 'https://api.spotify.com/v1/me/playlists?limit=50';
+        while (url && !playlistId) {
+          const playlistsRes = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+          });
+          if (!playlistsRes.ok) break;
+          const data = await playlistsRes.json();
+          for (const p of (data.items || [])) {
+            if (!p) continue;
+            if (p.name === playlist_name || normalize(p.name) === normalizedInput) {
+              playlistId = p.id;
+              break;
+            }
+          }
+          url = data.next;
+        }
+      }
+    }
+
+    if (!playlistId) {
+      return res.status(400).json({ error: 'Playlist destino no reconocida en tu perfil: ' + playlist_name });
+    }
 
     // 2. Insertar track físicamente en la playlist de Spotify
     const trackUri = `spotify:track:${trackId}`;
