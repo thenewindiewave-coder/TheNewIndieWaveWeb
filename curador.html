@@ -4259,6 +4259,10 @@ Instagram:
     "💎 ¡Una recomendación imperdible para la comunidad! Descubran a *{artist}* y disfruten de su canción *'{song}'*. La acabamos de seleccionar para la playlist *'{playlist}'*. ¡Vayan a agregarla a sus bibliotecas! 🤘\n{url}"
   ];
 
+  var _tniwLogoImg = new Image();
+  _tniwLogoImg.crossOrigin = 'anonymous';
+  _tniwLogoImg.src = 'logo.png';
+
   let _wpCurrentArtist = '';
   let _wpCurrentSong = '';
   let _wpCurrentPlaylist = '';
@@ -4277,11 +4281,19 @@ Instagram:
     var modal = document.getElementById('whatsappGroupModal');
     if (modal) modal.style.display = 'flex';
 
-    // Placeholder until we load track cover
-    generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
-    generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
+    // Render inicial con placeholder
+    try {
+      generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
+    } catch(e1) {
+      console.error('Error render inicial WhatsApp Canvas:', e1);
+    }
+    try {
+      generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
+    } catch(e2) {
+      console.error('Error render inicial WhatsApp Vertical:', e2);
+    }
 
-    // Fetch track cover
+    // Consultar carátula oficial en alta resolución desde Spotify API
     if (spotifyUrl) {
       fetch('/api/spotify-lookup?url=' + encodeURIComponent(spotifyUrl))
         .then(function(res) { return res.json(); })
@@ -4289,21 +4301,31 @@ Instagram:
           if (data && data.cover) {
             var coverUrl = data.cover;
             if (_wpTrackCoverCache[coverUrl]) {
-              generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]);
-                generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]);
+              try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]); } catch(e){}
+              try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]); } catch(e){}
             } else {
               var img = new Image();
               img.crossOrigin = 'anonymous';
               img.onload = function() {
                 _wpTrackCoverCache[coverUrl] = img;
-                generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img);
-                generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img);
+                try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img); } catch(e){}
+                try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img); } catch(e){}
+              };
+              img.onerror = function() {
+                // Si falla CORS anónimo, reintentar carga directa
+                var imgFallback = new Image();
+                imgFallback.onload = function() {
+                  _wpTrackCoverCache[coverUrl] = imgFallback;
+                  try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, imgFallback); } catch(e){}
+                  try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, imgFallback); } catch(e){}
+                };
+                imgFallback.src = coverUrl;
               };
               img.src = coverUrl;
             }
           }
         })
-        .catch(function(e) { console.error(e); });
+        .catch(function(e) { console.error('Error en spotify-lookup:', e); });
     }
   }
 
@@ -4360,7 +4382,7 @@ Instagram:
     var H = 1920;
 
     // Si el logo aún no termina de cargar en memoria, re-renderizar al completarse
-    if (_tniwLogoImg && !_tniwLogoImg.complete) {
+    if (typeof _tniwLogoImg !== 'undefined' && _tniwLogoImg && !_tniwLogoImg.complete) {
       _tniwLogoImg.onload = function() {
         generateWhatsAppVerticalCanvas(artist, song, playlist, coverImg);
       };
@@ -4402,7 +4424,7 @@ Instagram:
     var logoX = (W - logoSize) / 2;
     var logoY = 85;
 
-    if (_tniwLogoImg && _tniwLogoImg.complete && _tniwLogoImg.naturalWidth > 0) {
+    if (typeof _tniwLogoImg !== 'undefined' && _tniwLogoImg && _tniwLogoImg.complete && _tniwLogoImg.naturalWidth > 0) {
       ctx.save();
       ctx.shadowColor = 'rgba(187, 244, 81, 0.4)';
       ctx.shadowBlur = 30;
