@@ -1532,10 +1532,12 @@
 
   function generateAiFeedback(id, genre, playlist) {
     var templates = [
-      "Excelente atmósfera en los sintetizadores y buen groove rítmico. Tiene la vibra exacta que buscamos para enriquecer esta lista.",
-      "Gran concepto y muy buena interpretación vocal. La producción encaja perfectamente con el mood indie de nuestro colectivo.",
-      "Muy buen trabajo en las guitarras y melodía envolvente. La dinámica encaja muy bien con el estilo de la playlist.",
-      "La canción transmite una emoción muy auténtica y la mezcla suena sólida. ¡Gran lanzamiento independiente!"
+      "¡Qué buen tema! Me atrapó muchísimo la vibra desde los primeros segundos. La mezcla se siente súper limpia y las melodías encajan perfecto con el mood que buscamos. ¡Excelente! Que sigan los éxitos.",
+      "Tremenda producción, me encantó cómo resolvieron los arreglos y la textura de la voz. Tiene ese toque súper especial y fresco que seguro le va a encantar a nuestra comunidad. ¡Excelente! Que sigan los éxitos.",
+      "Wow, qué buena vibra transmite esta canción. La instrumentación suena súper orgánica, y el estribillo se te queda pegado de inmediato. Una propuesta súper sólida. ¡Excelente! Que sigan los éxitos.",
+      "Me gustó muchísimo el sonido que lograron aquí. La calidad de la mezcla y la energía de la interpretación la hacen destacar al instante. Va directo a la playlist. ¡Excelente! Que sigan los éxitos.",
+      "¡Qué joyita! Tiene una atmósfera increíble y cada detalle sonoro se nota súper bien cuidado. Es de esos temas que quieres escuchar en loop y dejarte llevar. ¡Excelente! Que sigan los éxitos.",
+      "Una propuesta súper fresca. Me encantó la cadencia del ritmo y lo bien trabajados que están los detalles de fondo. Transmite exactamente la emoción correcta. ¡Excelente! Que sigan los éxitos."
     ];
     var randomText = templates[Math.floor(Math.random() * templates.length)];
     var ta = document.getElementById('fb-' + id);
