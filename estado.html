@@ -1036,6 +1036,15 @@
 
     <div id="acceptedFeedbackWrap" style="display:none; margin-bottom: 20px; padding: 14px 16px; background: rgba(0,0,0,0.5); border-radius: 6px; border-left: 3px solid var(--accent-lime); font-size: 13.5px; color: #fff;"></div>
 
+    <!-- NEW PLAYLIST URL BOX -->
+    <div id="acceptedPlaylistUrlBox" style="display:none; margin-bottom: 20px; padding: 14px 16px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px dashed var(--border-strong);">
+      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">URL Directa a la Playlist:</div>
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <input type="text" id="accPlaylistUrl" readonly value="Cargando enlace..." style="flex: 1; min-width: 200px; background: #000; border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; color: #fff; font-family: var(--font-mono); font-size: 12px; outline: none;">
+        <button onclick="copyPlaylistUrl()" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-strong); color: #fff; padding: 10px 14px; border-radius: 4px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; font-weight: 700; transition: all 0.2s ease; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">Copiar Enlace</button>
+      </div>
+    </div>
+
     <button class="btn-download-story" onclick="openStoryGeneratorModal()" style="cursor: pointer; border: none; font-size: 13px; font-weight: 800; padding: 14px 24px; box-shadow: 0 4px 18px rgba(187, 244, 81, 0.3);">
       🎨 Generar Historia para tus Redes (Instagram / TikTok) ↗
     </button>
@@ -1129,6 +1138,31 @@
               fbW.style.display = 'block';
             }
           }
+
+          // Rellenar URL exacta de la playlist destino
+          var urlBox = document.getElementById('acceptedPlaylistUrlBox');
+          var urlInput = document.getElementById('accPlaylistUrl');
+          if (urlBox && urlInput && record.playlist) {
+            urlBox.style.display = 'block';
+            fetch('/api/playlists')
+              .then(function(r) { return r.json(); })
+              .then(function(data) {
+                if (data && data.allPlaylists) {
+                  var pNameNorm = record.playlist.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                  var match = data.allPlaylists.find(function(p) { 
+                    return p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() === pNameNorm; 
+                  });
+                  if (match && match.spotify_url) {
+                    urlInput.value = match.spotify_url;
+                  } else {
+                    urlInput.value = "https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu";
+                  }
+                }
+              })
+              .catch(function(e) {
+                urlInput.value = "https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu";
+              });
+          }
         } else if(record.status === 'declined' || record.status === 'rejected') {
           document.getElementById('badgeText').textContent = 'REVISIÓN FINALIZADA (DECLINADA)';
           if (timerBox) timerBox.style.display = 'none';
@@ -1209,6 +1243,35 @@
       });
     } else {
       showToast('✓ Enlace: ' + fullUrl);
+    }
+  }
+
+  function copyPlaylistUrl() {
+    var urlInput = document.getElementById('accPlaylistUrl');
+    var btn = document.querySelector('button[onclick="copyPlaylistUrl()"]');
+    if (urlInput && urlInput.value && urlInput.value !== "Cargando enlace...") {
+      if(navigator.clipboard) {
+        navigator.clipboard.writeText(urlInput.value).then(function() {
+          showToast('✅ ¡Enlace de playlist copiado con éxito!');
+          if(btn) {
+            var oldText = btn.textContent;
+            btn.textContent = '¡Copiado!';
+            btn.style.background = 'rgba(187, 244, 81, 0.2)';
+            btn.style.color = 'var(--accent-lime)';
+            btn.style.borderColor = 'rgba(187, 244, 81, 0.4)';
+            setTimeout(function(){ 
+              btn.textContent = oldText; 
+              btn.style.background = 'rgba(255,255,255,0.1)';
+              btn.style.color = '#fff';
+              btn.style.borderColor = 'var(--border-strong)';
+            }, 3000);
+          }
+        });
+      } else {
+        urlInput.select();
+        document.execCommand('copy');
+        showToast('✅ ¡Enlace copiado!');
+      }
     }
   }
 
