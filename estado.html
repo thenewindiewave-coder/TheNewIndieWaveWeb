@@ -1041,7 +1041,11 @@
       <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">URL Directa a la Playlist:</div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <input type="text" id="accPlaylistUrl" readonly value="Cargando enlace..." style="flex: 1; min-width: 200px; background: #000; border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; color: #fff; font-family: var(--font-mono); font-size: 12px; outline: none;">
-        <button onclick="copyPlaylistUrl()" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-strong); color: #fff; padding: 10px 14px; border-radius: 4px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; font-weight: 700; transition: all 0.2s ease; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">Copiar Enlace</button>
+        <button onclick="copyPlaylistUrl()" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-strong); color: #fff; padding: 10px 14px; border-radius: 4px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; font-weight: 700; transition: all 0.2s ease; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📋 Copiar Enlace</button>
+        <a id="accPlaylistOpenBtn" href="#" target="_blank" rel="noopener noreferrer" style="background: #1DB954; color: #000; padding: 10px 16px; border-radius: 4px; text-decoration: none; font-family: var(--font-mono); font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: transform 0.15s ease;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+          Abrir en Spotify ↗
+        </a>
       </div>
     </div>
 
@@ -1090,6 +1094,51 @@
   // 2. Consulta en vivo a la base de datos (Supabase)
   var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
+
+  
+  var playlistLinksMap = {
+    // 8 Playlists Oficiales de Spotify
+    "Mezcla de rolas urbanas para farmear Aura": "https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB",
+    "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln",
+    "Música urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
+    "Metal intenso para liberar toda tu energía": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
+    "Rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
+    "Soft Pop suave para esos domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
+    "Dream Pop intimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "SynthPop para cuando solo quieres bailar": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl",
+
+    // Variantes anteriores compatibles
+    "Hard rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
+    "Soft Pop suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
+    "Pop indie suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
+    "Pop indie íntimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "Pop indie para estar feliz y triste al mismo tiempo": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl",
+    "Rock indie para manejar de noche sin rumbo": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
+    "Rock indie para cuando no puedes dormir y piensas demasiado": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "Rock indie sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
+    "Punk sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
+    "Dreamy Songs para escuchar en la intimidad de tu habitación": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "Dreamy Songs para escuchar en la intimidad de tu habitacion": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj"
+  };
+
+  function resolvePlaylistUrl(playlistName) {
+    if (!playlistName) return "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj";
+    if (playlistLinksMap[playlistName]) return playlistLinksMap[playlistName];
+    var norm = playlistName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    for (var k in playlistLinksMap) {
+      if (k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() === norm) {
+        return playlistLinksMap[k];
+      }
+    }
+    if (norm.includes('dream') || norm.includes('habitacion') || norm.includes('cuarto')) return "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj";
+    if (norm.includes('darkwave') || norm.includes('madrugada')) return "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln";
+    if (norm.includes('metal') || norm.includes('energia')) return "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1";
+    if (norm.includes('rabia') || norm.includes('enojo') || norm.includes('hard rock')) return "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc";
+    if (norm.includes('soft') || norm.includes('domingo')) return "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF";
+    if (norm.includes('synth') || norm.includes('bailar')) return "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl";
+    if (norm.includes('flow') || norm.includes('urbana') || norm.includes('aura')) return "https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB";
+    return "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj";
+  }
 
   async function fetchLiveStatus() {
     try {
@@ -1142,8 +1191,19 @@
           // Rellenar URL exacta de la playlist destino
           var urlBox = document.getElementById('acceptedPlaylistUrlBox');
           var urlInput = document.getElementById('accPlaylistUrl');
-          if (urlBox && urlInput && record.playlist) {
-            urlBox.style.display = 'block';
+          var openBtn = document.getElementById('accPlaylistOpenBtn');
+          var accPlayEl = document.getElementById('accPlaylist');
+
+          if (record.playlist) {
+            var resolvedUrl = resolvePlaylistUrl(record.playlist);
+            if (urlInput) urlInput.value = resolvedUrl;
+            if (openBtn) openBtn.href = resolvedUrl;
+            if (accPlayEl) {
+              accPlayEl.innerHTML = '<a href="' + resolvedUrl + '" target="_blank" style="color: #fff; text-decoration: underline; text-underline-offset: 4px;">' + record.playlist + ' ↗</a>';
+            }
+            if (urlBox) urlBox.style.display = 'block';
+
+            // Comprobar en vivo con /api/playlists si existe una URL dinámica
             fetch('/api/playlists')
               .then(function(r) { return r.json(); })
               .then(function(data) {
@@ -1153,15 +1213,15 @@
                     return p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() === pNameNorm; 
                   });
                   if (match && match.spotify_url) {
-                    urlInput.value = match.spotify_url;
-                  } else {
-                    urlInput.value = "https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu";
+                    if (urlInput) urlInput.value = match.spotify_url;
+                    if (openBtn) openBtn.href = match.spotify_url;
+                    if (accPlayEl) {
+                      accPlayEl.innerHTML = '<a href="' + match.spotify_url + '" target="_blank" style="color: #fff; text-decoration: underline; text-underline-offset: 4px;">' + record.playlist + ' ↗</a>';
+                    }
                   }
                 }
               })
-              .catch(function(e) {
-                urlInput.value = "https://open.spotify.com/user/31vxac7th7vonsgtzbeyixk32ftu";
-              });
+              .catch(function(e) {});
           }
         } else if(record.status === 'declined' || record.status === 'rejected') {
           document.getElementById('badgeText').textContent = 'REVISIÓN FINALIZADA (DECLINADA)';
