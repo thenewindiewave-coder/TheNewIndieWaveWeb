@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Panel de Curaduría — The New Indie Wave</title>
+<title>Panel de CuradurÃ­a â€” The New Indie Wave</title>
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 <link rel="apple-touch-icon" href="logo.png">
@@ -486,7 +486,7 @@
   }
 
   .toast-box.active { transform: translateY(0); opacity: 1; }
-  /* MODAL FLOTANTE CENTRADO PARA EDICIÓN DEL RADAR */
+  /* MODAL FLOTANTE CENTRADO PARA EDICIÃ“N DEL RADAR */
   .artist-modal-overlay {
     position: fixed !important;
     top: 0 !important;
@@ -1048,11 +1048,11 @@
 <!-- ACCESO PRIVADO / PIN -->
 <div class="pin-overlay" id="pinOverlay">
   <div class="pin-box">
-    <div class="site-logo" style="margin-bottom: 12px;">🌊</div>
-    <h2 class="pin-title">PANEL DE CURADURÍA</h2>
+    <div class="site-logo" style="margin-bottom: 12px;">ðŸŒŠ</div>
+    <h2 class="pin-title">PANEL DE CURADURÃA</h2>
     <p style="font-size: 12.5px; color: var(--text-muted);">The New Indie Wave // Acceso exclusivo para Rodrigo</p>
     <input type="password" class="pin-input" id="pinInput" placeholder="Introduce tu clave" autofocus onkeydown="if(event.key==='Enter') unlockPanel()">
-    <button class="btn-pin-unlock" onclick="unlockPanel()">ACCEDER A LA COLA ↗</button>
+    <button class="btn-pin-unlock" onclick="unlockPanel()">ACCEDER A LA COLA â†—</button>
   </div>
 </div>
 
@@ -1068,19 +1068,19 @@
       <div id="spotifyAuthStatusWrap" style="display: flex; align-items: center; gap: 8px;">
         <a id="btnConnectSpotifyCurator" href="https://accounts.spotify.com/authorize?response_type=code&client_id=7a56561898eb4057941b2c1453476e10&scope=playlist-modify-public%20playlist-modify-private%20playlist-read-private%20playlist-read-collaborative%20user-read-private%20user-read-email&redirect_uri=https%3A%2F%2Fthenewindiewave.online%2Fapi%2Fspotify-callback&show_dialog=true" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 6px 14px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 0 15px rgba(29,185,84,0.3);">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.308c-.216.353-.675.467-1.028.25-2.816-1.722-6.36-2.112-10.534-1.158-.403.093-.807-.156-.9-.559-.093-.404.156-.808.56-.9 4.568-1.045 8.487-.597 11.653 1.34.352.217.466.674.249 1.027zm1.468-3.265c-.272.443-.853.582-1.296.31-3.224-1.982-8.139-2.555-11.953-1.397-.498.151-1.03-.134-1.18-.633-.151-.498.134-1.03.633-1.18 4.359-1.323 9.774-.683 13.486 1.603.443.272.582.853.31 1.297zm.126-3.41c-3.865-2.296-10.24-2.508-13.929-1.388-.593.18-1.222-.16-1.402-.753-.18-.593.16-1.222.753-1.402 4.238-1.286 11.284-1.038 15.736 1.605.534.317.708 1.01.391 1.545-.316.533-1.009.708-1.549.393z"/></svg>
-          <span>Vincular Spotify (Inserción Auto)</span>
+          <span>Vincular Spotify (InserciÃ³n Auto)</span>
         </a>
         <div id="badgeSpotifyConnected" style="display: none; align-items: center; gap: 8px;">
           <span style="font-family: var(--font-mono); font-size: 11px; color: #1DB954; background: rgba(29,185,84,0.12); border: 1px solid rgba(29,185,84,0.35); padding: 5px 12px; border-radius: 4px; font-weight: 600;">
-            🟢 Spotify Vinculado
+            ðŸŸ¢ Spotify Vinculado
           </span>
           <button onclick="reconnectSpotify()" title="Cambiar cuenta o renovar permisos" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 10.5px; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-            🔄 Re-vincular
+            ðŸ”„ Re-vincular
           </button>
         </div>
       </div>
-      <span class="badge-curator">● CURADOR: RODRIGO DL MORAL</span>
-      <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">← Ver Web Pública</a>
+      <span class="badge-curator">â— CURADOR: RODRIGO DL MORAL</span>
+      <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">â† Ver Web PÃºblica</a>
     </div>
   </div>
 </header>
@@ -1109,28 +1109,28 @@
       <button class="tab-btn active" onclick="switchTab('pending', this)">[ PENDIENTES DE ESCUCHA ]</button>
       <button class="tab-btn" onclick="switchTab('accepted', this)">[ ACEPTADAS ]</button>
       <button class="tab-btn" onclick="switchTab('rejected', this)">[ HISTORIAL DECLINADAS ]</button>
-      <button class="tab-btn" onclick="switchTab('playlists_manager', this)">[ 🏷️ GESTIÓN DE PLAYLISTS & ETIQUETAS ]</button>
-      <button class="tab-btn" onclick="switchTab('radar_manager', this)">[ 🌟 ARTISTAS EN EL RADAR ]</button>
-      <button class="tab-btn" onclick="switchTab('auto_message', this)">[ 🤖 MENSAJE AUTOMÁTICO ]</button>
+      <button class="tab-btn" onclick="switchTab('playlists_manager', this)">[ ðŸ·ï¸ GESTIÃ“N DE PLAYLISTS & ETIQUETAS ]</button>
+      <button class="tab-btn" onclick="switchTab('radar_manager', this)">[ ðŸŒŸ ARTISTAS EN EL RADAR ]</button>
+      <button class="tab-btn" onclick="switchTab('auto_message', this)">[ ðŸ¤– MENSAJE AUTOMÃTICO ]</button>
     </div>
 
     <button class="btn-refresh" onclick="refreshCurrentTab()">
-      🔄 Refrescar en Vivo
+      ðŸ”„ Refrescar en Vivo
     </button>
   </div>
 
-    <!-- TOOLBAR DE GESTIÓN RÁPIDA -->
+    <!-- TOOLBAR DE GESTIÃ“N RÃPIDA -->
   <div class="queue-toolbar" id="queueToolbar" style="display: flex;">
-    <input type="text" id="queueSearchInput" onkeyup="renderQueue()" placeholder="🔍 Buscar por artista, canción, playlist o país..." class="queue-search-bar">
+    <input type="text" id="queueSearchInput" onkeyup="renderQueue()" placeholder="ðŸ” Buscar por artista, canciÃ³n, playlist o paÃ­s..." class="queue-search-bar">
     <div class="queue-toggle-actions">
-      <button class="btn-tool" onclick="toggleAllCards(true)">🔽 Desplegar Todas</button>
-      <button class="btn-tool" onclick="toggleAllCards(false)">🔼 Colapsar Todas</button>
+      <button class="btn-tool" onclick="toggleAllCards(true)">ðŸ”½ Desplegar Todas</button>
+      <button class="btn-tool" onclick="toggleAllCards(false)">ðŸ”¼ Colapsar Todas</button>
     </div>
   </div>
 
   <!-- LIST OF TRACKS -->
   <div class="queue-list" id="queueContainer">
-    <div class="empty-box">Cargando envíos desde Supabase...</div>
+    <div class="empty-box">Cargando envÃ­os desde Supabase...</div>
   </div>
 
 </main>
@@ -1155,9 +1155,9 @@
   var playlistLinksMap = {
     // 8 Playlists Oficiales de Spotify
     "Mezcla de rolas urbanas para farmear Aura": "https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB",
-    "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln",
-    "Música urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
-    "Metal intenso para liberar toda tu energía": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
+    "Darkwave oscuro y atmosfÃ©rico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln",
+    "MÃºsica urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
+    "Metal intenso para liberar toda tu energÃ­a": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
     "Rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
     "Soft Pop suave para esos domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
     "Dream Pop intimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
@@ -1167,13 +1167,13 @@
     "Hard rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
     "Soft Pop suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
     "Pop indie suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
-    "Pop indie íntimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "Pop indie Ã­ntimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
     "Pop indie para estar feliz y triste al mismo tiempo": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl",
     "Rock indie para manejar de noche sin rumbo": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
     "Rock indie para cuando no puedes dormir y piensas demasiado": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
     "Rock indie sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
     "Punk sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
-    "Dreamy Songs para escuchar en la intimidad de tu habitación": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "Dreamy Songs para escuchar en la intimidad de tu habitaciÃ³n": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
     "Dreamy Songs para escuchar en la intimidad de tu habitacion": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj"
   };
 
@@ -1214,7 +1214,7 @@
       checkSpotifyAuthStatus();
       preloadPlaylistsMetadata();
     } else {
-      showToast('❌ Clave incorrecta');
+      showToast('âŒ Clave incorrecta');
     }
   }
 
@@ -1225,7 +1225,7 @@
     preloadPlaylistsMetadata();
   }
 
-  // 2. Cargar envíos desde Supabase
+  // 2. Cargar envÃ­os desde Supabase
   async function loadSubmissions() {
     var container = document.getElementById('queueContainer');
     try {
@@ -1239,9 +1239,9 @@
       allSubmissions = await res.json();
       updateMetrics();
       renderQueue();
-      showToast('✓ Cola de envíos actualizada');
+      showToast('âœ“ Cola de envÃ­os actualizada');
     } catch(err) {
-      container.innerHTML = '<div class="empty-box">No se pudieron cargar los envíos. Verifica tu conexión.</div>';
+      container.innerHTML = '<div class="empty-box">No se pudieron cargar los envÃ­os. Verifica tu conexiÃ³n.</div>';
     }
   }
 
@@ -1285,26 +1285,26 @@
       if (typeof syncRadarFromSupabase === 'function') {
         syncRadarFromSupabase().then(function(){
           renderRadarManager();
-          showToast('✓ Artistas en el Radar actualizados');
+          showToast('âœ“ Artistas en el Radar actualizados');
         });
       } else {
         renderRadarManager();
-        showToast('✓ Artistas en el Radar actualizados');
+        showToast('âœ“ Artistas en el Radar actualizados');
       }
     } else if(currentTab === 'playlists_manager') {
       loadPlaylistsForManager();
-      showToast('✓ Playlists actualizadas');
+      showToast('âœ“ Playlists actualizadas');
     } else if(currentTab === 'auto_message') {
       preloadPlaylistsMetadata().then(function(){
         renderAutoMessageTool();
-        showToast('✓ Playlists y datos actualizados desde Spotify');
+        showToast('âœ“ Playlists y datos actualizados desde Spotify');
       });
     } else {
       loadSubmissions();
     }
   }
 
-  // 3. Toggle de Acordeón
+  // 3. Toggle de AcordeÃ³n
   function toggleCardDetail(recordId, e) {
     if (e && (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('a') || e.target.closest('button'))) {
       return;
@@ -1354,7 +1354,7 @@
     });
 
     if(filtered.length === 0) {
-      container.innerHTML = '<div class="empty-box">' + (searchVal ? 'No se encontraron canciones que coincidan con la búsqueda.' : 'No hay canciones en este apartado actualmente.') + '</div>';
+      container.innerHTML = '<div class="empty-box">' + (searchVal ? 'No se encontraron canciones que coincidan con la bÃºsqueda.' : 'No hay canciones en este apartado actualmente.') + '</div>';
       return;
     }
 
@@ -1393,7 +1393,7 @@
         var igUrl = igHandle.includes('instagram.com') ? (igHandle.startsWith('http') ? igHandle : 'https://' + igHandle) : 'https://instagram.com/' + igHandle.replace('@', '');
         var igDisplay = igHandle.replace('https://www.instagram.com/', '').replace('https://instagram.com/', '');
         if(!igDisplay.startsWith('@')) igDisplay = '@' + igDisplay.split('?')[0].replace(/\/$/, '');
-        igLink = ` • <a href="${igUrl}" target="_blank" style="color: #f472b6; font-weight: 600; text-decoration: none;">📷 IG: ${igDisplay} ↗</a>`;
+        igLink = ` â€¢ <a href="${igUrl}" target="_blank" style="color: #f472b6; font-weight: 600; text-decoration: none;">ðŸ“· IG: ${igDisplay} â†—</a>`;
       }
       
       var ttLink = '';
@@ -1401,7 +1401,7 @@
         var ttUrl = ttHandle.includes('tiktok.com') ? (ttHandle.startsWith('http') ? ttHandle : 'https://' + ttHandle) : 'https://tiktok.com/@' + ttHandle.replace('@', '');
         var ttDisplay = ttHandle.replace('https://www.tiktok.com/', '').replace('https://tiktok.com/', '').replace('@', '');
         if(!ttDisplay.startsWith('@')) ttDisplay = '@' + ttDisplay.split('?')[0].replace(/\/$/, '');
-        ttLink = ` • <a href="${ttUrl}" target="_blank" style="color: #cbd5e1; font-weight: 600; text-decoration: none;">🎵 TikTok: ${ttDisplay} ↗</a>`;
+        ttLink = ` â€¢ <a href="${ttUrl}" target="_blank" style="color: #cbd5e1; font-weight: 600; text-decoration: none;">ðŸŽµ TikTok: ${ttDisplay} â†—</a>`;
       }
 
       var actionBlock = '';
@@ -1411,16 +1411,16 @@
             <div class="feedback-header">
               <span>FEEDBACK EDITORIAL PARA EL ARTISTA:</span>
               <button class="btn-ai-assist" onclick="generateAiFeedback('${item.id}', '${item.genre}', '${item.playlist}')">
-                ✨ Generar Borrador con IA
+                âœ¨ Generar Borrador con IA
               </button>
             </div>
-            <textarea class="feedback-textarea" id="fb-${item.id}" onfocus="markAsListening('${item.id}')" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
+            <textarea class="feedback-textarea" id="fb-${item.id}" onfocus="markAsListening('${item.id}')" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producciÃ³n...">${item.feedback || ''}</textarea>
             <div class="decision-actions">
               <button class="btn-decline" onclick="updateDecision('${item.id}', 'declined')">
-                ✕ Declinar Envío
+                âœ• Declinar EnvÃ­o
               </button>
               <button class="btn-accept" onclick="updateDecision('${item.id}', 'accepted')">
-                ✓ Aceptar para Playlist & Redes ↗
+                âœ“ Aceptar para Playlist & Redes â†—
               </button>
             </div>
           </div>
@@ -1430,17 +1430,17 @@
           <div style="background: rgba(187, 244, 81, 0.04); border: 1px solid rgba(187, 244, 81, 0.25); border-radius: 6px; padding: 14px; margin-top: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
               <span style="color: var(--accent-lime); font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
-                ✓ ACEPTADA EN PLAYLIST: ${item.playlist}
+                âœ“ ACEPTADA EN PLAYLIST: ${item.playlist}
               </span>
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <button onclick="insertToSpotifyManual('${item.spotify_url}', '${item.playlist}')" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  ⚡ Insertar / Re-insertar en Spotify
+                  âš¡ Insertar / Re-insertar en Spotify
                 </button>
                 <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  🎨 Generar Pack Promocional (Artista) ↗
+                  ðŸŽ¨ Generar Pack Promocional (Artista) â†—
                 </button>
                 <button onclick="openWhatsAppGroupGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}')" style="background: rgba(37, 211, 102, 0.15); color: #25D366; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(37, 211, 102, 0.4); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  💬 Generar Post Grupo (Comunidad) ↗
+                  ðŸ’¬ Generar Post Grupo (Comunidad) â†—
                 </button>
               </div>
             </div>
@@ -1456,7 +1456,7 @@
           <div style="background: rgba(239, 68, 68, 0.04); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 14px; margin-top: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
               <span style="color: #ef4444; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
-                ✕ SOLICITUD DECLINADA
+                âœ• SOLICITUD DECLINADA
               </span>
             </div>
             ${item.feedback ? `
@@ -1474,20 +1474,20 @@
           <!-- FILA COMPACTA PRINCIPAL (Clic para desplegar) -->
           <div class="compact-header" onclick="toggleCardDetail('${item.id}', event)">
             <div class="compact-left">
-              <div class="compact-play-icon">▶</div>
+              <div class="compact-play-icon">â–¶</div>
               <div class="compact-info">
-                <span class="compact-title">${item.song_title || 'Sin Título'}</span>
-                <span class="compact-artist">— ${item.artist_name || 'Artista'}</span>
-                <span class="compact-pill">📍 ${item.country || 'N/A'}</span>
-                <span class="compact-pill playlist-pill">🎯 ${item.playlist}</span>
-                <span class="compact-pill">🏷️ ${item.genre || 'Indie'}</span>
+                <span class="compact-title">${item.song_title || 'Sin TÃ­tulo'}</span>
+                <span class="compact-artist">â€” ${item.artist_name || 'Artista'}</span>
+                <span class="compact-pill">ðŸ“ ${item.country || 'N/A'}</span>
+                <span class="compact-pill playlist-pill">ðŸŽ¯ ${item.playlist}</span>
+                <span class="compact-pill">ðŸ·ï¸ ${item.genre || 'Indie'}</span>
               </div>
             </div>
 
             <div class="compact-right">
-              ${isBoost ? '<span class="sla-badge sla-urgent">⚡ IMPULSO</span>' : '<span class="sla-badge sla-normal">⏳ 48H</span>'}
-              ${currentTab === 'accepted' ? '<span class="badge-status-accepted">✓ ACEPTADA</span>' : (currentTab === 'rejected' ? '<span class="badge-status-declined">✕ DECLINADA</span>' : '<span class="badge-status-pending">● EN COLA</span>')}
-              <button class="btn-toggle-chevron ${isExpanded ? 'open' : ''}" id="chevron-${item.id}">▼</button>
+              ${isBoost ? '<span class="sla-badge sla-urgent">âš¡ IMPULSO</span>' : '<span class="sla-badge sla-normal">â³ 48H</span>'}
+              ${currentTab === 'accepted' ? '<span class="badge-status-accepted">âœ“ ACEPTADA</span>' : (currentTab === 'rejected' ? '<span class="badge-status-declined">âœ• DECLINADA</span>' : '<span class="badge-status-pending">â— EN COLA</span>')}
+              <button class="btn-toggle-chevron ${isExpanded ? 'open' : ''}" id="chevron-${item.id}">â–¼</button>
             </div>
           </div>
 
@@ -1495,12 +1495,12 @@
           <div class="track-detail-body" id="detail-${item.id}" style="display: ${isExpanded ? 'block' : 'none'};">
             
             <div class="detail-contact-row">
-              <span>✉️ Correo: <a href="mailto:${item.email}" style="color:inherit; text-decoration:underline;">${item.email}</a></span>
-              ${waNumber ? ` • <a href="https://wa.me/${waCleanDigits}" target="_blank" style="color: #25D366; font-weight: 600; text-decoration: none;">💬 WhatsApp: ${waNumber} ↗</a>` : ''}
+              <span>âœ‰ï¸ Correo: <a href="mailto:${item.email}" style="color:inherit; text-decoration:underline;">${item.email}</a></span>
+              ${waNumber ? ` â€¢ <a href="https://wa.me/${waCleanDigits}" target="_blank" style="color: #25D366; font-weight: 600; text-decoration: none;">ðŸ’¬ WhatsApp: ${waNumber} â†—</a>` : ''}
               ${igLink}
               ${ttLink}
-              • <a href="${playlistLinksMap[item.playlist] || 'https://open.spotify.com'}" target="_blank" style="color: var(--accent-lime); text-decoration: underline;">Abrir Playlist en Spotify ↗</a>
-              • <a href="estado.html?id=${encodeURIComponent(item.track_id || '')}" target="_blank" style="color: #38bdf8; text-decoration: underline;">🔗 Magic Link (${item.track_id || 'Ver Estado'}) ↗</a>
+              â€¢ <a href="${playlistLinksMap[item.playlist] || 'https://open.spotify.com'}" target="_blank" style="color: var(--accent-lime); text-decoration: underline;">Abrir Playlist en Spotify â†—</a>
+              â€¢ <a href="estado.html?id=${encodeURIComponent(item.track_id || '')}" target="_blank" style="color: #38bdf8; text-decoration: underline;">ðŸ”— Magic Link (${item.track_id || 'Ver Estado'}) â†—</a>
             </div>
 
             ${spotifyEmbed ? `
@@ -1511,7 +1511,7 @@
 
             ${cleanNotes ? `
               <div class="detail-note-box">
-                💬 <strong>Nota del Artista:</strong> "${cleanNotes}"
+                ðŸ’¬ <strong>Nota del Artista:</strong> "${cleanNotes}"
               </div>
             ` : ''}
 
@@ -1534,18 +1534,18 @@
 
   function generateAiFeedback(id, genre, playlist) {
     var templates = [
-      "¡Qué buen tema! Me atrapó muchísimo la vibra desde los primeros segundos. La mezcla se siente súper limpia y las melodías encajan perfecto con el mood que buscamos. ¡Excelente! Que sigan los éxitos.",
-      "Tremenda producción, me encantó cómo resolvieron los arreglos y la textura de la voz. Tiene ese toque súper especial y fresco que seguro le va a encantar a nuestra comunidad. ¡Excelente! Que sigan los éxitos.",
-      "Wow, qué buena vibra transmite esta canción. La instrumentación suena súper orgánica, y el estribillo se te queda pegado de inmediato. Una propuesta súper sólida. ¡Excelente! Que sigan los éxitos.",
-      "Me gustó muchísimo el sonido que lograron aquí. La calidad de la mezcla y la energía de la interpretación la hacen destacar al instante. Va directo a la playlist. ¡Excelente! Que sigan los éxitos.",
-      "¡Qué joyita! Tiene una atmósfera increíble y cada detalle sonoro se nota súper bien cuidado. Es de esos temas que quieres escuchar en loop y dejarte llevar. ¡Excelente! Que sigan los éxitos.",
-      "Una propuesta súper fresca. Me encantó la cadencia del ritmo y lo bien trabajados que están los detalles de fondo. Transmite exactamente la emoción correcta. ¡Excelente! Que sigan los éxitos."
+      "Â¡QuÃ© buen tema! Me atrapÃ³ muchÃ­simo la vibra desde los primeros segundos. La mezcla se siente sÃºper limpia y las melodÃ­as encajan perfecto con el mood que buscamos. Â¡Excelente! Que sigan los Ã©xitos.",
+      "Tremenda producciÃ³n, me encantÃ³ cÃ³mo resolvieron los arreglos y la textura de la voz. Tiene ese toque sÃºper especial y fresco que seguro le va a encantar a nuestra comunidad. Â¡Excelente! Que sigan los Ã©xitos.",
+      "Wow, quÃ© buena vibra transmite esta canciÃ³n. La instrumentaciÃ³n suena sÃºper orgÃ¡nica, y el estribillo se te queda pegado de inmediato. Una propuesta sÃºper sÃ³lida. Â¡Excelente! Que sigan los Ã©xitos.",
+      "Me gustÃ³ muchÃ­simo el sonido que lograron aquÃ­. La calidad de la mezcla y la energÃ­a de la interpretaciÃ³n la hacen destacar al instante. Va directo a la playlist. Â¡Excelente! Que sigan los Ã©xitos.",
+      "Â¡QuÃ© joyita! Tiene una atmÃ³sfera increÃ­ble y cada detalle sonoro se nota sÃºper bien cuidado. Es de esos temas que quieres escuchar en loop y dejarte llevar. Â¡Excelente! Que sigan los Ã©xitos.",
+      "Una propuesta sÃºper fresca. Me encantÃ³ la cadencia del ritmo y lo bien trabajados que estÃ¡n los detalles de fondo. Transmite exactamente la emociÃ³n correcta. Â¡Excelente! Que sigan los Ã©xitos."
     ];
     var randomText = templates[Math.floor(Math.random() * templates.length)];
     var ta = document.getElementById('fb-' + id);
     if(ta) {
       ta.value = randomText;
-      showToast('✨ Borrador de feedback generado');
+      showToast('âœ¨ Borrador de feedback generado');
     }
   }
 
@@ -1569,7 +1569,7 @@
 
   async function insertToSpotifyManual(spotifyUrl, playlistName) {
     var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
-    showToast('⏳ Conectando con Spotify para insertar track...');
+    showToast('â³ Conectando con Spotify para insertar track...');
     try {
       var res = await fetch('/api/spotify-add-track', {
         method: 'POST',
@@ -1582,14 +1582,14 @@
       });
       var data = await res.json();
       if(data.success) {
-        showToast('⚡ ¡Canción insertada físicamente en Spotify con éxito!');
+        showToast('âš¡ Â¡CanciÃ³n insertada fÃ­sicamente en Spotify con Ã©xito!');
       } else if (data.needs_auth) {
-        showToast('⚠️ Haz clic en "Vincular Spotify" arriba primero.');
+        showToast('âš ï¸ Haz clic en "Vincular Spotify" arriba primero.');
       } else {
-        showToast('⚠️ ' + (data.error || 'Error al insertar en Spotify'));
+        showToast('âš ï¸ ' + (data.error || 'Error al insertar en Spotify'));
       }
     } catch(e) {
-      showToast('Error de conexión con Spotify API');
+      showToast('Error de conexiÃ³n con Spotify API');
     }
   }
 
@@ -1605,7 +1605,7 @@
     renderQueue();
     updateMetrics();
 
-    showToast(status === 'accepted' ? '🎉 ¡Canción ACEPTADA! Añadiendo a Spotify...' : '✓ Envío marcado como declinado');
+    showToast(status === 'accepted' ? 'ðŸŽ‰ Â¡CanciÃ³n ACEPTADA! AÃ±adiendo a Spotify...' : 'âœ“ EnvÃ­o marcado como declinado');
 
     if (status === 'accepted' && item && item.spotify_url && item.playlist) {
       var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
@@ -1621,9 +1621,9 @@
       .then(function(res){ return res.json(); })
       .then(function(data){
         if (data.success) {
-          showToast('⚡ ¡Canción insertada físicamente en tu Playlist de Spotify!');
+          showToast('âš¡ Â¡CanciÃ³n insertada fÃ­sicamente en tu Playlist de Spotify!');
         } else if (data.needs_auth) {
-          showToast('⚠️ Vincula tu cuenta de Spotify arriba para inserción automática.');
+          showToast('âš ï¸ Vincula tu cuenta de Spotify arriba para inserciÃ³n automÃ¡tica.');
         } else {
           console.warn('Spotify add warning:', data.error);
         }
@@ -1668,20 +1668,20 @@
     } catch(e) {}
   }
 
-  // 6. GESTIÓN DE PLAYLISTS & ETIQUETAS
+  // 6. GESTIÃ“N DE PLAYLISTS & ETIQUETAS
   var livePlaylists = [];
   async function loadPlaylistsForManager() {
     var container = document.getElementById('queueContainer');
-    container.innerHTML = '<div class="empty-box">⏳ Consultando playlists en vivo desde tu cuenta de Spotify...</div>';
+    container.innerHTML = '<div class="empty-box">â³ Consultando playlists en vivo desde tu cuenta de Spotify...</div>';
     try {
       var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
       var url = '/api/playlists?t=' + Date.now() + (rToken ? ('&refresh_token=' + encodeURIComponent(rToken)) : '');
       const res = await fetch(url);
-      if(!res.ok) throw new Error('Error de conexión con Spotify API');
+      if(!res.ok) throw new Error('Error de conexiÃ³n con Spotify API');
       const data = await res.json();
       livePlaylists = data.allPlaylists || [];
 
-      // Actualizar dinámicamente el mapa de enlaces y portadas de playlists
+      // Actualizar dinÃ¡micamente el mapa de enlaces y portadas de playlists
       if (livePlaylists && livePlaylists.length > 0) {
         livePlaylists.forEach(function(p) {
           if (p.name && p.spotify_url) {
@@ -1706,11 +1706,11 @@
     } catch(e) {
       container.innerHTML = `
         <div class="empty-box" style="border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.03);">
-          <div style="color: #ef4444; font-size: 14px; font-weight: 700; margin-bottom: 8px;">❌ No se pudieron cargar las playlists de Spotify</div>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">${e.message || 'Verifica tu conexión a internet o tu vinculación.'}</p>
+          <div style="color: #ef4444; font-size: 14px; font-weight: 700; margin-bottom: 8px;">âŒ No se pudieron cargar las playlists de Spotify</div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">${e.message || 'Verifica tu conexiÃ³n a internet o tu vinculaciÃ³n.'}</p>
           <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button onclick="loadPlaylistsForManager()" class="btn-refresh" style="display: inline-flex;">🔄 Reintentar Carga</button>
-            <button onclick="reconnectSpotify()" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">🟢 Vincular / Re-vincular Spotify</button>
+            <button onclick="loadPlaylistsForManager()" class="btn-refresh" style="display: inline-flex;">ðŸ”„ Reintentar Carga</button>
+            <button onclick="reconnectSpotify()" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">ðŸŸ¢ Vincular / Re-vincular Spotify</button>
           </div>
         </div>
       `;
@@ -1754,7 +1754,7 @@
       container.innerHTML = `
         <div class="empty-box">
           No se encontraron playlists activas en la cuenta vinculada.<br><br>
-          <button onclick="loadPlaylistsForManager()" class="btn-refresh" style="display: inline-flex;">🔄 Reintentar Carga</button>
+          <button onclick="loadPlaylistsForManager()" class="btn-refresh" style="display: inline-flex;">ðŸ”„ Reintentar Carga</button>
         </div>
       `;
       return;
@@ -1764,17 +1764,17 @@
       <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 18px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div>
-            <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 4px;">🏷️ ADMINISTRADOR DE PLAYLISTS & GÉNEROS</h3>
+            <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 4px;">ðŸ·ï¸ ADMINISTRADOR DE PLAYLISTS & GÃ‰NEROS</h3>
             <p style="font-size: 12.5px; color: var(--text-muted);">
               Sincronizado en tiempo real con tu Spotify. Total: <strong style="color: var(--accent-lime);">${livePlaylists.length} playlists detectadas</strong>.
             </p>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button onclick="loadPlaylistsForManager()" class="btn-tool" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); border-color: rgba(187, 244, 81, 0.3);">
-              🔄 Sincronizar Cambios de Spotify
+              ðŸ”„ Sincronizar Cambios de Spotify
             </button>
             <a href="https://open.spotify.com" target="_blank" class="btn-tool" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-              🎵 Abrir Spotify App ↗
+              ðŸŽµ Abrir Spotify App â†—
             </a>
           </div>
         </div>
@@ -1794,24 +1794,24 @@
                   <div>
                     <h4 style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 2px;">${p.name}</h4>
                     <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime);">
-                      👥 ${(p.followers || 0).toLocaleString()} seguidores • 🎵 ${(p.tracks_count || 0)} canciones • ID: <span style="color:var(--text-muted);">${p.id}</span>
+                      ðŸ‘¥ ${(p.followers || 0).toLocaleString()} seguidores â€¢ ðŸŽµ ${(p.tracks_count || 0)} canciones â€¢ ID: <span style="color:var(--text-muted);">${p.id}</span>
                     </div>
                   </div>
                 </div>
                 <a href="${p.spotify_url}" target="_blank" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-decoration: none; border: 1px solid var(--border-strong); padding: 5px 12px; border-radius: 4px; white-space: nowrap;">
-                  Abrir Playlist ↗
+                  Abrir Playlist â†—
                 </a>
               </div>
 
               <div class="playlist-edit-row">
                 <div>
                   <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">
-                    Etiquetas de Género (separadas por coma para filtros web):
+                    Etiquetas de GÃ©nero (separadas por coma para filtros web):
                   </label>
                   <input type="text" id="tags-input-${p.id}" value="${currentTags}" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); border-radius: 4px; padding: 9px 12px; color: #fff; font-family: var(--font-body); font-size: 12.5px;">
                 </div>
                 <button onclick="savePlaylistTags('${p.id}')" class="playlist-save-btn" style="background: var(--accent-lime); color: #000; border: none; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 10px 18px; border-radius: 4px; cursor: pointer; align-self: flex-end; white-space: nowrap;">
-                  Guardar Etiquetas ✓
+                  Guardar Etiquetas âœ“
                 </button>
               </div>
             </div>
@@ -1824,7 +1824,7 @@
   function savePlaylistTags(pId) {
     var val = document.getElementById('tags-input-' + pId).value;
     localStorage.setItem('tniw_tags_' + pId, val);
-    showToast('✓ Etiquetas de la playlist actualizadas');
+    showToast('âœ“ Etiquetas de la playlist actualizadas');
   }
 
   // 7. GESTOR DE ARTISTAS EN EL RADAR (OPTIMIZADO PARA ANDROID Y DESKTOP CON POSICIONES FIJAS)
@@ -1835,7 +1835,7 @@
       return a && a.id !== 'spotify_auth_config' && a.type !== 'config';
     });
 
-    // Ordenamiento estricto por posición fija (#1, #2, #3...)
+    // Ordenamiento estricto por posiciÃ³n fija (#1, #2, #3...)
     list.sort(function(a, b) {
       return (parseInt(a.order, 10) || 999) - (parseInt(b.order, 10) || 999);
     });
@@ -1851,32 +1851,32 @@
               // DIRECTORIO EDITORIAL CON POSICIONES FIJAS
             </div>
             <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: #fff;">
-              🌟 ARTISTAS EN EL RADAR (${list.length})
+              ðŸŒŸ ARTISTAS EN EL RADAR (${list.length})
             </h3>
             <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">
-              Directorio con posiciones inamovibles. Reordena con las flechas ▲/▼ o define el puesto exacto al editar.
+              Directorio con posiciones inamovibles. Reordena con las flechas â–²/â–¼ o define el puesto exacto al editar.
             </p>
           </div>
           
           <div class="radar-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button onclick="openEditArtistModal()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11.5px; font-weight: 800; padding: 9px 16px; border: none; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 0 16px rgba(187,244,81,0.25);">
-              ➕ Agregar Artista
+              âž• Agregar Artista
             </button>
             <button onclick="syncAndRefreshRadar()" class="btn-tool" style="background: rgba(56, 189, 248, 0.12); color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.3);">
-              🔄 Sincronizar Supabase
+              ðŸ”„ Sincronizar Supabase
             </button>
             <a href="/artistas" target="_blank" class="btn-tool" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-              ↗ Ver Web Artistas
+              â†— Ver Web Artistas
             </a>
           </div>
         </div>
       </div>
 
-      <!-- SECCIÓN 1: TOP 10 DESTACADOS -->
+      <!-- SECCIÃ“N 1: TOP 10 DESTACADOS -->
       <div style="margin-bottom: 24px;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; color: var(--accent-lime); background: rgba(187,244,81,0.12); border: 1px solid rgba(187,244,81,0.3); padding: 3px 10px; border-radius: 4px;">
-            ⭐ TOP 10 RADAR DESTACADOS (${top3List.length})
+            â­ TOP 10 RADAR DESTACADOS (${top3List.length})
           </span>
           <span style="font-size: 12px; color: var(--text-muted);">Aparecen en la cabecera principal con reproductor</span>
         </div>
@@ -1886,11 +1886,11 @@
         </div>
       </div>
 
-      <!-- SECCIÓN 2: RADAR SECUNDARIO / GENERAL -->
+      <!-- SECCIÃ“N 2: RADAR SECUNDARIO / GENERAL -->
       <div style="margin-bottom: 24px;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; color: var(--text-main); background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); padding: 3px 10px; border-radius: 4px;">
-            📻 RADAR GENERAL / SECUNDARIO (${secList.length})
+            ðŸ“» RADAR GENERAL / SECUNDARIO (${secList.length})
           </span>
           <span style="font-size: 12px; color: var(--text-muted);">Directorio completo de talentos emergentes</span>
         </div>
@@ -1900,23 +1900,23 @@
         </div>
       </div>
 
-      <!-- SECCIÓN 3: ARCHIVO HISTÓRICO DEL RADAR (RESEÑAS PRESERVADAS) -->
+      <!-- SECCIÃ“N 3: ARCHIVO HISTÃ“RICO DEL RADAR (RESEÃ‘AS PRESERVADAS) -->
       <div style="margin-top: 28px; border-top: 1px dashed var(--border-strong); padding-top: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; color: #a78bfa; background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.3); padding: 3px 10px; border-radius: 4px;">
-              📁 ARCHIVO HISTÓRICO DEL RADAR
+              ðŸ“ ARCHIVO HISTÃ“RICO DEL RADAR
             </span>
-            <span style="font-size: 12px; color: var(--text-muted);">Artistas retirados del radar activo. Sus reseñas y links exclusivos siguen activos.</span>
+            <span style="font-size: 12px; color: var(--text-muted);">Artistas retirados del radar activo. Sus reseÃ±as y links exclusivos siguen activos.</span>
           </div>
           <button onclick="loadAndRenderRadarArchive()" class="btn-tool" style="background: rgba(167,139,250,0.1); color: #a78bfa; border-color: rgba(167,139,250,0.3); font-size: 11px;">
-            🔄 Actualizar Archivo
+            ðŸ”„ Actualizar Archivo
           </button>
         </div>
 
         <div id="radarArchiveListContainer">
           <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim); padding: 14px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px dashed var(--border);">
-            ⏳ Cargando archivo histórico...
+            â³ Cargando archivo histÃ³rico...
           </div>
         </div>
       </div>
@@ -1937,7 +1937,7 @@
         mediaPreview = `<img src="${a.media_url}" alt="" style="width: 52px; height: 52px; border-radius: 6px; object-fit: cover; background: #141417; flex-shrink: 0;">`;
       }
     } else {
-      mediaPreview = `<div style="width: 52px; height: 52px; border-radius: 6px; background: rgba(187,244,81,0.08); border: 1px solid rgba(187,244,81,0.25); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">🎵</div>`;
+      mediaPreview = `<div style="width: 52px; height: 52px; border-radius: 6px; background: rgba(187,244,81,0.08); border: 1px solid rgba(187,244,81,0.25); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">ðŸŽµ</div>`;
     }
 
     var posNumber = (indexInCat + 1 < 10 ? '0' : '') + (indexInCat + 1);
@@ -1949,7 +1949,7 @@
           
           <div style="display: flex; align-items: center; gap: 12px; min-width: 240px; flex: 1;">
             
-            <!-- BADGE DE POSICIÓN FIJA -->
+            <!-- BADGE DE POSICIÃ“N FIJA -->
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 44px; height: 44px; background: rgba(0,0,0,0.6); border: 1px solid ${isTop ? 'rgba(187,244,81,0.35)' : 'var(--border-strong)'}; border-radius: 6px; flex-shrink: 0;">
               <span style="font-family: var(--font-mono); font-size: 13px; font-weight: 800; color: ${isTop ? 'var(--accent-lime)' : 'var(--accent-cyan)'};">
                 #${posNumber}
@@ -1968,34 +1968,34 @@
                 </span>
               </div>
               <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 2px;">
-                ${a.genre || 'Indie'} ${a.spotify_url ? '• <a href="' + a.spotify_url + '" target="_blank" style="color:var(--accent-lime); text-decoration:none;">Spotify ↗</a>' : ''} ${a.instagram ? '• <a href="https://instagram.com/' + a.instagram.replace('@','') + '" target="_blank" style="color:var(--accent-pink); text-decoration:none;">' + a.instagram + ' ↗</a>' : ''}
+                ${a.genre || 'Indie'} ${a.spotify_url ? 'â€¢ <a href="' + a.spotify_url + '" target="_blank" style="color:var(--accent-lime); text-decoration:none;">Spotify â†—</a>' : ''} ${a.instagram ? 'â€¢ <a href="https://instagram.com/' + a.instagram.replace('@','') + '" target="_blank" style="color:var(--accent-pink); text-decoration:none;">' + a.instagram + ' â†—</a>' : ''}
               </div>
             </div>
           </div>
 
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
             
-            <!-- CONTROLES DE POSICIÓN SUBIR / BAJAR -->
+            <!-- CONTROLES DE POSICIÃ“N SUBIR / BAJAR -->
             <div style="display: flex; gap: 3px; background: rgba(0,0,0,0.5); padding: 3px 5px; border-radius: 4px; border: 1px solid var(--border-strong);">
               <button onclick="moveRadarArtist('${a.id}', 'up')" title="Mover un puesto arriba" ${indexInCat === 0 ? 'disabled' : ''} style="background: ${indexInCat === 0 ? 'transparent' : 'rgba(187,244,81,0.15)'}; border: 1px solid ${indexInCat === 0 ? 'transparent' : 'rgba(187,244,81,0.3)'}; color: ${indexInCat === 0 ? 'var(--text-dim)' : 'var(--accent-lime)'}; font-family: var(--font-mono); font-size: 11.5px; font-weight: 800; cursor: ${indexInCat === 0 ? 'not-allowed' : 'pointer'}; padding: 4px 7px; border-radius: 3px; opacity: ${indexInCat === 0 ? '0.3' : '1'};">
-                ▲ Subir
+                â–² Subir
               </button>
               <button onclick="moveRadarArtist('${a.id}', 'down')" title="Mover un puesto abajo" ${indexInCat === totalInCat - 1 ? 'disabled' : ''} style="background: ${indexInCat === totalInCat - 1 ? 'transparent' : 'rgba(187,244,81,0.15)'}; border: 1px solid ${indexInCat === totalInCat - 1 ? 'transparent' : 'rgba(187,244,81,0.3)'}; color: ${indexInCat === totalInCat - 1 ? 'var(--text-dim)' : 'var(--accent-lime)'}; font-family: var(--font-mono); font-size: 11.5px; font-weight: 800; cursor: ${indexInCat === totalInCat - 1 ? 'not-allowed' : 'pointer'}; padding: 4px 7px; border-radius: 3px; opacity: ${indexInCat === totalInCat - 1 ? '0.3' : '1'};">
-                ▼ Bajar
+                â–¼ Bajar
               </button>
             </div>
 
             <button onclick="toggleRadarType('${a.id}', '${isTop ? 'secondary' : 'top3'}')" class="btn-tool" style="font-size: 10.5px; padding: 6px 10px;">
-              ${isTop ? '⬇ Pasar a Secundario' : '⭐ Subir a Top 10'}
+              ${isTop ? 'â¬‡ Pasar a Secundario' : 'â­ Subir a Top 10'}
             </button>
-            <button onclick="copyRadarArtistLink('${a.id}')" title="Copiar enlace exclusivo de la reseña" style="background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.35); color: var(--accent-cyan); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-              🔗 Copiar Link
+            <button onclick="copyRadarArtistLink('${a.id}')" title="Copiar enlace exclusivo de la reseÃ±a" style="background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.35); color: var(--accent-cyan); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              ðŸ”— Copiar Link
             </button>
             <button onclick="openEditArtistModal('${a.id}')" style="background: rgba(187,244,81,0.14); border: 1px solid rgba(187,244,81,0.35); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
-              ✏️ Editar
+              âœï¸ Editar
             </button>
-            <button onclick="deleteRadarArtist('${a.id}')" title="Mover a Archivo Histórico (su link sigue activo)" style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-              📦 Archivar
+            <button onclick="deleteRadarArtist('${a.id}')" title="Mover a Archivo HistÃ³rico (su link sigue activo)" style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              ðŸ“¦ Archivar
             </button>
           </div>
 
@@ -2047,16 +2047,16 @@
     list.forEach(function(item, i){ item.order = i + 1; });
     saveRadarArtists(list);
     renderRadarManager();
-    showToast('✓ Posición actualizada (# ' + (list.findIndex(function(a){ return a.id === artistId; }) + 1) + ')');
+    showToast('âœ“ PosiciÃ³n actualizada (# ' + (list.findIndex(function(a){ return a.id === artistId; }) + 1) + ')');
 
     if (typeof saveAllRadarArtistsOrders === 'function') {
       await saveAllRadarArtistsOrders(list);
     }
   }
 
-  // LISTAS MAESTRAS DE GÉNEROS Y FORMATOS (ORDENADAS ALFABÉTICAMENTE A-Z)
+  // LISTAS MAESTRAS DE GÃ‰NEROS Y FORMATOS (ORDENADAS ALFABÃ‰TICAMENTE A-Z)
   var RADAR_GENRES = [
-    "ACOUSTIC / ACÚSTICO",
+    "ACOUSTIC / ACÃšSTICO",
     "AFRO HOUSE",
     "AFROBEAT / AFROPOP",
     "ALTERNATIVE METAL",
@@ -2081,14 +2081,14 @@
     "BREAKBEAT / BREAKS",
     "BRITPOP",
     "CHAMBER POP",
-    "CHICHA / CUMBIA PSICODÉLICA",
+    "CHICHA / CUMBIA PSICODÃ‰LICA",
     "CHILLWAVE",
     "CITY POP",
     "COLDWAVE",
     "CORRIDOS TUMBADOS",
     "CRUNKCORE / DIGITAL HARDCORE",
     "CUMBIA / CUMBIA ALTERNATIVA",
-    "CUMBIA ELECTRÓNICA / ELECTRO CUMBIA",
+    "CUMBIA ELECTRÃ“NICA / ELECTRO CUMBIA",
     "DANCE-PUNK",
     "DANCEHALL",
     "DARK SYNTH",
@@ -2108,11 +2108,11 @@
     "EBM / INDUSTRIAL",
     "ELECTRO POP",
     "ELECTROCLASH",
-    "ELECTRÓNICA / DANCE",
+    "ELECTRÃ“NICA / DANCE",
     "ELECTROPOP / INDIE POP",
     "EMO / MIDWEST EMO",
     "EXPERIMENTAL",
-    "FLAMENCO ALTERNATIVO / FUSIÓN",
+    "FLAMENCO ALTERNATIVO / FUSIÃ“N",
     "FLOW ALTERNATIVO",
     "FOLK / FOLK ROCK",
     "FOLK POP",
@@ -2161,7 +2161,7 @@
     "NEO-CORRIDOS",
     "NEO-PSYCHEDELIA",
     "NEO-SOUL",
-    "NEOCLÁSICO",
+    "NEOCLÃSICO",
     "NEW WAVE",
     "NOISE POP",
     "NOISE ROCK",
@@ -2178,7 +2178,7 @@
     "PSYCHEDELIC POP",
     "PSYCHEDELIC ROCK",
     "PUNK ROCK",
-    "R&B CONTEMPORÁNEO",
+    "R&B CONTEMPORÃNEO",
     "R&B LATINO",
     "REGGAE",
     "REGGAETON",
@@ -2213,13 +2213,13 @@
   ];
 
   var RADAR_BADGES = [
-    "SOLISTA", "DÚO", "TRÍO", "CUARTETO", "AGRUPACIÓN",
+    "SOLISTA", "DÃšO", "TRÃO", "CUARTETO", "AGRUPACIÃ“N",
     "BANDA", "DJ", "PRODUCTOR", "CANTANTE", "PROYECTO SOLISTA",
     "COLECTIVO", "COMPOSITOR", "BEATMAKER", "PERFORMER", "MULTIINSTRUMENTISTA",
     "TOP RADAR", "RECOMENDADO", "ESTRENO", "DESTACADO", "OTRO"
   ];
 
-  // MODAL FLOTANTE Y RESPONSIVE DE EDICIÓN DE ARTISTA CON LUGAR FIJO
+  // MODAL FLOTANTE Y RESPONSIVE DE EDICIÃ“N DE ARTISTA CON LUGAR FIJO
   function openEditArtistModal(artistId) {
     var rawList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
     var list = rawList.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
@@ -2241,16 +2241,16 @@
                 // ${isNew ? 'NUEVO ARTISTA CON LUGAR FIJO' : 'EDITAR ARTISTA'}
               </div>
               <h3 style="font-family: var(--font-heading); font-size: 19px; font-weight: 800; color: #fff;">
-                ${isNew ? '🌟 Añadir Artista al Radar' : '✏️ ' + artist.name}
+                ${isNew ? 'ðŸŒŸ AÃ±adir Artista al Radar' : 'âœï¸ ' + artist.name}
               </h3>
             </div>
-            <button onclick="closeRadarModal()" style="background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; padding: 4px 8px;">✕</button>
+            <button onclick="closeRadarModal()" style="background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; padding: 4px 8px;">âœ•</button>
           </div>
 
           ${!isNew ? `
             <div style="background: rgba(187,244,81,0.06); border: 1px solid rgba(187,244,81,0.25); border-radius: 6px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
               <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis;">
-                🔗 Enlace permanente y exclusivo: <strong style="color: var(--accent-lime);">${'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(artist.id)}</strong>
+                ðŸ”— Enlace permanente y exclusivo: <strong style="color: var(--accent-lime);">${'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(artist.id)}</strong>
               </div>
               <button type="button" onclick="copyRadarArtistLink('${artist.id}')" style="background: var(--accent-lime); color: #000; border: none; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 4px; cursor: pointer;">
                 Copiar Link
@@ -2260,22 +2260,22 @@
 
           <form onsubmit="handleRadarFormSubmit(event, '${artist ? artist.id : ''}')" style="display: flex; flex-direction: column; gap: 14px;">
             
-            <!-- DATOS BÁSICOS -->
+            <!-- DATOS BÃSICOS -->
             <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Proyecto / Artista *</label>
                 <input type="text" id="rfName" required value="${artist ? (artist.name || '') : ''}" placeholder="Ej. Rodrigo dl Moral" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ciudad / País *</label>
-                <input type="text" id="rfCity" required value="${artist ? (artist.city || '') : ''}" placeholder="Ej. CIUDAD DE MÉXICO" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ciudad / PaÃ­s *</label>
+                <input type="text" id="rfCity" required value="${artist ? (artist.city || '') : ''}" placeholder="Ej. CIUDAD DE MÃ‰XICO" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
             </div>
 
-            <!-- GÉNERO, UBICACIÓN Y POSICIÓN FIJA -->
+            <!-- GÃ‰NERO, UBICACIÃ“N Y POSICIÃ“N FIJA -->
             <div class="radar-form-grid" style="display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 12px;">
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género Musical *</label>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">GÃ©nero Musical *</label>
                 <select id="rfGenre" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
                   ${RADAR_GENRES.map(function(g){
                     var sel = (currentGenre === g || currentGenre.includes(g)) ? 'selected' : '';
@@ -2285,19 +2285,19 @@
                 </select>
               </div>
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Ubicación en la Web *</label>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">UbicaciÃ³n en la Web *</label>
                 <select id="rfType" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
-                  <option value="top3" ${artist && artist.type === 'top3' ? 'selected' : ''}>⭐ Top 10 Destacado (Principal)</option>
-                  <option value="secondary" ${!artist || artist.type !== 'top3' ? 'selected' : ''}>📻 Radar Secundario (Directorio)</option>
+                  <option value="top3" ${artist && artist.type === 'top3' ? 'selected' : ''}>â­ Top 10 Destacado (Principal)</option>
+                  <option value="secondary" ${!artist || artist.type !== 'top3' ? 'selected' : ''}>ðŸ“» Radar Secundario (Directorio)</option>
                 </select>
               </div>
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">Puesto / Posición (#) *</label>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">Puesto / PosiciÃ³n (#) *</label>
                 <input type="number" id="rfOrder" min="1" max="${list.length + 5}" value="${currentOrder}" style="width:100%; background:#09090b; border:1px solid rgba(187,244,81,0.4); padding:9px 12px; color:var(--accent-lime); font-family:var(--font-mono); font-weight:800; border-radius:4px; font-size:13px;">
               </div>
             </div>
 
-            <!-- FORMATO Y CANCIÓN -->
+            <!-- FORMATO Y CANCIÃ“N -->
             <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Formato / Badge (Lista Desplegable) *</label>
@@ -2310,7 +2310,7 @@
                 </select>
               </div>
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ID / Enlace Canción (Spotify, YouTube o SoundCloud)</label>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ID / Enlace CanciÃ³n (Spotify, YouTube o SoundCloud)</label>
                 <input type="text" id="rfTrackId" value="${artist ? (artist.track_id || '') : ''}" placeholder="Ej. https://youtu.be/... o ID Spotify" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
             </div>
@@ -2318,14 +2318,14 @@
             <!-- FOTO / MULTIMEDIA CON SUBIDA DIRECTA DESDE CELULAR O PC -->
             <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 14px;">
               <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 6px;">
-                📸 FOTO O VIDEO DEL ARTISTA (CLOUDINARY / URL)
+                ðŸ“¸ FOTO O VIDEO DEL ARTISTA (CLOUDINARY / URL)
               </label>
               
               <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px;">
                 <input type="text" id="rfMediaUrl" value="${artist ? (artist.media_url || '') : ''}" oninput="previewRadarMedia(this.value)" placeholder="https://res.cloudinary.com/... o URL directa" style="flex:1; min-width:200px; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
                 
                 <label style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 9px 14px; border-radius: 4px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
-                  📁 Subir Archivo
+                  ðŸ“ Subir Archivo
                   <input type="file" accept="image/*,video/*" onchange="handleDirectFileUpload(this)" style="display: none;">
                 </label>
               </div>
@@ -2335,15 +2335,15 @@
               <div id="rfMediaPreview" style="display: none; margin-top: 8px;"></div>
             </div>
 
-            <!-- RESEÑAS Y TEXTOS -->
+            <!-- RESEÃ‘AS Y TEXTOS -->
             <div>
-              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Biografía Corta (Frase destacada en tarjeta)</label>
-              <textarea id="rfShortBio" rows="2" placeholder="Electrónica, emoción y oscuridad convertidas en canciones que dejan huella." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.short_bio || '') : ''}</textarea>
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">BiografÃ­a Corta (Frase destacada en tarjeta)</label>
+              <textarea id="rfShortBio" rows="2" placeholder="ElectrÃ³nica, emociÃ³n y oscuridad convertidas en canciones que dejan huella." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.short_bio || '') : ''}</textarea>
             </div>
 
             <div>
-              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Reseña Editorial Completa (Página del Artista)</label>
-              <textarea id="rfFullReview" rows="3" placeholder="Texto editorial profundo sobre su sonido, propuesta e identidad artística..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.full_review || '') : ''}</textarea>
+              <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ReseÃ±a Editorial Completa (PÃ¡gina del Artista)</label>
+              <textarea id="rfFullReview" rows="3" placeholder="Texto editorial profundo sobre su sonido, propuesta e identidad artÃ­stica..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px; resize:vertical;">${artist ? (artist.full_review || '') : ''}</textarea>
             </div>
 
             <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -2352,64 +2352,64 @@
                 <input type="text" id="rfCareer" value="${artist ? (artist.career_notes || '') : ''}" placeholder="Hitos, escuchas, lanzamientos..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Próximos Eventos / Fechas</label>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">PrÃ³ximos Eventos / Fechas</label>
                 <input type="text" id="rfEvents" value="${artist ? (artist.events_note || '') : ''}" placeholder="Ej. Showcase TNIW Vol. 04" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
               </div>
             </div>
 
-            <!-- SECCIÓN COMPLETA DE REDES SOCIALES Y ENLACES OFICIALES -->
+            <!-- SECCIÃ“N COMPLETA DE REDES SOCIALES Y ENLACES OFICIALES -->
             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 14px; margin-top: 4px;">
               <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                🌐 REDES SOCIALES Y ENLACES OFICIALES DEL ARTISTA
+                ðŸŒ REDES SOCIALES Y ENLACES OFICIALES DEL ARTISTA
               </div>
 
               <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
                 <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🟢 Spotify Perfil (URL)</label>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ðŸŸ¢ Spotify Perfil (URL)</label>
                   <input type="url" id="rfSpotifyUrl" value="${artist ? (artist.spotify_url || '') : ''}" placeholder="https://open.spotify.com/artist/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
                 <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">📸 Instagram (@usuario o URL)</label>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ðŸ“¸ Instagram (@usuario o URL)</label>
                   <input type="text" id="rfInstagram" value="${artist ? (artist.instagram || '') : ''}" placeholder="@rodrigodlmoral" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
               </div>
 
               <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
                 <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🔴 YouTube (Canal / Video URL)</label>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ðŸ”´ YouTube (Canal / Video URL)</label>
                   <input type="url" id="rfYoutubeUrl" value="${artist ? (artist.youtube_url || '') : ''}" placeholder="https://youtube.com/@... o video" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
                 <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🖤 TikTok (@usuario o URL)</label>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ðŸ–¤ TikTok (@usuario o URL)</label>
                   <input type="text" id="rfTiktokUrl" value="${artist ? (artist.tiktok_url || '') : ''}" placeholder="@usuario" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
               </div>
 
               <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
                 <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🍎 Apple Music (URL)</label>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ðŸŽ Apple Music (URL)</label>
                   <input type="url" id="rfAppleMusicUrl" value="${artist ? (artist.apple_music_url || '') : ''}" placeholder="https://music.apple.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
                 <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🟠 SoundCloud (URL)</label>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ðŸŸ  SoundCloud (URL)</label>
                   <input type="url" id="rfSoundcloudUrl" value="${artist ? (artist.soundcloud_url || '') : ''}" placeholder="https://soundcloud.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
               </div>
 
               <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
                 <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🔵 Facebook (Página o perfil URL)</label>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ðŸ”µ Facebook (PÃ¡gina o perfil URL)</label>
                   <input type="url" id="rfFacebookUrl" value="${artist ? (artist.facebook_url || '') : ''}" placeholder="https://facebook.com/..." style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
                 <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🔷 Bandcamp (URL)</label>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ðŸ”· Bandcamp (URL)</label>
                   <input type="url" id="rfBandcampUrl" value="${artist ? (artist.bandcamp_url || '') : ''}" placeholder="https://artista.bandcamp.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
               </div>
 
               <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
                 <div>
-                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">🌍 Sitio Web Oficial / Linktree (URL)</label>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">ðŸŒ Sitio Web Oficial / Linktree (URL)</label>
                   <input type="url" id="rfWebsiteUrl" value="${artist ? (artist.website_url || '') : ''}" placeholder="https://miweb.com" style="width:100%; background:#09090b; border:1px solid var(--border-strong); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
                 </div>
               </div>
@@ -2420,7 +2420,7 @@
                 Cancelar
               </button>
               <button type="submit" style="background: var(--accent-lime); border: none; color: #000; font-family: var(--font-mono); font-size: 12px; font-weight: 800; padding: 10px 24px; border-radius: 4px; cursor: pointer; box-shadow: 0 0 14px rgba(187,244,81,0.3);">
-                Guardar en Posición Fija ✓
+                Guardar en PosiciÃ³n Fija âœ“
               </button>
             </div>
 
@@ -2515,7 +2515,7 @@
     list.forEach(function(item, i){ item.order = i + 1; });
 
     saveRadarArtists(list);
-    showToast('⏳ Sincronizando orden fijo con Supabase...');
+    showToast('â³ Sincronizando orden fijo con Supabase...');
 
     if (typeof saveAllRadarArtistsOrders === 'function') {
       await saveAllRadarArtistsOrders(list);
@@ -2525,7 +2525,7 @@
 
     closeRadarModal();
     renderRadarManager();
-    showToast('✓ Artista guardado en posición fija #' + (insertIdx + 1));
+    showToast('âœ“ Artista guardado en posiciÃ³n fija #' + (insertIdx + 1));
   }
 
   async function toggleRadarType(artistId, newType) {
@@ -2537,7 +2537,7 @@
       list.forEach(function(it, i){ it.order = i + 1; });
       saveRadarArtists(list);
       renderRadarManager();
-      showToast('✓ Categoría cambiada a ' + (newType === 'top3' ? 'Top 10' : 'Secundario'));
+      showToast('âœ“ CategorÃ­a cambiada a ' + (newType === 'top3' ? 'Top 10' : 'Secundario'));
 
       if (typeof saveAllRadarArtistsOrders === 'function') {
         await saveAllRadarArtistsOrders(list);
@@ -2551,10 +2551,10 @@
     var artistName = targetArtist ? ('"' + targetArtist.name + '"') : 'este artista';
 
     var confirmArchive = confirm(
-      '¿Deseas enviar a ' + artistName + ' al Archivo Histórico del Radar?\n\n' +
-      '✓ Se retirará del Top 10 / Secundario activo para dar lugar a nuevas propuestas.\n' +
-      '✓ Su reseña, fotos, música y link único seguirán funcionando para siempre.\n' +
-      '✓ Podrás consultarlo o restaurarlo en cualquier momento desde la sección "Archivo Histórico".'
+      'Â¿Deseas enviar a ' + artistName + ' al Archivo HistÃ³rico del Radar?\n\n' +
+      'âœ“ Se retirarÃ¡ del Top 10 / Secundario activo para dar lugar a nuevas propuestas.\n' +
+      'âœ“ Su reseÃ±a, fotos, mÃºsica y link Ãºnico seguirÃ¡n funcionando para siempre.\n' +
+      'âœ“ PodrÃ¡s consultarlo o restaurarlo en cualquier momento desde la secciÃ³n "Archivo HistÃ³rico".'
     );
     if (!confirmArchive) return;
 
@@ -2563,22 +2563,22 @@
     list.forEach(function(item, i){ item.order = i + 1; });
     saveRadarArtists(list);
     renderRadarManager();
-    showToast('⏳ Archivando artista y preservando reseña...');
+    showToast('â³ Archivando artista y preservando reseÃ±a...');
 
     try {
       if (typeof archiveRadarArtistInSupabase === 'function') {
         await archiveRadarArtistInSupabase(artistId);
       }
-      showToast('✓ Artista enviado al Archivo Histórico (su link sigue activo)');
+      showToast('âœ“ Artista enviado al Archivo HistÃ³rico (su link sigue activo)');
       renderRadarManager();
     } catch(e) {
       console.error('Error archivando:', e);
-      showToast('⚠️ No se pudo sincronizar el archivo con Supabase');
+      showToast('âš ï¸ No se pudo sincronizar el archivo con Supabase');
     }
   }
 
   async function restoreRadarArtist(artistId) {
-    showToast('⏳ Restaurando artista al radar activo...');
+    showToast('â³ Restaurando artista al radar activo...');
     try {
       if (typeof unarchiveRadarArtistInSupabase === 'function') {
         await unarchiveRadarArtistInSupabase(artistId, 'secondary');
@@ -2587,21 +2587,21 @@
         await syncRadarFromSupabase();
       }
       renderRadarManager();
-      showToast('✓ Artista restaurado al radar activo');
+      showToast('âœ“ Artista restaurado al radar activo');
     } catch(e) {
       console.error('Error restaurando artista:', e);
-      showToast('⚠️ Error al restaurar artista');
+      showToast('âš ï¸ Error al restaurar artista');
     }
   }
 
   async function permanentlyDeleteRadarArtist(artistId) {
     var confirmPermanent = confirm(
-      '⚠️ ATENCIÓN: ¿Estás completamente seguro de ELIMINAR DEFINITIVAMENTE este artista de Supabase?\n\n' +
-      'Esta acción no se puede deshacer. La reseña se borrará y el enlace dejará de funcionar.'
+      'âš ï¸ ATENCIÃ“N: Â¿EstÃ¡s completamente seguro de ELIMINAR DEFINITIVAMENTE este artista de Supabase?\n\n' +
+      'Esta acciÃ³n no se puede deshacer. La reseÃ±a se borrarÃ¡ y el enlace dejarÃ¡ de funcionar.'
     );
     if (!confirmPermanent) return;
 
-    showToast('⏳ Eliminando definitivamente de Supabase...');
+    showToast('â³ Eliminando definitivamente de Supabase...');
     try {
       await fetch(SUPABASE_URL + '/rest/v1/radar_artists?id=eq.' + encodeURIComponent(artistId), {
         method: 'DELETE',
@@ -2610,10 +2610,10 @@
           'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
         }
       });
-      showToast('✓ Artista eliminado definitivamente');
+      showToast('âœ“ Artista eliminado definitivamente');
       loadAndRenderRadarArchive();
     } catch(e) {
-      showToast('⚠️ Error eliminando de base de datos');
+      showToast('âš ï¸ Error eliminando de base de datos');
     }
   }
 
@@ -2621,7 +2621,7 @@
     var fullUrl = 'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(artistId);
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(fullUrl).then(function(){
-        showToast('✓ Link exclusivo copiado: ' + fullUrl);
+        showToast('âœ“ Link exclusivo copiado: ' + fullUrl);
       }).catch(function(){
         prompt('Copia este link exclusivo:', fullUrl);
       });
@@ -2638,7 +2638,7 @@
         ? await getArchivedRadarArtistsFromSupabase() 
         : [];
       if (!archived || archived.length === 0) {
-        cont.innerHTML = '<div class="empty-box" style="padding: 20px; font-size: 12px; border: 1px dashed var(--border);">No hay artistas en el archivo histórico todavía. Cuando archives artistas activos para renovar tu Top 10, aparecerán aquí para que sus reseñas y links sigan funcionando siempre.</div>';
+        cont.innerHTML = '<div class="empty-box" style="padding: 20px; font-size: 12px; border: 1px dashed var(--border);">No hay artistas en el archivo histÃ³rico todavÃ­a. Cuando archives artistas activos para renovar tu Top 10, aparecerÃ¡n aquÃ­ para que sus reseÃ±as y links sigan funcionando siempre.</div>';
         return;
       }
       cont.innerHTML = `
@@ -2656,30 +2656,30 @@
                       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <h4 style="font-family: var(--font-heading); font-size: 15px; font-weight: 700; color: #fff;">${a.name}</h4>
                         <span class="track-tag" style="background: rgba(167,139,250,0.15); color: #c4b5fd;">
-                          📁 ARCHIVADO (${dateStr})
+                          ðŸ“ ARCHIVADO (${dateStr})
                         </span>
                         <span class="track-tag" style="background: rgba(56,189,248,0.08); color: var(--accent-cyan);">
                           ${a.city || 'GLOBAL'}
                         </span>
                       </div>
                       <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 3px; word-break: break-all;">
-                        Link permanente: <a href="${artistUrl}" target="_blank" style="color: var(--accent-lime); text-decoration: none;">${artistUrl} ↗</a>
+                        Link permanente: <a href="${artistUrl}" target="_blank" style="color: var(--accent-lime); text-decoration: none;">${artistUrl} â†—</a>
                       </div>
                     </div>
                   </div>
 
                   <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                     <button onclick="copyRadarArtistLink('${a.id}')" title="Copiar enlace permanente" style="background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.35); color: var(--accent-cyan); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                      🔗 Copiar Link
+                      ðŸ”— Copiar Link
                     </button>
-                    <a href="${artistUrl}" target="_blank" title="Ver reseña en la web" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 6px 10px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                      👁️ Ver Reseña ↗
+                    <a href="${artistUrl}" target="_blank" title="Ver reseÃ±a en la web" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 6px 10px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                      ðŸ‘ï¸ Ver ReseÃ±a â†—
                     </a>
                     <button onclick="restoreRadarArtist('${a.id}')" title="Regresar al radar activo" style="background: rgba(187,244,81,0.14); border: 1px solid rgba(187,244,81,0.35); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
-                      🔄 Restaurar
+                      ðŸ”„ Restaurar
                     </button>
                     <button onclick="permanentlyDeleteRadarArtist('${a.id}')" title="Borrar definitivamente de la base de datos" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #ef4444; font-family: var(--font-mono); font-size: 11px; padding: 6px 8px; border-radius: 4px; cursor: pointer;">
-                      🗑️
+                      ðŸ—‘ï¸
                     </button>
                   </div>
                 </div>
@@ -2689,19 +2689,19 @@
         </div>
       `;
     } catch(e) {
-      cont.innerHTML = '<div class="empty-box" style="padding: 16px; color: #ef4444;">Error cargando archivo histórico.</div>';
+      cont.innerHTML = '<div class="empty-box" style="padding: 16px; color: #ef4444;">Error cargando archivo histÃ³rico.</div>';
     }
   }
 
   async function syncAndRefreshRadar() {
-    showToast('⏳ Sincronizando artistas con Supabase...');
+    showToast('â³ Sincronizando artistas con Supabase...');
     if (typeof syncRadarFromSupabase === 'function') {
       var data = await syncRadarFromSupabase();
       renderRadarManager();
-      showToast('✓ Artistas sincronizados con la nube');
+      showToast('âœ“ Artistas sincronizados con la nube');
     } else {
       renderRadarManager();
-      showToast('✓ Lista actualizada');
+      showToast('âœ“ Lista actualizada');
     }
   }
 
@@ -2721,7 +2721,7 @@
       prev.innerHTML = `
         <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong);">
           <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-cyan); margin-bottom: 6px; text-transform: uppercase;">
-            ▶ Video Detectado (Cloudinary / MP4):
+            â–¶ Video Detectado (Cloudinary / MP4):
           </div>
           <video src="${cleanUrl}" controls autoplay loop muted playsinline style="max-height: 140px; max-width: 100%; border-radius: 6px; background: #000; display: block;"></video>
         </div>
@@ -2730,9 +2730,9 @@
       prev.innerHTML = `
         <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong);">
           <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-lime); margin-bottom: 6px; text-transform: uppercase;">
-            🖼️ Foto Detectada:
+            ðŸ–¼ï¸ Foto Detectada:
           </div>
-          <img src="${cleanUrl}" alt="Preview" style="max-height: 140px; max-width: 100%; border-radius: 6px; object-fit: cover; display: block;" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:#ef4444; font-size:11px; font-family:var(--font-mono);\\'>✕ No se pudo cargar la imagen</span>';">
+          <img src="${cleanUrl}" alt="Preview" style="max-height: 140px; max-width: 100%; border-radius: 6px; object-fit: cover; display: block;" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:#ef4444; font-size:11px; font-family:var(--font-mono);\\'>âœ• No se pudo cargar la imagen</span>';">
         </div>
       `;
     }
@@ -2754,16 +2754,16 @@
     var mediaUrlInput = document.getElementById('rfMediaUrl');
     var isVideo = file.type.startsWith('video') || file.name.endsWith('.mp4') || file.name.endsWith('.mov');
 
-    // Mostrar vista previa local instantánea con Blob URL
+    // Mostrar vista previa local instantÃ¡nea con Blob URL
     var localBlobUrl = URL.createObjectURL(file);
     previewRadarMedia(localBlobUrl);
 
     if (statusEl) {
       statusEl.style.display = 'block';
       statusEl.style.color = 'var(--accent-lime)';
-      statusEl.textContent = '⏳ Preparando ' + file.name + '...';
+      statusEl.textContent = 'â³ Preparando ' + file.name + '...';
     }
-    showToast('⏳ Subiendo a Cloudinary: 0%');
+    showToast('â³ Subiendo a Cloudinary: 0%');
 
     try {
       var cloudName = 'ckknw1do';
@@ -2788,8 +2788,8 @@
       xhr.upload.onprogress = function(e) {
         if (e.lengthComputable) {
           var percent = Math.round((e.loaded / e.total) * 100);
-          if (statusEl) statusEl.textContent = '⏳ Subiendo a Cloudinary: ' + percent + '%';
-          showToast('⏳ Subiendo: ' + percent + '%');
+          if (statusEl) statusEl.textContent = 'â³ Subiendo a Cloudinary: ' + percent + '%';
+          showToast('â³ Subiendo: ' + percent + '%');
         }
       };
 
@@ -2802,11 +2802,11 @@
               previewRadarMedia(data.secure_url);
               if (statusEl) {
                 statusEl.style.color = 'var(--accent-lime)';
-                statusEl.textContent = '✓ Subido a Cloudinary';
+                statusEl.textContent = 'âœ“ Subido a Cloudinary';
               }
-              showToast('✓ Archivo subido con éxito a Cloudinary');
+              showToast('âœ“ Archivo subido con Ã©xito a Cloudinary');
             } else {
-              throw new Error('Respuesta inválida');
+              throw new Error('Respuesta invÃ¡lida');
             }
           } catch(err) {
             fallbackUploadViaApi(file, isVideo, mediaUrlInput, statusEl);
@@ -2847,15 +2847,15 @@
           previewRadarMedia(data.url);
           if (statusEl) {
             statusEl.style.color = 'var(--accent-lime)';
-            statusEl.textContent = '✓ Subido a la nube';
+            statusEl.textContent = 'âœ“ Subido a la nube';
           }
-          showToast('✓ Archivo subido con éxito');
+          showToast('âœ“ Archivo subido con Ã©xito');
         } else {
           mediaUrlInput.value = base64Data;
           previewRadarMedia(base64Data);
           if (statusEl) {
             statusEl.style.color = 'var(--accent-cyan)';
-            statusEl.textContent = '✓ Cargado localmente';
+            statusEl.textContent = 'âœ“ Cargado localmente';
           }
         }
       } catch(err) {
@@ -2867,7 +2867,7 @@
   }
 
 
-  // 8. HERRAMIENTA DE MENSAJE AUTOMÁTICO & GENERADOR DE STORY
+  // 8. HERRAMIENTA DE MENSAJE AUTOMÃTICO & GENERADOR DE STORY
   function renderAutoMessageTool() {
     var container = document.getElementById('queueContainer');
     var radarArtists = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
@@ -2891,13 +2891,13 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
           <div>
             <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">
-              // HERRAMIENTA EDITORIAL // AUTOMATIZACIÓN DE NOTIFICACIONES
+              // HERRAMIENTA EDITORIAL // AUTOMATIZACIÃ“N DE NOTIFICACIONES
             </div>
             <h3 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #fff;">
-              🤖 Generador de Mensaje Automático & Story Promocional
+              ðŸ¤– Generador de Mensaje AutomÃ¡tico & Story Promocional
             </h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px; max-width: 760px;">
-              Genera automáticamente el mensaje oficial de felicitación para compartir con el artista por WhatsApp o redes, junto con la historia visual en HD (1080x1920) lista para publicar en Instagram.
+              Genera automÃ¡ticamente el mensaje oficial de felicitaciÃ³n para compartir con el artista por WhatsApp o redes, junto con la historia visual en HD (1080x1920) lista para publicar en Instagram.
             </p>
           </div>
         </div>
@@ -2915,11 +2915,11 @@
                 <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Seleccionar Artista del Directorio:</label>
                 <select id="amRadarSelect" onchange="onAutoMessageRadarSelect(this.value)" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
                   ${cleanArtists.map(function(a){
-                    var tag = a.type === 'top3' ? '⭐ TOP 10' : '📻 RADAR';
-                    return '<option value="' + a.id + '">' + tag + ' — ' + a.name + ' (' + (a.city || 'Global') + ')</option>';
+                    var tag = a.type === 'top3' ? 'â­ TOP 10' : 'ðŸ“» RADAR';
+                    return '<option value="' + a.id + '">' + tag + ' â€” ' + a.name + ' (' + (a.city || 'Global') + ')</option>';
                   }).join('')}
-                  <option value="custom">✏️ [ Ingresar enlace personalizado / manual ]</option>
-                  <option value="none">🚫 [ Sin enlace de radar / Solo Playlist ]</option>
+                  <option value="custom">âœï¸ [ Ingresar enlace personalizado / manual ]</option>
+                  <option value="none">ðŸš« [ Sin enlace de radar / Solo Playlist ]</option>
                 </select>
               </div>
 
@@ -2928,13 +2928,13 @@
                 <div style="display: flex; gap: 6px;">
                   <input type="text" id="amRadarUrl" value="${defaultRadarUrl}" placeholder="https://thenewindiewave.online/artistas.html?artista=... (Opcional)" style="flex: 1; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-lime); border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
                   <button type="button" onclick="copyAmRadarUrl()" style="background: rgba(187,244,81,0.15); border: 1px solid rgba(187,244,81,0.35); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 0 14px; border-radius: 4px; cursor: pointer; white-space: nowrap;">
-                    📋 Copiar
+                    ðŸ“‹ Copiar
                   </button>
                 </div>
               </div>
             </div>
             <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">
-              ℹ️ Opcional. Si se incluye enlace, se agregará al mensaje de felicitación de ARTISTAS DEL RADAR.
+              â„¹ï¸ Opcional. Si se incluye enlace, se agregarÃ¡ al mensaje de felicitaciÃ³n de ARTISTAS DEL RADAR.
             </div>
           </div>
 
@@ -2945,31 +2945,31 @@
             </label>
 
             <div style="margin-bottom: 10px;">
-              <input type="text" id="amSpotifyUrl" oninput="handleAutoMessageTrackInput(this.value)" placeholder="https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp o ID de canción..." style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: #fff; border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
+              <input type="text" id="amSpotifyUrl" oninput="handleAutoMessageTrackInput(this.value)" placeholder="https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp o ID de canciÃ³n..." style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: #fff; border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
             </div>
 
             <div id="amTrackLookupStatus" style="display: none; font-family: var(--font-mono); font-size: 11.5px; margin-bottom: 12px; padding: 6px 10px; background: rgba(0,0,0,0.4); border-radius: 4px; border-left: 3px solid var(--accent-cyan);"></div>
 
             <div style="display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 12px;">
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Tema / Canción *</label>
-                <input type="text" id="amSongTitle" required placeholder="Ej. ¿Qué Es Lo Que Harías?" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Tema / CanciÃ³n *</label>
+                <input type="text" id="amSongTitle" required placeholder="Ej. Â¿QuÃ© Es Lo Que HarÃ­as?" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
               </div>
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Artista / Proyecto *</label>
                 <input type="text" id="amArtistName" required value="${defaultArtist ? defaultArtist.name : ''}" placeholder="Ej. Rodrigo dl Moral" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
               </div>
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género (Para Story)</label>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">GÃ©nero (Para Story)</label>
                 <input type="text" id="amGenre" value="${defaultArtist ? defaultArtist.genre : 'INDIE POP'}" placeholder="Ej. SYNTH POP" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
               </div>
             </div>
           </div>
 
-          <!-- CAMPO 3: URL DE LA PLAYLIST DE SPOTIFY (DETECCIÓN AUTOMÁTICA) -->
+          <!-- CAMPO 3: URL DE LA PLAYLIST DE SPOTIFY (DETECCIÃ“N AUTOMÃTICA) -->
           <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-strong); border-radius: 6px; padding: 16px;">
             <label style="display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-pink); text-transform: uppercase; margin-bottom: 8px;">
-              3. URL DE LA PLAYLIST DE SPOTIFY (DETECCIÓN AUTOMÁTICA) *
+              3. URL DE LA PLAYLIST DE SPOTIFY (DETECCIÃ“N AUTOMÃTICA) *
             </label>
 
             <!-- INPUT MANUAL DE URL O ID DE PLAYLIST -->
@@ -2977,7 +2977,7 @@
               <input type="text" id="amPlaylistUrl" required oninput="handleAutoMessagePlaylistInput(this.value)" value="${defaultPlaylistUrl}" placeholder="https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl o ID de playlist..." style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-pink); border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
             </div>
 
-            <!-- BADGE DE ESTADO DE DETECCIÓN EN VIVO -->
+            <!-- BADGE DE ESTADO DE DETECCIÃ“N EN VIVO -->
             <div id="amPlaylistLookupStatus" style="display: none; font-family: var(--font-mono); font-size: 11.5px; margin-bottom: 12px; padding: 6px 10px; background: rgba(0,0,0,0.4); border-radius: 4px; border-left: 3px solid var(--accent-pink);"></div>
 
             <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; align-items: center;">
@@ -2987,9 +2987,9 @@
               </div>
 
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">⚡ O Seleccionar Playlist Guardada:</label>
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">âš¡ O Seleccionar Playlist Guardada:</label>
                 <select id="amPlaylistQuickSelect" onchange="onAutoMessageQuickPlaylistSelect(this.value)" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: var(--text-muted); border-radius: 4px; font-size: 12px;">
-                  <option value="">-- Elige una playlist rápida --</option>
+                  <option value="">-- Elige una playlist rÃ¡pida --</option>
                   ${playlistNames.map(function(pName){
                     var pUrl = playlistLinksMap[pName] || ('https://open.spotify.com/playlist/' + pName);
                     return '<option value="' + pUrl + '">' + pName + '</option>';
@@ -2999,7 +2999,7 @@
             </div>
           </div>
 
-          <!-- BOTÓN GENERAR Y OPCIONES -->
+          <!-- BOTÃ“N GENERAR Y OPCIONES -->
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 8px;">
             <label style="display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--text-main); cursor: pointer; user-select: none; background: rgba(255,255,255,0.03); padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);">
               <input type="checkbox" id="amIncludeUrls" checked style="accent-color: var(--accent-lime); width: 16px; height: 16px; cursor: pointer;">
@@ -3007,7 +3007,7 @@
             </label>
 
             <button type="submit" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 14px 28px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(187,244,81,0.35);">
-              ⚡ Generar Mensaje y Story para Redes ↗
+              âš¡ Generar Mensaje y Story para Redes â†—
             </button>
           </div>
 
@@ -3022,7 +3022,7 @@
       handleAutoMessageTrackInput(initialTrackUrl);
     }
 
-    // Inicializar detección de la playlist inicial
+    // Inicializar detecciÃ³n de la playlist inicial
     if (defaultPlaylistUrl) {
       handleAutoMessagePlaylistInput(defaultPlaylistUrl);
     }
@@ -3045,7 +3045,7 @@
     var statusEl = document.getElementById('amTrackLookupStatus');
     if (statusEl) {
       statusEl.style.display = 'block';
-      statusEl.innerHTML = '<span style="color: var(--accent-cyan);">⏳ Consultando información en Spotify API...</span>';
+      statusEl.innerHTML = '<span style="color: var(--accent-cyan);">â³ Consultando informaciÃ³n en Spotify API...</span>';
     }
 
     try {
@@ -3056,7 +3056,7 @@
           if (document.getElementById('amSongTitle')) document.getElementById('amSongTitle').value = data.title;
           if (document.getElementById('amArtistName') && data.artist) document.getElementById('amArtistName').value = data.artist;
           if (statusEl) {
-            statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Track detectado: <strong>' + data.title + '</strong> — ' + (data.artist || '') + '</span>';
+            statusEl.innerHTML = '<span style="color: var(--accent-lime);">âœ“ Track detectado: <strong>' + data.title + '</strong> â€” ' + (data.artist || '') + '</span>';
           }
           return;
         }
@@ -3073,7 +3073,7 @@
           if (document.getElementById('amSongTitle')) document.getElementById('amSongTitle').value = d2.title;
           if (document.getElementById('amArtistName') && d2.author_name) document.getElementById('amArtistName').value = d2.author_name;
           if (statusEl) {
-            statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Track detectado: <strong>' + d2.title + '</strong>' + (d2.author_name ? (' — ' + d2.author_name) : '') + '</span>';
+            statusEl.innerHTML = '<span style="color: var(--accent-lime);">âœ“ Track detectado: <strong>' + d2.title + '</strong>' + (d2.author_name ? (' â€” ' + d2.author_name) : '') + '</span>';
           }
           return;
         }
@@ -3081,11 +3081,11 @@
     } catch(e2) {}
 
     if (statusEl) {
-      statusEl.innerHTML = '<span style="color: var(--text-muted);">ℹ️ Puedes escribir o ajustar el título de la canción manualmente abajo.</span>';
+      statusEl.innerHTML = '<span style="color: var(--text-muted);">â„¹ï¸ Puedes escribir o ajustar el tÃ­tulo de la canciÃ³n manualmente abajo.</span>';
     }
   }
 
-  // DETECCIÓN AUTOMÁTICA EN TIEMPO REAL DE PLAYLISTS DE SPOTIFY
+  // DETECCIÃ“N AUTOMÃTICA EN TIEMPO REAL DE PLAYLISTS DE SPOTIFY
   var _autoMessagePlaylistLookupTimer = null;
   function handleAutoMessagePlaylistInput(val) {
     clearTimeout(_autoMessagePlaylistLookupTimer);
@@ -3103,7 +3103,7 @@
     var statusEl = document.getElementById('amPlaylistLookupStatus');
     if (statusEl) {
       statusEl.style.display = 'block';
-      statusEl.innerHTML = '<span style="color: var(--accent-pink);">⏳ Detectando información oficial de la playlist en Spotify...</span>';
+      statusEl.innerHTML = '<span style="color: var(--accent-pink);">â³ Detectando informaciÃ³n oficial de la playlist en Spotify...</span>';
     }
 
     // 1. Intentar consultar endpoint /api/spotify-lookup?type=playlist
@@ -3135,7 +3135,7 @@
             var trackInfo = (Array.isArray(data.tracks) && data.tracks.length > 0)
               ? (' (' + data.tracks.length + ' temas reales detectados)')
               : (data.tracks_total ? (' (' + data.tracks_total + ' canciones)') : '');
-            statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Playlist detectada: <strong>' + data.title + '</strong>' + trackInfo + '</span>';
+            statusEl.innerHTML = '<span style="color: var(--accent-lime);">âœ“ Playlist detectada: <strong>' + data.title + '</strong>' + trackInfo + '</span>';
           }
           return;
         }
@@ -3163,7 +3163,7 @@
             preImg2.src = d2.thumbnail_url;
           }
           if (statusEl) {
-            statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Playlist detectada: <strong>' + d2.title + '</strong></span>';
+            statusEl.innerHTML = '<span style="color: var(--accent-lime);">âœ“ Playlist detectada: <strong>' + d2.title + '</strong></span>';
           }
           return;
         }
@@ -3175,14 +3175,14 @@
       if (playlistLinksMap[name] && urlOrId.includes(playlistLinksMap[name].split('playlist/')[1] || 'XYZ_NONE')) {
         if (document.getElementById('amPlaylistName')) document.getElementById('amPlaylistName').value = name;
         if (statusEl) {
-          statusEl.innerHTML = '<span style="color: var(--accent-lime);">✓ Playlist reconocida: <strong>' + name + '</strong></span>';
+          statusEl.innerHTML = '<span style="color: var(--accent-lime);">âœ“ Playlist reconocida: <strong>' + name + '</strong></span>';
         }
         return;
       }
     }
 
     if (statusEl) {
-      statusEl.innerHTML = '<span style="color: var(--text-muted);">ℹ️ Enlace ingresado. Puedes escribir o ajustar el nombre de la playlist arriba.</span>';
+      statusEl.innerHTML = '<span style="color: var(--text-muted);">â„¹ï¸ Enlace ingresado. Puedes escribir o ajustar el nombre de la playlist arriba.</span>';
     }
   }
 
@@ -3195,12 +3195,12 @@
   function copyAmRadarUrl() {
     var val = (document.getElementById('amRadarUrl').value || '').trim();
     if (!val) {
-      showToast('⚠️ No hay enlace ingresado para copiar');
+      showToast('âš ï¸ No hay enlace ingresado para copiar');
       return;
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(val).then(function(){
-        showToast('✓ Link copiado al portapapeles');
+        showToast('âœ“ Link copiado al portapapeles');
       }).catch(function(){
         prompt('Copia este link:', val);
       });
@@ -3253,11 +3253,11 @@
     var genre = (document.getElementById('amGenre').value || 'INDIE').trim().toUpperCase();
 
     if (!songTitle) {
-      showToast('⚠️ Por favor ingresa el título de la canción');
+      showToast('âš ï¸ Por favor ingresa el tÃ­tulo de la canciÃ³n');
       return;
     }
     if (!playlistUrl) {
-      showToast('⚠️ Por favor ingresa la URL de la playlist de Spotify');
+      showToast('âš ï¸ Por favor ingresa la URL de la playlist de Spotify');
       return;
     }
     if (!playlistName) {
@@ -3272,45 +3272,45 @@
     var fullMessage = '';
     if (includeUrls) {
       if (cleanRadarUrl) {
-        fullMessage = `¡Felicidades! ¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
+        fullMessage = `Â¡Felicidades! Â¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
 ${cleanRadarUrl}
 
-te invitamos a que compartas con tus seguidores esta reseña y que sigan creciendo los éxitos. También es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+te invitamos a que compartas con tus seguidores esta reseÃ±a y que sigan creciendo los Ã©xitos. TambiÃ©n es de nuestro gusto informarte que tu tema: â€œ${songTitle}â€œ fue seleccionado para aÃ±adirse en la rotaciÃ³n de nuestra playlist oficial: â€œ${playlistName}â€œ
 ${playlistUrl}
 
-Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras redes:
+Si gustas apoyar creciendo la comunidad tambiÃ©n te invitamos a seguir nuestras redes:
 Instagram:
 @the.new.indie.wave
 @rodrigodlmoral`;
       } else {
-        fullMessage = `¡Felicidades! Es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+        fullMessage = `Â¡Felicidades! Es de nuestro gusto informarte que tu tema: â€œ${songTitle}â€œ fue seleccionado para aÃ±adirse en la rotaciÃ³n de nuestra playlist oficial: â€œ${playlistName}â€œ
 ${playlistUrl}
 
-Te invitamos a compartirlo con tus seguidores para que sigan creciendo los éxitos.
+Te invitamos a compartirlo con tus seguidores para que sigan creciendo los Ã©xitos.
 
-Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras redes:
+Si gustas apoyar creciendo la comunidad tambiÃ©n te invitamos a seguir nuestras redes:
 Instagram:
 @the.new.indie.wave
 @rodrigodlmoral`;
       }
     } else {
       if (cleanRadarUrl) {
-        fullMessage = `¡Felicidades! ¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
+        fullMessage = `Â¡Felicidades! Â¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
 
-te invitamos a que compartas con tus seguidores esta reseña y que sigan creciendo los éxitos. También es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+te invitamos a que compartas con tus seguidores esta reseÃ±a y que sigan creciendo los Ã©xitos. TambiÃ©n es de nuestro gusto informarte que tu tema: â€œ${songTitle}â€œ fue seleccionado para aÃ±adirse en la rotaciÃ³n de nuestra playlist oficial: â€œ${playlistName}â€œ
 Mandame Dm para compartirte el link de la playlist.
 
-Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras redes:
+Si gustas apoyar creciendo la comunidad tambiÃ©n te invitamos a seguir nuestras redes:
 Instagram:
 @the.new.indie.wave
 @rodrigodlmoral`;
       } else {
-        fullMessage = `¡Felicidades! Es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+        fullMessage = `Â¡Felicidades! Es de nuestro gusto informarte que tu tema: â€œ${songTitle}â€œ fue seleccionado para aÃ±adirse en la rotaciÃ³n de nuestra playlist oficial: â€œ${playlistName}â€œ
 Mandame Dm para compartirte el link de la playlist.
 
-Te invitamos a compartirlo con tus seguidores para que sigan creciendo los éxitos.
+Te invitamos a compartirlo con tus seguidores para que sigan creciendo los Ã©xitos.
 
-Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras redes:
+Si gustas apoyar creciendo la comunidad tambiÃ©n te invitamos a seguir nuestras redes:
 Instagram:
 @the.new.indie.wave
 @rodrigodlmoral`;
@@ -3324,7 +3324,7 @@ Instagram:
 
     var modal = document.getElementById('autoMessageModal');
     if (modal) modal.style.display = 'flex';
-    showToast('✓ Mensaje y Story generados con éxito');
+    showToast('âœ“ Mensaje y Story generados con Ã©xito');
   }
 
   function closeAutoMessageModal() {
@@ -3337,7 +3337,7 @@ Instagram:
     if (!txt) return;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(txt).then(function(){
-        showToast('✓ ¡Mensaje copiado al portapapeles!');
+        showToast('âœ“ Â¡Mensaje copiado al portapapeles!');
       }).catch(function(){
         fallbackCopyText(txt);
       });
@@ -3353,9 +3353,9 @@ Instagram:
     ta.select();
     try {
       document.execCommand('copy');
-      showToast('✓ ¡Mensaje copiado al portapapeles!');
+      showToast('âœ“ Â¡Mensaje copiado al portapapeles!');
     } catch(e) {
-      showToast('⚠️ Selecciona y copia el texto manualmente.');
+      showToast('âš ï¸ Selecciona y copia el texto manualmente.');
     }
     document.body.removeChild(ta);
   }
@@ -3375,23 +3375,23 @@ Instagram:
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    showToast('✓ Descargando Historia (1080x1920 HD)...');
+    showToast('âœ“ Descargando Historia (1080x1920 HD)...');
   }
 
   function copyAutoMessageStoryToClipboard() {
     if (!navigator.clipboard || !window.ClipboardItem || !_curCachedAmStoryDataUrl) {
-      showToast('⚠️ Tu navegador no soporta copiado directo');
+      showToast('âš ï¸ Tu navegador no soporta copiado directo');
       return;
     }
     fetch(_curCachedAmStoryDataUrl)
       .then(function(res){ return res.blob(); })
       .then(function(blob){
         navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function(){
-          showToast('✓ ¡Imagen de historia copiada al portapapeles!');
+          showToast('âœ“ Â¡Imagen de historia copiada al portapapeles!');
         });
       })
       .catch(function(){
-        showToast('⚠️ No se pudo copiar la imagen automáticamente. Usa el botón descargar.');
+        showToast('âš ï¸ No se pudo copiar la imagen automÃ¡ticamente. Usa el botÃ³n descargar.');
       });
   }
 
@@ -3410,25 +3410,25 @@ Instagram:
 <!-- MODAL GENERADOR DE MATERIAL PROMOCIONAL PARA CURADOR -->
 <div id="storyModalCurator" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
   <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 1200px; width: 100%; max-height: 94vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
-    <button onclick="closeCuratorStoryModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; z-index: 10;">✕</button>
+    <button onclick="closeCuratorStoryModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; z-index: 10;">âœ•</button>
     
     <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// GENERADOR OFICIAL // MATERIAL PROMOCIONAL</div>
-    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">Paquete de Aceptación para el Artista</h3>
+    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">Paquete de AceptaciÃ³n para el Artista</h3>
     <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 22px;">
-      Genera el texto de felicitación y los gráficos para anunciar la inclusión del track (Story vertical + Post cuadrado).
+      Genera el texto de felicitaciÃ³n y los grÃ¡ficos para anunciar la inclusiÃ³n del track (Story vertical + Post cuadrado).
     </p>
 
     <div class="story-modal-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start;">
       
-      <!-- Columna 1: Mensaje de Felicitación -->
+      <!-- Columna 1: Mensaje de FelicitaciÃ³n -->
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); margin-bottom: 4px;">1. MENSAJE PARA EL ARTISTA:</div>
         <textarea id="curatorGeneratedMessageText" rows="18" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); border-radius: 6px; padding: 12px; color: #fff; font-family: var(--font-mono); font-size: 13px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
         <button onclick="copyCuratorMessage()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 12px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
-          📋 Copiar Mensaje
+          ðŸ“‹ Copiar Mensaje
         </button>
         <button onclick="regenerateCuratorMessage()" style="background: rgba(255,255,255,0.05); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
-          🔄 Generar Otro Texto
+          ðŸ”„ Generar Otro Texto
         </button>
       </div>
 
@@ -3440,10 +3440,10 @@ Instagram:
         </div>
         <div style="display: flex; gap: 8px; width: 100%;">
           <button onclick="downloadCuratorStoryImage()" style="flex: 1; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 800; padding: 10px; border-radius: 6px; border: none; cursor: pointer;">
-            ⬇️ Descargar
+            â¬‡ï¸ Descargar
           </button>
           <button onclick="copyCuratorStoryToClipboard()" style="flex: 1; background: rgba(255,255,255,0.1); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 600; padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
-            📋 Copiar Imagen
+            ðŸ“‹ Copiar Imagen
           </button>
         </div>
       </div>
@@ -3456,10 +3456,10 @@ Instagram:
         </div>
         <div style="display: flex; gap: 8px; width: 100%;">
           <button onclick="downloadCuratorPostImage()" style="flex: 1; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 800; padding: 10px; border-radius: 6px; border: none; cursor: pointer;">
-            ⬇️ Descargar
+            â¬‡ï¸ Descargar
           </button>
           <button onclick="copyCuratorPostToClipboard()" style="flex: 1; background: rgba(255,255,255,0.1); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 600; padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
-            📋 Copiar Imagen
+            ðŸ“‹ Copiar Imagen
           </button>
         </div>
       </div>
@@ -3477,41 +3477,41 @@ Instagram:
   var _livePlaylistCoversMap = {};
   var _loadedPlaylistCoverImages = {};
 
-  // CANCIONES 100% REALES EXTRAÍDAS DE TUS PLAYLISTS OFICIALES DE SPOTIFY
+  // CANCIONES 100% REALES EXTRAÃDAS DE TUS PLAYLISTS OFICIALES DE SPOTIFY
   var _curatedPlaylistTracks = {
-    "Metal intenso para liberar toda tu energía": [
-      { name: "Díganme", artist: "Jose Macario, Zxmyr, Ladrones" },
-      { name: "Crónica De Una Peda Anunciada", artist: "Cabezä de Perro" },
-      { name: "Aquí Se Viene A Chupar Y Coger", artist: "Dismembered Pig" },
+    "Metal intenso para liberar toda tu energÃ­a": [
+      { name: "DÃ­ganme", artist: "Jose Macario, Zxmyr, Ladrones" },
+      { name: "CrÃ³nica De Una Peda Anunciada", artist: "CabezÃ¤ de Perro" },
+      { name: "AquÃ­ Se Viene A Chupar Y Coger", artist: "Dismembered Pig" },
       { name: "She Came Like A Hurricane", artist: "Corpore" },
       { name: "PRENDELA", artist: "DELICTIVO, Coko Yamasaki" },
       { name: "Charcos de Sudor", artist: "Desmembramiento Eterno" },
-      { name: "Fuego En El Corazón", artist: "The Metal Nomad" },
+      { name: "Fuego En El CorazÃ³n", artist: "The Metal Nomad" },
       { name: "A Batalla Vamos", artist: "Yaotl Mictlan" },
       { name: "In-Pulso", artist: "Vulgar Addiction" },
       { name: "Black Svn", artist: "Deconception" }
     ],
     "Mezcla de rolas urbanas para farmear Aura": [
-      { name: "Nuestro Juramento", artist: "Maskafé" },
-      { name: "Despertar en Ti", artist: "Escathárys" },
-      { name: "Excepto Tú", artist: "Radio Revuelta" },
+      { name: "Nuestro Juramento", artist: "MaskafÃ©" },
+      { name: "Despertar en Ti", artist: "EscathÃ¡rys" },
+      { name: "Excepto TÃº", artist: "Radio Revuelta" },
       { name: "Todo por Amor", artist: "Gran Matador" },
-      { name: "Seria", artist: "Médanos" },
+      { name: "Seria", artist: "MÃ©danos" },
       { name: "Perdedor", artist: "Radio Revuelta" },
       { name: "Tu mirar", artist: "Modorros" },
-      { name: "Adiós", artist: "Chicle y Pega Ska" }
+      { name: "AdiÃ³s", artist: "Chicle y Pega Ska" }
     ],
-    "Darkwave oscuro y atmosférico para la madrugada": [
+    "Darkwave oscuro y atmosfÃ©rico para la madrugada": [
       { name: "Bang!", artist: "Rey Rata" },
       { name: "Ritmo Triple Seis", artist: "Rey Rata" },
       { name: "Tenerla Adentro", artist: "El Muertho De Tijuana" },
       { name: "Los inocentes", artist: "EESCA" },
-      { name: "Reflejos", artist: "Vacíos Cuerpos" },
+      { name: "Reflejos", artist: "VacÃ­os Cuerpos" },
       { name: "Death Song", artist: "Stranger and Lovers" },
-      { name: "Lápidas de Sal", artist: "Funeralz" },
-      { name: "En las Telarañas de Tu Ternura", artist: "Khristian De Los Muertos" }
+      { name: "LÃ¡pidas de Sal", artist: "Funeralz" },
+      { name: "En las TelaraÃ±as de Tu Ternura", artist: "Khristian De Los Muertos" }
     ],
-    "Música urbana con flow y ritmo para moverte": [
+    "MÃºsica urbana con flow y ritmo para moverte": [
       { name: "Nalguita y Teta", artist: "Neton Vega" },
       { name: "No Son Celos", artist: "Ander Noria" },
       { name: "Nadie Me Enamora", artist: "Victoria Amaya" },
@@ -3522,51 +3522,51 @@ Instagram:
       { name: "Que Me Entierren Con La Banda", artist: "El Chivo" }
     ],
     "Hard rock para sacar la rabia y el enojo acumulado": [
-      { name: "Fiesta y Degenere", artist: "DEGENERACIÖN 89" },
+      { name: "Fiesta y Degenere", artist: "DEGENERACIÃ–N 89" },
       { name: "Ratas", artist: "Sindrome" },
       { name: "Todos Somos Punks", artist: "Fe D' Ratas" },
       { name: "zona liberada", artist: "Manu Sousax" },
       { name: "Museo del Chopo", artist: "Rebel'd Punk" },
       { name: "Cuatro Sudakas", artist: "Mal Pasar" },
       { name: "Escupelos", artist: "Gesto Punk" },
-      { name: "Barrio Bajos", artist: "DEGENERACIÖN 89" }
+      { name: "Barrio Bajos", artist: "DEGENERACIÃ–N 89" }
     ],
     "Soft Pop suave para domingos sin hacer nada": [
-      { name: "Corazón en Fuga", artist: "Breneli R" },
+      { name: "CorazÃ³n en Fuga", artist: "Breneli R" },
       { name: "Lo Que Alguna Vez Fue Hermoso", artist: "Los Dinosaurios Murieron Ayer" },
       { name: "Vampira", artist: "Usted Solitario" },
       { name: "Dapa", artist: "El Picnic Era Ayer" },
-      { name: "1500 Calorías", artist: "Bruno Bardo" },
+      { name: "1500 CalorÃ­as", artist: "Bruno Bardo" },
       { name: "Mecanismos de Defensa en las Ligas Mayores", artist: "Blackthony Startano" },
       { name: "no cesara", artist: "NOTA" },
       { name: "Historia de una Flor", artist: "D-Lirios" }
     ],
     "Dream Pop intimo para escuchar solo en tu cuarto": [
       { name: "Indefenso - Bolero", artist: "TOVAR" },
-      { name: "Ya no más", artist: "Mi113r" },
+      { name: "Ya no mÃ¡s", artist: "Mi113r" },
       { name: "Tu ciudad", artist: "ASHLI" },
       { name: "No Te Drogues, Bonita", artist: "Loncheras De Perro" },
       { name: "perros", artist: "mil ataris por segundo" },
-      { name: "tu bitácora emocional", artist: "mil ataris por segundo" },
+      { name: "tu bitÃ¡cora emocional", artist: "mil ataris por segundo" },
       { name: "Necesito Decirte", artist: "Lagrima De Risa" },
-      { name: "Infrarrojos", artist: "Los Niños Vudú" }
+      { name: "Infrarrojos", artist: "Los NiÃ±os VudÃº" }
     ],
     "SynthPop para cuando solo quieres bailar": [
       { name: "Solitarium", artist: "MART.INN" },
       { name: "Eres Mi Todo", artist: "Arwil" },
       { name: "cada que...", artist: "te vi en un planetario, Santa Madero, Poder Fantasma" },
       { name: "conexion infinita", artist: "victor manuel jaquez lantigua" },
-      { name: "OASIS", artist: "AarǿnViz" },
-      { name: "Guerra Fría", artist: "Blue Larimar Music" },
-      { name: "Déjate llevar", artist: "Rodrigo dl Moral" },
+      { name: "OASIS", artist: "AarÇ¿nViz" },
+      { name: "Guerra FrÃ­a", artist: "Blue Larimar Music" },
+      { name: "DÃ©jate llevar", artist: "Rodrigo dl Moral" },
       { name: "Blue Monday", artist: "Rodrigo dl Moral" }
     ],
     "Rock indie para manejar de noche sin rumbo": [
       { name: "Blue Monday", artist: "Rodrigo dl Moral" },
-      { name: "Déjate llevar", artist: "Rodrigo dl Moral" },
+      { name: "DÃ©jate llevar", artist: "Rodrigo dl Moral" },
       { name: "Midnight Dance 90's - Remix", artist: "Rodrigo dl Moral" },
-      { name: "Guerra Fría", artist: "Blue Larimar Music" },
-      { name: "OASIS", artist: "AarǿnViz" },
+      { name: "Guerra FrÃ­a", artist: "Blue Larimar Music" },
+      { name: "OASIS", artist: "AarÇ¿nViz" },
       { name: "conexion infinita", artist: "victor manuel jaquez lantigua" },
       { name: "cada que...", artist: "te vi en un planetario" },
       { name: "Eres Mi Todo", artist: "Arwil" }
@@ -3593,18 +3593,18 @@ Instagram:
       return _livePlaylistTracksMap[playlistName];
     }
 
-    // 2. Coincidencia por Palabras Clave Esenciales (Garantiza 100% de éxito con mayúsculas/acentos)
+    // 2. Coincidencia por Palabras Clave Esenciales (Garantiza 100% de Ã©xito con mayÃºsculas/acentos)
     if (normPName.includes('metal') || normPName.includes('energia') || normPUrl.includes('5olib')) {
-      return _curatedPlaylistTracks["Metal intenso para liberar toda tu energía"];
+      return _curatedPlaylistTracks["Metal intenso para liberar toda tu energÃ­a"];
     }
     if (normPName.includes('darkwave') || normPName.includes('madrugada') || normPName.includes('goth') || normPUrl.includes('4mcjj')) {
-      return _curatedPlaylistTracks["Darkwave oscuro y atmosférico para la madrugada"];
+      return _curatedPlaylistTracks["Darkwave oscuro y atmosfÃ©rico para la madrugada"];
     }
     if (normPName.includes('aura') || normPName.includes('farmear') || normPUrl.includes('79sku')) {
       return _curatedPlaylistTracks["Mezcla de rolas urbanas para farmear Aura"];
     }
     if (normPName.includes('urbano') || normPName.includes('flow') || normPName.includes('trap') || normPName.includes('reggaeton') || normPName.includes('corridos') || normPUrl.includes('7bbyp')) {
-      return _curatedPlaylistTracks["Música urbana con flow y ritmo para moverte"];
+      return _curatedPlaylistTracks["MÃºsica urbana con flow y ritmo para moverte"];
     }
     if (normPName.includes('hard rock') || normPName.includes('rabia') || normPName.includes('enojo') || normPName.includes('punk') || normPName.includes('rebelde') || normPUrl.includes('6cuh') || normPUrl.includes('2qlvw')) {
       return _curatedPlaylistTracks["Hard rock para sacar la rabia y el enojo acumulado"];
@@ -3630,7 +3630,7 @@ Instagram:
     }
 
     // 4. Fallback con temas reales de Metal / Rock TNIW
-    return _curatedPlaylistTracks["Metal intenso para liberar toda tu energía"];
+    return _curatedPlaylistTracks["Metal intenso para liberar toda tu energÃ­a"];
   }
 
   function getCoverForPlaylist(playlistName, playlistUrl) {
@@ -3683,15 +3683,15 @@ Instagram:
   let _curPromoGenre = '';
   
   const promoTemplates = [
-    "¡Felicidades *{artist}*! 🎉 Nos encantó escuchar *'{song}'* y estamos muy felices de anunciarte que ha sido oficialmente seleccionada para ser parte de nuestra comunidad en The New Indie Wave. Ya puedes encontrarla en nuestra playlist *'{playlist}'*.\n\nEscúchala y guárdala aquí: {url}\n\nAyúdanos a seguir creciendo compartiendo la buena noticia y etiquetándonos en tus redes. ¡Que sigan los éxitos! 🚀",
-    "¡Hola *{artist}*! 🎵 Queremos felicitarte porque *'{song}'* ha superado nuestro proceso de curaduría y ya es parte de la familia The New Indie Wave. La hemos añadido a la playlist *'{playlist}'*.\n\nLink directo: {url}\n\n¡No olvides compartirla con tus seguidores y etiquetarnos para hacer más ruido juntos! Un abrazo enorme. ✨",
-    "¡Excelentes noticias *{artist}*! ⚡ Tu tema *'{song}'* nos transmitió la vibra perfecta y acaba de ser integrado a nuestra playlist oficial *'{playlist}'*.\n\nPuedes encontrarla aquí: {url}\n\n¡Celebra este logro compartiéndolo en tus historias! Etiqueta a The New Indie Wave para que podamos repostearte. ¡Mucho éxito! 🤘",
-    "¡Enhorabuena *{artist}*! 💎 Hemos seleccionado tu canción *'{song}'* por su gran calidad y ya forma parte de The New Indie Wave, dentro de la playlist *'{playlist}'*.\n\nEscúchala aquí: {url}\n\nNos encantaría que nos ayudes a correr la voz compartiendo el enlace en tus redes. ¡Bienvenido a la comunidad! 🔥"
+    "Â¡Felicidades *{artist}*! ðŸŽ‰ Nos encantÃ³ escuchar *'{song}'* y estamos muy felices de anunciarte que ha sido oficialmente seleccionada para ser parte de nuestra comunidad en The New Indie Wave. Ya puedes encontrarla en nuestra playlist *'{playlist}'*.\n\nEscÃºchala y guÃ¡rdala aquÃ­: {url}\n\nAyÃºdanos a seguir creciendo compartiendo la buena noticia y etiquetÃ¡ndonos en tus redes. Â¡Que sigan los Ã©xitos! ðŸš€",
+    "Â¡Hola *{artist}*! ðŸŽµ Queremos felicitarte porque *'{song}'* ha superado nuestro proceso de curadurÃ­a y ya es parte de la familia The New Indie Wave. La hemos aÃ±adido a la playlist *'{playlist}'*.\n\nLink directo: {url}\n\nÂ¡No olvides compartirla con tus seguidores y etiquetarnos para hacer mÃ¡s ruido juntos! Un abrazo enorme. âœ¨",
+    "Â¡Excelentes noticias *{artist}*! âš¡ Tu tema *'{song}'* nos transmitiÃ³ la vibra perfecta y acaba de ser integrado a nuestra playlist oficial *'{playlist}'*.\n\nPuedes encontrarla aquÃ­: {url}\n\nÂ¡Celebra este logro compartiÃ©ndolo en tus historias! Etiqueta a The New Indie Wave para que podamos repostearte. Â¡Mucho Ã©xito! ðŸ¤˜",
+    "Â¡Enhorabuena *{artist}*! ðŸ’Ž Hemos seleccionado tu canciÃ³n *'{song}'* por su gran calidad y ya forma parte de The New Indie Wave, dentro de la playlist *'{playlist}'*.\n\nEscÃºchala aquÃ­: {url}\n\nNos encantarÃ­a que nos ayudes a correr la voz compartiendo el enlace en tus redes. Â¡Bienvenido a la comunidad! ðŸ”¥"
   ];
 
   function openCuratorStoryGenerator(encArtist, encSong, encPlaylist, encGenre, encPlaylistUrl, encSpotifyUrl) {
     _curPromoArtist = decodeURIComponent(encArtist || 'Artista');
-    _curPromoSong = decodeURIComponent(encSong || 'Canción');
+    _curPromoSong = decodeURIComponent(encSong || 'CanciÃ³n');
     _curPromoPlaylist = decodeURIComponent(encPlaylist || 'Rock Indie');
     _curPromoGenre = decodeURIComponent(encGenre || 'Indie');
     _curPromoUrl = encPlaylistUrl ? decodeURIComponent(encPlaylistUrl) : (playlistLinksMap[_curPromoPlaylist] || '');
@@ -3752,12 +3752,12 @@ Instagram:
     if (!ta) return;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(ta.value).then(function() {
-        showToast('✅ ¡Mensaje copiado al portapapeles!');
+        showToast('âœ… Â¡Mensaje copiado al portapapeles!');
       });
     } else {
       ta.select();
       document.execCommand('copy');
-      showToast('✅ ¡Mensaje copiado al portapapeles!');
+      showToast('âœ… Â¡Mensaje copiado al portapapeles!');
     }
   }
 
@@ -3831,7 +3831,7 @@ Instagram:
     
     ctx.fillStyle = '#bbf451';
     ctx.font = 'bold 24px "Space Mono", monospace';
-    ctx.fillText('RECIÉN AÑADIDA A NUESTRA PLAYLIST', W/2, 145);
+    ctx.fillText('RECIÃ‰N AÃ‘ADIDA A NUESTRA PLAYLIST', W/2, 145);
 
     // Song Info
     ctx.fillStyle = '#fff';
@@ -3845,7 +3845,7 @@ Instagram:
     // Spotify Tag
     ctx.fillStyle = '#1DB954'; // Spotify green
     ctx.font = 'bold 28px "Space Mono", monospace';
-    ctx.fillText('🎵 ' + truncateStringCur(playlist, 70), W/2, covY + covH + 215);
+    ctx.fillText('ðŸŽµ ' + truncateStringCur(playlist, 70), W/2, covY + covH + 215);
   }
 
   function downloadCuratorPostImage() {
@@ -3857,22 +3857,22 @@ Instagram:
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    showToast('✅ Descargando imagen...');
+    showToast('âœ… Descargando imagen...');
   }
 
   function copyCuratorPostToClipboard() {
     var canvas = document.getElementById('curatorPostCanvas');
     if (!canvas) return;
     if (!navigator.clipboard || !window.ClipboardItem) {
-      showToast('⚠️ Tu navegador no soporta copiado directo de imágenes');
+      showToast('âš ï¸ Tu navegador no soporta copiado directo de imÃ¡genes');
       return;
     }
     canvas.toBlob(function(blob) {
       if(blob) {
         navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function() {
-          showToast('✅ ¡Imagen copiada al portapapeles!');
+          showToast('âœ… Â¡Imagen copiada al portapapeles!');
         }).catch(function(e) {
-          showToast('⚠️ Error al copiar imagen');
+          showToast('âš ï¸ Error al copiar imagen');
           console.error(e);
         });
       }
@@ -3977,7 +3977,7 @@ Instagram:
 
       ctx.drawImage(coverImg, drawX, drawY, drawW, drawH);
 
-      // Overlay cinematográfico oscuro para legibilidad y elegancia editorial impecable
+      // Overlay cinematogrÃ¡fico oscuro para legibilidad y elegancia editorial impecable
       var coverOverlay = ctx.createLinearGradient(cardX, cardY, cardX, cardY + headerH);
       coverOverlay.addColorStop(0, 'rgba(8, 12, 20, 0.65)');
       coverOverlay.addColorStop(0.35, 'rgba(6, 8, 14, 0.75)');
@@ -3988,7 +3988,7 @@ Instagram:
       ctx.restore();
     }
 
-    // Ecualizador gráfico / espectro de audio decorativo
+    // Ecualizador grÃ¡fico / espectro de audio decorativo
     var eqBarCount = 28;
     var eqWidth = 16;
     var eqGap = 12;
@@ -4004,7 +4004,7 @@ Instagram:
       ctx.fill();
     }
 
-    // Badge superior centrado con acento verde neón
+    // Badge superior centrado con acento verde neÃ³n
     var badgeW = 340;
     var badgeH = 34;
     var badgeX = cardX + (cardW - badgeW) / 2;
@@ -4023,9 +4023,9 @@ Instagram:
     ctx.fillStyle = '#bbf451';
     ctx.font = 'bold 14px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('⚡ SPOTIFY OFFICIAL PLAYLIST', cardX + (cardW / 2), badgeY + 22);
+    ctx.fillText('âš¡ SPOTIFY OFFICIAL PLAYLIST', cardX + (cardW / 2), badgeY + 22);
 
-    // Título Editorial en MAYÚSCULAS con Tipografía Imponente
+    // TÃ­tulo Editorial en MAYÃšSCULAS con TipografÃ­a Imponente
     var upperPlaylist = (playlist || 'ROCK INDIE').toUpperCase();
     ctx.fillStyle = '#ffffff';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
@@ -4037,7 +4037,7 @@ Instagram:
     // Sello Editorial Centrado
     ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
     ctx.font = '700 14px monospace';
-    ctx.fillText('CURADURÍA EDITORIAL OFICIAL', cardX + (cardW / 2), cardY + headerH - 38);
+    ctx.fillText('CURADURÃA EDITORIAL OFICIAL', cardX + (cardW / 2), cardY + headerH - 38);
 
     ctx.fillStyle = '#bbf451';
     ctx.font = 'bold 19px monospace';
@@ -4046,7 +4046,7 @@ Instagram:
 
     ctx.restore();
 
-    // 4. BOTÓN VERDE SPOTIFY EN MODO PAUSE (Reproducción en Curso)
+    // 4. BOTÃ“N VERDE SPOTIFY EN MODO PAUSE (ReproducciÃ³n en Curso)
     var pauseX = cardX + cardW - 80;
     var pauseY = cardY + headerH - 14;
     var pauseR = 44;
@@ -4072,9 +4072,9 @@ Instagram:
     var listStartY = cardY + headerH + 34;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.font = '800 18px monospace';
-    ctx.fillText('★ EN REPRODUCCIÓN // RECIÉN AÑADIDA', cardX + 44, listStartY);
+    ctx.fillText('â˜… EN REPRODUCCIÃ“N // RECIÃ‰N AÃ‘ADIDA', cardX + 44, listStartY);
 
-    // 6. CANCIÓN ADMITIDA (PUESTO #1 DESTACADO)
+    // 6. CANCIÃ“N ADMITIDA (PUESTO #1 DESTACADO)
     var row1Y = listStartY + 18;
     var row1H = 112;
 
@@ -4086,7 +4086,7 @@ Instagram:
     drawRoundRectCur(ctx, cardX + 24, row1Y, cardW - 48, row1H, 14);
     ctx.stroke();
 
-    // Portada / Badge de la Canción #1
+    // Portada / Badge de la CanciÃ³n #1
     var t1X = cardX + 42;
     var t1Y = row1Y + 16;
     var t1Size = 80;
@@ -4096,20 +4096,20 @@ Instagram:
 
     ctx.fillStyle = '#000000';
     ctx.font = 'bold 28px sans-serif';
-    ctx.fillText('🎵', t1X + 23, t1Y + 51);
+    ctx.fillText('ðŸŽµ', t1X + 23, t1Y + 51);
 
-    // Títulos de la canción #1
+    // TÃ­tulos de la canciÃ³n #1
     ctx.fillStyle = '#bbf451';
     ctx.font = 'bold 30px sans-serif';
     ctx.fillText(truncateStringCur(song, 22), t1X + t1Size + 22, t1Y + 34);
 
     ctx.fillStyle = '#ffffff';
     ctx.font = '600 20px monospace';
-    ctx.fillText(truncateStringCur(artist, 26) + ' • ' + genre, t1X + t1Size + 22, t1Y + 66);
+    ctx.fillText(truncateStringCur(artist, 26) + ' â€¢ ' + genre, t1X + t1Size + 22, t1Y + 66);
 
     ctx.fillStyle = '#1DB954';
     ctx.font = '32px sans-serif';
-    ctx.fillText('💚', cardX + cardW - 88, t1Y + 50);
+    ctx.fillText('ðŸ’š', cardX + cardW - 88, t1Y + 50);
 
     // 7. LISTA EXTENSA DE 7 TEMAS SIGUIENTES (Con desvanecimiento / overflow realista al final)
     var otherTracks = getTracksForPlaylist(playlist, optionalPlaylistUrl);
@@ -4119,12 +4119,12 @@ Instagram:
       var trackItem = otherTracks[t];
       var currentY = startOthersY + (t * 96);
 
-      // Número de pista
+      // NÃºmero de pista
       ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
       ctx.font = 'bold 19px monospace';
       ctx.fillText((t + 2 < 10 ? '0' : '') + (t + 2), cardX + 44, currentY + 36);
 
-      // Nombre de la canción
+      // Nombre de la canciÃ³n
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.font = 'bold 23px sans-serif';
       ctx.fillText(truncateStringCur(trackItem.name, 28), cardX + 88, currentY + 28);
@@ -4134,12 +4134,12 @@ Instagram:
       ctx.font = '500 18px monospace';
       ctx.fillText(truncateStringCur(trackItem.artist, 32), cardX + 88, currentY + 54);
 
-      // Corazón de guardado
+      // CorazÃ³n de guardado
       ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
       ctx.font = '22px sans-serif';
-      ctx.fillText('🤍', cardX + cardW - 85, currentY + 40);
+      ctx.fillText('ðŸ¤', cardX + cardW - 85, currentY + 40);
 
-      // Línea divisoria sutil
+      // LÃ­nea divisoria sutil
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -4193,19 +4193,19 @@ Instagram:
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    showToast('✓ Descargando Historia (1080x1920 HD)...');
+    showToast('âœ“ Descargando Historia (1080x1920 HD)...');
   }
 
   function copyCuratorStoryToClipboard() {
     if (!navigator.clipboard || !window.ClipboardItem || !_curCachedStoryDataUrl) {
-      showToast('⚠️ Tu navegador no soporta copiado directo');
+      showToast('âš ï¸ Tu navegador no soporta copiado directo');
       return;
     }
     fetch(_curCachedStoryDataUrl)
       .then(function(res){ return res.blob(); })
       .then(function(blob){
         navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function(){
-          showToast('✓ ¡Imagen de historia copiada al portapapeles!');
+          showToast('âœ“ Â¡Imagen de historia copiada al portapapeles!');
         });
       });
   }
@@ -4252,11 +4252,11 @@ Instagram:
   }
 
   const wpTemplates = [
-    "🔥 ¡Nueva joya musical descubierta! Comunidad de The New Indie Wave, les presentamos a *{artist}* con su increíble tema *'{song}'*. Acabamos de añadirla a nuestra playlist oficial *'{playlist}'*. ¡Vayan a darle amor y escucharla ya mismo! 👇\n{url}",
-    "✨ ¡Atención, amantes del indie! The New Indie Wave le da la bienvenida a *{artist}* y su genial canción *'{song}'*. Ya forma parte de la playlist *'{playlist}'*. ¡Escúchenla completa y guárdenla en sus favoritos! 🎧\n{url}",
-    "🚀 ¡Música fresca para sus oídos! Conozcan a *{artist}* y escuchen *'{song}'*, nuestro más reciente descubrimiento en The New Indie Wave. Ya la pueden encontrar en la playlist *'{playlist}'*. ¡Denle play y apoyen el talento independiente! 💥\n{url}",
-    "🎶 ¡Nuevos sonidos en The New Indie Wave! Sumérgete en la vibra de *{artist}* con su tema *'{song}'*. Recién salida del horno directo a nuestra playlist *'{playlist}'*. ¡No te la pierdas y escúchala aquí! 👇\n{url}",
-    "💎 ¡Una recomendación imperdible para la comunidad! Descubran a *{artist}* y disfruten de su canción *'{song}'*. La acabamos de seleccionar para la playlist *'{playlist}'*. ¡Vayan a agregarla a sus bibliotecas! 🤘\n{url}"
+    "ðŸ”¥ Â¡Nueva joya musical descubierta! Comunidad de The New Indie Wave, les presentamos a *{artist}* con su increÃ­ble tema *'{song}'*. Acabamos de aÃ±adirla a nuestra playlist oficial *'{playlist}'*. Â¡Vayan a darle amor y escucharla ya mismo! ðŸ‘‡\n{url}",
+    "âœ¨ Â¡AtenciÃ³n, amantes del indie! The New Indie Wave le da la bienvenida a *{artist}* y su genial canciÃ³n *'{song}'*. Ya forma parte de la playlist *'{playlist}'*. Â¡EscÃºchenla completa y guÃ¡rdenla en sus favoritos! ðŸŽ§\n{url}",
+    "ðŸš€ Â¡MÃºsica fresca para sus oÃ­dos! Conozcan a *{artist}* y escuchen *'{song}'*, nuestro mÃ¡s reciente descubrimiento en The New Indie Wave. Ya la pueden encontrar en la playlist *'{playlist}'*. Â¡Denle play y apoyen el talento independiente! ðŸ’¥\n{url}",
+    "ðŸŽ¶ Â¡Nuevos sonidos en The New Indie Wave! SumÃ©rgete en la vibra de *{artist}* con su tema *'{song}'*. ReciÃ©n salida del horno directo a nuestra playlist *'{playlist}'*. Â¡No te la pierdas y escÃºchala aquÃ­! ðŸ‘‡\n{url}",
+    "ðŸ’Ž Â¡Una recomendaciÃ³n imperdible para la comunidad! Descubran a *{artist}* y disfruten de su canciÃ³n *'{song}'*. La acabamos de seleccionar para la playlist *'{playlist}'*. Â¡Vayan a agregarla a sus bibliotecas! ðŸ¤˜\n{url}"
   ];
 
   let _wpCurrentArtist = '';
@@ -4267,7 +4267,7 @@ Instagram:
 
   function openWhatsAppGroupGenerator(encArtist, encSong, encPlaylist, encPlaylistUrl, encSpotifyUrl) {
     _wpCurrentArtist = decodeURIComponent(encArtist || 'Artista');
-    _wpCurrentSong = decodeURIComponent(encSong || 'Canción');
+    _wpCurrentSong = decodeURIComponent(encSong || 'CanciÃ³n');
     _wpCurrentPlaylist = decodeURIComponent(encPlaylist || 'Playlist');
     _wpCurrentUrl = encPlaylistUrl ? decodeURIComponent(encPlaylistUrl) : (playlistLinksMap[_wpCurrentPlaylist] || '');
     var spotifyUrl = encSpotifyUrl ? decodeURIComponent(encSpotifyUrl) : '';
@@ -4279,6 +4279,7 @@ Instagram:
 
     // Placeholder until we load track cover
     generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
+    generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
 
     // Fetch track cover
     if (spotifyUrl) {
@@ -4289,12 +4290,14 @@ Instagram:
             var coverUrl = data.cover;
             if (_wpTrackCoverCache[coverUrl]) {
               generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]);
+              generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]);
             } else {
               var img = new Image();
               img.crossOrigin = 'anonymous';
               img.onload = function() {
                 _wpTrackCoverCache[coverUrl] = img;
                 generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img);
+                generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img);
               };
               img.src = coverUrl;
             }
@@ -4326,12 +4329,12 @@ Instagram:
     if (!ta) return;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(ta.value).then(function() {
-        showToast('✅ ¡Mensaje copiado al portapapeles!');
+        showToast('âœ… Â¡Mensaje copiado al portapapeles!');
       });
     } else {
       ta.select();
       document.execCommand('copy');
-      showToast('✅ ¡Mensaje copiado al portapapeles!');
+      showToast('âœ… Â¡Mensaje copiado al portapapeles!');
     }
   }
 
@@ -4408,7 +4411,7 @@ Instagram:
     
     ctx.fillStyle = '#bbf451';
     ctx.font = 'bold 24px "Space Mono", monospace';
-    ctx.fillText('RECIÉN AÑADIDA A NUESTRA PLAYLIST', W/2, 145);
+    ctx.fillText('RECIÃ‰N AÃ‘ADIDA A NUESTRA PLAYLIST', W/2, 145);
 
     // Song Info
     ctx.fillStyle = '#fff';
@@ -4422,7 +4425,7 @@ Instagram:
     // Spotify Tag
     ctx.fillStyle = '#1DB954'; // Spotify green
     ctx.font = 'bold 28px "Space Mono", monospace';
-    ctx.fillText('🎵 ' + truncateStringCur(playlist, 70), W/2, covY + covH + 215);
+    ctx.fillText('ðŸŽµ ' + truncateStringCur(playlist, 70), W/2, covY + covH + 215);
   }
 
   function downloadWhatsAppImage() {
@@ -4434,22 +4437,143 @@ Instagram:
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    showToast('✅ Descargando imagen...');
+    showToast('âœ… Descargando imagen...');
   }
 
   function copyWhatsAppImage() {
     var canvas = document.getElementById('wpStoryCanvas');
     if (!canvas) return;
     if (!navigator.clipboard || !window.ClipboardItem) {
-      showToast('⚠️ Tu navegador no soporta copiado directo de imágenes');
+      showToast('âš ï¸ Tu navegador no soporta copiado directo de imÃ¡genes');
       return;
     }
     canvas.toBlob(function(blob) {
       if(blob) {
         navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function() {
-          showToast('✅ ¡Imagen copiada al portapapeles!');
+          showToast('âœ… Â¡Imagen copiada al portapapeles!');
         }).catch(function(e) {
-          showToast('⚠️ Error al copiar imagen');
+          showToast('âš ï¸ Error al copiar imagen');
+          console.error(e);
+        });
+      }
+    }, 'image/png');
+  }
+  function generateWhatsAppVerticalCanvas(artist, song, playlist, coverImg) {
+    var canvas = document.getElementById('wpVerticalStoryCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = 1080;
+    var H = 1920;
+
+    // Background
+    ctx.fillStyle = '#09090b';
+    ctx.fillRect(0, 0, W, H);
+
+    // Ambient glow from cover if exists
+    if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.globalAlpha = 0.4;
+      ctx.filter = 'blur(120px)';
+      ctx.drawImage(coverImg, -200, -200, W+400, H+400);
+      ctx.restore();
+    }
+
+    // Grid pattern / Texture
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for(var i=0; i<Math.max(W, H); i+=40) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke();
+    }
+
+    // Outer Border
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(40, 40, W-80, H-80);
+
+    // Logo & Header text
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 42px "Space Grotesk", "Outfit", "Syne", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('THE NEW INDIE WAVE', W/2, 200);
+    
+    ctx.fillStyle = 'var(--accent-lime)';
+    ctx.font = '700 24px "Space Mono", monospace';
+    ctx.fillText('RECIÉN AÑADIDO A NUESTRA PLAYLIST', W/2, 260);
+
+    // Cover Image (Center)
+    var covW = 740;
+    var covH = 740;
+    var covX = (W - covW) / 2;
+    var covY = 440;
+
+    if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.9)';
+      ctx.shadowBlur = 50;
+      ctx.shadowOffsetY = 25;
+      drawRoundRectCur(ctx, covX, covY, covW, covH, 24);
+      ctx.fillStyle = '#111';
+      ctx.fill();
+      ctx.clip();
+      ctx.drawImage(coverImg, covX, covY, covW, covH);
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.fillStyle = '#1a1a20';
+      drawRoundRectCur(ctx, covX, covY, covW, covH, 24);
+      ctx.fill();
+      ctx.fillStyle = '#444';
+      ctx.font = 'bold 36px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Cargando Portada...', W/2, covY + covH/2);
+      ctx.restore();
+    }
+
+    // Song Info
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 70px "Space Grotesk", "Outfit", "Syne", sans-serif';
+    ctx.textAlign = 'center';
+    var truncSong = song.length > 25 ? song.substring(0, 22) + '...' : song;
+    ctx.fillText(truncSong, W/2, covY + covH + 140);
+
+    ctx.fillStyle = '#d1d5db';
+    ctx.font = '500 44px "Space Grotesk", "Outfit", sans-serif';
+    var truncArtist = artist.length > 30 ? artist.substring(0, 27) + '...' : artist;
+    ctx.fillText(truncArtist, W/2, covY + covH + 210);
+
+    // Playlist info at bottom
+    ctx.fillStyle = 'var(--accent-lime)';
+    ctx.font = '600 30px "Space Mono", monospace';
+    var pText = '♫ ' + (playlist.length > 38 ? playlist.substring(0, 35) + '...' : playlist);
+    ctx.fillText(pText, W/2, H - 120);
+  }
+
+  function downloadWhatsAppVerticalImage() {
+    var canvas = document.getElementById('wpVerticalStoryCanvas');
+    if (!canvas) return;
+    var a = document.createElement('a');
+    a.download = 'WhatsApp_Status_' + _wpCurrentSong.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+    a.href = canvas.toDataURL('image/png');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('⬇️ Descargando Status Vertical...');
+  }
+
+  function copyWhatsAppVerticalImage() {
+    var canvas = document.getElementById('wpVerticalStoryCanvas');
+    if (!canvas) return;
+    if (!navigator.clipboard || !window.ClipboardItem) {
+      showToast('❌ Tu navegador no soporta copiado directo de imágenes');
+      return;
+    }
+    canvas.toBlob(function(blob) {
+      if(blob) {
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function() {
+          showToast('✨ ¡Status Vertical copiado al portapapeles!');
+        }).catch(function(e) {
+          showToast('❌ Error al copiar imagen');
           console.error(e);
         });
       }
@@ -4457,13 +4581,13 @@ Instagram:
   }
 </script>
 
-<!-- MODAL MENSAJE AUTOMÁTICO & STORY PARA CURADOR -->
+<!-- MODAL MENSAJE AUTOMÃTICO & STORY PARA CURADOR -->
 <div id="autoMessageModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
   <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 960px; width: 100%; max-height: 92vh; overflow-y: auto; padding: 26px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
-    <button onclick="closeAutoMessageModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; z-index: 10;">✕</button>
+    <button onclick="closeAutoMessageModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; z-index: 10;">âœ•</button>
     
-    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// RESULTADO // MENSAJE AUTOMÁTICO & STORY GENERADA</div>
-    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">🎉 Notificación Oficial Lista para Enviar</h3>
+    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// RESULTADO // MENSAJE AUTOMÃTICO & STORY GENERADA</div>
+    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">ðŸŽ‰ NotificaciÃ³n Oficial Lista para Enviar</h3>
     <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
       Copia el mensaje para el artista y descarga o copia la historia visual en HD (1080x1920) para tus redes sociales.
     </p>
@@ -4474,7 +4598,7 @@ Instagram:
       <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase;">
-            💬 MENSAJE LISTO PARA COPIAR
+            ðŸ’¬ MENSAJE LISTO PARA COPIAR
           </div>
           <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">Editable</span>
         </div>
@@ -4483,10 +4607,10 @@ Instagram:
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <button onclick="copyAutoMessageText()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 12.5px; font-weight: 800; padding: 12px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
-            📋 Copiar Mensaje al Portapapeles
+            ðŸ“‹ Copiar Mensaje al Portapapeles
           </button>
           <button onclick="shareAutoMessageWhatsApp()" style="background: #25D366; color: #000; font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 10px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-            🟢 Enviar / Abrir en WhatsApp ↗
+            ðŸŸ¢ Enviar / Abrir en WhatsApp â†—
           </button>
         </div>
       </div>
@@ -4495,7 +4619,7 @@ Instagram:
       <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-pink); text-transform: uppercase;">
-            🎨 STORY PROMOCIONAL (1080x1920)
+            ðŸŽ¨ STORY PROMOCIONAL (1080x1920)
           </div>
           <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">9:16 HD</span>
         </div>
@@ -4506,10 +4630,10 @@ Instagram:
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <button onclick="downloadAutoMessageStory()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 12.5px; font-weight: 800; padding: 12px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
-            📥 Descargar Imagen de Historia (PNG HD)
+            ðŸ“¥ Descargar Imagen de Historia (PNG HD)
           </button>
           <button onclick="copyAutoMessageStoryToClipboard()" style="background: rgba(255,255,255,0.06); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
-            📋 Copiar Imagen al Portapapeles
+            ðŸ“‹ Copiar Imagen al Portapapeles
           </button>
         </div>
       </div>
@@ -4520,33 +4644,48 @@ Instagram:
 
 <!-- MODAL GENERADOR WHATSAPP GRUPO -->
 <div id="whatsappGroupModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
-  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
-    <button onclick="closeWhatsAppGroupModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; z-index: 10;">✕</button>
+  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 1200px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
+    <button onclick="closeWhatsAppGroupModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; z-index: 10;">Ã—</button>
     
     <div style="font-family: var(--font-mono); font-size: 11px; color: #25D366; text-transform: uppercase; margin-bottom: 4px;">// GENERADOR WHATSAPP // COMUNIDAD</div>
     <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">Mensaje para Grupo de WhatsApp</h3>
     
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start; margin-top: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: start; margin-top: 20px;">
       <!-- Texto -->
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <textarea id="wpGeneratedMessageText" rows="14" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); border-radius: 6px; padding: 12px; color: #fff; font-family: var(--font-mono); font-size: 13px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
         <button onclick="copyWhatsAppMessage()" style="background: #25D366; color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 12px 16px; border-radius: 6px; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(37, 211, 102, 0.25);">
-          📋 Copiar Mensaje
+          ðŸ“‹ Copiar Mensaje
         </button>
         <button onclick="regenerateWhatsAppMessage()" style="background: rgba(255,255,255,0.05); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
-          🔄 Generar Otro Mensaje Distinto
+          ðŸ”„ Generar Otro Mensaje Distinto
         </button>
       </div>
 
-      <!-- Imagen -->
+      <!-- Imagen Cuadrada 1:1 -->
       <div style="display: flex; flex-direction: column; gap: 12px; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-transform: uppercase;">POST CUADRADO (1080x1080)</div>
         <canvas id="wpStoryCanvas" width="1080" height="1080" style="width: 100%; max-width: 320px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></canvas>
         <div style="display: flex; gap: 8px; width: 100%;">
           <button onclick="downloadWhatsAppImage()" style="flex: 1; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 800; padding: 10px; border-radius: 6px; border: none; cursor: pointer;">
-            ⬇️ Descargar
+            â¬‡ï¸ Descargar
           </button>
           <button onclick="copyWhatsAppImage()" style="flex: 1; background: rgba(255,255,255,0.1); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 600; padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
-            📋 Copiar Imagen
+            ðŸ“‹ Copiar Imagen
+          </button>
+        </div>
+      </div>
+
+      <!-- Imagen Story 9:16 -->
+      <div style="display: flex; flex-direction: column; gap: 12px; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-transform: uppercase;">STATUS VERTICAL (1080x1920)</div>
+        <canvas id="wpVerticalStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 200px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></canvas>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button onclick="downloadWhatsAppVerticalImage()" style="flex: 1; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 800; padding: 10px; border-radius: 6px; border: none; cursor: pointer;">
+            â¬‡ï¸ Descargar
+          </button>
+          <button onclick="copyWhatsAppVerticalImage()" style="flex: 1; background: rgba(255,255,255,0.1); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 600; padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
+            ðŸ“‹ Copiar Imagen
           </button>
         </div>
       </div>
@@ -4556,3 +4695,6 @@ Instagram:
 
 </body>
 </html>
+
+
+
