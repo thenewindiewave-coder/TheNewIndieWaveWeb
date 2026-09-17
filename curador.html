@@ -1437,6 +1437,9 @@
                 <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                   🎨 Generar Historia Story ↗
                 </button>
+                <button onclick="openWhatsAppGroupGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}')" style="background: rgba(37, 211, 102, 0.15); color: #25D366; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(37, 211, 102, 0.4); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                  💬 Generar Mensaje WhatsApp ↗
+                </button>
               </div>
             </div>
             ${item.feedback ? `
@@ -4034,6 +4037,211 @@ Instagram:
     if (str.length <= num) return str;
     return str.slice(0, num) + '...';
   }
+
+  const wpTemplates = [
+    "🔥 ¡Nueva joya musical descubierta! Comunidad de The New Indie Wave, les presentamos a *{artist}* con su increíble tema *'{song}'*. Acabamos de añadirla a nuestra playlist oficial *'{playlist}'*. ¡Vayan a darle amor y escucharla ya mismo! 👇\n{url}",
+    "✨ ¡Atención, amantes del indie! The New Indie Wave le da la bienvenida a *{artist}* y su genial canción *'{song}'*. Ya forma parte de la playlist *'{playlist}'*. ¡Escúchenla completa y guárdenla en sus favoritos! 🎧\n{url}",
+    "🚀 ¡Música fresca para sus oídos! Conozcan a *{artist}* y escuchen *'{song}'*, nuestro más reciente descubrimiento en The New Indie Wave. Ya la pueden encontrar en la playlist *'{playlist}'*. ¡Denle play y apoyen el talento independiente! 💥\n{url}",
+    "🎶 ¡Nuevos sonidos en The New Indie Wave! Sumérgete en la vibra de *{artist}* con su tema *'{song}'*. Recién salida del horno directo a nuestra playlist *'{playlist}'*. ¡No te la pierdas y escúchala aquí! 👇\n{url}",
+    "💎 ¡Una recomendación imperdible para la comunidad! Descubran a *{artist}* y disfruten de su canción *'{song}'*. La acabamos de seleccionar para la playlist *'{playlist}'*. ¡Vayan a agregarla a sus bibliotecas! 🤘\n{url}"
+  ];
+
+  let _wpCurrentArtist = '';
+  let _wpCurrentSong = '';
+  let _wpCurrentPlaylist = '';
+  let _wpCurrentUrl = '';
+  let _wpTrackCoverCache = {}; // URL -> Image object
+
+  function openWhatsAppGroupGenerator(encArtist, encSong, encPlaylist, encPlaylistUrl, encSpotifyUrl) {
+    _wpCurrentArtist = decodeURIComponent(encArtist || 'Artista');
+    _wpCurrentSong = decodeURIComponent(encSong || 'Canción');
+    _wpCurrentPlaylist = decodeURIComponent(encPlaylist || 'Playlist');
+    _wpCurrentUrl = encPlaylistUrl ? decodeURIComponent(encPlaylistUrl) : (playlistLinksMap[_wpCurrentPlaylist] || '');
+    var spotifyUrl = encSpotifyUrl ? decodeURIComponent(encSpotifyUrl) : '';
+
+    regenerateWhatsAppMessage();
+
+    var modal = document.getElementById('whatsappGroupModal');
+    if (modal) modal.style.display = 'flex';
+
+    // Placeholder until we load track cover
+    generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
+
+    // Fetch track cover
+    if (spotifyUrl) {
+      fetch('/api/spotify-lookup?url=' + encodeURIComponent(spotifyUrl))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.cover) {
+            var coverUrl = data.cover;
+            if (_wpTrackCoverCache[coverUrl]) {
+              generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]);
+            } else {
+              var img = new Image();
+              img.crossOrigin = 'anonymous';
+              img.onload = function() {
+                _wpTrackCoverCache[coverUrl] = img;
+                generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img);
+              };
+              img.src = coverUrl;
+            }
+          }
+        })
+        .catch(function(e) { console.error(e); });
+    }
+  }
+
+  function regenerateWhatsAppMessage() {
+    var template = wpTemplates[Math.floor(Math.random() * wpTemplates.length)];
+    var msg = template
+      .replace('{artist}', _wpCurrentArtist)
+      .replace('{song}', _wpCurrentSong)
+      .replace('{playlist}', _wpCurrentPlaylist)
+      .replace('{url}', _wpCurrentUrl);
+    
+    var ta = document.getElementById('wpGeneratedMessageText');
+    if (ta) ta.value = msg;
+  }
+
+  function closeWhatsAppGroupModal() {
+    var modal = document.getElementById('whatsappGroupModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function copyWhatsAppMessage() {
+    var ta = document.getElementById('wpGeneratedMessageText');
+    if (!ta) return;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(ta.value).then(function() {
+        showToast('✅ ¡Mensaje copiado al portapapeles!');
+      });
+    } else {
+      ta.select();
+      document.execCommand('copy');
+      showToast('✅ ¡Mensaje copiado al portapapeles!');
+    }
+  }
+
+  function generateWhatsAppCanvas(artist, song, playlist, coverImg) {
+    var canvas = document.getElementById('wpStoryCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = 1080;
+    var H = 1080;
+
+    // Background
+    ctx.fillStyle = '#09090b';
+    ctx.fillRect(0, 0, W, H);
+
+    // Ambient glow from cover if exists
+    if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      // Draw cover large and blurred
+      ctx.filter = 'blur(100px)';
+      ctx.drawImage(coverImg, -200, -200, W+400, H+400);
+      ctx.restore();
+    }
+
+    // Grid pattern / Texture
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for(var i=0; i<W; i+=40) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke();
+    }
+
+    // Border
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(40, 40, W-80, H-80);
+
+    // Cover Image (Center)
+    var covW = 500;
+    var covH = 500;
+    var covX = (W - covW) / 2;
+    var covY = 200;
+
+    if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+      ctx.save();
+      // shadow
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 20;
+      drawRoundRectCur(ctx, covX, covY, covW, covH, 20);
+      ctx.fillStyle = '#111';
+      ctx.fill();
+      ctx.clip();
+      ctx.drawImage(coverImg, covX, covY, covW, covH);
+      ctx.restore();
+    } else {
+      // Placeholder
+      ctx.save();
+      ctx.fillStyle = '#1a1a20';
+      drawRoundRectCur(ctx, covX, covY, covW, covH, 20);
+      ctx.fill();
+      ctx.fillStyle = '#444';
+      ctx.font = 'bold 30px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Cargando Portada...', W/2, covY + covH/2);
+      ctx.restore();
+    }
+
+    // Logo & Header text
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 36px "Space Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('THE NEW INDIE WAVE', W/2, 110);
+    
+    ctx.fillStyle = '#bbf451';
+    ctx.font = 'bold 24px "Space Mono", monospace';
+    ctx.fillText('RECIÉN AÑADIDA A NUESTRA PLAYLIST', W/2, 150);
+
+    // Song Info
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 56px "Space Mono", monospace';
+    ctx.fillText(truncateStringCur(song, 28), W/2, covY + covH + 80);
+
+    ctx.fillStyle = '#a1a1aa'; // text-muted
+    ctx.font = '600 36px "Space Mono", monospace';
+    ctx.fillText(truncateStringCur(artist, 32), W/2, covY + covH + 130);
+
+    // Spotify Tag
+    ctx.fillStyle = '#1DB954'; // Spotify green
+    ctx.font = 'bold 28px "Space Mono", monospace';
+    ctx.fillText('🎵 ' + truncateStringCur(playlist, 36), W/2, covY + covH + 210);
+  }
+
+  function downloadWhatsAppImage() {
+    var canvas = document.getElementById('wpStoryCanvas');
+    if (!canvas) return;
+    var a = document.createElement('a');
+    a.download = 'WhatsApp_TNIW_' + _wpCurrentSong.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+    a.href = canvas.toDataURL('image/png');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('✅ Descargando imagen...');
+  }
+
+  function copyWhatsAppImage() {
+    var canvas = document.getElementById('wpStoryCanvas');
+    if (!canvas) return;
+    if (!navigator.clipboard || !window.ClipboardItem) {
+      showToast('⚠️ Tu navegador no soporta copiado directo de imágenes');
+      return;
+    }
+    canvas.toBlob(function(blob) {
+      if(blob) {
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function() {
+          showToast('✅ ¡Imagen copiada al portapapeles!');
+        }).catch(function(e) {
+          showToast('⚠️ Error al copiar imagen');
+          console.error(e);
+        });
+      }
+    }, 'image/png');
+  }
 </script>
 
 <!-- MODAL MENSAJE AUTOMÁTICO & STORY PARA CURADOR -->
@@ -4093,6 +4301,42 @@ Instagram:
         </div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GENERADOR WHATSAPP GRUPO -->
+<div id="whatsappGroupModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
+    <button onclick="closeWhatsAppGroupModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; z-index: 10;">✕</button>
+    
+    <div style="font-family: var(--font-mono); font-size: 11px; color: #25D366; text-transform: uppercase; margin-bottom: 4px;">// GENERADOR WHATSAPP // COMUNIDAD</div>
+    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">Mensaje para Grupo de WhatsApp</h3>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start; margin-top: 20px;">
+      <!-- Texto -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <textarea id="wpGeneratedMessageText" rows="14" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); border-radius: 6px; padding: 12px; color: #fff; font-family: var(--font-mono); font-size: 13px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
+        <button onclick="copyWhatsAppMessage()" style="background: #25D366; color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 12px 16px; border-radius: 6px; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(37, 211, 102, 0.25);">
+          📋 Copiar Mensaje
+        </button>
+        <button onclick="regenerateWhatsAppMessage()" style="background: rgba(255,255,255,0.05); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
+          🔄 Generar Otro Mensaje Distinto
+        </button>
+      </div>
+
+      <!-- Imagen -->
+      <div style="display: flex; flex-direction: column; gap: 12px; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+        <canvas id="wpStoryCanvas" width="1080" height="1080" style="width: 100%; max-width: 320px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></canvas>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button onclick="downloadWhatsAppImage()" style="flex: 1; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 800; padding: 10px; border-radius: 6px; border: none; cursor: pointer;">
+            ⬇️ Descargar
+          </button>
+          <button onclick="copyWhatsAppImage()" style="flex: 1; background: rgba(255,255,255,0.1); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 600; padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
+            📋 Copiar Imagen
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
