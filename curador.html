@@ -1434,11 +1434,11 @@
                 <button onclick="insertToSpotifyManual('${item.spotify_url}', '${item.playlist}')" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                   ⚡ Insertar / Re-insertar en Spotify
                 </button>
-                <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  🎨 Generar Historia Story ↗
+                <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                  🎨 Generar Pack Promocional (Artista) ↗
                 </button>
                 <button onclick="openWhatsAppGroupGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}')" style="background: rgba(37, 211, 102, 0.15); color: #25D366; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(37, 211, 102, 0.4); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  💬 Generar Mensaje WhatsApp ↗
+                  💬 Generar Post Grupo (Comunidad) ↗
                 </button>
               </div>
             </div>
@@ -3403,40 +3403,63 @@ Instagram:
   }
 </script>
 
-<!-- MODAL GENERADOR DE HISTORIA DE INSTAGRAM PARA CURADOR (1080x1920) -->
+<!-- MODAL GENERADOR DE MATERIAL PROMOCIONAL PARA CURADOR -->
 <div id="storyModalCurator" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
-  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 860px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
+  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 1200px; width: 100%; max-height: 94vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
     <button onclick="closeCuratorStoryModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; z-index: 10;">✕</button>
     
-    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// GENERADOR DE HISTORIAS // PANEL CURADOR</div>
-    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">Historia Promocional para Redes</h3>
+    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 4px;">// GENERADOR OFICIAL // MATERIAL PROMOCIONAL</div>
+    <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">Paquete de Aceptación para el Artista</h3>
     <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 22px;">
-      Mockup automático en resolución 1080 x 1920 px listo para publicar en @the.new.indie.wave & @m.trendvideo.
+      Genera el texto de felicitación y los gráficos para anunciar la inclusión del track (Story vertical + Post cuadrado).
     </p>
 
-    <div class="story-modal-grid" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
-      <!-- Canvas Preview Container -->
-      <div style="background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; justify-content: center; align-items: center;">
-        <canvas id="curatorStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 260px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
+    <div class="story-modal-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start;">
+      
+      <!-- Columna 1: Mensaje de Felicitación -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); margin-bottom: 4px;">1. MENSAJE PARA EL ARTISTA:</div>
+        <textarea id="curatorGeneratedMessageText" rows="18" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); border-radius: 6px; padding: 12px; color: #fff; font-family: var(--font-mono); font-size: 13px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
+        <button onclick="copyCuratorMessage()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 12px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
+          📋 Copiar Mensaje
+        </button>
+        <button onclick="regenerateCuratorMessage()" style="background: rgba(255,255,255,0.05); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
+          🔄 Generar Otro Texto
+        </button>
       </div>
 
-      <!-- Action Panel & Download -->
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 16px;">
-          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); margin-bottom: 4px;">DETALLES DEL TRACK:</div>
-          <div style="font-size: 13px; color: #fff; font-weight: 700;" id="curStoryPreviewTrack">Cargando...</div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="curStoryPreviewPlaylist">Playlist: ...</div>
-          <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); margin-top: 6px;">Formato: 1080 x 1920 px (9:16 HD)</div>
+      <!-- Columna 2: IG Story Canvas -->
+      <div style="display: flex; flex-direction: column; gap: 14px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px; align-items: center;">
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-pink); margin-bottom: 4px; text-align: center;">2. IG STORY (1080x1920)</div>
+        <div style="background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; justify-content: center; align-items: center; width: 100%;">
+          <canvas id="curatorStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 200px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
         </div>
-
-        <button onclick="downloadCuratorStoryImage()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 14px 20px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
-          📥 Descargar Imagen de Historia (PNG HD)
-        </button>
-
-        <button onclick="copyCuratorStoryToClipboard()" style="background: rgba(255,255,255,0.06); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 11px 18px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
-          📋 Copiar Imagen al Portapapeles
-        </button>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button onclick="downloadCuratorStoryImage()" style="flex: 1; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 800; padding: 10px; border-radius: 6px; border: none; cursor: pointer;">
+            ⬇️ Descargar
+          </button>
+          <button onclick="copyCuratorStoryToClipboard()" style="flex: 1; background: rgba(255,255,255,0.1); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 600; padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
+            📋 Copiar Imagen
+          </button>
+        </div>
       </div>
+
+      <!-- Columna 3: WhatsApp Post Canvas -->
+      <div style="display: flex; flex-direction: column; gap: 14px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px; align-items: center;">
+        <div style="font-family: var(--font-mono); font-size: 11px; color: #25D366; margin-bottom: 4px; text-align: center;">3. POST / WA (1080x1080)</div>
+        <div style="background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; justify-content: center; align-items: center; width: 100%;">
+          <canvas id="curatorPostCanvas" width="1080" height="1080" style="width: 100%; max-width: 200px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
+        </div>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button onclick="downloadCuratorPostImage()" style="flex: 1; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 800; padding: 10px; border-radius: 6px; border: none; cursor: pointer;">
+            ⬇️ Descargar
+          </button>
+          <button onclick="copyCuratorPostToClipboard()" style="flex: 1; background: rgba(255,255,255,0.1); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 600; padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
+            📋 Copiar Imagen
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -3649,21 +3672,207 @@ Instagram:
 
   var _curSongName = 'historia_tniw';
 
-  function openCuratorStoryGenerator(encArtist, encSong, encPlaylist, encGenre, encPlaylistUrl) {
-    var artist = decodeURIComponent(encArtist || 'Artista');
-    var song = decodeURIComponent(encSong || 'Canción');
-    var playlist = decodeURIComponent(encPlaylist || 'Rock Indie');
-    var genre = decodeURIComponent(encGenre || 'Indie');
-    var playlistUrl = encPlaylistUrl ? decodeURIComponent(encPlaylistUrl) : (playlistLinksMap[playlist] || '');
-    _curSongName = song;
+  let _curPromoArtist = '';
+  let _curPromoSong = '';
+  let _curPromoPlaylist = '';
+  let _curPromoUrl = '';
+  let _curPromoGenre = '';
+  
+  const promoTemplates = [
+    "¡Felicidades *{artist}*! 🎉 Nos encantó escuchar *'{song}'* y estamos muy felices de anunciarte que ha sido oficialmente seleccionada para ser parte de nuestra comunidad en The New Indie Wave. Ya puedes encontrarla en nuestra playlist *'{playlist}'*.\n\nEscúchala y guárdala aquí: {url}\n\nAyúdanos a seguir creciendo compartiendo la buena noticia y etiquetándonos en tus redes. ¡Que sigan los éxitos! 🚀",
+    "¡Hola *{artist}*! 🎵 Queremos felicitarte porque *'{song}'* ha superado nuestro proceso de curaduría y ya es parte de la familia The New Indie Wave. La hemos añadido a la playlist *'{playlist}'*.\n\nLink directo: {url}\n\n¡No olvides compartirla con tus seguidores y etiquetarnos para hacer más ruido juntos! Un abrazo enorme. ✨",
+    "¡Excelentes noticias *{artist}*! ⚡ Tu tema *'{song}'* nos transmitió la vibra perfecta y acaba de ser integrado a nuestra playlist oficial *'{playlist}'*.\n\nPuedes encontrarla aquí: {url}\n\n¡Celebra este logro compartiéndolo en tus historias! Etiqueta a The New Indie Wave para que podamos repostearte. ¡Mucho éxito! 🤘",
+    "¡Enhorabuena *{artist}*! 💎 Hemos seleccionado tu canción *'{song}'* por su gran calidad y ya forma parte de The New Indie Wave, dentro de la playlist *'{playlist}'*.\n\nEscúchala aquí: {url}\n\nNos encantaría que nos ayudes a correr la voz compartiendo el enlace en tus redes. ¡Bienvenido a la comunidad! 🔥"
+  ];
+
+  function openCuratorStoryGenerator(encArtist, encSong, encPlaylist, encGenre, encPlaylistUrl, encSpotifyUrl) {
+    _curPromoArtist = decodeURIComponent(encArtist || 'Artista');
+    _curPromoSong = decodeURIComponent(encSong || 'Canción');
+    _curPromoPlaylist = decodeURIComponent(encPlaylist || 'Rock Indie');
+    _curPromoGenre = decodeURIComponent(encGenre || 'Indie');
+    _curPromoUrl = encPlaylistUrl ? decodeURIComponent(encPlaylistUrl) : (playlistLinksMap[_curPromoPlaylist] || '');
+    var spotifyUrl = encSpotifyUrl ? decodeURIComponent(encSpotifyUrl) : '';
+    
+    _curSongName = _curPromoSong;
 
     var modal = document.getElementById('storyModalCurator');
     if (modal) modal.style.display = 'flex';
 
-    document.getElementById('curStoryPreviewTrack').textContent = song + ' — ' + artist;
-    document.getElementById('curStoryPreviewPlaylist').textContent = 'Playlist: ' + playlist;
+    // Generar Mensaje
+    regenerateCuratorMessage();
 
-    generateCuratorStoryCanvas(artist, song, playlist, genre, 'curatorStoryCanvas', playlistUrl);
+    // Generar IG Story
+    generateCuratorStoryCanvas(_curPromoArtist, _curPromoSong, _curPromoPlaylist, _curPromoGenre, 'curatorStoryCanvas', _curPromoUrl);
+
+    // Generar Post Cuadrado (WA)
+    generateCuratorPostCanvas(_curPromoArtist, _curPromoSong, _curPromoPlaylist, null);
+
+    // Fetch track cover for the square post
+    if (spotifyUrl) {
+      fetch('/api/spotify-lookup?url=' + encodeURIComponent(spotifyUrl))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.cover) {
+            var coverUrl = data.cover;
+            if (_wpTrackCoverCache[coverUrl]) {
+              generateCuratorPostCanvas(_curPromoArtist, _curPromoSong, _curPromoPlaylist, _wpTrackCoverCache[coverUrl]);
+            } else {
+              var img = new Image();
+              img.crossOrigin = 'anonymous';
+              img.onload = function() {
+                _wpTrackCoverCache[coverUrl] = img;
+                generateCuratorPostCanvas(_curPromoArtist, _curPromoSong, _curPromoPlaylist, img);
+              };
+              img.src = coverUrl;
+            }
+          }
+        })
+        .catch(function(e) { console.error(e); });
+    }
+  }
+
+  function regenerateCuratorMessage() {
+    var template = promoTemplates[Math.floor(Math.random() * promoTemplates.length)];
+    var msg = template
+      .replace('{artist}', _curPromoArtist)
+      .replace('{song}', _curPromoSong)
+      .replace('{playlist}', _curPromoPlaylist)
+      .replace('{url}', _curPromoUrl);
+    
+    var ta = document.getElementById('curatorGeneratedMessageText');
+    if (ta) ta.value = msg;
+  }
+
+  function copyCuratorMessage() {
+    var ta = document.getElementById('curatorGeneratedMessageText');
+    if (!ta) return;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(ta.value).then(function() {
+        showToast('✅ ¡Mensaje copiado al portapapeles!');
+      });
+    } else {
+      ta.select();
+      document.execCommand('copy');
+      showToast('✅ ¡Mensaje copiado al portapapeles!');
+    }
+  }
+
+  function generateCuratorPostCanvas(artist, song, playlist, coverImg) {
+    var canvas = document.getElementById('curatorPostCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = 1080;
+    var H = 1080;
+
+    // Background
+    ctx.fillStyle = '#09090b';
+    ctx.fillRect(0, 0, W, H);
+
+    // Ambient glow from cover if exists
+    if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      ctx.filter = 'blur(100px)';
+      ctx.drawImage(coverImg, -200, -200, W+400, H+400);
+      ctx.restore();
+    }
+
+    // Grid pattern / Texture
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for(var i=0; i<W; i+=40) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke();
+    }
+
+    // Border
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(40, 40, W-80, H-80);
+
+    // Cover Image (Center)
+    var covW = 600;
+    var covH = 600;
+    var covX = (W - covW) / 2;
+    var covY = 200;
+
+    if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 20;
+      drawRoundRectCur(ctx, covX, covY, covW, covH, 20);
+      ctx.fillStyle = '#111';
+      ctx.fill();
+      ctx.clip();
+      ctx.drawImage(coverImg, covX, covY, covW, covH);
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.fillStyle = '#1a1a20';
+      drawRoundRectCur(ctx, covX, covY, covW, covH, 20);
+      ctx.fill();
+      ctx.fillStyle = '#444';
+      ctx.font = 'bold 30px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Cargando Portada...', W/2, covY + covH/2);
+      ctx.restore();
+    }
+
+    // Logo & Header text
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 38px "Space Grotesk", "Outfit", "Syne", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('THE NEW INDIE WAVE', W/2, 100);
+    
+    ctx.fillStyle = '#bbf451';
+    ctx.font = 'bold 24px "Space Mono", monospace';
+    ctx.fillText('RECIÉN AÑADIDA A NUESTRA PLAYLIST', W/2, 145);
+
+    // Song Info
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 68px "Space Grotesk", "Outfit", "Syne", sans-serif';
+    ctx.fillText(truncateStringCur(song, 40), W/2, covY + covH + 85);
+
+    ctx.fillStyle = '#a1a1aa'; // text-muted
+    ctx.font = '600 42px "Space Grotesk", "Outfit", "Syne", sans-serif';
+    ctx.fillText(truncateStringCur(artist, 40), W/2, covY + covH + 145);
+
+    // Spotify Tag
+    ctx.fillStyle = '#1DB954'; // Spotify green
+    ctx.font = 'bold 28px "Space Mono", monospace';
+    ctx.fillText('🎵 ' + truncateStringCur(playlist, 70), W/2, covY + covH + 215);
+  }
+
+  function downloadCuratorPostImage() {
+    var canvas = document.getElementById('curatorPostCanvas');
+    if (!canvas) return;
+    var a = document.createElement('a');
+    a.download = 'TNIW_Post_' + _curSongName.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+    a.href = canvas.toDataURL('image/png');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('✅ Descargando imagen...');
+  }
+
+  function copyCuratorPostToClipboard() {
+    var canvas = document.getElementById('curatorPostCanvas');
+    if (!canvas) return;
+    if (!navigator.clipboard || !window.ClipboardItem) {
+      showToast('⚠️ Tu navegador no soporta copiado directo de imágenes');
+      return;
+    }
+    canvas.toBlob(function(blob) {
+      if(blob) {
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function() {
+          showToast('✅ ¡Imagen copiada al portapapeles!');
+        }).catch(function(e) {
+          showToast('⚠️ Error al copiar imagen');
+          console.error(e);
+        });
+      }
+    }, 'image/png');
   }
 
   function closeCuratorStoryModal() {
