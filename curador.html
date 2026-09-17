@@ -1477,7 +1477,7 @@
               <div class="compact-play-icon">▶</div>
               <div class="compact-info">
                 <span class="compact-title">${item.song_title || 'Sin Título'}</span>
-                <span class="compact-artist">— ${item.artist_name || 'Artista'}</span>
+                <span class="compact-artist" id="card-artist-${item.id}">— ${item.artist_name || 'Artista'}</span>
                 <span class="compact-pill">📍 ${item.country || 'N/A'}</span>
                 <span class="compact-pill playlist-pill">🎯 ${item.playlist}</span>
                 <span class="compact-pill">🏷️ ${item.genre || 'Indie'}</span>
@@ -4263,6 +4263,33 @@ Instagram:
   _tniwLogoImg.crossOrigin = 'anonymous';
   _tniwLogoImg.src = 'logo.png';
 
+  var _spotifyLogoImg = new Image();
+  _spotifyLogoImg.crossOrigin = 'anonymous';
+  _spotifyLogoImg.src = 'spotylogo.png';
+
+  
+  function updateSubmissionArtistIfNeeded(spotifyUrl, fullArtist) {
+    if (!spotifyUrl || !fullArtist) return;
+    var sub = allSubmissions.find(function(s) { 
+      return s.spotify_url === spotifyUrl || (s.spotify_url && s.spotify_url.includes(spotifyUrl)) || (spotifyUrl && spotifyUrl.includes(s.spotify_url)); 
+    });
+    if (sub && sub.artist_name !== fullArtist) {
+      console.log('Actualizando artistas completos desde Spotify:', sub.artist_name, '->', fullArtist);
+      sub.artist_name = fullArtist;
+      var el = document.getElementById('card-artist-' + sub.id);
+      if (el) el.textContent = '— ' + fullArtist;
+      fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + sub.id, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ artist_name: fullArtist })
+      }).catch(function(e){ console.error(e); });
+    }
+  }
+
   let _wpCurrentArtist = '';
   let _wpCurrentSong = '';
   let _wpCurrentPlaylist = '';
@@ -4281,7 +4308,7 @@ Instagram:
     var modal = document.getElementById('whatsappGroupModal');
     if (modal) modal.style.display = 'flex';
 
-    // Render inicial con placeholder
+    // Render inicial
     try {
       generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
     } catch(e1) {
@@ -4293,35 +4320,52 @@ Instagram:
       console.error('Error render inicial WhatsApp Vertical:', e2);
     }
 
-    // Consultar carátula oficial en alta resolución desde Spotify API
+    // Consultar metadatos y carátula oficial en alta resolución desde Spotify API
     if (spotifyUrl) {
       fetch('/api/spotify-lookup?url=' + encodeURIComponent(spotifyUrl))
         .then(function(res) { return res.json(); })
         .then(function(data) {
-          if (data && data.cover) {
-            var coverUrl = data.cover;
-            if (_wpTrackCoverCache[coverUrl]) {
-              try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]); } catch(e){}
-              try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]); } catch(e){}
-            } else {
-              var img = new Image();
-              img.crossOrigin = 'anonymous';
-              img.onload = function() {
-                _wpTrackCoverCache[coverUrl] = img;
-                try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img); } catch(e){}
-                try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img); } catch(e){}
-              };
-              img.onerror = function() {
-                // Si falla CORS anónimo, reintentar carga directa
-                var imgFallback = new Image();
-                imgFallback.onload = function() {
-                  _wpTrackCoverCache[coverUrl] = imgFallback;
-                  try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, imgFallback); } catch(e){}
-                  try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, imgFallback); } catch(e){}
+          if (data) {
+            // Si hay múltiples artistas en Spotify, actualizar siempre todos los nombres
+            if (data.artist && data.artist.trim()) {
+              _wpCurrentArtist = data.artist.trim();
+              regenerateWhatsAppMessage();
+              updateSubmissionArtistIfNeeded(spotifyUrl, data.artist.trim());
+            }
+            if (data.title && data.title.trim()) {
+              _wpCurrentSong = data.title.trim();
+              regenerateWhatsAppMessage();
+            }
+
+            var activeCover = null;
+            if (data.cover) {
+              var coverUrl = data.cover;
+              if (_wpTrackCoverCache[coverUrl]) {
+                activeCover = _wpTrackCoverCache[coverUrl];
+                try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, activeCover); } catch(e){}
+                try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, activeCover); } catch(e){}
+              } else {
+                var img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                  _wpTrackCoverCache[coverUrl] = img;
+                  try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img); } catch(e){}
+                  try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img); } catch(e){}
                 };
-                imgFallback.src = coverUrl;
-              };
-              img.src = coverUrl;
+                img.onerror = function() {
+                  var imgFallback = new Image();
+                  imgFallback.onload = function() {
+                    _wpTrackCoverCache[coverUrl] = imgFallback;
+                    try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, imgFallback); } catch(e){}
+                    try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, imgFallback); } catch(e){}
+                  };
+                  imgFallback.src = coverUrl;
+                };
+                img.src = coverUrl;
+              }
+            } else {
+              try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null); } catch(e){}
+              try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null); } catch(e){}
             }
           }
         })
@@ -4381,9 +4425,14 @@ Instagram:
     var W = 1080;
     var H = 1920;
 
-    // Si el logo aún no termina de cargar en memoria, re-renderizar al completarse
+    // Recargar si las imágenes oficiales están terminando de cargar
     if (typeof _tniwLogoImg !== 'undefined' && _tniwLogoImg && !_tniwLogoImg.complete) {
       _tniwLogoImg.onload = function() {
+        generateWhatsAppVerticalCanvas(artist, song, playlist, coverImg);
+      };
+    }
+    if (typeof _spotifyLogoImg !== 'undefined' && _spotifyLogoImg && !_spotifyLogoImg.complete) {
+      _spotifyLogoImg.onload = function() {
         generateWhatsAppVerticalCanvas(artist, song, playlist, coverImg);
       };
     }
@@ -4400,7 +4449,6 @@ Instagram:
       ctx.drawImage(coverImg, -250, -250, W + 500, H + 500);
       ctx.restore();
 
-      // Gradiente oscuro suave para legibilidad total
       var darkGrad = ctx.createLinearGradient(0, 0, 0, H);
       darkGrad.addColorStop(0, 'rgba(8, 8, 10, 0.75)');
       darkGrad.addColorStop(0.5, 'rgba(8, 8, 10, 0.60)');
@@ -4409,7 +4457,7 @@ Instagram:
       ctx.fillRect(0, 0, W, H);
     }
 
-    // Patrón de grilla sutil estilo Cyberpunk / Editorial
+    // Grilla sutil
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
     ctx.lineWidth = 1;
     for(var i = 0; i < W; i += 45) {
@@ -4422,7 +4470,7 @@ Instagram:
     // 2. Cabecera con LOGO Oficial de The New Indie Wave
     var logoSize = 120;
     var logoX = (W - logoSize) / 2;
-    var logoY = 85;
+    var logoY = 80;
 
     if (typeof _tniwLogoImg !== 'undefined' && _tniwLogoImg && _tniwLogoImg.complete && _tniwLogoImg.naturalWidth > 0) {
       ctx.save();
@@ -4446,32 +4494,36 @@ Instagram:
       ctx.restore();
     }
 
-    // Título de la marca con presencia imponente
+    // Título de la marca
     ctx.fillStyle = '#ffffff';
     ctx.font = '900 38px "Space Grotesk", sans-serif';
     ctx.textAlign = 'center';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-    ctx.shadowBlur = 12;
-    ctx.fillText('THE NEW INDIE WAVE', W/2, 245);
+    ctx.shadowBlur = 14;
+    ctx.fillText('THE NEW INDIE WAVE', W/2, 240);
 
-    // Badge Pill
-    var badgeW = 460;
-    var badgeH = 38;
+    // BANNER IMPONENTE Y NOTORIO: RECIÉN AÑADIDA A LA PLAYLIST
+    var badgeW = 600;
+    var badgeH = 52;
     var badgeX = (W - badgeW) / 2;
-    var badgeY = 270;
+    var badgeY = 265;
+
     ctx.save();
-    ctx.fillStyle = 'rgba(187, 244, 81, 0.12)';
-    drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 19);
+    ctx.shadowColor = 'rgba(187, 244, 81, 0.50)';
+    ctx.shadowBlur = 24;
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.18)';
+    drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 26);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(187, 244, 81, 0.45)';
-    ctx.lineWidth = 1.5;
-    drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 19);
+    ctx.strokeStyle = '#BBF451';
+    ctx.lineWidth = 2.5;
+    drawRoundRectCur(ctx, badgeX, badgeY, badgeW, badgeH, 26);
     ctx.stroke();
     ctx.restore();
 
     ctx.fillStyle = '#BBF451';
-    ctx.font = 'bold 18px monospace';
-    ctx.fillText('⚡ RECIÉN AÑADIDA A PLAYLIST', W/2, badgeY + 25);
+    ctx.font = '900 24px "Chivo", "Space Grotesk", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('⚡ RECIÉN AÑADIDA A LA PLAYLIST ⚡', W/2, badgeY + 34);
 
     // 3. Portada con Gran Presencia (780x780)
     var coverSize = 780;
@@ -4515,10 +4567,11 @@ Instagram:
       ctx.stroke();
       ctx.fillStyle = '#555';
       ctx.font = 'bold 36px monospace';
+      ctx.textAlign = 'center';
       ctx.fillText('Cargando Portada...', W/2, cy + coverSize/2);
     }
 
-    // 4. Información de la Canción con Gran Presencia
+    // 4. Información de Canción y TODOS los Artistas
     var songTitle = song || 'Canción';
     var songFontSize = 66;
     if (songTitle.length > 18) songFontSize = 54;
@@ -4531,10 +4584,17 @@ Instagram:
     ctx.shadowBlur = 20;
     ctx.fillText(songTitle, W/2, cy + coverSize + 90);
 
+    // Artistas (soporta 2 o más artistas con ajuste tipográfico)
+    var artistText = artist || 'Artista';
+    var artistFontSize = 46;
+    if (artistText.length > 20) artistFontSize = 38;
+    if (artistText.length > 30) artistFontSize = 32;
+    if (artistText.length > 42) artistFontSize = 26;
+
     ctx.fillStyle = '#BBF451';
-    ctx.font = '700 44px "Space Grotesk", sans-serif';
+    ctx.font = '700 ' + artistFontSize + 'px "Space Grotesk", sans-serif';
     ctx.shadowBlur = 12;
-    ctx.fillText(artist || 'Artista', W/2, cy + coverSize + 155);
+    ctx.fillText(artistText, W/2, cy + coverSize + 155);
 
     // 5. Card de Playlist Oficial (Nombre completo multilínea)
     var pbW = 900;
@@ -4564,9 +4624,9 @@ Instagram:
     ctx.font = 'bold 32px "Space Grotesk", sans-serif';
     wrapTextCenteredCur(ctx, playlist || 'Playlist Oficial', W/2, pbY + 95, pbW - 80, 42);
 
-    // 6. Badge Oficial de Spotify
-    var spW = 480;
-    var spH = 80;
+    // 6. Badge Oficial de Spotify con el logo spotylogo.png
+    var spW = 500;
+    var spH = 88;
     var spX = (W - spW) / 2;
     var spY = pbY + pbH + 45;
 
@@ -4574,22 +4634,29 @@ Instagram:
     ctx.shadowColor = 'rgba(29, 185, 84, 0.35)';
     ctx.shadowBlur = 22;
     ctx.fillStyle = 'rgba(29, 185, 84, 0.16)';
-    drawRoundRectCur(ctx, spX, spY, spW, spH, 40);
+    drawRoundRectCur(ctx, spX, spY, spW, spH, 44);
     ctx.fill();
     ctx.strokeStyle = '#1DB954';
-    ctx.lineWidth = 2;
-    drawRoundRectCur(ctx, spX, spY, spW, spH, 40);
+    ctx.lineWidth = 2.5;
+    drawRoundRectCur(ctx, spX, spY, spW, spH, 44);
     ctx.stroke();
     ctx.restore();
 
-    // Logo oficial vectorial de Spotify
-    drawSpotifyOfficialLogo(ctx, spX + 52, spY + spH / 2, 25);
+    // Dibujar logo exacto desde spotylogo.png
+    if (typeof _spotifyLogoImg !== 'undefined' && _spotifyLogoImg && _spotifyLogoImg.complete && _spotifyLogoImg.naturalWidth > 0) {
+      var spLogoSize = 54;
+      var spLogoX = spX + 42;
+      var spLogoY = spY + (spH - spLogoSize) / 2;
+      ctx.drawImage(_spotifyLogoImg, spLogoX, spLogoY, spLogoSize, spLogoSize);
+    } else {
+      drawSpotifyOfficialLogo(ctx, spX + 68, spY + spH / 2, 26);
+    }
 
     // Texto Spotify
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 28px "Space Grotesk", sans-serif';
+    ctx.font = '900 32px "Space Grotesk", sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Escuchar en Spotify', spX + 96, spY + spH / 2 + 10);
+    ctx.fillText('Escuchar en Spotify', spX + 114, spY + spH / 2 + 11);
   }
 
   function downloadWhatsAppVerticalImage() {
