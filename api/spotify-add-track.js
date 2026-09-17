@@ -5,25 +5,27 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.s
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
 const PLAYLIST_ID_MAP = {
-  // 8 Playlists Oficiales Actuales
+  // 8 Playlists Oficiales de Spotify
   "Mezcla de rolas urbanas para farmear Aura": "79SKuyss3MfkzvOJGnaisB",
-  "Darkwave oscuro y atmosferico para la madrugada": "4mcJJz8GiKTuxieL9Jziln",
-  "Musica urbana con flow y ritmo para moverte": "7bbYPZ5ia4IGRP2fT47kXr",
-  "Metal intenso para liberar toda tu energia": "5OLiBaOPAe5cBEdV1AoSd1",
+  "Darkwave oscuro y atmosf\u00E9rico para la madrugada": "4mcJJz8GiKTuxieL9Jziln",
+  "M\u00FAsica urbana con flow y ritmo para moverte": "7bbYPZ5ia4IGRP2fT47kXr",
+  "Metal intenso para liberar toda tu energ\u00EDa": "5OLiBaOPAe5cBEdV1AoSd1",
   "Rock para sacar la rabia y el enojo acumulado": "6cuhRpfYmEt0vYCT9mFLKc",
   "Soft Pop suave para esos domingos sin hacer nada": "20uF7xCOW8zldDCiAowxuF",
   "Dream Pop intimo para escuchar solo en tu cuarto": "0Ty7tTNh1ONGyOLuasPREj",
   "SynthPop para cuando solo quieres bailar": "36ribRboGB3DwM821oYokl",
 
-  // Variantes y nombres anteriores compatibles
+  // Variantes anteriores compatibles
   "Hard rock para sacar la rabia y el enojo acumulado": "6cuhRpfYmEt0vYCT9mFLKc",
+  "Soft Pop suave para domingos sin hacer nada": "20uF7xCOW8zldDCiAowxuF",
   "Pop indie suave para domingos sin hacer nada": "20uF7xCOW8zldDCiAowxuF",
-  "Pop indie intimo para escuchar solo en tu cuarto": "0Ty7tTNh1ONGyOLuasPREj",
+  "Pop indie \u00EDntimo para escuchar solo en tu cuarto": "0Ty7tTNh1ONGyOLuasPREj",
   "Pop indie para estar feliz y triste al mismo tiempo": "36ribRboGB3DwM821oYokl",
-  "Rock indie sucio y crudo para sentirte rebelde": "6cuhRpfYmEt0vYCT9mFLKc",
-  "Punk sucio y crudo para sentirte rebelde": "6cuhRpfYmEt0vYCT9mFLKc",
   "Rock indie para manejar de noche sin rumbo": "6cuhRpfYmEt0vYCT9mFLKc",
   "Rock indie para cuando no puedes dormir y piensas demasiado": "0Ty7tTNh1ONGyOLuasPREj",
+  "Rock indie sucio y crudo para sentirte rebelde": "6cuhRpfYmEt0vYCT9mFLKc",
+  "Punk sucio y crudo para sentirte rebelde": "6cuhRpfYmEt0vYCT9mFLKc",
+  "Dreamy Songs para escuchar en la intimidad de tu habitaci\u00F3n": "0Ty7tTNh1ONGyOLuasPREj",
   "Dreamy Songs para escuchar en la intimidad de tu habitacion": "0Ty7tTNh1ONGyOLuasPREj"
 };
 

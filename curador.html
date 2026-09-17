@@ -1155,9 +1155,9 @@
   var playlistLinksMap = {
     // 8 Playlists Oficiales de Spotify
     "Mezcla de rolas urbanas para farmear Aura": "https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB",
-    "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln",
-    "Música urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
-    "Metal intenso para liberar toda tu energía": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
+    "Darkwave oscuro y atmosf\u00E9rico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln",
+    "M\u00FAsica urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
+    "Metal intenso para liberar toda tu energ\u00EDa": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
     "Rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
     "Soft Pop suave para esos domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
     "Dream Pop intimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
@@ -1167,13 +1167,13 @@
     "Hard rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
     "Soft Pop suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
     "Pop indie suave para domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
-    "Pop indie íntimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "Pop indie \u00EDntimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
     "Pop indie para estar feliz y triste al mismo tiempo": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl",
     "Rock indie para manejar de noche sin rumbo": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
     "Rock indie para cuando no puedes dormir y piensas demasiado": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
     "Rock indie sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
     "Punk sucio y crudo para sentirte rebelde": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
-    "Dreamy Songs para escuchar en la intimidad de tu habitación": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+    "Dreamy Songs para escuchar en la intimidad de tu habitaci\u00F3n": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
     "Dreamy Songs para escuchar en la intimidad de tu habitacion": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj"
   };
 
@@ -4279,6 +4279,7 @@ Instagram:
 
     // Placeholder until we load track cover
     generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
+    generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
 
     // Fetch track cover
     if (spotifyUrl) {
@@ -4289,12 +4290,14 @@ Instagram:
             var coverUrl = data.cover;
             if (_wpTrackCoverCache[coverUrl]) {
               generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]);
+                generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[coverUrl]);
             } else {
               var img = new Image();
               img.crossOrigin = 'anonymous';
               img.onload = function() {
                 _wpTrackCoverCache[coverUrl] = img;
                 generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img);
+                generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, img);
               };
               img.src = coverUrl;
             }
@@ -4314,6 +4317,141 @@ Instagram:
     
     var ta = document.getElementById('wpGeneratedMessageText');
     if (ta) ta.value = msg;
+  }
+
+  function generateWhatsAppVerticalCanvas(artist, song, playlist, coverImg) {
+    var canvas = document.getElementById('wpVerticalStoryCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = 1080;
+    var H = 1920;
+
+    // Background
+    ctx.fillStyle = '#09090b';
+    ctx.fillRect(0, 0, W, H);
+
+    // Ambient glow from cover if exists
+    if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      ctx.filter = 'blur(100px)';
+      ctx.drawImage(coverImg, -300, -300, W+600, H+600);
+      ctx.restore();
+    }
+
+    // Grid pattern / Texture
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for(var i=0; i<W; i+=40) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
+    }
+    for(var j=0; j<H; j+=40) {
+      ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(W, j); ctx.stroke();
+    }
+
+    // Header Logo/Brand
+    ctx.fillStyle = '#BBF451';
+    ctx.font = 'bold 36px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('THE NEW INDIE WAVE', W/2, 200);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px monospace';
+    ctx.fillText('RECIÉN AÑADIDA A PLAYLIST', W/2, 260);
+
+    // Cover Image
+    var coverSize = 650;
+    var cx = W/2 - coverSize/2;
+    var cy = 380;
+    
+    if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 20;
+      ctx.beginPath();
+      ctx.roundRect(cx, cy, coverSize, coverSize, 30);
+      ctx.fill();
+      ctx.clip();
+      ctx.drawImage(coverImg, cx, cy, coverSize, coverSize);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#121215';
+      ctx.beginPath();
+      ctx.roundRect(cx, cy, coverSize, coverSize, 30);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Track Info
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 64px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(song || 'Canción', W/2, cy + coverSize + 120);
+
+    ctx.fillStyle = '#888888';
+    ctx.font = '500 42px sans-serif';
+    ctx.fillText(artist || 'Artista', W/2, cy + coverSize + 190);
+
+    // Playlist box
+    var pbW = 800;
+    var pbH = 140;
+    var pbX = W/2 - pbW/2;
+    var pbY = cy + coverSize + 300;
+
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.1)';
+    ctx.beginPath();
+    ctx.roundRect(pbX, pbY, pbW, pbH, 20);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = '#BBF451';
+    ctx.font = 'bold 24px monospace';
+    ctx.fillText('ESCUCHA EN', W/2, pbY + 45);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 36px sans-serif';
+    var wrapText = playlist || 'Playlist';
+    if(wrapText.length > 35) wrapText = wrapText.substring(0,35)+'...';
+    ctx.fillText(wrapText, W/2, pbY + 100);
+
+    // Spotify Logo placeholder
+    ctx.fillStyle = '#1DB954';
+    ctx.beginPath();
+    ctx.arc(W/2, pbY + 280, 45, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 45px sans-serif';
+    ctx.fillText('Spotify', W/2, pbY + 370);
+  }
+
+  function downloadWhatsAppVerticalImage() {
+    var canvas = document.getElementById('wpVerticalStoryCanvas');
+    if (!canvas) return;
+    var link = document.createElement('a');
+    link.download = 'tnhiw_whatsapp_status.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  function copyWhatsAppVerticalImage() {
+    var canvas = document.getElementById('wpVerticalStoryCanvas');
+    if (!canvas) return;
+    canvas.toBlob(function(blob) {
+      if (navigator.clipboard && navigator.clipboard.write) {
+        var item = new ClipboardItem({ 'image/png': blob });
+        navigator.clipboard.write([item]).then(function() {
+          showToast('✅ ¡Status vertical copiado al portapapeles!');
+        }).catch(function(err) {
+          console.error(err);
+          showToast('❌ Error al copiar la imagen vertical');
+        });
+      }
+    }, 'image/png');
   }
 
   function closeWhatsAppGroupModal() {
@@ -4520,13 +4658,13 @@ Instagram:
 
 <!-- MODAL GENERADOR WHATSAPP GRUPO -->
 <div id="whatsappGroupModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
-  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
+  <div style="background: #121215; border: 1px solid var(--border-strong); border-radius: 12px; max-width: 1200px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); position: relative;">
     <button onclick="closeWhatsAppGroupModal()" style="position: absolute; top: 18px; right: 18px; background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; z-index: 10;">✕</button>
     
     <div style="font-family: var(--font-mono); font-size: 11px; color: #25D366; text-transform: uppercase; margin-bottom: 4px;">// GENERADOR WHATSAPP // COMUNIDAD</div>
     <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px;">Mensaje para Grupo de WhatsApp</h3>
     
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start; margin-top: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: start; margin-top: 20px;">
       <!-- Texto -->
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <textarea id="wpGeneratedMessageText" rows="14" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); border-radius: 6px; padding: 12px; color: #fff; font-family: var(--font-mono); font-size: 13px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
@@ -4538,8 +4676,9 @@ Instagram:
         </button>
       </div>
 
-      <!-- Imagen -->
+      <!-- Imagen Cuadrada 1:1 -->
       <div style="display: flex; flex-direction: column; gap: 12px; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-transform: uppercase;">POST CUADRADO (1080x1080)</div>
         <canvas id="wpStoryCanvas" width="1080" height="1080" style="width: 100%; max-width: 320px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></canvas>
         <div style="display: flex; gap: 8px; width: 100%;">
           <button onclick="downloadWhatsAppImage()" style="flex: 1; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 800; padding: 10px; border-radius: 6px; border: none; cursor: pointer;">
@@ -4550,9 +4689,23 @@ Instagram:
           </button>
         </div>
       </div>
+
+      <!-- Imagen Story 9:16 -->
+      <div style="display: flex; flex-direction: column; gap: 12px; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-transform: uppercase;">STATUS VERTICAL (1080x1920)</div>
+        <canvas id="wpVerticalStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 200px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></canvas>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button onclick="downloadWhatsAppVerticalImage()" style="flex: 1; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 800; padding: 10px; border-radius: 6px; border: none; cursor: pointer;">
+            ⬇️ Descargar
+          </button>
+          <button onclick="copyWhatsAppVerticalImage()" style="flex: 1; background: rgba(255,255,255,0.1); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 600; padding: 10px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
+            📋 Copiar Imagen
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-</body>
+</body></body>
 </html>
