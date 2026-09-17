@@ -7,9 +7,9 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIs
 const PLAYLIST_ID_MAP = {
   // 8 Playlists Oficiales Actuales
   "Mezcla de rolas urbanas para farmear Aura": "79SKuyss3MfkzvOJGnaisB",
-  "Darkwave oscuro y atmosférico para la madrugada": "4mcJJz8GiKTuxieL9Jziln",
-  "Música urbana con flow y ritmo para moverte": "7bbYPZ5ia4IGRP2fT47kXr",
-  "Metal intenso para liberar toda tu energía": "5OLiBaOPAe5cBEdV1AoSd1",
+  "Darkwave oscuro y atmosferico para la madrugada": "4mcJJz8GiKTuxieL9Jziln",
+  "Musica urbana con flow y ritmo para moverte": "7bbYPZ5ia4IGRP2fT47kXr",
+  "Metal intenso para liberar toda tu energia": "5OLiBaOPAe5cBEdV1AoSd1",
   "Rock para sacar la rabia y el enojo acumulado": "6cuhRpfYmEt0vYCT9mFLKc",
   "Soft Pop suave para esos domingos sin hacer nada": "20uF7xCOW8zldDCiAowxuF",
   "Dream Pop intimo para escuchar solo en tu cuarto": "0Ty7tTNh1ONGyOLuasPREj",
@@ -18,13 +18,12 @@ const PLAYLIST_ID_MAP = {
   // Variantes y nombres anteriores compatibles
   "Hard rock para sacar la rabia y el enojo acumulado": "6cuhRpfYmEt0vYCT9mFLKc",
   "Pop indie suave para domingos sin hacer nada": "20uF7xCOW8zldDCiAowxuF",
-  "Pop indie íntimo para escuchar solo en tu cuarto": "0Ty7tTNh1ONGyOLuasPREj",
+  "Pop indie intimo para escuchar solo en tu cuarto": "0Ty7tTNh1ONGyOLuasPREj",
   "Pop indie para estar feliz y triste al mismo tiempo": "36ribRboGB3DwM821oYokl",
   "Rock indie sucio y crudo para sentirte rebelde": "6cuhRpfYmEt0vYCT9mFLKc",
   "Punk sucio y crudo para sentirte rebelde": "6cuhRpfYmEt0vYCT9mFLKc",
   "Rock indie para manejar de noche sin rumbo": "6cuhRpfYmEt0vYCT9mFLKc",
   "Rock indie para cuando no puedes dormir y piensas demasiado": "0Ty7tTNh1ONGyOLuasPREj",
-  "Dreamy Songs para escuchar en la intimidad de tu habitación": "0Ty7tTNh1ONGyOLuasPREj",
   "Dreamy Songs para escuchar en la intimidad de tu habitacion": "0Ty7tTNh1ONGyOLuasPREj"
 };
 
