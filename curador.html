@@ -1383,6 +1383,25 @@
       var waCleanDigits = waNumber ? waNumber.replace(/[^0-9]/g, '') : '';
       var isExpanded = !!_expandedCardMap[item.id];
 
+      var igHandle = item.instagram ? item.instagram.trim() : '';
+      var ttHandle = item.tiktok ? item.tiktok.trim() : '';
+      
+      var igLink = '';
+      if(igHandle) {
+        var igUrl = igHandle.includes('instagram.com') ? (igHandle.startsWith('http') ? igHandle : 'https://' + igHandle) : 'https://instagram.com/' + igHandle.replace('@', '');
+        var igDisplay = igHandle.replace('https://www.instagram.com/', '').replace('https://instagram.com/', '');
+        if(!igDisplay.startsWith('@')) igDisplay = '@' + igDisplay.split('?')[0].replace(/\/$/, '');
+        igLink = ` • <a href="${igUrl}" target="_blank" style="color: #f472b6; font-weight: 600; text-decoration: none;">📷 IG: ${igDisplay} ↗</a>`;
+      }
+      
+      var ttLink = '';
+      if(ttHandle) {
+        var ttUrl = ttHandle.includes('tiktok.com') ? (ttHandle.startsWith('http') ? ttHandle : 'https://' + ttHandle) : 'https://tiktok.com/@' + ttHandle.replace('@', '');
+        var ttDisplay = ttHandle.replace('https://www.tiktok.com/', '').replace('https://tiktok.com/', '').replace('@', '');
+        if(!ttDisplay.startsWith('@')) ttDisplay = '@' + ttDisplay.split('?')[0].replace(/\/$/, '');
+        ttLink = ` • <a href="${ttUrl}" target="_blank" style="color: #cbd5e1; font-weight: 600; text-decoration: none;">🎵 TikTok: ${ttDisplay} ↗</a>`;
+      }
+
       var actionBlock = '';
       if (currentTab === 'pending') {
         actionBlock = `
@@ -1473,6 +1492,8 @@
             <div class="detail-contact-row">
               <span>✉️ Correo: <a href="mailto:${item.email}" style="color:inherit; text-decoration:underline;">${item.email}</a></span>
               ${waNumber ? ` • <a href="https://wa.me/${waCleanDigits}" target="_blank" style="color: #25D366; font-weight: 600; text-decoration: none;">💬 WhatsApp: ${waNumber} ↗</a>` : ''}
+              ${igLink}
+              ${ttLink}
               • <a href="${playlistLinksMap[item.playlist] || 'https://open.spotify.com'}" target="_blank" style="color: var(--accent-lime); text-decoration: underline;">Abrir Playlist en Spotify ↗</a>
               • <a href="estado.html?id=${encodeURIComponent(item.track_id || '')}" target="_blank" style="color: #38bdf8; text-decoration: underline;">🔗 Magic Link (${item.track_id || 'Ver Estado'}) ↗</a>
             </div>
