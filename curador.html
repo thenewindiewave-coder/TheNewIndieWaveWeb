@@ -4157,8 +4157,8 @@ Instagram:
     ctx.strokeRect(40, 40, W-80, H-80);
 
     // Cover Image (Center)
-    var covW = 500;
-    var covH = 500;
+    var covW = 600;
+    var covH = 600;
     var covX = (W - covW) / 2;
     var covY = 200;
 
@@ -4189,27 +4189,27 @@ Instagram:
 
     // Logo & Header text
     ctx.fillStyle = '#fff';
-    ctx.font = '900 36px "Space Mono", monospace';
+    ctx.font = '900 38px "Space Grotesk", "Outfit", "Syne", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('THE NEW INDIE WAVE', W/2, 110);
+    ctx.fillText('THE NEW INDIE WAVE', W/2, 100);
     
     ctx.fillStyle = '#bbf451';
     ctx.font = 'bold 24px "Space Mono", monospace';
-    ctx.fillText('RECIÉN AÑADIDA A NUESTRA PLAYLIST', W/2, 150);
+    ctx.fillText('RECIÉN AÑADIDA A NUESTRA PLAYLIST', W/2, 145);
 
     // Song Info
     ctx.fillStyle = '#fff';
-    ctx.font = '900 56px "Space Mono", monospace';
-    ctx.fillText(truncateStringCur(song, 28), W/2, covY + covH + 80);
+    ctx.font = '900 68px "Space Grotesk", "Outfit", "Syne", sans-serif';
+    ctx.fillText(truncateStringCur(song, 40), W/2, covY + covH + 85);
 
     ctx.fillStyle = '#a1a1aa'; // text-muted
-    ctx.font = '600 36px "Space Mono", monospace';
-    ctx.fillText(truncateStringCur(artist, 32), W/2, covY + covH + 130);
+    ctx.font = '600 42px "Space Grotesk", "Outfit", "Syne", sans-serif';
+    ctx.fillText(truncateStringCur(artist, 40), W/2, covY + covH + 145);
 
     // Spotify Tag
     ctx.fillStyle = '#1DB954'; // Spotify green
     ctx.font = 'bold 28px "Space Mono", monospace';
-    ctx.fillText('🎵 ' + truncateStringCur(playlist, 36), W/2, covY + covH + 210);
+    ctx.fillText('🎵 ' + truncateStringCur(playlist, 70), W/2, covY + covH + 215);
   }
 
   function downloadWhatsAppImage() {
