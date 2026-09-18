@@ -1112,6 +1112,7 @@
       <button class="tab-btn" onclick="switchTab('playlists_manager', this)">[ 🏷️ GESTIÓN DE PLAYLISTS & ETIQUETAS ]</button>
       <button class="tab-btn" onclick="switchTab('radar_manager', this)">[ 🌟 ARTISTAS EN EL RADAR ]</button>
       <button class="tab-btn" onclick="switchTab('auto_message', this)">[ 🤖 MENSAJE AUTOMÁTICO ]</button>
+      <button class="tab-btn" onclick="openBlogArticleModal()" style="color: var(--accent-lime); border-color: rgba(187,244,81,0.4);">[ ⚡ REDACTAR ARTÍCULO BLOG ]</button>
     </div>
 
     <button class="btn-refresh" onclick="refreshCurrentTab()">
@@ -1606,6 +1607,10 @@
     updateMetrics();
 
     showToast(status === 'accepted' ? '🎉 ¡Canción ACEPTADA! Añadiendo a Spotify...' : '✓ Envío marcado como declinado');
+
+    if (status === 'accepted' && item) {
+      publishTrackSpotlightArticle(item, fb);
+    }
 
     if (status === 'accepted' && item && item.spotify_url && item.playlist) {
       var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
@@ -4937,5 +4942,289 @@ Instagram:
   </div>
 </div>
 
-</body></body>
+
+<!-- MODAL GENERADOR EXPRESS DE ARTÍCULOS (OPCIÓN D) -->
+<div class="modal-overlay" id="blogArticleModalOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:9999; justify-content:center; align-items:center; padding:20px;">
+  <div style="background:#121215; border:1px solid rgba(255,255,255,0.15); border-radius:8px; max-width:600px; width:100%; padding:28px; box-shadow:0 20px 50px rgba(0,0,0,0.8); position:relative;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px;">
+      <div style="font-family:var(--font-heading); font-size:18px; font-weight:800; color:#fff;">
+        ⚡ GENERADOR EXPRESS DE ARTÍCULOS PARA EL BLOG
+      </div>
+      <button onclick="closeBlogArticleModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;">✕</button>
+    </div>
+
+    <div style="font-size:13px; color:var(--text-muted); margin-bottom:18px; line-height:1.5;">
+      Escribe cualquier tema, instrucción o idea. El motor editorial redactará un artículo rápido (1 a 1.5 min), directo al grano, con formato web y lo publicará automáticamente en <strong style="color:var(--accent-lime);">thenewindiewave.online/blog</strong>.
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:20px;">
+      <div>
+        <label style="display:block; font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); margin-bottom:6px;">TEMA / IDEA / INSTRUCCIÓN DEL ARTÍCULO:</label>
+        <textarea id="articleGenTopic" rows="3" placeholder="Ej: Por qué pagar por playlists de bots congela tu perfil de Spotify..." style="width:100%; background:#09090b; border:1px solid rgba(255,255,255,0.12); border-radius:4px; padding:10px; color:#fff; font-family:var(--font-body); font-size:13px; resize:vertical; outline:none; box-sizing:border-box;"></textarea>
+      </div>
+
+      <div>
+        <label style="display:block; font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); margin-bottom:6px;">CATEGORÍA EDITORIAL:</label>
+        <select id="articleGenCategory" style="width:100%; background:#09090b; border:1px solid rgba(255,255,255,0.12); border-radius:4px; padding:10px; color:#fff; font-family:var(--font-mono); font-size:12px; outline:none; box-sizing:border-box;">
+          <option value="Estrategia & Algoritmos">Estrategia & Spotify</option>
+          <option value="Arte & Visuales">Arte & Visuales</option>
+          <option value="Industria Musical" selected>Industria Musical</option>
+          <option value="Producción & Sonido">Producción & Sonido</option>
+          <option value="Cultura Indie">Cultura Indie</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="articleGenResultBox" style="display:none; background:rgba(187,244,81,0.06); border:1px solid var(--accent-lime); border-radius:6px; padding:14px; margin-bottom:16px;">
+      <div style="font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); margin-bottom:4px;" id="articleGenStatus">// ARTÍCULO PUBLICADO CON ÉXITO:</div>
+      <div style="font-family:var(--font-heading); font-size:15px; font-weight:700; color:#fff; margin-bottom:6px;" id="articleGenTitle"></div>
+      <a href="#" id="articleGenLink" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-family:var(--font-mono); font-size:12px; text-decoration:none; font-weight:700;">Ver artículo en vivo en la Web ↗</a>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button onclick="closeBlogArticleModal()" class="btn-tool" style="padding:10px 16px;">Cancelar</button>
+      <button id="btnSubmitGenerateArticle" onclick="submitExpressArticle()" class="btn-nav-submit" style="min-height:42px; padding:10px 20px; font-size:13px; cursor:pointer;">
+        ⚡ GENERAR Y PUBLICAR EN LA WEB ↗
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openBlogArticleModal() {
+    var modal = document.getElementById('blogArticleModalOverlay');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.getElementById('articleGenResultBox').style.display = 'none';
+      setTimeout(function() {
+        var el = document.getElementById('articleGenTopic');
+        if (el) el.focus();
+      }, 100);
+    }
+  }
+
+  function closeBlogArticleModal() {
+    var modal = document.getElementById('blogArticleModalOverlay');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  }
+
+  async function submitExpressArticle() {
+    var topicInput = document.getElementById('articleGenTopic');
+    var topic = topicInput ? topicInput.value.trim() : '';
+    if (!topic || topic.length < 4) {
+      showToast('⚠️ Escribe un tema o instrucción para el artículo.');
+      return;
+    }
+
+    var category = document.getElementById('articleGenCategory').value;
+    var btn = document.getElementById('btnSubmitGenerateArticle');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Generando y publicando...';
+
+    try {
+      var res = await fetch('/api/generate-article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'custom_topic',
+          topic: topic,
+          category: category,
+          auto_publish: true
+        })
+      });
+
+      var data = await res.json();
+      if (data && data.success) {
+        showToast('🎉 ¡Artículo generado y publicado en la web!');
+        var resBox = document.getElementById('articleGenResultBox');
+        document.getElementById('articleGenTitle').textContent = data.article.title;
+        var link = document.getElementById('articleGenLink');
+        link.href = data.url || ('/blog#' + data.article.slug);
+        resBox.style.display = 'block';
+        topicInput.value = '';
+      } else {
+        showToast('⚠️ ' + (data.error || 'Error al generar artículo'));
+      }
+    } catch(e) {
+      showToast('Error de conexión con el generador');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '⚡ GENERAR Y PUBLICAR EN LA WEB ↗';
+    }
+  }
+
+  async function publishTrackSpotlightArticle(item, fb) {
+    if (!item) return;
+    try {
+      var res = await fetch('/api/generate-article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'track_spotlight',
+          artist_name: item.artist_name,
+          song_title: item.song_title,
+          genre: item.genre || 'Indie',
+          country: item.country || '',
+          playlist: item.playlist || '',
+          feedback: fb,
+          spotify_url: item.spotify_url,
+          cover_url: item.cover_url || '',
+          auto_publish: true
+        })
+      });
+      var data = await res.json();
+      if (data && data.success) {
+        showToast('📰 ¡Reseña editorial del track publicada en el Blog!');
+      }
+    } catch(err) {
+      console.warn('Aviso: no se pudo auto-publicar reseña en el blog:', err);
+    }
+  }
+</script>
+
+</body>
+<!-- MODAL GENERADOR EXPRESS DE ARTÍCULOS (OPCIÓN D) -->
+<div class="modal-overlay" id="blogArticleModalOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:9999; justify-content:center; align-items:center; padding:20px;">
+  <div style="background:#121215; border:1px solid rgba(255,255,255,0.15); border-radius:8px; max-width:600px; width:100%; padding:28px; box-shadow:0 20px 50px rgba(0,0,0,0.8); position:relative;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px;">
+      <div style="font-family:var(--font-heading); font-size:18px; font-weight:800; color:#fff;">
+        ⚡ GENERADOR EXPRESS DE ARTÍCULOS PARA EL BLOG
+      </div>
+      <button onclick="closeBlogArticleModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;">✕</button>
+    </div>
+
+    <div style="font-size:13px; color:var(--text-muted); margin-bottom:18px; line-height:1.5;">
+      Escribe cualquier tema, instrucción o idea. El motor editorial redactará un artículo rápido (1 a 1.5 min), directo al grano, con formato web y lo publicará automáticamente en <strong style="color:var(--accent-lime);">thenewindiewave.online/blog</strong>.
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:20px;">
+      <div>
+        <label style="display:block; font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); margin-bottom:6px;">TEMA / IDEA / INSTRUCCIÓN DEL ARTÍCULO:</label>
+        <textarea id="articleGenTopic" rows="3" placeholder="Ej: Por qué pagar por playlists de bots congela tu perfil de Spotify..." style="width:100%; background:#09090b; border:1px solid rgba(255,255,255,0.12); border-radius:4px; padding:10px; color:#fff; font-family:var(--font-body); font-size:13px; resize:vertical; outline:none; box-sizing:border-box;"></textarea>
+      </div>
+
+      <div>
+        <label style="display:block; font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); margin-bottom:6px;">CATEGORÍA EDITORIAL:</label>
+        <select id="articleGenCategory" style="width:100%; background:#09090b; border:1px solid rgba(255,255,255,0.12); border-radius:4px; padding:10px; color:#fff; font-family:var(--font-mono); font-size:12px; outline:none; box-sizing:border-box;">
+          <option value="Estrategia & Algoritmos">Estrategia & Spotify</option>
+          <option value="Arte & Visuales">Arte & Visuales</option>
+          <option value="Industria Musical" selected>Industria Musical</option>
+          <option value="Producción & Sonido">Producción & Sonido</option>
+          <option value="Cultura Indie">Cultura Indie</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="articleGenResultBox" style="display:none; background:rgba(187,244,81,0.06); border:1px solid var(--accent-lime); border-radius:6px; padding:14px; margin-bottom:16px;">
+      <div style="font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); margin-bottom:4px;" id="articleGenStatus">// ARTÍCULO PUBLICADO CON ÉXITO:</div>
+      <div style="font-family:var(--font-heading); font-size:15px; font-weight:700; color:#fff; margin-bottom:6px;" id="articleGenTitle"></div>
+      <a href="#" id="articleGenLink" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-family:var(--font-mono); font-size:12px; text-decoration:none; font-weight:700;">Ver artículo en vivo en la Web ↗</a>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button onclick="closeBlogArticleModal()" class="btn-tool" style="padding:10px 16px;">Cancelar</button>
+      <button id="btnSubmitGenerateArticle" onclick="submitExpressArticle()" class="btn-nav-submit" style="min-height:42px; padding:10px 20px; font-size:13px; cursor:pointer;">
+        ⚡ GENERAR Y PUBLICAR EN LA WEB ↗
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openBlogArticleModal() {
+    var modal = document.getElementById('blogArticleModalOverlay');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.getElementById('articleGenResultBox').style.display = 'none';
+      setTimeout(function() {
+        var el = document.getElementById('articleGenTopic');
+        if (el) el.focus();
+      }, 100);
+    }
+  }
+
+  function closeBlogArticleModal() {
+    var modal = document.getElementById('blogArticleModalOverlay');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  }
+
+  async function submitExpressArticle() {
+    var topicInput = document.getElementById('articleGenTopic');
+    var topic = topicInput ? topicInput.value.trim() : '';
+    if (!topic || topic.length < 4) {
+      showToast('⚠️ Escribe un tema o instrucción para el artículo.');
+      return;
+    }
+
+    var category = document.getElementById('articleGenCategory').value;
+    var btn = document.getElementById('btnSubmitGenerateArticle');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Generando y publicando...';
+
+    try {
+      var res = await fetch('/api/generate-article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'custom_topic',
+          topic: topic,
+          category: category,
+          auto_publish: true
+        })
+      });
+
+      var data = await res.json();
+      if (data && data.success) {
+        showToast('🎉 ¡Artículo generado y publicado en la web!');
+        var resBox = document.getElementById('articleGenResultBox');
+        document.getElementById('articleGenTitle').textContent = data.article.title;
+        var link = document.getElementById('articleGenLink');
+        link.href = data.url || ('/blog#' + data.article.slug);
+        resBox.style.display = 'block';
+        topicInput.value = '';
+      } else {
+        showToast('⚠️ ' + (data.error || 'Error al generar artículo'));
+      }
+    } catch(e) {
+      showToast('Error de conexión con el generador');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '⚡ GENERAR Y PUBLICAR EN LA WEB ↗';
+    }
+  }
+
+  async function publishTrackSpotlightArticle(item, fb) {
+    if (!item) return;
+    try {
+      var res = await fetch('/api/generate-article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'track_spotlight',
+          artist_name: item.artist_name,
+          song_title: item.song_title,
+          genre: item.genre || 'Indie',
+          country: item.country || '',
+          playlist: item.playlist || '',
+          feedback: fb,
+          spotify_url: item.spotify_url,
+          cover_url: item.cover_url || '',
+          auto_publish: true
+        })
+      });
+      var data = await res.json();
+      if (data && data.success) {
+        showToast('📰 ¡Reseña editorial del track publicada en el Blog!');
+      }
+    } catch(err) {
+      console.warn('Aviso: no se pudo auto-publicar reseña en el blog:', err);
+    }
+  }
+</script>
+
+</body>
 </html>
