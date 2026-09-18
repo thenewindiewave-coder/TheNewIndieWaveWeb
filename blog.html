@@ -615,6 +615,106 @@
     font-weight: 700;
   }
 
+  /* BOTÓN & SECCIÓN DE ARCHIVO HISTÓRICO */
+  .archive-action-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0 60px 0;
+  }
+
+  .btn-archive-trigger {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-strong);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 14px 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.22s var(--ease-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-archive-trigger:hover {
+    background: rgba(187, 244, 81, 0.08);
+    border-color: var(--accent-lime);
+    color: var(--accent-lime);
+    box-shadow: 0 0 24px rgba(187, 244, 81, 0.16);
+    transform: translateY(-2px);
+  }
+
+  .archive-counter-pill {
+    background: rgba(187, 244, 81, 0.15);
+    color: var(--accent-lime);
+    border: 1px solid rgba(187, 244, 81, 0.3);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .archive-section {
+    background: rgba(18, 18, 21, 0.7);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 30px;
+    margin-bottom: 70px;
+    animation: fadeInArchive 0.3s ease;
+  }
+
+  @keyframes fadeInArchive {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .archive-header-box {
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+
+  .archive-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #f59e0b;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+
+  .archive-title {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .archive-desc {
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+
+  .card-archive-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(245, 158, 11, 0.92);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
   /* ARTICLE READER OVERLAY (MODAL TIPO SUBSTACK / MEDIUM EN MODO OSCURO) */
   .reader-overlay {
     position: fixed;
@@ -1121,8 +1221,39 @@
   <!-- FEATURED ARTICLE HERO (COVER STORY) -->
   <div id="featuredHeroContainer"></div>
 
-  <!-- ARTICLES GRID -->
+  <!-- ARTICLES GRID (MÁXIMO 6 CARDS EN PORTADA + 1 HERO = EXACTAMENTE 7 NOTAS) -->
   <div id="articlesGrid" class="articles-grid"></div>
+
+  <!-- BOTÓN VER ARCHIVO HISTÓRICO -->
+  <div class="archive-action-wrapper" id="archiveActionWrapper">
+    <button id="btnToggleArchive" class="btn-archive-trigger" onclick="toggleArchiveSection()">
+      <span>📦</span>
+      <span id="btnToggleArchiveText">VER ARCHIVO HISTÓRICO</span>
+      <span id="archiveCountBadge" class="archive-counter-pill">0 NOTAS</span>
+    </button>
+  </div>
+
+  <!-- SECCIÓN ARCHIVO HISTÓRICO DE NOTICIAS -->
+  <section id="archiveSection" class="archive-section" style="display: none;">
+    <div class="archive-header-box">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+        <div>
+          <div class="archive-tag">// ARCHIVO HISTÓRICO PERMANENTE</div>
+          <h3 class="archive-title">Crónicas & Noticias Anteriores</h3>
+          <p class="archive-desc">
+            Ediciones que ya no están en la portada activa de 7 noticias. Cada nota conserva de forma perpetua su enlace único.
+          </p>
+        </div>
+        <button class="chip-btn" onclick="toggleArchiveSection()" style="margin-left: auto;">
+          ✕ Ocultar Archivo
+        </button>
+      </div>
+    </div>
+    <div id="archivedArticlesGrid" class="articles-grid"></div>
+    <div id="archivedEmptyState" style="display: none; text-align: center; padding: 40px 20px; color: var(--text-muted); font-family: var(--font-mono); font-size: 12px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border);">
+      // NO HAY NOTAS EN EL ARCHIVO HISTÓRICO POR AHORA (TODAS LAS NOTAS ESTÁN EN PORTADA)
+    </div>
+  </section>
 
   <!-- EMPTY STATE (SI LA BÚSQUEDA NO DEVUELVE RESULTADOS) -->
   <div id="emptyState" style="display:none; text-align:center; padding: 60px 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;">
@@ -1270,6 +1401,8 @@
 
   // ARTÍCULOS EDITORIALES TNIW (CARGA EXCLUSIVA DESDE SUPABASE)
   var allArticles = [];
+  var archivedArticles = [];
+  var isArchiveOpen = false;
   var currentCategory = 'all';
   var currentSearchQuery = '';
   var activeArticle = null;
@@ -1322,6 +1455,7 @@
   async function loadArticles() {
     var dbStatusBadge = document.getElementById('dbStatusBadge');
     try {
+      // 1. Cargar artículos publicados en vivo (ordenados cronológicamente desc)
       var res = await fetch(SUPABASE_URL + '/rest/v1/articles?published=eq.true&order=published_at.desc', {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -1332,24 +1466,40 @@
       if (res.ok) {
         var data = await res.json();
         allArticles = data || [];
-        if (dbStatusBadge) {
-          dbStatusBadge.innerHTML = '<span style="color:var(--accent-lime)">● SUPABASE ONLINE (' + allArticles.length + ' ARTÍCULOS)</span>';
-        }
       } else {
         allArticles = [];
-        if (dbStatusBadge) {
-          dbStatusBadge.innerHTML = '<span style="color:#ef4444">● SUPABASE OFFLINE</span>';
+      }
+
+      // 2. Cargar artículos archivados (published=false)
+      var archRes = await fetch(SUPABASE_URL + '/rest/v1/articles?published=eq.false&order=published_at.desc', {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
         }
+      });
+
+      if (archRes.ok) {
+        var archData = await archRes.json();
+        archivedArticles = archData || [];
+      } else {
+        archivedArticles = [];
+      }
+
+      if (dbStatusBadge) {
+        dbStatusBadge.innerHTML = '<span style="color:var(--accent-lime)">● SUPABASE ONLINE (' + allArticles.length + ' EN PORTADA, ' + archivedArticles.length + ' EN ARCHIVO)</span>';
       }
     } catch(err) {
       console.error("Error al cargar artículos de Supabase:", err);
       allArticles = [];
+      archivedArticles = [];
       if (dbStatusBadge) {
         dbStatusBadge.innerHTML = '<span style="color:#ef4444">● ERROR DE CONEXIÓN</span>';
       }
     }
 
+    updateArchiveCounter();
     renderArticles();
+    renderArchivedArticles();
     checkUrlHash();
   }
 
@@ -1379,26 +1529,31 @@
     var emptyState = document.getElementById('emptyState');
     var countBadge = document.getElementById('articlesCountBadge');
 
-    countBadge.textContent = filtered.length + (filtered.length === 1 ? ' artículo disponible' : ' artículos disponibles');
-
     if (filtered.length === 0) {
       heroContainer.innerHTML = '';
       gridContainer.innerHTML = '';
       emptyState.style.display = 'block';
+      if (countBadge) countBadge.textContent = '0 artículos encontrados';
       return;
     }
 
     emptyState.style.display = 'none';
 
-    // Si estamos en 'all' y sin búsqueda, el primer artículo destacado va en el Featured Hero
+    // REGLA CLAVE: EXACTAMENTE 7 NOTICIAS EN PORTADA (1 DESTACADA COVER + 6 REGULARES EN GRID)
     var featured = null;
     var regularList = [];
 
     if (currentCategory === 'all' && !currentSearchQuery) {
       featured = filtered.find(function(a) { return a.featured; }) || filtered[0];
-      regularList = filtered.filter(function(a) { return a.slug !== featured.slug; });
+      // Tomar exactamente 6 del resto para tener 1 + 6 = 7
+      regularList = filtered.filter(function(a) { return a.slug !== featured.slug; }).slice(0, 6);
+      
+      var totalDisplayed = (featured ? 1 : 0) + regularList.length;
+      if (countBadge) countBadge.textContent = totalDisplayed + ' artículos en portada';
     } else {
+      featured = null;
       regularList = filtered;
+      if (countBadge) countBadge.textContent = filtered.length + (filtered.length === 1 ? ' artículo encontrado' : ' artículos encontrados');
     }
 
     // RENDER FEATURED HERO
@@ -1459,6 +1614,72 @@
     }).join('');
   }
 
+  // RENDER SECCIÓN DE ARCHIVO HISTÓRICO
+  function renderArchivedArticles() {
+    var grid = document.getElementById('archivedArticlesGrid');
+    var empty = document.getElementById('archivedEmptyState');
+    if (!grid) return;
+
+    if (!archivedArticles || archivedArticles.length === 0) {
+      grid.innerHTML = '';
+      if (empty) empty.style.display = 'block';
+      return;
+    }
+
+    if (empty) empty.style.display = 'none';
+
+    grid.innerHTML = archivedArticles.map(function(art) {
+      return `
+        <div class="article-card" onclick="openArticle('${escapeHtml(art.slug)}')">
+          <div class="card-media">
+            <img src="${escapeHtml(art.image_url)}" alt="${escapeHtml(art.title)}" class="card-img" loading="lazy">
+            <span class="card-cat-tag">${escapeHtml(art.category)}</span>
+            <span class="card-archive-badge">📦 ARCHIVADO</span>
+          </div>
+          <div class="card-body">
+            <div class="card-meta">
+              <span>${formatDate(art.published_at)}</span>
+              <span class="meta-dot"></span>
+              <span>${escapeHtml(art.read_time || '4 min')}</span>
+            </div>
+            <h3 class="card-title">${escapeHtml(art.title)}</h3>
+            <p class="card-summary">${escapeHtml(art.summary)}</p>
+            <div class="card-footer">
+              <div class="card-author">
+                <span>Por ${escapeHtml(art.author || 'Rodrigo dL Moral')}</span>
+              </div>
+              <span class="card-arrow" style="color:#f59e0b;">Ver crónica ↗</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateArchiveCounter() {
+    var badge = document.getElementById('archiveCountBadge');
+    if (badge) {
+      var count = archivedArticles ? archivedArticles.length : 0;
+      badge.textContent = count + (count === 1 ? ' NOTA' : ' NOTAS');
+    }
+  }
+
+  function toggleArchiveSection() {
+    var section = document.getElementById('archiveSection');
+    var btnText = document.getElementById('btnToggleArchiveText');
+    if (!section) return;
+
+    isArchiveOpen = !isArchiveOpen;
+    if (isArchiveOpen) {
+      section.style.display = 'block';
+      if (btnText) btnText.textContent = 'OCULTAR ARCHIVO HISTÓRICO';
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      section.style.display = 'none';
+      if (btnText) btnText.textContent = 'VER ARCHIVO HISTÓRICO';
+    }
+  }
+
   // FILTROS
   function filterByCategory(category, btnElement) {
     currentCategory = category;
@@ -1492,7 +1713,7 @@
   // MODAL LECTOR (READER VIEW CON RESOLUCIÓN PERMANENTE DE URL)
   async function openArticle(slug) {
     if (!slug) return;
-    var article = allArticles.find(function(a) { return a.slug === slug; });
+    var article = allArticles.find(function(a) { return a.slug === slug; }) || archivedArticles.find(function(a) { return a.slug === slug; });
     if (!article) {
       // Búsqueda directa en Supabase por si la nota fue archivada (mantiene URL único permanente)
       try {

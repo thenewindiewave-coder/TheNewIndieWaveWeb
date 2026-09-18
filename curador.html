@@ -6003,6 +6003,39 @@ Instagram:
     }
   }
 
+  // AUTO-ARCHIVADO: GARANTIZAR QUE EXACTAMENTE MÁXIMO 7 NOTICIAS ESTÉN ACTIVAS EN PORTADA
+  async function enforceMaxPublishedArticlesLimit(maxCount) {
+    try {
+      maxCount = maxCount || 7;
+      var res = await fetch(SUPABASE_URL + '/rest/v1/articles?published=eq.true&order=published_at.desc', {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        }
+      });
+      if (!res.ok) return;
+      var pubList = await res.json();
+      if (pubList && pubList.length > maxCount) {
+        var toArchive = pubList.slice(maxCount);
+        for (var i = 0; i < toArchive.length; i++) {
+          await fetch(SUPABASE_URL + '/rest/v1/articles?slug=eq.' + encodeURIComponent(toArchive[i].slug), {
+            method: 'PATCH',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ published: false })
+          });
+        }
+        console.log('Auto-archivadas ' + toArchive.length + ' notas antiguas para mantener el límite exacto de ' + maxCount + ' en portada.');
+      }
+    } catch(err) {
+      console.warn('Error en enforceMaxPublishedArticlesLimit:', err);
+    }
+  }
+
   // ACCIÓN: ARCHIVAR O PUBLICAR EN VIVO (CONSERVANDO URL PERMANENTE)
   async function toggleArticlePublished(slug, makePublished) {
     try {
@@ -6024,7 +6057,8 @@ Instagram:
       if (!makePublished) {
         showToast('📦 Nota archivada. Su enlace permanente sigue activo en /blog#' + slug);
       } else {
-        showToast('✓ ¡Nota publicada en vivo en el Blog!');
+        await enforceMaxPublishedArticlesLimit(7);
+        showToast('✓ ¡Nota publicada en vivo en el Blog (límite de 7 notas asegurado)!');
       }
 
       await loadBlogManagerArticles();
@@ -6513,7 +6547,11 @@ Instagram:
         throw new Error('Supabase responded ' + res.status + ': ' + errBody);
       }
 
-      showToast(editingArticleSlug ? '✓ ¡Artículo actualizado con éxito!' : '🎉 ¡Artículo guardado exitosamente en Supabase!');
+      if (isPublished) {
+        await enforceMaxPublishedArticlesLimit(7);
+      }
+
+      showToast(editingArticleSlug ? '✓ ¡Artículo actualizado con éxito!' : '🎉 ¡Artículo guardado exitosamente en Supabase (Portada limitada a 7 notas)!');
       closeManualArticleModal();
       await loadBlogManagerArticles();
     } catch(err) {

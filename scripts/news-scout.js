@@ -147,6 +147,37 @@ Enlace fuente: ${selected.link}`;
     console.log(`   Título: "${article.title}"`);
     console.log(`   Región: ${selected.region}`);
     console.log(`   URL: /blog#${article.slug}`);
+
+    // Auto-archivar notas antiguas para que la portada muestre exactamente 7 noticias
+    try {
+      const pubCheckRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?published=eq.true&order=published_at.desc`, {
+        headers: {
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+        }
+      });
+      if (pubCheckRes.ok) {
+        const pubArticles = await pubCheckRes.json();
+        if (pubArticles && pubArticles.length > 7) {
+          const toArchive = pubArticles.slice(7);
+          for (const item of toArchive) {
+            await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(item.slug)}`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_SERVICE_KEY,
+                'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify({ published: false })
+            });
+          }
+          console.log(`   Auto-archivadas ${toArchive.length} notas antiguas para mantener exactamente 7 en portada.`);
+        }
+      }
+    } catch (archiveErr) {
+      console.warn('   Error auto-archivando notas:', archiveErr);
+    }
   } else {
     const errText = await insertRes.text();
     console.error('❌ Error al guardar en Supabase:', errText);
