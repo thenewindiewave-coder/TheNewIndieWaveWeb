@@ -1157,18 +1157,65 @@
         El bot rastrea en vivo 9 medios independientes de México, Latinoamérica y España. Aquí puedes ver las novedades detectadas en tiempo real y publicarlas con 1 clic en el blog, o dejar que el bot automático las publique a diario a las 8:00 AM.
       </p>
 
-      <!-- CHIPS DE FUENTES -->
-      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin-right:4px;">FUENTES ACTIVAS:</span>
-        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇲🇽 WARP Magazine</span>
-        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇲🇽 Sopitas Música</span>
-        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇲🇽 Setlist.me</span>
-        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇦🇷 Indie Hoy</span>
-        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🌎 Cuchara Sónica</span>
-        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇪🇸 MondoSonoro</span>
-        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇪🇸 Binaural</span>
-        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇪🇸 Muzikalia</span>
-        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇪🇸 Jenesaispop</span>
+      <!-- RED DE MONITOREO // FUENTES ACTIVAS ORGANIZADAS -->
+      <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:16px 20px; margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+          <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim); letter-spacing:1.5px; display:flex; align-items:center; gap:8px;">
+            <span>📡 RED DE MONITOREO ACTIVA</span>
+            <span style="background:rgba(56,189,248,0.12); color:var(--accent-cyan); padding:2px 8px; border-radius:4px; font-weight:700; border:1px solid rgba(56,189,248,0.3);">9 MEDIOS VERIFICADOS</span>
+          </div>
+          <div style="font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); display:flex; align-items:center; gap:6px;">
+            <span style="width:7px; height:7px; background:var(--accent-lime); border-radius:50%; display:inline-block; box-shadow:0 0 8px var(--accent-lime); animation: pulseRadar 1.5s infinite;"></span>
+            RADAR EN VIVO
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
+          <!-- REGIÓN: MÉXICO -->
+          <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:12px 14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-family:var(--font-mono); font-size:10.5px; font-weight:800; color:var(--accent-cyan); background:rgba(56,189,248,0.12); padding:2px 8px; border-radius:4px; border:1px solid rgba(56,189,248,0.25);">
+                🇲🇽 MÉXICO
+              </span>
+              <span style="font-family:var(--font-mono); font-size:10px; color:var(--text-dim);">3 MEDIOS</span>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              <a href="https://warp.la" target="_blank" rel="noopener noreferrer" style="background:#161619; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.borderColor='var(--accent-cyan)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">WARP Magazine ↗</a>
+              <a href="https://sopitas.com/musica" target="_blank" rel="noopener noreferrer" style="background:#161619; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.borderColor='var(--accent-cyan)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">Sopitas Música ↗</a>
+              <a href="https://setlist.me" target="_blank" rel="noopener noreferrer" style="background:#161619; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.borderColor='var(--accent-cyan)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">Setlist.me ↗</a>
+            </div>
+          </div>
+
+          <!-- REGIÓN: LATINOAMÉRICA -->
+          <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:12px 14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-family:var(--font-mono); font-size:10.5px; font-weight:800; color:var(--accent-lime); background:rgba(187,244,81,0.12); padding:2px 8px; border-radius:4px; border:1px solid rgba(187,244,81,0.25);">
+                🌎 LATINOAMÉRICA
+              </span>
+              <span style="font-family:var(--font-mono); font-size:10px; color:var(--text-dim);">2 MEDIOS</span>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              <a href="https://indiehoy.com" target="_blank" rel="noopener noreferrer" style="background:#161619; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.borderColor='var(--accent-lime)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">Indie Hoy (AR) ↗</a>
+              <a href="https://cucharasonica.com" target="_blank" rel="noopener noreferrer" style="background:#161619; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.borderColor='var(--accent-lime)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">Cuchara Sónica ↗</a>
+            </div>
+          </div>
+
+          <!-- REGIÓN: ESPAÑA -->
+          <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:12px 14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-family:var(--font-mono); font-size:10.5px; font-weight:800; color:#f59e0b; background:rgba(245,158,11,0.12); padding:2px 8px; border-radius:4px; border:1px solid rgba(245,158,11,0.25);">
+                🇪🇸 ESPAÑA
+              </span>
+              <span style="font-family:var(--font-mono); font-size:10px; color:var(--text-dim);">4 MEDIOS</span>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              <a href="https://www.mondosonoro.com" target="_blank" rel="noopener noreferrer" style="background:#161619; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">MondoSonoro ↗</a>
+              <a href="https://binaural.es" target="_blank" rel="noopener noreferrer" style="background:#161619; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">Binaural ↗</a>
+              <a href="https://muzikalia.com" target="_blank" rel="noopener noreferrer" style="background:#161619; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">Muzikalia ↗</a>
+              <a href="https://jenesaispop.com" target="_blank" rel="noopener noreferrer" style="background:#161619; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">Jenesaispop ↗</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -5222,6 +5269,41 @@ Instagram:
     }
   }
 
+  function formatScoutPubDate(dateStr) {
+    if (!dateStr) return 'Fecha no especificada';
+    try {
+      var d = new Date(dateStr);
+      if (isNaN(d.getTime())) return String(dateStr);
+      
+      var months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      var day = d.getDate();
+      var month = months[d.getMonth()];
+      var year = d.getFullYear();
+      var hours = String(d.getHours()).padStart(2, '0');
+      var minutes = String(d.getMinutes()).padStart(2, '0');
+      
+      var now = new Date();
+      var diffMs = now - d;
+      var diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      var rel = '';
+      if (diffHours >= 0 && diffHours < 1) {
+        var diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+        rel = 'hace ' + diffMins + ' min';
+      } else if (diffHours >= 1 && diffHours < 24) {
+        rel = 'hace ' + diffHours + 'h';
+      } else if (diffHours >= 24 && diffHours < 48) {
+        rel = 'ayer';
+      } else if (diffHours >= 48) {
+        var days = Math.floor(diffHours / 24);
+        rel = 'hace ' + days + 'd';
+      }
+
+      return day + ' ' + month + ' ' + year + ' · ' + hours + ':' + minutes + ' hrs ' + (rel ? '(' + rel + ')' : '');
+    } catch(e) {
+      return String(dateStr);
+    }
+  }
+
   async function fetchLiveFeedFallback() {
     var results = [];
     var testFeeds = [
@@ -5245,6 +5327,7 @@ Instagram:
                 title: entry.title,
                 link: entry.link,
                 desc: (entry.description || '').replace(/<[^>]*>?/gm, '').slice(0, 160) + '...',
+                pub_date: entry.pubDate || new Date().toISOString(),
                 slug: (entry.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
                 is_published: false
               });
@@ -5255,6 +5338,7 @@ Instagram:
     }
 
     if (results.length === 0) {
+      var now = Date.now();
       results = [
         {
           source: 'WARP Magazine',
@@ -5262,6 +5346,7 @@ Instagram:
           title: 'Bratty presenta nueva era sonora con guitarras dream-pop y letras introspectivas',
           link: 'https://warp.la',
           desc: 'La compositora sinaloense anuncia nueva etapa en su carrera musical con adelantos que exploran el indie rock más envolvente y colaboraciones iberoamericanas.',
+          pub_date: new Date(now - 1000 * 3600 * 2).toISOString(),
           slug: 'bratty-nueva-era-dream-pop',
           is_published: false
         },
@@ -5271,6 +5356,7 @@ Instagram:
           title: 'Él Mató a un Policía Motorizado anuncia gira por España y festivales en México',
           link: 'https://indiehoy.com',
           desc: 'La banda platense continuará presentando su aclamado disco Súper Terror con un recorrido que incluye fechas clave en Madrid, Barcelona, CDMX y Guadalajara.',
+          pub_date: new Date(now - 1000 * 3600 * 4).toISOString(),
           slug: 'el-mato-gira-espana-mexico',
           is_published: false
         },
@@ -5280,6 +5366,7 @@ Instagram:
           title: 'Triángulo de Amor Bizarro celebra dos décadas de ruido, post-punk y furia melódica',
           link: 'https://www.mondosonoro.com',
           desc: 'Los gallegos repasan sus 20 años de trayectoria con una serie de directos especiales donde reinterpretan sus himnos generacionales más crudos.',
+          pub_date: new Date(now - 1000 * 3600 * 7).toISOString(),
           slug: 'triangulo-de-amor-bizarro-20-anos',
           is_published: false
         },
@@ -5289,6 +5376,7 @@ Instagram:
           title: 'Austin TV prepara nuevo material tras su triunfal regreso a los escenarios',
           link: 'https://setlist.me',
           desc: 'La mítica banda instrumental mexicana comparte pistas de nuevas composiciones nacidas en su última gira internacional.',
+          pub_date: new Date(now - 1000 * 3600 * 12).toISOString(),
           slug: 'austin-tv-nuevo-material-gira',
           is_published: false
         },
@@ -5298,6 +5386,7 @@ Instagram:
           title: 'Clubz y el regreso del electropop elegante en festivales de verano',
           link: 'https://www.sopitas.com',
           desc: 'El dúo regiomontano afina detalles para su próximo ciclo de lanzamientos cargado de sintetizadores funk y estética ochentera.',
+          pub_date: new Date(now - 1000 * 3600 * 18).toISOString(),
           slug: 'clubz-electropop-festivales-verano',
           is_published: false
         },
@@ -5307,6 +5396,7 @@ Instagram:
           title: 'Carolina Durante estrena single demoledor anticipando su nuevo álbum',
           link: 'https://binaural.es',
           desc: 'El cuarteto madrileño vuelve con guitarras afiladas y cinismo lírico en su tema más acelerado del año.',
+          pub_date: new Date(now - 1000 * 3600 * 26).toISOString(),
           slug: 'carolina-durante-nuevo-single',
           is_published: false
         }
@@ -5336,42 +5426,55 @@ Instagram:
     var html = '';
     scoutDetectedNews.forEach(function(item, idx) {
       var isPub = item.is_published;
-      var flag = item.region === 'México' ? '🇲🇽' : (item.region === 'España' ? '🇪🇸' : '🌎');
+      var regionColor = item.region === 'México' ? 'var(--accent-cyan)' : (item.region === 'España' ? '#f59e0b' : 'var(--accent-lime)');
+      var regionBg = item.region === 'México' ? 'rgba(56,189,248,0.12)' : (item.region === 'España' ? 'rgba(245,158,11,0.12)' : 'rgba(187,244,81,0.12)');
+      var regionBorder = item.region === 'México' ? 'rgba(56,189,248,0.3)' : (item.region === 'España' ? 'rgba(245,158,11,0.3)' : 'rgba(187,244,81,0.3)');
 
       html += `
-        <div style="background:var(--bg-card); border:1px solid ${isPub ? 'rgba(187,244,81,0.35)' : 'var(--border)'}; border-radius:8px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; transition:border-color 0.2s; position:relative;">
+        <div style="background:var(--bg-card); border:1px solid ${isPub ? 'rgba(187,244,81,0.35)' : 'rgba(255,255,255,0.09)'}; border-radius:8px; padding:22px; display:flex; flex-direction:column; justify-content:space-between; transition:border-color 0.2s; position:relative; box-shadow:0 4px 20px rgba(0,0,0,0.35);">
           <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <span style="font-family:var(--font-mono); font-size:11px; color:var(--accent-cyan); font-weight:700;">
-                ${flag} ${escapeHtml(item.source)}
+            <!-- HEADER DE LA TARJETA: REGIÓN + MEDIO + STATUS -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <span style="font-family:var(--font-mono); font-size:11px; font-weight:800; display:inline-flex; align-items:center; gap:6px;">
+                <span style="background:${regionBg}; color:${regionColor}; border:1px solid ${regionBorder}; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:800;">${escapeHtml(item.region || 'Indie')}</span>
+                <span style="color:#fff;">${escapeHtml(item.source)}</span>
               </span>
-              <span style="font-family:var(--font-mono); font-size:10px; padding:2px 8px; border-radius:4px; ${isPub ? 'background:rgba(187,244,81,0.15); color:var(--accent-lime); border:1px solid var(--accent-lime);' : 'background:rgba(56,189,248,0.1); color:var(--accent-cyan); border:1px solid rgba(56,189,248,0.3);'}">
+              <span style="font-family:var(--font-mono); font-size:10px; padding:3px 9px; border-radius:4px; font-weight:700; ${isPub ? 'background:rgba(187,244,81,0.15); color:var(--accent-lime); border:1px solid var(--accent-lime);' : 'background:rgba(56,189,248,0.1); color:var(--accent-cyan); border:1px solid rgba(56,189,248,0.3);'}">
                 ${isPub ? '✓ PUBLICADA' : '● EN RADAR'}
               </span>
             </div>
 
-            <h3 style="font-family:var(--font-heading); font-size:15px; font-weight:800; color:#fff; line-height:1.4; margin-bottom:10px;">
+            <!-- FECHA Y HORA DE PUBLICACIÓN ORIGINAL DE LA FUENTE -->
+            <div style="font-family:var(--font-mono); font-size:11px; color:#cbd5e1; display:flex; align-items:center; gap:6px; margin-bottom:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); padding:6px 10px; border-radius:4px;">
+              <span style="color:var(--accent-cyan);">🕒</span>
+              <span>Publicado: <strong style="color:#fff;">${escapeHtml(formatScoutPubDate(item.pub_date))}</strong></span>
+            </div>
+
+            <!-- TÍTULO CON ENLACE DIRECTO -->
+            <h3 style="font-family:var(--font-heading); font-size:16px; font-weight:800; color:#fff; line-height:1.4; margin-bottom:12px;">
               <a href="${escapeHtml(item.link || '#')}" target="_blank" rel="noopener noreferrer" style="color:#fff; text-decoration:none;" onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='#fff'">
                 ${escapeHtml(item.title)} ↗
               </a>
             </h3>
 
-            <p style="font-family:var(--font-body); font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-bottom:16px;">
+            <!-- EXTRACTO -->
+            <p style="font-family:var(--font-body); font-size:13px; color:var(--text-muted); line-height:1.55; margin-bottom:18px;">
               ${escapeHtml(item.desc || '')}
             </p>
           </div>
 
-          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.06); margin-top:8px; padding-top:12px;">
-            <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim);">
-              ${escapeHtml(item.region || 'Indie')}
-            </span>
+          <!-- FOOTER: ENLACE A FUENTE Y BOTÓN DE REDACCIÓN -->
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.07); margin-top:10px; padding-top:14px;">
+            <a href="${escapeHtml(item.link || '#')}" target="_blank" rel="noopener noreferrer" style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim); text-decoration:none;" onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='var(--text-dim)'">
+              Leer fuente original ↗
+            </a>
             <div>
               ${isPub ? `
-                <a href="/blog#${escapeHtml(item.slug || '')}" target="_blank" class="btn-tool" style="color:var(--accent-lime); border-color:rgba(187,244,81,0.4); text-decoration:none; display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:6px 12px;">
+                <a href="/blog#${escapeHtml(item.slug || '')}" target="_blank" class="btn-tool" style="color:var(--accent-lime); border-color:rgba(187,244,81,0.4); text-decoration:none; display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:7px 14px; font-weight:700;">
                   <span>Ver en Blog</span> ↗
                 </a>
               ` : `
-                <button id="btnScoutPub-${idx}" onclick="publishScoutItem(${idx})" class="btn-tool" style="background:rgba(56,189,248,0.12); color:var(--accent-cyan); border-color:var(--accent-cyan); font-weight:700; font-size:11px; padding:6px 12px; cursor:pointer;">
+                <button id="btnScoutPub-${idx}" onclick="publishScoutItem(${idx})" class="btn-tool" style="background:rgba(56,189,248,0.12); color:var(--accent-cyan); border-color:var(--accent-cyan); font-weight:700; font-size:11.5px; padding:7px 14px; cursor:pointer;">
                   ⚡ Redactar y Publicar
                 </button>
               `}

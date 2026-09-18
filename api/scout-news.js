@@ -60,6 +60,8 @@ export default async function handler(req, res) {
             const titleMatch = rawItem.match(/<title>([\s\S]*?)<\/title>/);
             const linkMatch = rawItem.match(/<link>([\s\S]*?)<\/link>/);
             const descMatch = rawItem.match(/<description>([\s\S]*?)<\/description>/);
+            const pubDateMatch = rawItem.match(/<pubDate>([\s\S]*?)<\/pubDate>/i) || rawItem.match(/<dc:date>([\s\S]*?)<\/dc:date>/i);
+            const pubDate = pubDateMatch ? cleanXml(pubDateMatch[1]) : new Date().toISOString();
 
             if (titleMatch && linkMatch) {
               const title = cleanXml(titleMatch[1]);
@@ -76,6 +78,7 @@ export default async function handler(req, res) {
                   title,
                   link,
                   desc: desc.slice(0, 180) + '...',
+                  pub_date: pubDate,
                   slug: s,
                   is_published: isPublished
                 });
