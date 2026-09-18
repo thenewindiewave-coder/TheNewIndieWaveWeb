@@ -385,7 +385,7 @@ async function sendTelegramText(text, chatId) {
 
 function escapeMarkdown(text) {
   if (!text) return '';
-  return text.toString().replace(/([_*[\]()~`>#+\-=|{}.!])/g, '\\$1');
+  return text.toString().replace(/([_*\[`])/g, '\\$1');
 }
 
 function escapeHtml(str) {
