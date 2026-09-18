@@ -5329,6 +5329,7 @@ Instagram:
                 desc: (entry.description || '').replace(/<[^>]*>?/gm, '').slice(0, 160) + '...',
                 pub_date: entry.pubDate || new Date().toISOString(),
                 slug: (entry.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+                image_url: entry.thumbnail || (entry.enclosure ? entry.enclosure.link : null),
                 is_published: false
               });
             });
@@ -5348,6 +5349,7 @@ Instagram:
           desc: 'La compositora sinaloense anuncia nueva etapa en su carrera musical con adelantos que exploran el indie rock más envolvente y colaboraciones iberoamericanas.',
           pub_date: new Date(now - 1000 * 3600 * 2).toISOString(),
           slug: 'bratty-nueva-era-dream-pop',
+          image_url: 'https://cdn-images.dzcdn.net/images/artist/4d5a4ebd86c5e703273f484d8ab83900/1000x1000-000000-80-0-0.jpg',
           is_published: false
         },
         {
@@ -5358,6 +5360,7 @@ Instagram:
           desc: 'La banda platense continuará presentando su aclamado disco Súper Terror con un recorrido que incluye fechas clave en Madrid, Barcelona, CDMX y Guadalajara.',
           pub_date: new Date(now - 1000 * 3600 * 4).toISOString(),
           slug: 'el-mato-gira-espana-mexico',
+          image_url: 'https://cdn-images.dzcdn.net/images/artist/33868898f1a9613ce6040a1654bbc274/1000x1000-000000-80-0-0.jpg',
           is_published: false
         },
         {
@@ -5368,6 +5371,7 @@ Instagram:
           desc: 'Los gallegos repasan sus 20 años de trayectoria con una serie de directos especiales donde reinterpretan sus himnos generacionales más crudos.',
           pub_date: new Date(now - 1000 * 3600 * 7).toISOString(),
           slug: 'triangulo-de-amor-bizarro-20-anos',
+          image_url: 'https://cdn-images.dzcdn.net/images/artist/c2c8f85f54070a7df844cf566085a6a6/1000x1000-000000-80-0-0.jpg',
           is_published: false
         },
         {
@@ -5378,6 +5382,7 @@ Instagram:
           desc: 'La mítica banda instrumental mexicana comparte pistas de nuevas composiciones nacidas en su última gira internacional.',
           pub_date: new Date(now - 1000 * 3600 * 12).toISOString(),
           slug: 'austin-tv-nuevo-material-gira',
+          image_url: 'https://cdn-images.dzcdn.net/images/artist/ba7d16ea92d9215a63817342bedf0f5f/1000x1000-000000-80-0-0.jpg',
           is_published: false
         },
         {
@@ -5388,6 +5393,7 @@ Instagram:
           desc: 'El dúo regiomontano afina detalles para su próximo ciclo de lanzamientos cargado de sintetizadores funk y estética ochentera.',
           pub_date: new Date(now - 1000 * 3600 * 18).toISOString(),
           slug: 'clubz-electropop-festivales-verano',
+          image_url: 'https://cdn-images.dzcdn.net/images/artist/582cb99bb9689ecb42c6c7dc9e479ae8/1000x1000-000000-80-0-0.jpg',
           is_published: false
         },
         {
@@ -5398,6 +5404,7 @@ Instagram:
           desc: 'El cuarteto madrileño vuelve con guitarras afiladas y cinismo lírico en su tema más acelerado del año.',
           pub_date: new Date(now - 1000 * 3600 * 26).toISOString(),
           slug: 'carolina-durante-nuevo-single',
+          image_url: 'https://cdn-images.dzcdn.net/images/artist/8431269e96d26a20569323c547caf95d/1000x1000-000000-80-0-0.jpg',
           is_published: false
         }
       ];
@@ -5449,6 +5456,13 @@ Instagram:
               <span style="color:var(--accent-cyan);">🕒</span>
               <span>Publicado: <strong style="color:#fff;">${escapeHtml(formatScoutPubDate(item.pub_date))}</strong></span>
             </div>
+
+            <!-- FOTO REAL DE LA BANDA / NOTICIA SI ESTÁ DISPONIBLE -->
+            ${item.image_url ? `
+              <div style="margin-bottom:12px; border-radius:6px; overflow:hidden; height:140px; border:1px solid rgba(255,255,255,0.08); background:#111;">
+                <img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.parentElement.style.display='none'">
+              </div>
+            ` : ''}
 
             <!-- TÍTULO CON ENLACE DIRECTO -->
             <h3 style="font-family:var(--font-heading); font-size:16px; font-weight:800; color:#fff; line-height:1.4; margin-bottom:12px;">
@@ -5506,7 +5520,8 @@ Instagram:
           source: item.source,
           region: item.region,
           link: item.link,
-          desc: item.desc
+          desc: item.desc,
+          image_url: item.image_url
         })
       });
 

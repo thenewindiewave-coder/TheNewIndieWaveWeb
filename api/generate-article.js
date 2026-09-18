@@ -200,10 +200,10 @@ REGLAS FUNDAMENTALES:
   "title": "Titular con gancho brutal que resuma la noticia real (máximo 12 palabras)",
   "slug": "slug-amigable-en-minusculas-con-guiones",
   "summary": "Resumen directo en 2 oraciones que enganche al lector (máximo 30 palabras)",
-  "content": "Cuerpo en HTML limpio con <p class=\\"lead\\">, <h2>, <ul> con 3 puntos clave con viñetas con hechos y nombres reales, y un <blockquote> reflexivo firmado por Rodrigo dL Moral",
+  "content": "Cuerpo en HTML limpio con <p class=\"lead\">, <h2>, <ul> con 3 puntos clave con viñetas con hechos y nombres reales, y un <blockquote> reflexivo firmado por Rodrigo dL Moral",
   "read_time": "1.5 min",
   "tags": ["Etiqueta1", "Etiqueta2", "Etiqueta3"],
-  "image_keyword": "palabra en inglés para la foto de portada (ej: orchestra, concert, guitar, vinyl, stage)"
+  "artist_name": "Nombre exacto de la banda o artista principal para vincular su foto real oficial (ej. Editors, Lizzo, Dudamel, Bad Bunny, etc.). Si es un tema conceptual sin artista, dejar en blanco."
 }`;
 
   const userPrompt = `Noticia o tema solicitado: "${topic}". Categoría: "${category}".${factsContext}`;
@@ -235,7 +235,7 @@ REGLAS FUNDAMENTALES:
           const rawJson = groqData.choices?.[0]?.message?.content;
           if (rawJson) {
             const parsed = JSON.parse(cleanJson(rawJson));
-            return formatGeneratedPayload(parsed, category, auto_publish);
+            return await formatGeneratedPayload(parsed, category, auto_publish, topic);
           }
         }
       } catch (e) {
@@ -262,7 +262,7 @@ REGLAS FUNDAMENTALES:
         const rawJson = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
         if (rawJson) {
           const parsed = JSON.parse(cleanJson(rawJson));
-          return formatGeneratedPayload(parsed, category, auto_publish);
+          return await formatGeneratedPayload(parsed, category, auto_publish, topic);
         }
       }
     } catch (e) {
@@ -293,7 +293,7 @@ REGLAS FUNDAMENTALES:
         const rawJson = aiData.choices?.[0]?.message?.content;
         if (rawJson) {
           const parsed = JSON.parse(cleanJson(rawJson));
-          return formatGeneratedPayload(parsed, category, auto_publish);
+          return await formatGeneratedPayload(parsed, category, auto_publish, topic);
         }
       }
     } catch (e) {
@@ -327,6 +327,11 @@ REGLAS FUNDAMENTALES:
     <p>Seguiremos de cerca las repercusiones de este suceso y su impacto en los artistas emergentes de nuestra comunidad.</p>
   `;
 
+  const realImg = await resolveRealNewsImage({
+    artistName: topic,
+    title
+  });
+
   return {
     slug,
     title,
@@ -336,7 +341,7 @@ REGLAS FUNDAMENTALES:
     author: 'Rodrigo dL Moral',
     author_role: 'Curador & Fundador TNIW',
     author_avatar: 'rodrigo_studio_web.jpg',
-    image_url: getRandomMusicCover(),
+    image_url: realImg,
     read_time: '1.5 min',
     tags: [category, 'Actualidad', 'Música', 'TNIW'],
     featured: false,
@@ -345,17 +350,12 @@ REGLAS FUNDAMENTALES:
   };
 }
 
-function formatGeneratedPayload(parsed, category, auto_publish) {
-  const images = {
-    orchestra: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80',
-    concert: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
-    guitar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
-    vinyl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=80',
-    studio: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=80'
-  };
-
-  const key = (parsed.image_keyword || '').toLowerCase();
-  const matchedImg = Object.keys(images).find(k => key.includes(k)) ? images[Object.keys(images).find(k => key.includes(k))] : getRandomMusicCover();
+async function formatGeneratedPayload(parsed, category, auto_publish, topic) {
+  const realImg = await resolveRealNewsImage({
+    articleUrl: topic && topic.includes('http') ? topic.match(/https?:\/\/[^\s]+/)?.[0] : null,
+    artistName: parsed.artist_name || (parsed.tags && parsed.tags[0]) || topic,
+    title: parsed.title || topic
+  });
 
   return {
     slug: parsed.slug || `editorial-${Date.now().toString().slice(-6)}`,
@@ -366,13 +366,107 @@ function formatGeneratedPayload(parsed, category, auto_publish) {
     author: 'Rodrigo dL Moral',
     author_role: 'Curador & Fundador TNIW',
     author_avatar: 'rodrigo_studio_web.jpg',
-    image_url: matchedImg,
+    image_url: realImg,
     read_time: parsed.read_time || '1.5 min',
     tags: parsed.tags || [category, 'TNIW'],
     featured: false,
     published: auto_publish !== false,
     published_at: new Date().toISOString()
   };
+}
+
+// RESOLUCIÓN DE IMAGEN REAL DEL ARTISTA / FUENTE
+async function fetchOgImageFromUrl(url) {
+  if (!url || !url.startsWith('http')) return null;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    const html = await res.text();
+    const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
+                    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i) ||
+                    html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
+    if (ogMatch && ogMatch[1] && ogMatch[1].startsWith('http')) {
+      return ogMatch[1];
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function fetchRealArtistImage(name) {
+  if (!name || typeof name !== 'string') return null;
+  const clean = name.trim()
+    .replace(/^reseña\s+(sobre\s+)?(la\s+)?(nueva\s+)?(canción|cancion|disco|rolita|rola)\s+(de\s+)?/i, '')
+    .replace(/^nueva\s+(canción|cancion|disco)\s+(de\s+)?/i, '')
+    .replace(/^de\s+/i, '')
+    .trim();
+
+  if (clean.length < 2) return null;
+
+  // 1. Deezer Artist API (Fotos oficiales en alta resolución 1000x1000)
+  try {
+    const res = await fetch(`https://api.deezer.com/search/artist?q=${encodeURIComponent(clean)}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 TNIW/1.0' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.data && data.data.length > 0) {
+        const item = data.data.find(a => a.name.toLowerCase() === clean.toLowerCase()) || data.data[0];
+        const img = item.picture_xl || item.picture_big;
+        if (img && !img.includes('default')) {
+          return img;
+        }
+      }
+    }
+  } catch(e) {}
+
+  // 2. Wikipedia PageImages API (Foto verificada en Wikimedia Commons)
+  try {
+    const wikiUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(clean)}&prop=pageimages&format=json&pithumbsize=1200`;
+    const res = await fetch(wikiUrl, { headers: { 'User-Agent': 'Mozilla/5.0 TNIW/1.0' } });
+    if (res.ok) {
+      const data = await res.json();
+      const pages = data.query?.pages;
+      if (pages) {
+        const pageKey = Object.keys(pages)[0];
+        const thumb = pages[pageKey]?.thumbnail?.source;
+        if (thumb) return thumb;
+      }
+    }
+  } catch(e) {}
+
+  return null;
+}
+
+async function resolveRealNewsImage({ articleUrl, artistName, title }) {
+  // 1. Extraer imagen original del artículo fuente si hay enlace
+  if (articleUrl && articleUrl.startsWith('http')) {
+    const ogImg = await fetchOgImageFromUrl(articleUrl);
+    if (ogImg) return ogImg;
+  }
+  // 2. Buscar foto oficial de la banda / artista en alta resolución
+  if (artistName) {
+    const artistImg = await fetchRealArtistImage(artistName);
+    if (artistImg) return artistImg;
+  }
+  // 3. Intentar extraer el nombre del artista del título
+  if (title) {
+    const parts = title.split(/[:\-\"“”—,]/);
+    for (const part of parts) {
+      const cleanCandidate = part.replace(/radar|méxico|mexico|latam|españa|estrena|estrenan|nuevo|nueva|canción|cancion|sencillo|disco|álbum|album/gi, '').trim();
+      if (cleanCandidate.length >= 3 && cleanCandidate.split(' ').length <= 3) {
+        const found = await fetchRealArtistImage(cleanCandidate);
+        if (found) return found;
+      }
+    }
+  }
+  // Fallback estético si es tema abstracto
+  return getRandomMusicCover();
 }
 
 function getRandomMusicCover() {
