@@ -1,7 +1,7 @@
 /**
  * THE NEW INDIE WAVE - AMBIENT TWINKLE BACKGROUND
- * Genera un fondo atmosférico de puntos tenues que parpadean suavemente
- * 100% no invasivo, ultra ligero, acelerado por hardware y con soporte Retina.
+ * Genera un fondo cósmico / terminal ASCII de puntos densos que parpadean
+ * Ubicado estrictamente en el fondo (z-index 0) por detrás de todas las tarjetas y textos.
  */
 (function() {
   'use strict';
@@ -10,22 +10,41 @@
   function initTwinkleBg() {
     if (document.getElementById('tniwTwinkleCanvas')) return;
 
+    // Inyectar reglas CSS para garantizar que el canvas quede al fondo y las tarjetas por encima
+    var style = document.createElement('style');
+    style.id = 'tniwTwinkleStyle';
+    style.textContent = [
+      '#tniwTwinkleCanvas {',
+      '  position: fixed !important;',
+      '  top: 0 !important;',
+      '  left: 0 !important;',
+      '  width: 100vw !important;',
+      '  height: 100vh !important;',
+      '  pointer-events: none !important;',
+      '  z-index: 0 !important;',
+      '}',
+      '.navbar, .container, main, footer, header,',
+      '.featured-hero, .article-card, .card, .glass-card,',
+      '[class*="card"], [class*="hero"], .reader-overlay, .modal {',
+      '  position: relative;',
+      '  z-index: 1;',
+      '}',
+      '.featured-hero, .article-card {',
+      '  background-color: var(--bg-card, #121215) !important;',
+      '}'
+    ].join('\n');
+    document.head.appendChild(style);
+
     var canvas = document.createElement('canvas');
     canvas.id = 'tniwTwinkleCanvas';
     canvas.setAttribute('aria-hidden', 'true');
-    canvas.style.cssText = [
-      'position: fixed',
-      'top: 0',
-      'left: 0',
-      'width: 100vw',
-      'height: 100vh',
-      'pointer-events: none',
-      'z-index: 2',
-      'opacity: 0.7',
-      'mix-blend-mode: screen'
-    ].join(';') + ';';
 
-    document.body.appendChild(canvas);
+    // Insertar como primer hijo de body para asegurar que quede al fondo
+    if (document.body.firstChild) {
+      document.body.insertBefore(canvas, document.body.firstChild);
+    } else {
+      document.body.appendChild(canvas);
+    }
 
     var ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -49,26 +68,30 @@
 
       dots = [];
 
-      // Distribución en rejilla rítmica con dispersión orgánica (tipo terminal ASCII/Unicorn)
-      var step = width < 768 ? 32 : 40;
-      var cols = Math.ceil(width / step);
-      var rows = Math.ceil(height / step);
+      // Malla densa similar a la referencia (paso de ~20px a ~22px)
+      var step = width < 768 ? 20 : 22;
+      var cols = Math.ceil(width / step) + 1;
+      var rows = Math.ceil(height / step) + 1;
 
       for (var r = 0; r <= rows; r++) {
+        var rowOffset = (r % 2) * (step * 0.5); // Escalonado hexagonal/matriz
         for (var c = 0; c <= cols; c++) {
-          // Solo activar aproximadamente el 28% de los nodos para que sea tenue y no sobrecargue
-          if (Math.random() < 0.28) {
-            var jitterX = (Math.random() - 0.5) * (step * 0.7);
-            var jitterY = (Math.random() - 0.5) * (step * 0.7);
-            
-            var x = c * step + jitterX;
+          // 65% de probabilidad de nodo activo para densidad rica y uniforme
+          if (Math.random() < 0.65) {
+            var jitterX = (Math.random() - 0.5) * (step * 0.45);
+            var jitterY = (Math.random() - 0.5) * (step * 0.45);
+
+            var x = c * step + rowOffset + jitterX;
             var y = r * step + jitterY;
 
-            if (x >= 0 && x <= width && y >= 0 && y <= height) {
-              var isLime = Math.random() < 0.12; // 12% con sutil toque verde lima TNIW
-              var size = Math.random() < 0.2 ? 1.4 : (Math.random() < 0.6 ? 1.0 : 0.75);
-              var baseAlpha = Math.random() * 0.22 + 0.08; // Muy tenue (0.08 a 0.30)
-              var speed = Math.random() * 0.025 + 0.01; // Ritmo de parpadeo suave
+            if (x >= -10 && x <= width + 10 && y >= -10 && y <= height + 10) {
+              var isLime = Math.random() < 0.12; // 12% tinte verde lima TNIW
+              // Tamaños finos y nítidos: 0.75px a 1.4px
+              var size = Math.random() < 0.2 ? 1.35 : (Math.random() < 0.65 ? 0.95 : 0.75);
+              // Atenuación suave y perfecta confirmada por el usuario (0.08 a 0.28)
+              var baseAlpha = Math.random() * 0.20 + 0.08;
+              // Parpadeo más rápido y activo (3x más dinámico)
+              var speed = Math.random() * 0.055 + 0.035;
               var phase = Math.random() * Math.PI * 2;
 
               dots.push({
@@ -102,7 +125,7 @@
       var delta = timestamp - lastTime;
       lastTime = timestamp;
 
-      // Normalizar avance de fase independientemente de la tasa de refresco
+      // Normalizar avance con delta time
       var stepFactor = Math.min(delta / 16.6, 2.5);
 
       ctx.clearRect(0, 0, width, height);
@@ -111,11 +134,11 @@
         var dot = dots[i];
         dot.phase += dot.speed * stepFactor;
 
-        // Oscilación suave senoidal
+        // Parpadeo suave senoidal
         var sine = Math.sin(dot.phase);
-        var alpha = dot.baseAlpha + sine * (dot.baseAlpha * 0.75);
-        if (alpha < 0.03) alpha = 0.03;
-        if (alpha > 0.45) alpha = 0.45;
+        var alpha = dot.baseAlpha + sine * (dot.baseAlpha * 0.8);
+        if (alpha < 0.02) alpha = 0.02;
+        if (alpha > 0.42) alpha = 0.42;
 
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2);
