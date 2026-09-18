@@ -2,10 +2,22 @@ name: TNIW Music News Scout Bot
 
 on:
   schedule:
-    # Corre todos los días a las 14:00 UTC (8:00 AM hora México)
+    # 8:00 AM hora México (14:00 UTC) -> Curaduría matutina a Telegram
     - cron: '0 14 * * *'
+    # 5:00 PM hora México (23:00 UTC) -> Fallback automático si no se publicó nada hoy
+    - cron: '0 23 * * *'
   # Permite ejecutarlo manualmente con 1 clic en la pestaña Actions de GitHub
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Modo de ejecución del scout'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - morning
+          - fallback
 
 jobs:
   scout-news:
@@ -26,5 +38,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || '8942664442:AAEDXBeqpfsYGZMkPVg6dpn2ndZRnHJZX9I' }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || '5821470884' }}
         run: |
-          node scripts/news-scout.js
+          node scripts/news-scout.js --mode=${{ github.event.inputs.mode || 'auto' }}
+

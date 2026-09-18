@@ -1480,7 +1480,9 @@
 
       if (archRes.ok) {
         var archData = await archRes.json();
-        archivedArticles = archData || [];
+        archivedArticles = (archData || []).filter(function(a) {
+          return a.category !== 'scout_queue' && a.category !== 'scout_discarded';
+        });
       } else {
         archivedArticles = [];
       }

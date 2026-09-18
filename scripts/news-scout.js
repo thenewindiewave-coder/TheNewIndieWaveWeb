@@ -37,15 +37,49 @@ const RSS_FEEDS = [
   { name: 'Jenesaispop (España)', url: 'https://jenesaispop.com/feed/', region: 'España' }
 ];
 
-async function runNewsScout() {
-  console.log('🤖 [TNIW Scout Bot] Iniciando patrullaje de medios indie en México, Latam y España...');
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8942664442:AAEDXBeqpfsYGZMkPVg6dpn2ndZRnHJZX9I';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '5821470884';
 
-  if (!SUPABASE_SERVICE_KEY) {
-    console.error('❌ Error: Falta SUPABASE_SERVICE_ROLE_KEY.');
-    process.exit(1);
+async function main() {
+  const args = process.argv.slice(2);
+  let mode = 'auto';
+
+  for (const arg of args) {
+    if (arg.startsWith('--mode=')) mode = arg.split('=')[1];
+    else if (arg === '--morning') mode = 'morning';
+    else if (arg === '--fallback') mode = 'fallback';
   }
 
-  // 1. Obtener slugs existentes en Supabase para evitar duplicados
+  if (mode === 'auto') {
+    const currentUtcHour = new Date().getUTCHours();
+    // 13:00 - 16:00 UTC corresponde a 7:00 AM - 10:00 AM hora CDMX
+    if (currentUtcHour >= 13 && currentUtcHour <= 16) {
+      mode = 'morning';
+    } 
+    // 22:00 - 02:00 UTC corresponde a 4:00 PM - 8:00 PM hora CDMX
+    else if (currentUtcHour >= 22 || currentUtcHour <= 2) {
+      mode = 'fallback';
+    } else {
+      mode = 'morning';
+    }
+  }
+
+  console.log(`🤖 [TNIW Scout Bot] Modo de ejecución activo: ${mode.toUpperCase()}`);
+
+  if (mode === 'morning') {
+    await runMorningScout();
+  } else if (mode === 'fallback') {
+    await runFallback5pm();
+  }
+}
+
+// =============================================================================
+// MODO 1: RASTREO MATUTINO (8:00 AM) + MENSAJE A TELEGRAM CON BOTONES
+// =============================================================================
+async function runMorningScout() {
+  console.log('📡 [TNIW Scout Bot] Iniciando escaneo matutino de los 16 medios...');
+
+  // 1. Obtener slugs existentes en Supabase para no repetir noticias
   let existingSlugs = new Set();
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/articles?select=slug`, {
@@ -57,22 +91,18 @@ async function runNewsScout() {
     if (res.ok) {
       const rows = await res.json();
       rows.forEach(r => existingSlugs.add(r.slug));
-      console.log(`✓ Verificados ${existingSlugs.size} artículos existentes en Supabase.`);
     }
   } catch (err) {
-    console.warn('Aviso al leer slugs previos:', err.message);
+    console.warn('Aviso al leer artículos existentes:', err.message);
   }
 
-  // 2. Rastreo de Feeds
+  // 2. Escanear Feeds RSS
   const candidateArticles = [];
 
   for (const feed of RSS_FEEDS) {
     try {
-      console.log(`📡 [${feed.region}] Consultando: ${feed.name}...`);
       const response = await fetch(feed.url, {
-        headers: { 
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) TheNewIndieWave/1.0' 
-        }
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) TheNewIndieWave/1.0' }
       });
       if (!response.ok) continue;
 
@@ -89,105 +119,293 @@ async function runNewsScout() {
           const link = cleanXml(linkMatch[1]);
           const desc = descMatch ? cleanXml(descMatch[1]) : '';
 
-          // Filtrar noticias irrelevantes de cine o chismes; priorizar música y lanzamientos
+          let feedImg = null;
+          const mediaMatch = rawItem.match(/<media:content[^>]+url=["']([^"']+)["']/i);
+          const encMatch = rawItem.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
+          const imgTagMatch = rawItem.match(/<img[^>]+src=["']([^"']+)["']/i);
+          if (mediaMatch) feedImg = mediaMatch[1];
+          else if (encMatch) feedImg = encMatch[1];
+          else if (imgTagMatch) feedImg = imgTagMatch[1];
+
           if (isMusicRelevant(rawTitle, desc)) {
-            candidateArticles.push({
-              source: feed.name,
-              region: feed.region,
-              title: rawTitle,
-              link,
-              desc
-            });
+            const testSlug = slugify(rawTitle);
+            if (!existingSlugs.has(testSlug) && !Array.from(existingSlugs).some(s => s.includes(testSlug.slice(0, 20)))) {
+              candidateArticles.push({
+                source: feed.name,
+                region: feed.region,
+                title: rawTitle,
+                link,
+                desc,
+                image_url: feedImg,
+                slug: `radar-${slugify(feed.region)}-${testSlug}-${Date.now().toString().slice(-4)}`
+              });
+            }
           }
         }
       }
-    } catch (err) {
-      console.warn(`Aviso en ${feed.name}:`, err.message);
-    }
+    } catch (err) {}
   }
 
-  console.log(`🎯 Encontradas ${candidateArticles.length} noticias musicales candidatas.`);
-  if (candidateArticles.length === 0) {
+  // Limitar a los 5 candidatos más destacados
+  const topCandidates = candidateArticles.slice(0, 5);
+  console.log(`🎯 Seleccionados ${topCandidates.length} candidatos para enviar a Telegram.`);
+
+  if (topCandidates.length === 0) {
     console.log('No se encontraron noticias nuevas en este ciclo.');
+    await sendTelegramMessage('📡 *Radar TNIW Matutino (8:00 AM):*\nNo se detectaron noticias nuevas hoy en los 16 medios monitoreados.');
     return;
   }
 
-  // 3. Seleccionar la más fresca y no procesada
-  let selected = null;
-  for (const candidate of candidateArticles) {
-    const testSlug = slugify(candidate.title);
-    if (!existingSlugs.has(testSlug) && !Array.from(existingSlugs).some(s => s.includes(testSlug.slice(0, 20)))) {
-      selected = candidate;
-      break;
+  // 3. Guardar en Supabase en la cola pendiente (category = 'scout_queue', published = false)
+  // Limpiar cola pendiente anterior para no saturar
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/articles?category=eq.scout_queue&published=eq.false`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+      }
+    });
+  } catch(e) {}
+
+  for (const c of topCandidates) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/articles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+        },
+        body: JSON.stringify({
+          slug: c.slug,
+          title: c.title,
+          summary: c.desc.slice(0, 160),
+          content: JSON.stringify(c),
+          category: 'scout_queue',
+          image_url: c.image_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
+          published: false,
+          tags: [c.region, 'Radar TNIW']
+        })
+      });
+    } catch(e) {}
+  }
+
+  // 4. Enviar Mensaje a Telegram con Botones Interactivos
+  const listText = topCandidates.map((c, i) => {
+    return `*${i + 1}.* [${escapeMarkdown(c.region)}] *${escapeMarkdown(c.source)}*\n"${escapeMarkdown(c.title)}"\n🔗 [Leer fuente original](${c.link})\n`;
+  }).join('\n');
+
+  const messageText = [
+    `📡 *RADAR DE NOTICIAS TNIW // 8:00 AM*`,
+    `¡Buenos días Rodrigo! Se detectaron *${topCandidates.length} noticias frescas* en la red de medios:`,
+    ``,
+    listText,
+    `━━━━━━━━━━━━━━━━━━━`,
+    `⚡ *Elige qué nota publicar:*`,
+    `• Toca un botón abajo para redactar y publicar con 1 clic en el blog.`,
+    `• O responde a este mensaje con el número *(1, 2, 3...)*.`,
+    ``,
+    `⏳ _Si no respondes antes de las 5:00 PM, se publicará automáticamente 1 nota al azar._`
+  ].join('\n');
+
+  // Construir teclado de botones interactivos
+  const buttons = [];
+  for (let i = 0; i < topCandidates.length; i += 2) {
+    const row = [];
+    row.push({ text: `⚡ Publicar #${i + 1}`, callback_data: `pub:${topCandidates[i].slug}` });
+    if (i + 1 < topCandidates.length) {
+      row.push({ text: `⚡ Publicar #${i + 2}`, callback_data: `pub:${topCandidates[i + 1].slug}` });
+    }
+    buttons.push(row);
+  }
+  buttons.push([{ text: `🚫 Descartar todas hoy`, callback_data: `discard_all` }]);
+
+  await sendTelegramMessageWithButtons(messageText, buttons);
+  console.log('✓ Notificación con botones enviada exitosamente a Telegram.');
+}
+
+// =============================================================================
+// MODO 2: FALLBACK AUTOMÁTICO DE LAS 5:00 PM (SI RODRIGO NO CONTESTÓ)
+// =============================================================================
+async function runFallback5pm() {
+  console.log('⏰ [TNIW Scout Bot] Verificando fallback de las 5:00 PM...');
+
+  // 1. Revisar si Rodrigo ya publicó alguna nota hoy
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?published=eq.true&published_at=gte.${todayStr}T00:00:00.000Z`, {
+    headers: {
+      'apikey': SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+    }
+  });
+
+  if (checkRes.ok) {
+    const publishedToday = await checkRes.json();
+    if (publishedToday && publishedToday.length > 0) {
+      console.log(`✓ Rodrigo ya curó o publicó ${publishedToday.length} nota(s) hoy. No se requiere fallback.`);
+      return;
     }
   }
 
-  if (!selected) {
-    console.log('✓ Todas las noticias del día ya están cubiertas en el blog. Cero duplicados.');
+  // 2. Obtener notas pendientes en la cola matutina
+  const queueRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?category=eq.scout_queue&published=eq.false`, {
+    headers: {
+      'apikey': SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+    }
+  });
+
+  if (!queueRes.ok) {
+    console.log('Aviso: No se pudo consultar la cola de noticias pendientes.');
     return;
   }
 
-  console.log(`⭐ Noticia seleccionada: "${selected.title}" [${selected.region} - ${selected.source}]`);
+  const queueItems = await queueRes.json();
+  if (!queueItems || queueItems.length === 0) {
+    console.log('Aviso: No hay noticias pendientes en la cola (o fueron descartadas).');
+    return;
+  }
 
-  // 4. Redactar con IA o Motor Editorial
-  const prompt = `Noticia indie de ${selected.region} vía ${selected.source}:
-Título: "${selected.title}"
-Detalles: "${selected.desc}"
-Enlace fuente: ${selected.link}`;
+  // 3. Seleccionar 1 nota al azar de las pendientes
+  const randomIndex = Math.floor(Math.random() * queueItems.length);
+  const selectedItem = queueItems[randomIndex];
 
-  const article = await generateEditorialPiece(prompt, selected);
+  console.log(`🎲 Seleccionada al azar nota #${randomIndex + 1}: "${selectedItem.title}"`);
 
-  // 5. Inyectar en Supabase
-  const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/articles`, {
-    method: 'POST',
+  let meta = {};
+  try {
+    meta = JSON.parse(selectedItem.content);
+  } catch(e) {
+    meta = {
+      title: selectedItem.title,
+      desc: selectedItem.summary,
+      region: (selectedItem.tags && selectedItem.tags[0]) || 'México',
+      source: 'Radar TNIW',
+      link: 'https://thenewindiewave.online',
+      image_url: selectedItem.image_url
+    };
+  }
+
+  // 4. Redactar pieza periodística limpia
+  const prompt = `Noticia indie de ${meta.region || 'México'} vía ${meta.source || 'Medios'}:
+Título: "${meta.title}"
+Detalles: "${meta.desc}"
+Enlace fuente: ${meta.link}`;
+
+  const editorial = await generateEditorialPiece(prompt, meta);
+
+  // 5. Publicar en Supabase
+  const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?id=eq.${selectedItem.id}`, {
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       'apikey': SUPABASE_SERVICE_KEY,
       'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
       'Prefer': 'return=representation'
     },
-    body: JSON.stringify(article)
+    body: JSON.stringify({
+      title: editorial.title,
+      summary: editorial.summary,
+      content: editorial.content,
+      category: 'Cultura Indie',
+      image_url: editorial.image_url || selectedItem.image_url,
+      published: true,
+      published_at: new Date().toISOString()
+    })
   });
 
-  if (insertRes.ok) {
-    console.log(`🎉 ¡ÉXITO! Artículo publicado en the new indie wave:`);
-    console.log(`   Título: "${article.title}"`);
-    console.log(`   Región: ${selected.region}`);
-    console.log(`   URL: /blog#${article.slug}`);
+  if (updateRes.ok) {
+    console.log(`🎉 ¡Fallback de las 5:00 PM ejecutado con éxito!`);
+    
+    // Auto-archivar para mantener exactamente 7 notas en portada
+    await enforceSevenArticlesLimit();
 
-    // Auto-archivar notas antiguas para que la portada muestre exactamente 7 noticias
-    try {
-      const pubCheckRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?published=eq.true&order=published_at.desc`, {
-        headers: {
-          'apikey': SUPABASE_SERVICE_KEY,
-          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-        }
-      });
-      if (pubCheckRes.ok) {
-        const pubArticles = await pubCheckRes.json();
-        if (pubArticles && pubArticles.length > 7) {
-          const toArchive = pubArticles.slice(7);
-          for (const item of toArchive) {
-            await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(item.slug)}`, {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_SERVICE_KEY,
-                'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify({ published: false })
-            });
-          }
-          console.log(`   Auto-archivadas ${toArchive.length} notas antiguas para mantener exactamente 7 en portada.`);
+    // 6. Notificar a Telegram
+    const alertMsg = [
+      `⏰ *RADAR TNIW // 5:00 PM (PUBLICACIÓN AUTOMÁTICA)*`,
+      `No se seleccionó ninguna nota durante el día.`,
+      `Se ha redactado y publicado automáticamente *1 nota al azar*:`,
+      ``,
+      `📰 *${escapeMarkdown(editorial.title)}*`,
+      `🏷️ *Categoría:* Cultura Indie // ${escapeMarkdown(meta.region || 'Indie')}`,
+      `📸 *Foto:* Vía ${escapeMarkdown(meta.source || 'Prensa')} / Oficial`,
+      ``,
+      `🔗 [Ver en el Blog](https://thenewindiewave.online/blog#${selectedItem.slug})`,
+      `⚡ Portada sincronizada en 7 notas.`
+    ].join('\n');
+
+    await sendTelegramMessage(alertMsg);
+  }
+}
+
+// =============================================================================
+// REGLA DE 7 NOTICIAS EN PORTADA
+// =============================================================================
+async function enforceSevenArticlesLimit() {
+  try {
+    const pubCheckRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?published=eq.true&order=published_at.desc`, {
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+      }
+    });
+    if (pubCheckRes.ok) {
+      const pubArticles = await pubCheckRes.json();
+      if (pubArticles && pubArticles.length > 7) {
+        const toArchive = pubArticles.slice(7);
+        for (const item of toArchive) {
+          await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(item.slug)}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_SERVICE_KEY,
+              'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ published: false })
+          });
         }
       }
-    } catch (archiveErr) {
-      console.warn('   Error auto-archivando notas:', archiveErr);
     }
-  } else {
-    const errText = await insertRes.text();
-    console.error('❌ Error al guardar en Supabase:', errText);
+  } catch(e) {}
+}
+
+// =============================================================================
+// UTILIDADES TELEGRAM
+// =============================================================================
+async function sendTelegramMessage(text) {
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text,
+        parse_mode: 'Markdown',
+        disable_web_page_preview: false
+      })
+    });
+  } catch(e) {}
+}
+
+async function sendTelegramMessageWithButtons(text, inlineKeyboard) {
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text,
+        parse_mode: 'Markdown',
+        disable_web_page_preview: false,
+        reply_markup: {
+          inline_keyboard: inlineKeyboard
+        }
+      })
+    });
+  } catch(e) {
+    console.warn('Error al enviar mensaje con botones a Telegram:', e.message);
   }
 }
 
