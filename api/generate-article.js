@@ -1,3 +1,7 @@
+if (typeof process !== 'undefined' && process.env) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');

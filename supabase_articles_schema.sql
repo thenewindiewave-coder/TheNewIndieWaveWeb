@@ -47,17 +47,15 @@ BEGIN
         USING (published = true);
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies 
-        WHERE tablename = 'articles' AND policyname = 'Permitir administración de artículos a curador autenticado'
-    ) THEN
-        CREATE POLICY "Permitir administración de artículos a curador autenticado"
-        ON public.articles
-        FOR ALL
-        TO authenticated, service_role
-        USING (true)
-        WITH CHECK (true);
-    END IF;
+    DROP POLICY IF EXISTS "Permitir administración de artículos a curador autenticado" ON public.articles;
+    DROP POLICY IF EXISTS "Permitir inserción y administración de artículos" ON public.articles;
+
+    CREATE POLICY "Permitir inserción y administración de artículos"
+    ON public.articles
+    FOR ALL
+    TO anon, authenticated, service_role
+    USING (true)
+    WITH CHECK (true);
 END
 $$;
 

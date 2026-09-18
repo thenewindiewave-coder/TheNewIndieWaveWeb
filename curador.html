@@ -5096,11 +5096,24 @@ Instagram:
       if (data && data.success) {
         showToast('🎉 ¡Artículo generado y publicado en la web!');
         var resBox = document.getElementById('articleGenResultBox');
+        document.getElementById('articleGenStatus').textContent = '// ARTÍCULO PUBLICADO CON ÉXITO:';
+        document.getElementById('articleGenStatus').style.color = 'var(--accent-lime)';
         document.getElementById('articleGenTitle').textContent = data.article.title;
         var link = document.getElementById('articleGenLink');
         link.href = data.url || ('/blog#' + data.article.slug);
+        link.textContent = 'Ver artículo en vivo en la Web ↗';
         resBox.style.display = 'block';
         topicInput.value = '';
+      } else if (data && data.generatedArticle) {
+        var resBox = document.getElementById('articleGenResultBox');
+        document.getElementById('articleGenStatus').textContent = '⚠️ REDACTADO PERO BLOQUEADO POR SUPABASE (RLS):';
+        document.getElementById('articleGenStatus').style.color = '#f87171';
+        document.getElementById('articleGenTitle').textContent = data.generatedArticle.title;
+        var link = document.getElementById('articleGenLink');
+        link.href = '#';
+        link.textContent = 'Ejecuta en Supabase SQL Editor el comando de permisos para permitir guardado.';
+        resBox.style.display = 'block';
+        showToast('⚠️ Redactado con éxito, pero Supabase bloqueó el guardado por permisos RLS.');
       } else {
         showToast('⚠️ ' + (data.error || 'Error al generar artículo'));
       }
