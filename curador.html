@@ -1433,10 +1433,7 @@
       toolbar.style.display = (tab === 'playlists_manager' || tab === 'radar_manager' || tab === 'auto_message' || tab === 'blog_manager') ? 'none' : 'flex';
     }
 
-    var pm = document.getElementById('playlistManagerContainer'); if(pm) pm.style.display = 'none';
-    var rm = document.getElementById('radarManagerContainer'); if(rm) rm.style.display = 'none';
-    var am = document.getElementById('autoMessageContainer'); if(am) am.style.display = 'none';
-    var bm = document.getElementById('blogManagerContainer'); if(bm) bm.style.display = 'none';
+    var bm = document.getElementById('blogManagerContainer');
     var qc = document.getElementById('queueContainer');
 
     if(tab === 'blog_manager') {
@@ -1446,20 +1443,19 @@
       return;
     }
 
-    if(qc) qc.style.display = (tab === 'playlists_manager' || tab === 'radar_manager' || tab === 'auto_message') ? 'none' : 'block';
+    // Todos los demás tabs (pendientes, aceptadas, rechazadas, playlists, radar, auto-mensaje) se muestran en queueContainer
+    if(bm) bm.style.display = 'none';
+    if(qc) qc.style.display = 'block';
 
     if(tab === 'playlists_manager') {
-      if(pm) pm.style.display = 'block';
       loadPlaylistsForManager();
     } else if(tab === 'radar_manager') {
-      if(rm) rm.style.display = 'block';
       if (typeof syncRadarFromSupabase === 'function') {
         syncRadarFromSupabase().then(function(){ renderRadarManager(); });
       } else {
         renderRadarManager();
       }
     } else if(tab === 'auto_message') {
-      if(am) am.style.display = 'block';
       renderAutoMessageTool();
       preloadPlaylistsMetadata().then(function(){
         if(currentTab === 'auto_message') renderAutoMessageTool();
@@ -5704,17 +5700,8 @@ Instagram:
         throw new Error(data && data.error ? data.error : 'Error en endpoint');
       }
     } catch (err) {
-      console.warn('Error al publicar vía /api/scout-news, abriendo generador asistido:', err);
-      openBlogArticleModal();
-      var topicInput = document.getElementById('articleGenTopic');
-      if (topicInput) {
-        topicInput.value = 'Redacta una nota rápida e impactante sobre: "' + item.title + '". Fuente original: ' + item.source + ' (' + item.link + '). Contexto: ' + item.desc;
-      }
-      var catSelect = document.getElementById('articleGenCategory');
-      if (catSelect) {
-        catSelect.value = 'Industria Musical';
-      }
-      showToast('⚡ Prellenando generador con esta noticia para publicar con 1 clic...');
+      console.warn('Error al publicar vía /api/scout-news:', err);
+      showToast('❌ No se pudo publicar la nota: ' + (err.message || 'Error de conexión'));
     } finally {
       if (btn && !item.is_published) {
         btn.disabled = false;

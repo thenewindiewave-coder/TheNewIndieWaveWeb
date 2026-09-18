@@ -15,26 +15,26 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.en
 // FUENTES OFICIALES DE LA ESCENA INDIE: MÉXICO (10 MEDIOS), LATINOAMÉRICA Y ESPAÑA
 const RSS_FEEDS = [
   // 🇲🇽 MÉXICO (ALMA MATER TNIW - 10 MEDIOS LÍDERES)
-  { name: 'WARP Magazine (México)', url: 'https://warp.la/feed/', region: 'México' },
-  { name: 'Indie Rocks! (México)', url: 'https://www.indierocks.mx/feed/', region: 'México' },
-  { name: 'Sopitas Música (México)', url: 'https://www.sopitas.com/feed/', region: 'México' },
-  { name: 'Me Hace Ruido (México)', url: 'https://mehaceruido.com/feed/', region: 'México' },
+  { name: 'WARP Magazine', url: 'https://warp.la/feed/', region: 'México' },
+  { name: 'Indie Rocks!', url: 'https://www.indierocks.mx/feed/', region: 'México' },
+  { name: 'Sopitas Música', url: 'https://www.sopitas.com/feed/', region: 'México' },
+  { name: 'Me Hace Ruido', url: 'https://mehaceruido.com/feed/', region: 'México' },
   { name: 'Filter México', url: 'https://filtermexico.com/feed/', region: 'México' },
-  { name: 'Setlist.me (México)', url: 'https://setlist.me/feed/', region: 'México' },
-  { name: 'Revista Kuadro (México)', url: 'https://revistakuadro.com/feed/', region: 'México' },
-  { name: 'Pólvora Rock (México)', url: 'https://polvora.com.mx/feed/', region: 'México' },
-  { name: 'Grita Radio (México)', url: 'https://gritaradio.com/feed/', region: 'México' },
-  { name: 'Rolling Stone en Español (México)', url: 'https://es.rollingstone.com/feed/', region: 'México' },
+  { name: 'Setlist.me', url: 'https://setlist.me/feed/', region: 'México' },
+  { name: 'Revista Kuadro', url: 'https://revistakuadro.com/feed/', region: 'México' },
+  { name: 'Pólvora Rock', url: 'https://polvora.com.mx/feed/', region: 'México' },
+  { name: 'Grita Radio', url: 'https://gritaradio.com/feed/', region: 'México' },
+  { name: 'Rolling Stone en Español', url: 'https://es.rollingstone.com/feed/', region: 'México' },
 
   // 🌎 LATINOAMÉRICA (Argentina, Chile, Colombia, Perú, etc.)
-  { name: 'Indie Hoy (Latinoamérica)', url: 'https://indiehoy.com/feed/', region: 'Latinoamérica' },
-  { name: 'Cuchara Sónica (Iberoamérica)', url: 'https://cucharasonica.com/feed/', region: 'Latinoamérica' },
+  { name: 'Indie Hoy', url: 'https://indiehoy.com/feed/', region: 'Latinoamérica' },
+  { name: 'Cuchara Sónica', url: 'https://cucharasonica.com/feed/', region: 'Latinoamérica' },
 
   // 🇪🇸 ESPAÑA
-  { name: 'MondoSonoro (España)', url: 'https://www.mondosonoro.com/feed/', region: 'España' },
-  { name: 'Binaural (España)', url: 'https://binaural.es/feed/', region: 'España' },
-  { name: 'Muzikalia (España)', url: 'https://muzikalia.com/feed/', region: 'España' },
-  { name: 'Jenesaispop (España)', url: 'https://jenesaispop.com/feed/', region: 'España' }
+  { name: 'MondoSonoro', url: 'https://www.mondosonoro.com/feed/', region: 'España' },
+  { name: 'Binaural', url: 'https://binaural.es/feed/', region: 'España' },
+  { name: 'Muzikalia', url: 'https://muzikalia.com/feed/', region: 'España' },
+  { name: 'Jenesaispop', url: 'https://jenesaispop.com/feed/', region: 'España' }
 ];
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8942664442:AAEDXBeqpfsYGZMkPVg6dpn2ndZRnHJZX9I';
@@ -147,9 +147,30 @@ async function runMorningScout() {
     } catch (err) {}
   }
 
-  // Limitar a los 5 candidatos más destacados
-  const topCandidates = candidateArticles.slice(0, 5);
-  console.log(`🎯 Seleccionados ${topCandidates.length} candidatos para enviar a Telegram.`);
+  // Limitar a los 5 candidatos más destacados garantizando DIVERSIDAD de fuentes
+  const sourceCount = {};
+  const diverseCandidates = [];
+
+  for (const c of candidateArticles) {
+    if (!sourceCount[c.source]) {
+      sourceCount[c.source] = 1;
+      diverseCandidates.push(c);
+      if (diverseCandidates.length >= 5) break;
+    }
+  }
+
+  // Rellenar si hay menos de 5 medios únicos disponibles
+  if (diverseCandidates.length < 5) {
+    for (const c of candidateArticles) {
+      if (!diverseCandidates.includes(c)) {
+        diverseCandidates.push(c);
+        if (diverseCandidates.length >= 5) break;
+      }
+    }
+  }
+
+  const topCandidates = diverseCandidates.slice(0, 5);
+  console.log(`🎯 Seleccionados ${topCandidates.length} candidatos diversos para enviar a Telegram:`, topCandidates.map(c => `[${c.source}]`).join(', '));
 
   if (topCandidates.length === 0) {
     console.log('No se encontraron noticias nuevas en este ciclo.');
@@ -451,9 +472,11 @@ function isMusicRelevant(title, desc) {
   const musicKeywords = [
     'canción', 'cancion', 'álbum', 'album', 'disco', 'single', 'sencillo', 'tema', 'video',
     'concierto', 'gira', 'festival', 'banda', 'estrena', 'lanzamiento', 'guitarra', 'indie',
-    'shoegaze', 'post-punk', 'rock', 'pop', 'presenta', 'estreno', 'música', 'musica'
+    'shoegaze', 'post-punk', 'rock', 'pop', 'presenta', 'estreno', 'música', 'musica',
+    'cartel', 'cover', 'adelanto', 'tour', 'videoclip', 'ep', 'lp', 'en vivo', 'acústico',
+    'acustico', 'solista', 'vocalista', 'sintetizador', 'producción', 'punk', 'metal'
   ];
-  const ignoreKeywords = ['película', 'pelicula', 'serie', 'tráiler', 'trailer', 'netflix', 'hbo', 'taquilla', 'marvel'];
+  const ignoreKeywords = ['película', 'pelicula', 'serie', 'tráiler', 'trailer', 'netflix', 'hbo', 'taquilla', 'marvel', 'nintendo', 'playstation', 'xbox', 'videojuego', 'gaming'];
   
   if (ignoreKeywords.some(k => text.includes(k) && !text.includes('soundtrack'))) {
     return false;

@@ -291,10 +291,18 @@ Responde ÚNICAMENTE un JSON válido con esta estructura:
           const raw = d.choices?.[0]?.message?.content;
           if (raw) {
             const parsed = JSON.parse(raw.replace(/```json/g, '').replace(/```/g, '').trim());
+            let bodyHtml = parsed.content || `<p>${escapeHtml(meta.desc)}</p>`;
+            if (!bodyHtml.includes('source-credit')) {
+              bodyHtml += `
+                <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">
+                  Fuente original: <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${escapeHtml(meta.source)} ↗</a> · Foto: Vía ${escapeHtml(meta.source)} / Prensa oficial
+                </div>
+              `;
+            }
             return {
               title: parsed.title || meta.title,
               summary: parsed.summary || meta.desc.slice(0, 160),
-              content: parsed.content || `<p>${escapeHtml(meta.desc)}</p>`,
+              content: bodyHtml,
               image_url: meta.image_url
             };
           }
