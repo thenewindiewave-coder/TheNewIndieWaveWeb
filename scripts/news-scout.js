@@ -102,7 +102,8 @@ async function runMorningScout() {
   for (const feed of RSS_FEEDS) {
     try {
       const response = await fetch(feed.url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) TheNewIndieWave/1.0' }
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) TheNewIndieWave/1.0' },
+        signal: AbortSignal.timeout(5000)
       });
       if (!response.ok) continue;
 
@@ -193,36 +194,35 @@ async function runMorningScout() {
 
   // 4. Enviar Mensaje a Telegram con Botones Interactivos
   const listText = topCandidates.map((c, i) => {
-    return `*${i + 1}.* [${escapeMarkdown(c.region)}] *${escapeMarkdown(c.source)}*\n"${escapeMarkdown(c.title)}"\n🔗 [Leer fuente original](${c.link})\n`;
+    return `<b>${i + 1}.</b> [${escapeHtml(c.region)}] <b>${escapeHtml(c.source)}</b>\n"${escapeHtml(c.title)}"\n🔗 <a href="${c.link}">Leer fuente original</a>\n`;
   }).join('\n');
 
   const messageText = [
-    `📡 *RADAR DE NOTICIAS TNIW // 8:00 AM*`,
-    `¡Buenos días Rodrigo! Se detectaron *${topCandidates.length} noticias frescas* en la red de medios:`,
+    `📡 <b>RADAR DE NOTICIAS TNIW // 8:00 AM</b>`,
+    `¡Buenos días Rodrigo! Se detectaron <b>${topCandidates.length} noticias frescas</b> en la red de medios:`,
     ``,
     listText,
     `━━━━━━━━━━━━━━━━━━━`,
-    `⚡ *Elige qué nota publicar:*`,
+    `⚡ <b>Elige qué nota publicar:</b>`,
     `• Toca un botón abajo para redactar y publicar con 1 clic en el blog.`,
-    `• O responde a este mensaje con el número *(1, 2, 3...)*.`,
+    `• O responde a este mensaje con el número <b>(1, 2, 3...)</b>.`,
     ``,
-    `⏳ _Si no respondes antes de las 5:00 PM, se publicará automáticamente 1 nota al azar._`
+    `⏳ <i>Si no respondes antes de las 5:00 PM, se publicará automáticamente 1 nota al azar.</i>`
   ].join('\n');
 
-  // Construir teclado de botones interactivos
+  // Construir teclado de botones interactivos (máx 64 bytes para callback_data)
   const buttons = [];
   for (let i = 0; i < topCandidates.length; i += 2) {
     const row = [];
-    row.push({ text: `⚡ Publicar #${i + 1}`, callback_data: `pub:${topCandidates[i].slug}` });
+    row.push({ text: `⚡ Publicar #${i + 1}`, callback_data: `pub:${i + 1}` });
     if (i + 1 < topCandidates.length) {
-      row.push({ text: `⚡ Publicar #${i + 2}`, callback_data: `pub:${topCandidates[i + 1].slug}` });
+      row.push({ text: `⚡ Publicar #${i + 2}`, callback_data: `pub:${i + 2}` });
     }
     buttons.push(row);
   }
   buttons.push([{ text: `🚫 Descartar todas hoy`, callback_data: `discard_all` }]);
 
   await sendTelegramMessageWithButtons(messageText, buttons);
-  console.log('✓ Notificación con botones enviada exitosamente a Telegram.');
 }
 
 // =============================================================================
@@ -323,15 +323,15 @@ Enlace fuente: ${meta.link}`;
 
     // 6. Notificar a Telegram
     const alertMsg = [
-      `⏰ *RADAR TNIW // 5:00 PM (PUBLICACIÓN AUTOMÁTICA)*`,
+      `⏰ <b>RADAR TNIW // 5:00 PM (PUBLICACIÓN AUTOMÁTICA)</b>`,
       `No se seleccionó ninguna nota durante el día.`,
-      `Se ha redactado y publicado automáticamente *1 nota al azar*:`,
+      `Se ha redactado y publicado automáticamente <b>1 nota al azar</b>:`,
       ``,
-      `📰 *${escapeMarkdown(editorial.title)}*`,
-      `🏷️ *Categoría:* Cultura Indie // ${escapeMarkdown(meta.region || 'Indie')}`,
-      `📸 *Foto:* Vía ${escapeMarkdown(meta.source || 'Prensa')} / Oficial`,
+      `📰 <b>${escapeHtml(editorial.title)}</b>`,
+      `🏷️ <b>Categoría:</b> Cultura Indie // ${escapeHtml(meta.region || 'Indie')}`,
+      `📸 <b>Foto:</b> Vía ${escapeHtml(meta.source || 'Prensa')} / Oficial`,
       ``,
-      `🔗 [Ver en el Blog](https://thenewindiewave.online/blog#${selectedItem.slug})`,
+      `🔗 <a href="https://thenewindiewave.online/blog#${selectedItem.slug}">Ver en el Blog</a>`,
       `⚡ Portada sincronizada en 7 notas.`
     ].join('\n');
 
@@ -376,36 +376,73 @@ async function enforceSevenArticlesLimit() {
 // =============================================================================
 async function sendTelegramMessage(text) {
   try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text,
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         disable_web_page_preview: false
       })
     });
-  } catch(e) {}
+    const data = await res.json();
+    if (!data.ok) {
+      console.warn('Aviso Telegram HTML:', data.description, '- Reintentando sin formato...');
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: text.replace(/<[^>]+>/g, '')
+        })
+      });
+    }
+  } catch(e) {
+    console.warn('Error al enviar mensaje a Telegram:', e.message);
+  }
 }
 
 async function sendTelegramMessageWithButtons(text, inlineKeyboard) {
   try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text,
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         disable_web_page_preview: false,
         reply_markup: {
           inline_keyboard: inlineKeyboard
         }
       })
     });
+    const data = await res.json();
+    if (!data.ok) {
+      console.warn('Aviso Telegram HTML con botones:', data.description, '- Reintentando sin formato...');
+      const fallbackRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: text.replace(/<[^>]+>/g, ''),
+          reply_markup: {
+            inline_keyboard: inlineKeyboard
+          }
+        })
+      });
+      const fbData = await fallbackRes.json();
+      if (fbData.ok) {
+        console.log(`✓ Mensaje entregado a Telegram (ID: ${fbData.result?.message_id})`);
+      } else {
+        console.error('❌ Error enviando mensaje a Telegram:', fbData.description);
+      }
+    } else {
+      console.log(`✓ Mensaje entregado a Telegram con éxito (ID: ${data.result?.message_id})`);
+    }
   } catch(e) {
-    console.warn('Error al enviar mensaje con botones a Telegram:', e.message);
+    console.warn('Error de red al enviar mensaje con botones a Telegram:', e.message);
   }
 }
 
@@ -599,6 +636,16 @@ function escapeMarkdown(text) {
   return text.toString().replace(/([_*\[`])/g, '\\$1');
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 main();
+
 
 

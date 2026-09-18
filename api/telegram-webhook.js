@@ -38,8 +38,12 @@ export default async function handler(req, res) {
       }
 
       if (data.startsWith('pub:')) {
-        const slug = data.replace('pub:', '').trim();
-        await handlePublishBySlug(slug, cq.message?.chat?.id || TELEGRAM_CHAT_ID);
+        const val = data.replace('pub:', '').trim();
+        if (/^[1-5]$/.test(val)) {
+          await handlePublishByNumber(parseInt(val, 10), cq.message?.chat?.id || TELEGRAM_CHAT_ID);
+        } else {
+          await handlePublishBySlug(val, cq.message?.chat?.id || TELEGRAM_CHAT_ID);
+        }
       } else if (data === 'discard_all') {
         await handleDiscardAll(cq.message?.chat?.id || TELEGRAM_CHAT_ID);
       }
@@ -168,7 +172,7 @@ async function handlePublishBySlug(slug, chatId) {
 // ACCIÓN: PUBLICAR POR NÚMERO (1-5)
 // -----------------------------------------------------------------------------
 async function handlePublishByNumber(num, chatId) {
-  const queueRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?category=eq.scout_queue&published=eq.false&order=created_at.desc&limit=5`, {
+  const queueRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?category=eq.scout_queue&published=eq.false&order=created_at.asc&limit=5`, {
     headers: {
       'apikey': SUPABASE_SERVICE_KEY,
       'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
