@@ -67,14 +67,9 @@ export default async function handler(req, res) {
       const content = `
         <p class="lead">Cada semana escuchamos cientos de canciones de toda Iberoamérica en <strong>The New Indie Wave</strong>. Muy pocas logran atrapar la atención desde los primeros 15 segundos con tanta honestidad y carácter como <strong>"${escapeHtml(song_title)}"</strong> de <strong>${escapeHtml(artist_name)}</strong>.</p>
 
-        <blockquote>"${escapeHtml(cleanFeedback)}" — <strong>Rodrigo dL Moral</strong>, curador de The New Indie Wave</blockquote>
+        <p>${escapeHtml(cleanFeedback)}</p>
 
-        <h2>¿Por qué llamó nuestra atención?</h2>
-        <ul>
-          <li><strong>Identidad y textura:</strong> Se aleja de la fórmula predecible de los algoritmos y apuesta por una estética sonora viva y con matices.</li>
-          <li><strong>Producción:</strong> El balance entre los instrumentos y la voz logra transmitir una atmósfera íntima sin perder fuerza.</li>
-          <li><strong>Curaduría Oficial:</strong> Seleccionada para rotar permanentemente en nuestra playlist <em>"${escapeHtml(playlist || 'Selección Oficial TNIW')}"</em> en Spotify.</li>
-        </ul>
+        <p>El balance entre instrumentación orgánica y textura vocal logra transmitir una atmósfera singular sin perder fuerza melódica. Por su propuesta fresca y carácter sonoro auténtico, ha sido seleccionada para rotar en nuestra playlist oficial <em>"${escapeHtml(playlist || 'Selección Oficial TNIW')}"</em> en Spotify.</p>
 
         ${spotifyEmbedHtml}
 
@@ -220,22 +215,22 @@ async function generateArticleWithAI({ topic, category, auto_publish, liveFacts 
     ? `\nHECHOS Y DATOS REALES EXTRAÍDOS EN VIVO DE INTERNET SOBRE ESTA NOTICIA:\n- ${liveFacts.join('\n- ')}\nIMPORTANTE: Basa tu crónica en estos hechos verídicos (fechas, recintos, artistas, canciones, contexto). NO inventes datos que contradigan la realidad.`
     : '';
 
-  const systemPrompt = `Eres Rodrigo dL Moral, fundador y curador de "The New Indie Wave" (TNIW).
+  const systemPrompt = `Eres redactor y curador editorial para la revista digital "The New Indie Wave" (TNIW).
 Tu misión es escribir una crónica o reseña de actualidad musical con periodismo real, rápido, con datos concretos y directo al hueso.
 REGLAS FUNDAMENTALES:
-- RIGOR CON LOS HECHOS: Habla de los datos reales del suceso (nombres propios, recintos como David Geffen Hall, auditorios, festivales, canciones, premios como Latin Grammys, discografía e instrumentos). CERO generalidades vacías como "marca un precedente" o "desafía las fórmulas".
-- FORMATO DE ALTA RETENCIÓN: Lectura de 1 a 1.5 minutos (220 a 300 palabras). Cero relleno aburrido corporativo.
-- VOZ EDITORIAL: Fresco, apasionado, de tú a tú, crítico pero respetuoso del arte.
-- FIRMA: En los blockquotes siempre firmado como: — Rodrigo dL Moral
+- RIGOR CON LOS HECHOS: Habla de los datos reales del suceso (nombres propios, recintos, festivales, canciones, colaboraciones, discografía e instrumentos). CERO generalidades vacías.
+- FORMATO DE ALTA RETENCIÓN: Lectura de 1 a 1.5 minutos (220 a 300 palabras en párrafos ágiles y fluidos).
+- VOZ EDITORIAL: Fresco, apasionado, de tú a tú, respetuoso del arte pero con criterio agudo.
+- PROHIBICIÓN ESTRICTA: PROHIBIDO ROTUNDAMENTE FABRICAR O INVENTAR CITAS O FRASES ATRIBUIDAS A RODRIGO DL MORAL. Tampoco uses listas forzadas o artificiales de viñetas si la nota fluye mejor en prosa periodística.
 - RESPONDE EXCLUSIVAMENTE UN OBJETO JSON VÁLIDO CON ESTA ESTRUCTURA EXACTA:
 {
-  "title": "Titular con gancho brutal que resuma la noticia real (máximo 12 palabras)",
+  "title": "Titular con gancho que resuma la noticia real (máximo 12 palabras)",
   "slug": "slug-amigable-en-minusculas-con-guiones",
   "summary": "Resumen directo en 2 oraciones que enganche al lector (máximo 30 palabras)",
-  "content": "Cuerpo en HTML limpio con <p class=\"lead\">, <h2>, <ul> con 3 puntos clave con viñetas con hechos y nombres reales, y un <blockquote> reflexivo firmado por Rodrigo dL Moral",
+  "content": "Cuerpo en HTML limpio con párrafos <p> y subtítulos naturales <h2> donde aporte valor, sin citas falsas de Rodrigo dL Moral",
   "read_time": "1.5 min",
   "tags": ["Etiqueta1", "Etiqueta2", "Etiqueta3"],
-  "artist_name": "Nombre exacto de la banda o artista principal para vincular su foto real oficial (ej. Editors, Lizzo, Dudamel, Bad Bunny, etc.). Si es un tema conceptual sin artista, dejar en blanco."
+  "artist_name": "Nombre exacto de la banda o artista principal para vincular su foto real oficial (ej. Editors, Lizzo, Dudamel, etc.). Si es un tema conceptual sin artista, dejar en blanco."
 }`;
 
   const userPrompt = `Noticia o tema solicitado: "${topic}". Categoría: "${category}".${factsContext}`;
@@ -347,16 +342,11 @@ REGLAS FUNDAMENTALES:
     : `Análisis directo sobre ${topic} desde la perspectiva editorial de The New Indie Wave.`;
 
   const content = `
-    <p class="lead">Las noticias vuelan, pero los momentos culturales que definen la música se analizan con calma. <strong>${escapeHtml(topic)}</strong> no es una fecha más en el calendario: es una declaración de intenciones.</p>
+    <p class="lead">Las noticias vuelan, pero los momentos culturales que definen la música se analizan con calma. <strong>${escapeHtml(topic)}</strong> es una de las conversaciones más relevantes de las últimas horas.</p>
 
-    <h2>Los puntos que marcan la diferencia:</h2>
-    <ul>
-      ${factsListHtml}
-    </ul>
+    <p>${liveFacts.length > 0 ? escapeHtml(liveFacts.join('. ')) : 'El movimiento constante en los circuitos musicales de la región confirma que la escena independiente sigue encontrando canales propios para desafiar las fórmulas comerciales predecibles.'}</p>
 
-    <blockquote>"Cuando las barreras de género se rompen y los artistas se atreven a arriesgar, la música recupera su poder de sorprender." — <strong>Rodrigo dL Moral</strong></blockquote>
-
-    <p>Seguiremos de cerca las repercusiones de este suceso y su impacto en los artistas emergentes de nuestra comunidad.</p>
+    <p>En <strong>The New Indie Wave</strong> seguimos de cerca el impacto de este tipo de acontecimientos y su eco en los artistas y proyectos emergentes de nuestra comunidad.</p>
   `;
 
   const realImg = await resolveRealNewsImage({

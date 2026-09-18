@@ -1275,6 +1275,9 @@
     </div>
 
     <img src="" alt="" id="readerHeroImg" class="reader-hero-img">
+    <div id="readerPhotoCredit" style="display:none; font-family:var(--font-mono); font-size:11px; color:#94a3b8; padding:8px 24px; border-bottom:1px solid rgba(255,255,255,0.06); background:rgba(0,0,0,0.3); align-items:center; gap:6px;">
+      <span>📸</span> <span id="readerPhotoCreditText"></span>
+    </div>
 
     <div class="reader-body-wrapper">
       <div class="reader-meta-row">
@@ -1738,6 +1741,24 @@
 
     document.getElementById('readerTitle').textContent = article.title;
     document.getElementById('readerHeroImg').src = article.image_url;
+
+    // Crédito fotográfico visible bajo la imagen principal
+    var creditBox = document.getElementById('readerPhotoCredit');
+    var creditText = document.getElementById('readerPhotoCreditText');
+    if (creditBox && creditText) {
+      var photoMatch = (article.content || '').match(/Foto:\s*([^<•\n]+)/i);
+      var sourceMatch = (article.content || '').match(/Fuente original:\s*<a[^>]*>([^<]+)<\/a>/i);
+      if (photoMatch) {
+        creditText.textContent = 'Foto: ' + photoMatch[1].trim();
+        creditBox.style.display = 'flex';
+      } else if (sourceMatch) {
+        creditText.textContent = 'Foto: Vía ' + sourceMatch[1].trim() + ' / Prensa oficial';
+        creditBox.style.display = 'flex';
+      } else {
+        creditBox.style.display = 'none';
+      }
+    }
+
     document.getElementById('readerDate').textContent = formatDate(article.published_at);
     document.getElementById('readerReadTime').textContent = (article.read_time || '4 min') + ' de lectura';
     

@@ -208,26 +208,68 @@ function isMusicRelevant(title, desc) {
 
 async function generateEditorialPiece(promptContext, meta) {
   const GEMINI_KEY = process.env.GEMINI_API_KEY;
-  const GROQ_KEY = process.env.GROQ_API_KEY;
+  const GROQ_KEY = process.env.GROQ_API_KEY || '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';
   const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
-  const systemPrompt = `Eres Rodrigo dL Moral, curador de "The New Indie Wave" (TNIW).
-Tu misión es transformar una noticia de la escena indie de ${meta.region} (${meta.source}) en una nota rápida, picante, fresca y de alta retención para músicos y fans en celular.
-REGLAS:
-- Lectura rápida de 1 a 1.5 minutos (alrededor de 230 palabras).
-- Cero tecnicismos aburridos, cero clichés de IA.
-- Tono directo, conversacional, destacando por qué le importa a la comunidad indie de habla hispana.
-- Responde ÚNICAMENTE un JSON válido con esta estructura:
+  const systemPrompt = `Eres redactor y curador editorial para la revista digital "The New Indie Wave" (TNIW).
+Tu misión es redactar una crónica o reseña de actualidad musical sobre la siguiente noticia de la escena indie de ${meta.region} (reportada originalmente por ${meta.source}).
+
+DIRECTRICES EDITORIALES ESTRICTAS:
+1. PERIODISMO MUSICAL REAL Y NATURAL:
+   - Redacta en prosa periodística fluida, atractiva y orgánica (2 a 3 párrafos bien estructurados).
+   - PROHIBIDO USAR LISTAS DE "3 CLAVES PARA ENTENDER LA MOVIDA", VIÑETAS ARTIFICIALES O FÓRMULAS REPETITIVAS.
+   - PROHIBIDO ROTUNDAMENTE FABRICAR O INVENTAR CITAS O FRASES ATRIBUIDAS A RODRIGO DL MORAL. No inventes declaraciones ni uses blockquotes falsos.
+   - Párrafo 1: Noticia directa y gancho (qué pasó, qué banda o artista protagoniza la novedad, qué lanzaron o anunciaron).
+   - Párrafo 2: Contexto musical, sonido, estética de la propuesta, colaboraciones o relevancia para la escena de ${meta.region}.
+   - Párrafo 3: Conclusión o recomendación de escucha con el espíritu independiente de TNIW.
+2. ATRIBUCIÓN Y TRANSPARENCIA ÉTICA:
+   - Al final incluye el crédito de la fuente original:
+     <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">Fuente original: <a href="${meta.link}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${meta.source} ↗</a> · Foto: Vía ${meta.source} / Prensa oficial</div>
+3. FORMATO JSON OBLIGATORIO:
+Responde ÚNICAMENTE un JSON válido con esta estructura:
 {
-  "title": "Titular magnético con gancho (máximo 12 palabras)",
-  "slug": "slug-limpio-en-minusculas",
-  "summary": "Resumen directo en 2 oraciones (máximo 30 palabras)",
-  "content": "Cuerpo en HTML con <p class=\"lead\">, <h2>, <ul> con 3 viñetas clave, y un <blockquote> reflexivo con la voz de Rodrigo",
+  "title": "Titular periodístico atractivo y natural (máximo 12 palabras)",
+  "slug": "slug-limpio-en-minusculas-con-guiones",
+  "summary": "Resumen directo de la noticia en 2 oraciones (máximo 35 palabras)",
+  "content": "Cuerpo completo del artículo en HTML limpio con párrafos <p> y <div class=\"source-credit\"> sin listas forzadas ni citas inventadas",
+  "photo_credit": "Vía ${meta.source} / Prensa oficial",
   "category": "Cultura Indie",
   "read_time": "1.5 min",
-  "tags": ["${meta.region}", "Música Indie", "Lanzamiento", "TNIW"],
-  "image_keyword": "concert"
+  "tags": ["${meta.region}", "Música Indie", "Lanzamiento", "TNIW"]
 }`;
+
+  if (GROQ_KEY) {
+    const groqModels = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b'];
+    for (const modelName of groqModels) {
+      try {
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GROQ_KEY}`
+          },
+          body: JSON.stringify({
+            model: modelName,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: promptContext }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.6,
+            max_tokens: 1200
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const rawJson = data.choices?.[0]?.message?.content;
+          if (rawJson) {
+            const parsed = JSON.parse(rawJson.replace(/```json/g, '').replace(/```/g, '').trim());
+            return buildArticleObject(parsed, meta);
+          }
+        }
+      } catch(e) {}
+    }
+  }
 
   if (GEMINI_KEY) {
     try {
@@ -253,21 +295,28 @@ REGLAS:
   }
 
   // Fallback autónomo si no hay API externa
-  const slug = `radar-${meta.region.toLowerCase()}-${slugify(meta.title)}-${Date.now().toString().slice(-4)}`;
+  const slug = `radar-${slugify(meta.region)}-${slugify(meta.title)}-${Date.now().toString().slice(-4)}`;
+  const cleanDesc = (meta.desc || '').replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+  const summaryText = cleanDesc.length > 25
+    ? (cleanDesc.slice(0, 160) + (cleanDesc.length > 160 ? '...' : ''))
+    : `Novedades en la escena independiente de ${meta.region}: ${meta.title}. Cobertura vía ${meta.source}.`;
+
+  const photoCredit = `Vía ${meta.source} / Prensa oficial`;
+
   return {
     slug,
-    title: `Radar ${meta.region}: ${meta.title.slice(0, 65)}`,
-    summary: `Lo que está pasando en la escena de ${meta.region}: ${meta.title}. Te lo resumimos en 1 minuto.`,
+    title: meta.title.length > 80 ? meta.title.slice(0, 77) + '...' : meta.title,
+    summary: summaryText,
     content: `
-      <p class="lead">El pulso de la música independiente en <strong>${meta.region}</strong> sigue moviéndose rápido. Hoy la conversación gira en torno a: <strong>${meta.title}</strong>.</p>
-      <h2>3 claves para entender la movida:</h2>
-      <ul>
-        <li><strong>El contexto:</strong> Reportado por ${meta.source}, este movimiento confirma la ebullición creativa en los circuitos independientes de la región.</li>
-        <li><strong>El sonido y la estética:</strong> Nuevos aires que refrescan el panorama sonoro y abren camino para más proyectos autogestivos.</li>
-        <li><strong>La lectura de TNIW:</strong> Mientras los grandes medios se concentran en lo mainstream, aquí celebramos las propuestas que tienen identidad y corazón.</li>
-      </ul>
-      <blockquote>"En Iberoamérica la música indie no es una moda pasajera: es la respuesta más honesta de una generación que no pide permiso para sonar." — Rodrigo dL Moral</blockquote>
-      <p>Fuente original: <a href="${meta.link}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime);">${meta.source} ↗</a></p>
+      <p class="lead">El pulso de la música independiente en <strong>${escapeHtml(meta.region)}</strong> suma una nueva noticia destacada de la mano de <strong>${escapeHtml(meta.source)}</strong>: <strong>${escapeHtml(meta.title)}</strong>.</p>
+      
+      <p>${escapeHtml(cleanDesc || 'Un acontecimiento relevante que reafirma el dinamismo y la constante evolución de las propuestas sonoras que marcan la pauta en los circuitos autogestivos de la región.')}</p>
+
+      <p>En <strong>The New Indie Wave</strong> seguimos de cerca el impacto de este tipo de anuncios y lanzamientos, manteniendo el compromiso de conectar a nuestra comunidad con la música que desafía los estándares comerciales.</p>
+
+      <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">
+        Fuente original: <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${escapeHtml(meta.source)} ↗</a> · Foto: ${photoCredit}
+      </div>
     `,
     category: 'Cultura Indie',
     author: 'Rodrigo dL Moral',
@@ -275,7 +324,7 @@ REGLAS:
     author_avatar: 'rodrigo_studio_web.jpg',
     image_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
     read_time: '1.5 min',
-    tags: [meta.region, 'Cultura Indie', 'Música', 'TNIW'],
+    tags: [meta.region, 'Música Indie', 'Radar TNIW'],
     featured: false,
     published: true,
     published_at: new Date().toISOString()
@@ -283,18 +332,29 @@ REGLAS:
 }
 
 function buildArticleObject(parsed, meta) {
+  const photoCredit = parsed.photo_credit || `Vía ${meta.source} / Prensa oficial`;
+  let contentHtml = parsed.content || `<p>${escapeHtml(parsed.summary || meta.title)}</p>`;
+
+  if (!contentHtml.includes('source-credit')) {
+    contentHtml += `
+      <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">
+        Fuente original: <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${escapeHtml(meta.source)} ↗</a> · Foto: ${photoCredit}
+      </div>
+    `;
+  }
+
   return {
-    slug: parsed.slug || `noticia-${Date.now().toString().slice(-6)}`,
-    title: parsed.title || 'Actualidad Musical // The New Indie Wave',
-    summary: parsed.summary || 'Resumen de actualidad musical.',
-    content: parsed.content || '<p>Contenido en actualización.</p>',
+    slug: parsed.slug || `radar-${slugify(meta.region)}-${slugify(meta.title)}-${Date.now().toString().slice(-4)}`,
+    title: parsed.title || meta.title,
+    summary: parsed.summary || (meta.desc ? meta.desc.slice(0, 160) : 'Resumen de actualidad musical.'),
+    content: contentHtml,
     category: parsed.category || 'Cultura Indie',
     author: 'Rodrigo dL Moral',
     author_role: 'Curador & Fundador TNIW',
     author_avatar: 'rodrigo_studio_web.jpg',
     image_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=80',
     read_time: parsed.read_time || '1.5 min',
-    tags: parsed.tags || [meta.region, 'Indie', 'TNIW'],
+    tags: parsed.tags || [meta.region, 'Música Indie', 'Radar TNIW'],
     featured: false,
     published: true,
     published_at: new Date().toISOString()
