@@ -5917,6 +5917,19 @@ Instagram:
   async function publishTrackSpotlightArticle(item, fb) {
     if (!item) return;
     try {
+      var coverUrl = item.cover_url || '';
+      if (!coverUrl && item.spotify_url) {
+        try {
+          var oRes = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(item.spotify_url));
+          if (oRes.ok) {
+            var oData = await oRes.json();
+            if (oData && oData.thumbnail_url) {
+              coverUrl = oData.thumbnail_url.replace('ab67616d00001e02', 'ab67616d0000b273');
+            }
+          }
+        } catch(e) {}
+      }
+
       var res = await fetch('/api/generate-article', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -5929,7 +5942,7 @@ Instagram:
           playlist: item.playlist || '',
           feedback: fb,
           spotify_url: item.spotify_url,
-          cover_url: item.cover_url || '',
+          cover_url: coverUrl,
           auto_publish: true
         })
       });

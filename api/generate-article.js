@@ -76,6 +76,17 @@ export default async function handler(req, res) {
         <p>Sigue de cerca a <strong>${escapeHtml(artist_name)}</strong> y escucha la canción completa directamente en nuestras listas oficiales para apoyar su crecimiento orgánico.</p>
       `;
 
+      let finalCover = cover_url ? cover_url.trim() : '';
+      if (!finalCover && spotify_url) {
+        finalCover = await fetchSpotifyTrackCover(spotify_url);
+      }
+      if (!finalCover && artist_name) {
+        finalCover = await fetchRealArtistImage(artist_name);
+      }
+      if (!finalCover) {
+        finalCover = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80';
+      }
+
       articlePayload = {
         slug,
         title,
@@ -85,7 +96,7 @@ export default async function handler(req, res) {
         author: 'Rodrigo dL Moral',
         author_role: 'Curador & Fundador TNIW',
         author_avatar: 'rodrigo_studio_web.jpg',
-        image_url: cover_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
+        image_url: finalCover,
         read_time: '1.5 min',
         tags: [artist_name, genre || 'Indie', 'Radar TNIW', 'Lanzamiento'],
         featured: false,
@@ -529,4 +540,56 @@ function escapeHtml(str) {
 function capitalize(s) {
   if (typeof s !== 'string' || !s) return '';
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+async function fetchSpotifyTrackCover(spotifyUrl) {
+  if (!spotifyUrl) return null;
+  const cleanUrl = String(spotifyUrl).trim();
+
+  // 1. Spotify oEmbed (rápido, sin tokens, devuelve carátula real del track)
+  try {
+    const oembedRes = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(cleanUrl)}`);
+    if (oembedRes.ok) {
+      const oembedData = await oembedRes.json();
+      if (oembedData && oembedData.thumbnail_url) {
+        // En CDN de Spotify, sustituir a resolución máxima 640x640 si aplica
+        return oembedData.thumbnail_url
+          .replace('ab67616d00001e02', 'ab67616d0000b273')
+          .replace('ab67616d00004851', 'ab67616d0000b273');
+      }
+    }
+  } catch (err) {}
+
+  // 2. Respaldo oficial con API de Spotify
+  try {
+    const match = cleanUrl.match(/track\/([a-zA-Z0-9]+)/);
+    if (match && match[1]) {
+      const trackId = match[1];
+      const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || '7a56561898eb4057941b2c1453476e10';
+      const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET || '86ed4df85d3f4f46885eb51013a0ab0f';
+      const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
+      const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'grant_type=client_credentials'
+      });
+      if (tokenRes.ok) {
+        const tokenData = await tokenRes.json();
+        const trackRes = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
+          headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
+        });
+        if (trackRes.ok) {
+          const trackData = await trackRes.json();
+          if (trackData.album && trackData.album.images && trackData.album.images.length > 0) {
+            return trackData.album.images[0].url;
+          }
+        }
+      }
+    }
+  } catch (err) {}
+
+  return null;
 }
