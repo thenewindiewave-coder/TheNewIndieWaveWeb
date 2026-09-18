@@ -67,7 +67,7 @@ export default async function handler(req, res) {
       const content = `
         <p class="lead">Cada semana escuchamos cientos de canciones de toda Iberoamérica en <strong>The New Indie Wave</strong>. Muy pocas logran atrapar la atención desde los primeros 15 segundos con tanta honestidad y carácter como <strong>"${escapeHtml(song_title)}"</strong> de <strong>${escapeHtml(artist_name)}</strong>.</p>
 
-        <blockquote>"${escapeHtml(cleanFeedback)}" — <strong>Rodrigo DL Moral</strong>, curador de The New Indie Wave</blockquote>
+        <blockquote>"${escapeHtml(cleanFeedback)}" — <strong>Rodrigo dL Moral</strong>, curador de The New Indie Wave</blockquote>
 
         <h2>¿Por qué llamó nuestra atención?</h2>
         <ul>
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
         summary,
         content,
         category: 'Artistas en el Radar',
-        author: 'Rodrigo DL Moral',
+        author: 'Rodrigo dL Moral',
         author_role: 'Curador & Fundador TNIW',
         author_avatar: 'rodrigo_studio_web.jpg',
         image_url: cover_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
@@ -180,27 +180,27 @@ async function fetchLiveWebFacts(query) {
 }
 
 async function generateArticleWithAI({ topic, category, auto_publish, liveFacts = [] }) {
+  const GROQ_KEY = process.env.GROQ_API_KEY || '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';
   const GEMINI_KEY = process.env.GEMINI_API_KEY;
-  const GROQ_KEY = process.env.GROQ_API_KEY;
   const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
   const factsContext = liveFacts.length > 0 
     ? `\nHECHOS Y DATOS REALES EXTRAÍDOS EN VIVO DE INTERNET SOBRE ESTA NOTICIA:\n- ${liveFacts.join('\n- ')}\nIMPORTANTE: Basa tu crónica en estos hechos verídicos (fechas, recintos, artistas, canciones, contexto). NO inventes datos que contradigan la realidad.`
     : '';
 
-  const systemPrompt = `Eres Rodrigo DL Moral, fundador y curador de "The New Indie Wave" (TNIW).
-Tu misión es escribir una crónica o reseña de actualidad musical con periodismo real, rápido y directo al hueso.
-REGLAS DE ORO:
-- RIGOR CON LOS HECHOS: Te proporcionamos datos y noticias reales extraídos en vivo de internet. Úsalos con precisión (lugares, fechas, nombres de canciones, invitados especiales, anécdotas).
-- FORMATO DE ALTA RETENCIÓN: Lectura de 1 a 1.5 minutos (220 a 300 palabras). Cero relleno aburrido.
-- CERO CLICHÉS DE IA: Prohibido usar "en el vasto tapiz", "es crucial", "sumérgete", "un testimonio de", "en un mundo donde".
-- ESTILO: Fresco, apasionado, de tú a tú, crítico pero respetuoso del arte.
+  const systemPrompt = `Eres Rodrigo dL Moral, fundador y curador de "The New Indie Wave" (TNIW).
+Tu misión es escribir una crónica o reseña de actualidad musical con periodismo real, rápido, con datos concretos y directo al hueso.
+REGLAS FUNDAMENTALES:
+- RIGOR CON LOS HECHOS: Habla de los datos reales del suceso (nombres propios, recintos como David Geffen Hall, auditorios, festivales, canciones, premios como Latin Grammys, discografía e instrumentos). CERO generalidades vacías como "marca un precedente" o "desafía las fórmulas".
+- FORMATO DE ALTA RETENCIÓN: Lectura de 1 a 1.5 minutos (220 a 300 palabras). Cero relleno aburrido corporativo.
+- VOZ EDITORIAL: Fresco, apasionado, de tú a tú, crítico pero respetuoso del arte.
+- FIRMA: En los blockquotes siempre firmado como: — Rodrigo dL Moral
 - RESPONDE EXCLUSIVAMENTE UN OBJETO JSON VÁLIDO CON ESTA ESTRUCTURA EXACTA:
 {
   "title": "Titular con gancho brutal que resuma la noticia real (máximo 12 palabras)",
   "slug": "slug-amigable-en-minusculas-con-guiones",
   "summary": "Resumen directo en 2 oraciones que enganche al lector (máximo 30 palabras)",
-  "content": "Cuerpo en HTML limpio con <p class=\"lead\">, <h2>, <ul> o <ol> con 3 puntos clave con viñetas, y un <blockquote> reflexivo",
+  "content": "Cuerpo en HTML limpio con <p class=\\"lead\\">, <h2>, <ul> con 3 puntos clave con viñetas con hechos y nombres reales, y un <blockquote> reflexivo firmado por Rodrigo dL Moral",
   "read_time": "1.5 min",
   "tags": ["Etiqueta1", "Etiqueta2", "Etiqueta3"],
   "image_keyword": "palabra en inglés para la foto de portada (ej: orchestra, concert, guitar, vinyl, stage)"
@@ -208,7 +208,43 @@ REGLAS DE ORO:
 
   const userPrompt = `Noticia o tema solicitado: "${topic}". Categoría: "${category}".${factsContext}`;
 
-  // 1. GEMINI CON DATOS EN VIVO
+  // 1. GROQ ULTRA RÁPIDO CON MODELOS VERIFICADOS (Qwen 3.8 27B / GPT-OSS 120B)
+  if (GROQ_KEY) {
+    const groqModels = ['qwen/qwen3.8-27b', 'openai/gpt-oss-120b'];
+    for (const modelName of groqModels) {
+      try {
+        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GROQ_KEY}`
+          },
+          body: JSON.stringify({
+            model: modelName,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.6,
+            max_tokens: 1200
+          })
+        });
+        if (groqRes.ok) {
+          const groqData = await groqRes.json();
+          const rawJson = groqData.choices?.[0]?.message?.content;
+          if (rawJson) {
+            const parsed = JSON.parse(cleanJson(rawJson));
+            return formatGeneratedPayload(parsed, category, auto_publish);
+          }
+        }
+      } catch (e) {
+        console.warn(`Groq (${modelName}) fallo:`, e.message);
+      }
+    }
+  }
+
+  // 2. GEMINI CON DATOS EN VIVO
   if (GEMINI_KEY) {
     try {
       const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
@@ -231,37 +267,6 @@ REGLAS DE ORO:
       }
     } catch (e) {
       console.warn("Gemini fallo, probando siguiente:", e.message);
-    }
-  }
-
-  // 2. GROQ CON DATOS EN VIVO
-  if (GROQ_KEY) {
-    try {
-      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GROQ_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          response_format: { type: "json_object" }
-        })
-      });
-      if (groqRes.ok) {
-        const groqData = await groqRes.json();
-        const rawJson = groqData.choices?.[0]?.message?.content;
-        if (rawJson) {
-          const parsed = JSON.parse(cleanJson(rawJson));
-          return formatGeneratedPayload(parsed, category, auto_publish);
-        }
-      }
-    } catch (e) {
-      console.warn("Groq fallo, probando siguiente:", e.message);
     }
   }
 
@@ -317,7 +322,7 @@ REGLAS DE ORO:
       ${factsListHtml}
     </ul>
 
-    <blockquote>"Cuando las barreras de género se rompen y los artistas se atreven a arriesgar, la música recupera su poder de sorprender." — <strong>Rodrigo DL Moral</strong></blockquote>
+    <blockquote>"Cuando las barreras de género se rompen y los artistas se atreven a arriesgar, la música recupera su poder de sorprender." — <strong>Rodrigo dL Moral</strong></blockquote>
 
     <p>Seguiremos de cerca las repercusiones de este suceso y su impacto en los artistas emergentes de nuestra comunidad.</p>
   `;
@@ -328,7 +333,7 @@ REGLAS DE ORO:
     summary,
     content,
     category,
-    author: 'Rodrigo DL Moral',
+    author: 'Rodrigo dL Moral',
     author_role: 'Curador & Fundador TNIW',
     author_avatar: 'rodrigo_studio_web.jpg',
     image_url: getRandomMusicCover(),
@@ -358,7 +363,7 @@ function formatGeneratedPayload(parsed, category, auto_publish) {
     summary: parsed.summary || 'Análisis independiente sobre la música actual.',
     content: parsed.content || '<p>Contenido editorial en preparación.</p>',
     category: category || 'Industria Musical',
-    author: 'Rodrigo DL Moral',
+    author: 'Rodrigo dL Moral',
     author_role: 'Curador & Fundador TNIW',
     author_avatar: 'rodrigo_studio_web.jpg',
     image_url: matchedImg,

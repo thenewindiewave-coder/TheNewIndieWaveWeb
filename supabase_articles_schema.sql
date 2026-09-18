@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS public.articles (
     summary TEXT NOT NULL,
     content TEXT NOT NULL,
     category TEXT NOT NULL,
-    author TEXT DEFAULT 'Rodrigo DL Moral',
+    author TEXT DEFAULT 'Rodrigo dL Moral',
     author_role TEXT DEFAULT 'Curador & Fundador TNIW',
     author_avatar TEXT DEFAULT 'rodrigo_studio_web.jpg',
     image_url TEXT NOT NULL,
@@ -100,7 +100,7 @@ INSERT INTO public.articles (
       <li><strong>Manda tráfico tuyo:</strong> Haz que 50 amigos de verdad la guarden y la escuchen completa. Con eso el algoritmo vuelve a respirar.</li>
     </ol>',
     'Estrategia & Algoritmos',
-    'Rodrigo DL Moral',
+    'Rodrigo dL Moral',
     'Curador & Fundador TNIW',
     'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
     '1.5 min',
@@ -124,7 +124,7 @@ INSERT INTO public.articles (
 
     <blockquote>"El arte visual no compite con tu música: es el gancho que convence a un extraño de darle una oportunidad."</blockquote>',
     'Arte & Visuales',
-    'Rodrigo DL Moral',
+    'Rodrigo dL Moral',
     'Curador & Fundador TNIW',
     'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=80',
     '1 min',
@@ -150,7 +150,7 @@ INSERT INTO public.articles (
       <li><strong>No limites todo en el máster:</strong> Usa saturación de cinta o clipping suave en las pistas individuales.</li>
     </ul>',
     'Producción & Sonido',
-    'Rodrigo DL Moral',
+    'Rodrigo dL Moral',
     'Curador & Fundador TNIW',
     'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
     '2 min',
@@ -175,7 +175,7 @@ INSERT INTO public.articles (
       <li>Aprende a leer qué porcentaje te están pidiendo de publishing y de máster antes de soltar la firma.</li>
     </ul>',
     'Industria Musical',
-    'Rodrigo DL Moral',
+    'Rodrigo dL Moral',
     'Curador & Fundador TNIW',
     'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=80',
     '1.5 min',
@@ -199,7 +199,7 @@ INSERT INTO public.articles (
 
     <blockquote>"El equipo más importante que tienes no es tu micrófono: es lo que tienes que decir y la verdad con la que lo dices."</blockquote>',
     'Cultura Indie',
-    'Rodrigo DL Moral',
+    'Rodrigo dL Moral',
     'Curador & Fundador TNIW',
     'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80',
     '1.5 min',

@@ -173,7 +173,7 @@ async function generateEditorialPiece(promptContext, meta) {
   const GROQ_KEY = process.env.GROQ_API_KEY;
   const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
-  const systemPrompt = `Eres Rodrigo DL Moral, curador de "The New Indie Wave" (TNIW).
+  const systemPrompt = `Eres Rodrigo dL Moral, curador de "The New Indie Wave" (TNIW).
 Tu misión es transformar una noticia de la escena indie de ${meta.region} (${meta.source}) en una nota rápida, picante, fresca y de alta retención para músicos y fans en celular.
 REGLAS:
 - Lectura rápida de 1 a 1.5 minutos (alrededor de 230 palabras).
@@ -228,11 +228,11 @@ REGLAS:
         <li><strong>El sonido y la estética:</strong> Nuevos aires que refrescan el panorama sonoro y abren camino para más proyectos autogestivos.</li>
         <li><strong>La lectura de TNIW:</strong> Mientras los grandes medios se concentran en lo mainstream, aquí celebramos las propuestas que tienen identidad y corazón.</li>
       </ul>
-      <blockquote>"En Iberoamérica la música indie no es una moda pasajera: es la respuesta más honesta de una generación que no pide permiso para sonar." — Rodrigo DL Moral</blockquote>
+      <blockquote>"En Iberoamérica la música indie no es una moda pasajera: es la respuesta más honesta de una generación que no pide permiso para sonar." — Rodrigo dL Moral</blockquote>
       <p>Fuente original: <a href="${meta.link}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime);">${meta.source} ↗</a></p>
     `,
     category: 'Cultura Indie',
-    author: 'Rodrigo DL Moral',
+    author: 'Rodrigo dL Moral',
     author_role: 'Curador & Fundador TNIW',
     author_avatar: 'rodrigo_studio_web.jpg',
     image_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
@@ -251,7 +251,7 @@ function buildArticleObject(parsed, meta) {
     summary: parsed.summary || 'Resumen de actualidad musical.',
     content: parsed.content || '<p>Contenido en actualización.</p>',
     category: parsed.category || 'Cultura Indie',
-    author: 'Rodrigo DL Moral',
+    author: 'Rodrigo dL Moral',
     author_role: 'Curador & Fundador TNIW',
     author_avatar: 'rodrigo_studio_web.jpg',
     image_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=80',
