@@ -6506,8 +6506,9 @@ Instagram:
         image_url: image_url,
         summary: summary,
         content: content,
-        author_name: 'Rodrigo dL Moral',
+        author: 'Rodrigo dL Moral',
         author_role: 'Curador & Fundador TNIW',
+        author_avatar: 'rodrigo_studio_web.jpg',
         read_time: read_time,
         tags: tagsArray,
         featured: isFeatured,
@@ -6517,6 +6518,7 @@ Instagram:
       var res;
       if (editingArticleSlug) {
         // Actualizar artículo existente
+        articlePayload.updated_at = new Date().toISOString();
         res = await fetch(SUPABASE_URL + '/rest/v1/articles?slug=eq.' + encodeURIComponent(editingArticleSlug), {
           method: 'PATCH',
           headers: {
