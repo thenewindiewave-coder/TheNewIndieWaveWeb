@@ -1,7 +1,8 @@
 /**
  * THE NEW INDIE WAVE - AMBIENT TWINKLE BACKGROUND
- * Genera un fondo cósmico / terminal ASCII de puntos densos que parpadean
- * Ubicado estrictamente en el fondo (z-index 0) por detrás de todas las tarjetas y textos.
+ * Genera un fondo cósmico / terminal ASCII de puntos densos que parpadean.
+ * Ubicado estrictamente en el fondo absoluto (z-index -1) sin interferir
+ * con el navbar, las tarjetas ni la ventana emergente de lectura (readerOverlay).
  */
 (function() {
   'use strict';
@@ -10,10 +11,16 @@
   function initTwinkleBg() {
     if (document.getElementById('tniwTwinkleCanvas')) return;
 
-    // Inyectar reglas CSS para garantizar que el canvas quede al fondo y las tarjetas por encima
+    // Inyectar reglas CSS seguras: Canvas en z-index -1 al fondo absoluto
     var style = document.createElement('style');
     style.id = 'tniwTwinkleStyle';
     style.textContent = [
+      'html {',
+      '  background-color: #09090b !important;',
+      '}',
+      'body {',
+      '  background-color: transparent !important;',
+      '}',
       '#tniwTwinkleCanvas {',
       '  position: fixed !important;',
       '  top: 0 !important;',
@@ -21,16 +28,10 @@
       '  width: 100vw !important;',
       '  height: 100vh !important;',
       '  pointer-events: none !important;',
-      '  z-index: 0 !important;',
-      '}',
-      '.navbar, .container, main, footer, header,',
-      '.featured-hero, .article-card, .card, .glass-card,',
-      '[class*="card"], [class*="hero"], .reader-overlay, .modal {',
-      '  position: relative;',
-      '  z-index: 1;',
+      '  z-index: -1 !important;',
       '}',
       '.featured-hero, .article-card {',
-      '  background-color: var(--bg-card, #121215) !important;',
+      '  background-color: var(--bg-card, #121215);',
       '}'
     ].join('\n');
     document.head.appendChild(style);
@@ -39,7 +40,7 @@
     canvas.id = 'tniwTwinkleCanvas';
     canvas.setAttribute('aria-hidden', 'true');
 
-    // Insertar como primer hijo de body para asegurar que quede al fondo
+    // Insertar al inicio de body
     if (document.body.firstChild) {
       document.body.insertBefore(canvas, document.body.firstChild);
     } else {
