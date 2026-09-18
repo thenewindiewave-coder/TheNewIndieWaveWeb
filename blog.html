@@ -1179,12 +1179,10 @@
   <div class="page-header">
     <div class="sec-tag">
       <span>// 05. NOTICIAS // BLOG</span>
-      <span style="color:var(--text-dim)">•</span>
-      <span id="dbStatusBadge" style="color: var(--text-dim); font-size: 10px;">CONECTANDO SUPABASE...</span>
     </div>
-    <h1 class="page-title">CRÓNICAS, INDUSTRIA & ARTE INDIE</h1>
+    <h1 class="page-title">NOTICIAS, ESTRENOS & CRÓNICAS INDIE</h1>
     <p class="page-desc">
-      Estrategias reales para artistas emergentes, análisis del algoritmo de streaming, dirección de arte visual, producción sonora en home studio y el pulso de la cultura independiente.
+      El pulso diario de la música alternativa: nuevos lanzamientos, festivales, reseñas y todo lo que está pasando en la escena independiente de México, Latinoamérica y el mundo.
     </p>
   </div>
 
@@ -1456,7 +1454,6 @@
 
   // CARGAR ARTÍCULOS EXCLUSIVAMENTE DESDE SUPABASE (CERO MOCKDATA)
   async function loadArticles() {
-    var dbStatusBadge = document.getElementById('dbStatusBadge');
     try {
       // 1. Cargar artículos publicados en vivo (ordenados cronológicamente desc)
       var res = await fetch(SUPABASE_URL + '/rest/v1/articles?published=eq.true&order=published_at.desc', {
@@ -1487,17 +1484,10 @@
       } else {
         archivedArticles = [];
       }
-
-      if (dbStatusBadge) {
-        dbStatusBadge.innerHTML = '<span style="color:var(--accent-lime)">● SUPABASE ONLINE (' + allArticles.length + ' EN PORTADA, ' + archivedArticles.length + ' EN ARCHIVO)</span>';
-      }
     } catch(err) {
       console.error("Error al cargar artículos de Supabase:", err);
       allArticles = [];
       archivedArticles = [];
-      if (dbStatusBadge) {
-        dbStatusBadge.innerHTML = '<span style="color:#ef4444">● ERROR DE CONEXIÓN</span>';
-      }
     }
 
     updateArchiveCounter();
