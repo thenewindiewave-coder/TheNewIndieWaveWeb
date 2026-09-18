@@ -3103,7 +3103,7 @@
           <!-- CAMPO 1: ARTISTA DEL RADAR (OPCIONAL) -->
           <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-strong); border-radius: 6px; padding: 16px;">
             <label style="display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 8px;">
-              1. PUESTO / ARTISTA EN EL RADAR (OPCIONAL)
+              1. PUESTO / ARTISTA EN EL RADAR
             </label>
             
             <div style="display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; align-items: center; margin-bottom: 8px;">
@@ -3129,15 +3129,16 @@
                 </div>
               </div>
             </div>
-            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">
-              ℹ️ Opcional. Si se incluye enlace, se agregará al mensaje de felicitación de ARTISTAS DEL RADAR.
+            <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+              <span>💡</span>
+              <span><strong>Directo:</strong> Puedes generar la Story 9:16 y copy de "Artistas en el Radar" con solo seleccionar el artista aquí, sin llenar track ni playlist abajo.</span>
             </div>
           </div>
 
           <!-- CAMPO 2: URL DE TRACK DE SPOTIFY -->
           <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-strong); border-radius: 6px; padding: 16px;">
             <label style="display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 8px;">
-              2. URL DEL TRACK DE SPOTIFY *
+              2. URL DEL TRACK DE SPOTIFY (OPCIONAL SI SOLO GENERAS STORY DEL RADAR)
             </label>
 
             <div style="margin-bottom: 10px;">
@@ -3148,12 +3149,12 @@
 
             <div style="display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 12px;">
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Tema / Canción *</label>
-                <input type="text" id="amSongTitle" required placeholder="Ej. ¿Qué Es Lo Que Harías?" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Tema / Canción</label>
+                <input type="text" id="amSongTitle" placeholder="Ej. ¿Qué Es Lo Que Harías?" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
               </div>
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Artista / Proyecto *</label>
-                <input type="text" id="amArtistName" required value="${defaultArtist ? defaultArtist.name : ''}" placeholder="Ej. Rodrigo dl Moral" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre del Artista / Proyecto</label>
+                <input type="text" id="amArtistName" value="${defaultArtist ? defaultArtist.name : ''}" placeholder="Ej. Rodrigo dl Moral" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
               </div>
               <div>
                 <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Género (Para Story)</label>
@@ -3165,12 +3166,12 @@
           <!-- CAMPO 3: URL DE LA PLAYLIST DE SPOTIFY (DETECCIÓN AUTOMÁTICA) -->
           <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-strong); border-radius: 6px; padding: 16px;">
             <label style="display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-pink); text-transform: uppercase; margin-bottom: 8px;">
-              3. URL DE LA PLAYLIST DE SPOTIFY (DETECCIÓN AUTOMÁTICA) *
+              3. URL DE LA PLAYLIST DE SPOTIFY (DETECCIÓN AUTOMÁTICA / OPCIONAL)
             </label>
 
             <!-- INPUT MANUAL DE URL O ID DE PLAYLIST -->
             <div style="margin-bottom: 10px;">
-              <input type="text" id="amPlaylistUrl" required oninput="handleAutoMessagePlaylistInput(this.value)" value="${defaultPlaylistUrl}" placeholder="https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl o ID de playlist..." style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-pink); border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
+              <input type="text" id="amPlaylistUrl" oninput="handleAutoMessagePlaylistInput(this.value)" value="${defaultPlaylistUrl}" placeholder="https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl o ID de playlist..." style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 10px 12px; color: var(--accent-pink); border-radius: 4px; font-size: 13px; font-family: var(--font-mono);">
             </div>
 
             <!-- BADGE DE ESTADO DE DETECCIÓN EN VIVO -->
@@ -3178,8 +3179,8 @@
 
             <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; align-items: center;">
               <div>
-                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre de la Playlist (Detectado desde Spotify / Editable) *</label>
-                <input type="text" id="amPlaylistName" required value="${defaultPlaylistName}" placeholder="Ej. SynthPop para cuando solo quieres bailar" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Nombre de la Playlist (Detectado desde Spotify / Editable)</label>
+                <input type="text" id="amPlaylistName" value="${defaultPlaylistName}" placeholder="Ej. SynthPop para cuando solo quieres bailar" style="width: 100%; background: #09090b; border: 1px solid var(--border-strong); padding: 9px 12px; color: #fff; border-radius: 4px; font-size: 13px;">
               </div>
 
               <div>
@@ -3437,38 +3438,142 @@
   }
 
   var _curCachedAmStoryDataUrl = null;
+  var _curCachedAmRadarStoryDataUrl = null;
   var _curAmSongTitle = '';
+  var _curAmArtistName = '';
+  var _activeAmStoryTab = 'radar';
+  var _loadedRadarArtistImages = {};
+
+  function switchAmStoryView(view) {
+    _activeAmStoryTab = view;
+    var btnRadar = document.getElementById('btnTabStoryRadar');
+    var btnPl = document.getElementById('btnTabStoryPlaylist');
+    var cRadar = document.getElementById('amRadarStoryCanvas');
+    var cPl = document.getElementById('amStoryCanvas');
+
+    if (view === 'radar') {
+      if (cRadar) cRadar.style.display = 'block';
+      if (cPl) cPl.style.display = 'none';
+      if (btnRadar) {
+        btnRadar.style.background = 'var(--accent-lime)';
+        btnRadar.style.color = '#000';
+      }
+      if (btnPl) {
+        btnPl.style.background = 'transparent';
+        btnPl.style.color = 'var(--text-muted)';
+      }
+    } else {
+      if (cRadar) cRadar.style.display = 'none';
+      if (cPl) cPl.style.display = 'block';
+      if (btnPl) {
+        btnPl.style.background = 'var(--accent-pink)';
+        btnPl.style.color = '#000';
+      }
+      if (btnRadar) {
+        btnRadar.style.background = 'transparent';
+        btnRadar.style.color = 'var(--text-muted)';
+      }
+    }
+  }
 
   function handleAutoMessageFormSubmit(e) {
     e.preventDefault();
+    var radarSelectEl = document.getElementById('amRadarSelect');
+    var radarSelectVal = radarSelectEl ? radarSelectEl.value : 'none';
     var radarUrl = (document.getElementById('amRadarUrl').value || '').trim();
     var songTitle = (document.getElementById('amSongTitle').value || '').trim();
     var artistName = (document.getElementById('amArtistName').value || '').trim();
     var playlistName = (document.getElementById('amPlaylistName').value || '').trim();
     var playlistUrl = (document.getElementById('amPlaylistUrl').value || '').trim();
     var genre = (document.getElementById('amGenre').value || 'INDIE').trim().toUpperCase();
-
-    if (!songTitle) {
-      showToast('⚠️ Por favor ingresa el título de la canción');
-      return;
-    }
-    if (!playlistUrl) {
-      showToast('⚠️ Por favor ingresa la URL de la playlist de Spotify');
-      return;
-    }
-    if (!playlistName) {
-      playlistName = 'Playlist Oficial The New Indie Wave';
-    }
-
-    _curAmSongTitle = songTitle;
-
     var includeUrls = document.getElementById('amIncludeUrls') ? document.getElementById('amIncludeUrls').checked : true;
     var cleanRadarUrl = (radarUrl && radarUrl !== 'https://thenewindiewave.online/artistas.html?artista=') ? radarUrl : '';
 
+    var radarList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var cleanRadarList = radarList.filter(function(a){ return a && a.id !== 'spotify_auth_config' && a.type !== 'config'; });
+    var selectedArtistObj = null;
+
+    if (radarSelectVal && radarSelectVal !== 'none' && radarSelectVal !== 'custom') {
+      selectedArtistObj = cleanRadarList.find(function(a){ return a.id === radarSelectVal; });
+    } else if (cleanRadarUrl) {
+      var matchId = cleanRadarUrl.match(/artista=([^&]+)/);
+      if (matchId) {
+        selectedArtistObj = cleanRadarList.find(function(a){ return a.id === decodeURIComponent(matchId[1]); });
+      }
+    }
+
+    if (!selectedArtistObj && (radarSelectVal !== 'none' && (artistName || cleanRadarUrl))) {
+      selectedArtistObj = {
+        id: 'custom',
+        name: artistName || 'Artista del Radar',
+        city: 'México',
+        genre: genre || 'Indie',
+        type: 'radar',
+        order: 1,
+        image: ''
+      };
+    }
+
+    var hasRadar = Boolean(selectedArtistObj && radarSelectVal !== 'none');
+    var hasPlaylist = Boolean(songTitle && playlistUrl);
+
+    if (!hasRadar && !hasPlaylist) {
+      showToast('⚠️ Selecciona un artista del radar o ingresa canción y playlist de Spotify');
+      return;
+    }
+
+    var displayName = (selectedArtistObj && selectedArtistObj.name) ? selectedArtistObj.name : (artistName || 'Artista');
+    _curAmArtistName = displayName;
+    _curAmSongTitle = songTitle;
+
     var fullMessage = '';
-    if (includeUrls) {
-      if (cleanRadarUrl) {
-        fullMessage = `¡Felicidades! ¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
+
+    // MODO 1: SOLO ARTISTA DEL RADAR (Sin playlist / track)
+    if (hasRadar && !hasPlaylist) {
+      if (includeUrls) {
+        fullMessage = `¡Felicidades ${displayName}! 🎉
+
+¡Tu proyecto musical ya aparece de manera oficial en ARTISTAS EN EL RADAR de The New Indie Wave!
+${cleanRadarUrl || 'https://thenewindiewave.online/artistas.html'}
+
+Te preparamos esta reseña y espacio permanente en nuestro directorio editorial para que más escuchas, curadores y medios independientes de México, Latam y España conozcan tu propuesta sonora.
+
+Te invitamos a compartir esta historia visual en tus redes para celebrar este paso y que sigan creciendo los éxitos.
+
+Sigamos haciendo comunidad:
+Instagram:
+@the.new.indie.wave
+@rodrigodlmoral`;
+      } else {
+        fullMessage = `¡Felicidades ${displayName}! 🎉
+
+¡Tu proyecto musical ya aparece de manera oficial en ARTISTAS EN EL RADAR de The New Indie Wave!
+
+Te preparamos esta reseña y espacio permanente en nuestro directorio editorial para que más escuchas, curadores y medios independientes de México, Latam y España conozcan tu propuesta sonora.
+Mándanos DM para compartirte tu enlace oficial directo.
+
+Te invitamos a compartir esta historia visual en tus redes para celebrar este paso y que sigan creciendo los éxitos.
+
+Sigamos haciendo comunidad:
+Instagram:
+@the.new.indie.wave
+@rodrigodlmoral`;
+      }
+
+      generateRadarArtistStoryCanvas(selectedArtistObj, 'amRadarStoryCanvas');
+
+      var tabContainer = document.getElementById('amStoryTabContainer');
+      if (tabContainer) tabContainer.style.display = 'none';
+      switchAmStoryView('radar');
+    }
+    // MODO 2: COMPLETO (Track + Playlist Y Artista del Radar)
+    else if (hasRadar && hasPlaylist) {
+      if (!playlistName) playlistName = 'Playlist Oficial The New Indie Wave';
+
+      if (includeUrls) {
+        fullMessage = `¡Felicidades ${displayName}! 🎉
+
+¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
 ${cleanRadarUrl}
 
 te invitamos a que compartas con tus seguidores esta reseña y que sigan creciendo los éxitos. También es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
@@ -3479,22 +3584,35 @@ Instagram:
 @the.new.indie.wave
 @rodrigodlmoral`;
       } else {
-        fullMessage = `¡Felicidades! Es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
-${playlistUrl}
+        fullMessage = `¡Felicidades ${displayName}! 🎉
 
-Te invitamos a compartirlo con tus seguidores para que sigan creciendo los éxitos.
+¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
+
+te invitamos a que compartas con tus seguidores esta reseña y que sigan creciendo los éxitos. También es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+Mandame Dm para compartirte el link de la playlist.
 
 Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras redes:
 Instagram:
 @the.new.indie.wave
 @rodrigodlmoral`;
       }
-    } else {
-      if (cleanRadarUrl) {
-        fullMessage = `¡Felicidades! ¡Tu proyecto musical ya aparece en ARTISTAS DEL RADAR!
 
-te invitamos a que compartas con tus seguidores esta reseña y que sigan creciendo los éxitos. También es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
-Mandame Dm para compartirte el link de la playlist.
+      generateCuratorStoryCanvas(artistName || displayName, songTitle, playlistName, genre, 'amStoryCanvas', playlistUrl);
+      generateRadarArtistStoryCanvas(selectedArtistObj, 'amRadarStoryCanvas');
+
+      var tabContainer = document.getElementById('amStoryTabContainer');
+      if (tabContainer) tabContainer.style.display = 'flex';
+      switchAmStoryView('radar');
+    }
+    // MODO 3: SOLO PLAYLIST (Sin artista del radar)
+    else {
+      if (!playlistName) playlistName = 'Playlist Oficial The New Indie Wave';
+
+      if (includeUrls) {
+        fullMessage = `¡Felicidades! Es de nuestro gusto informarte que tu tema: “${songTitle}“ fue seleccionado para añadirse en la rotación de nuestra playlist oficial: “${playlistName}“
+${playlistUrl}
+
+Te invitamos a compartirlo con tus seguidores para que sigan creciendo los éxitos.
 
 Si gustas apoyar creciendo la comunidad también te invitamos a seguir nuestras redes:
 Instagram:
@@ -3511,16 +3629,18 @@ Instagram:
 @the.new.indie.wave
 @rodrigodlmoral`;
       }
+
+      generateCuratorStoryCanvas(artistName || displayName, songTitle, playlistName, genre, 'amStoryCanvas', playlistUrl);
+
+      var tabContainer = document.getElementById('amStoryTabContainer');
+      if (tabContainer) tabContainer.style.display = 'none';
+      switchAmStoryView('playlist');
     }
 
     document.getElementById('amGeneratedMessageText').value = fullMessage;
-
-    // Generar Story en amStoryCanvas
-    generateCuratorStoryCanvas(artistName, songTitle, playlistName, genre, 'amStoryCanvas', playlistUrl);
-
     var modal = document.getElementById('autoMessageModal');
     if (modal) modal.style.display = 'flex';
-    showToast('✓ Mensaje y Story generados con éxito');
+    showToast('✓ Mensaje y Story(s) generados con éxito');
   }
 
   function closeAutoMessageModal() {
@@ -3564,10 +3684,26 @@ Instagram:
   }
 
   function downloadAutoMessageStory() {
-    if (!_curCachedAmStoryDataUrl) return;
     var a = document.createElement('a');
-    a.download = 'Historia_TNIW_' + _curAmSongTitle.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
-    a.href = _curCachedAmStoryDataUrl;
+    if (_activeAmStoryTab === 'radar') {
+      var cRadar = document.getElementById('amRadarStoryCanvas');
+      var dataUrl = _curCachedAmRadarStoryDataUrl || (cRadar ? cRadar.toDataURL('image/png') : null);
+      if (!dataUrl) {
+        showToast('⚠️ No se pudo obtener la imagen del Radar');
+        return;
+      }
+      a.download = 'Historia_TNIW_Radar_' + (_curAmArtistName || 'Artista').replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+      a.href = dataUrl;
+    } else {
+      var cPl = document.getElementById('amStoryCanvas');
+      var dataUrl = _curCachedAmStoryDataUrl || (cPl ? cPl.toDataURL('image/png') : null);
+      if (!dataUrl) {
+        showToast('⚠️ No se pudo obtener la imagen de Playlist');
+        return;
+      }
+      a.download = 'Historia_TNIW_Playlist_' + (_curAmSongTitle || 'Track').replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+      a.href = dataUrl;
+    }
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -3575,20 +3711,24 @@ Instagram:
   }
 
   function copyAutoMessageStoryToClipboard() {
-    if (!navigator.clipboard || !window.ClipboardItem || !_curCachedAmStoryDataUrl) {
+    if (!navigator.clipboard || !window.ClipboardItem) {
       showToast('⚠️ Tu navegador no soporta copiado directo');
       return;
     }
-    fetch(_curCachedAmStoryDataUrl)
-      .then(function(res){ return res.blob(); })
-      .then(function(blob){
-        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function(){
+    var targetCanvas = _activeAmStoryTab === 'radar' 
+      ? document.getElementById('amRadarStoryCanvas') 
+      : document.getElementById('amStoryCanvas');
+    if (!targetCanvas) return;
+
+    targetCanvas.toBlob(function(blob) {
+      if (blob) {
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function() {
           showToast('✓ ¡Imagen de historia copiada al portapapeles!');
+        }).catch(function() {
+          showToast('⚠️ No se pudo copiar la imagen automáticamente. Usa el botón descargar.');
         });
-      })
-      .catch(function(){
-        showToast('⚠️ No se pudo copiar la imagen automáticamente. Usa el botón descargar.');
-      });
+      }
+    }, 'image/png');
   }
 
   function showToast(msg) {
@@ -4358,6 +4498,270 @@ Instagram:
     }
   }
 
+  function generateRadarArtistStoryCanvas(artist, targetCanvasId) {
+    var canvasId = (typeof targetCanvasId === 'string' && targetCanvasId) ? targetCanvasId : 'amRadarStoryCanvas';
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = 1080;
+    var H = 1920;
+
+    var artistName = (artist && artist.name) ? artist.name : 'Artista en el Radar';
+    var city = (artist && artist.city) ? artist.city : 'México';
+    var genre = (artist && artist.genre) ? artist.genre : 'Música Indie';
+    var order = (artist && artist.order) ? artist.order : 1;
+    var type = (artist && artist.type) ? artist.type : 'radar';
+    var bio = (artist && artist.bio) ? artist.bio : '';
+    var imageUrl = (artist && artist.image) ? artist.image : '';
+
+    // Manejo de carga asíncrona de la foto del artista
+    var artistImg = null;
+    if (imageUrl) {
+      if (_loadedRadarArtistImages[imageUrl] && _loadedRadarArtistImages[imageUrl] !== 'error') {
+        artistImg = _loadedRadarArtistImages[imageUrl];
+      } else if (!_loadedRadarArtistImages[imageUrl]) {
+        var imgLoader = new Image();
+        imgLoader.crossOrigin = 'anonymous';
+        imgLoader.onload = function() {
+          _loadedRadarArtistImages[imageUrl] = imgLoader;
+          generateRadarArtistStoryCanvas(artist, targetCanvasId);
+        };
+        imgLoader.onerror = function() {
+          _loadedRadarArtistImages[imageUrl] = 'error';
+        };
+        imgLoader.src = imageUrl;
+      }
+    }
+
+    // 1. Fondo Oficial
+    if (_curStoryBgImage.complete && _curStoryBgImage.naturalWidth > 0) {
+      ctx.drawImage(_curStoryBgImage, 0, 0, W, H);
+      ctx.fillStyle = 'rgba(9, 9, 12, 0.72)';
+      ctx.fillRect(0, 0, W, H);
+    } else {
+      var bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+      bgGrad.addColorStop(0, '#090a0f');
+      bgGrad.addColorStop(0.5, '#050608');
+      bgGrad.addColorStop(1, '#020304');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // Destellos ambientales neon
+    var radCyan = ctx.createRadialGradient(W * 0.85, 200, 20, W * 0.85, 200, 500);
+    radCyan.addColorStop(0, 'rgba(56, 189, 248, 0.18)');
+    radCyan.addColorStop(1, 'rgba(56, 189, 248, 0)');
+    ctx.fillStyle = radCyan;
+    ctx.fillRect(0, 0, W, 800);
+
+    var radLime = ctx.createRadialGradient(W * 0.15, H - 350, 20, W * 0.15, H - 350, 500);
+    radLime.addColorStop(0, 'rgba(187, 244, 81, 0.15)');
+    radLime.addColorStop(1, 'rgba(187, 244, 81, 0)');
+    ctx.fillStyle = radLime;
+    ctx.fillRect(0, H - 800, W, 800);
+
+    // 2. Cabecera Branding
+    ctx.save();
+    ctx.fillStyle = '#bbf451';
+    ctx.font = 'bold 21px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('// THE NEW INDIE WAVE  •  CURADURÍA EDITORIAL //', W / 2, 115);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 48px sans-serif';
+    ctx.shadowColor = 'rgba(187, 244, 81, 0.65)';
+    ctx.shadowBlur = 25;
+    ctx.fillText('ARTISTAS EN EL RADAR', W / 2, 182);
+    ctx.shadowBlur = 0;
+
+    // Badge de puesto / categoría
+    var isTop = (type === 'top3' || (order && order <= 10));
+    var badgeLabel = isTop ? ('⭐ TOP 10 // PUESTO #' + order) : ('📻 RADAR EDITORIAL' + (order ? (' // #' + order) : ''));
+    var badgeColor = isTop ? '#bbf451' : '#38bdf8';
+    var badgeBg = isTop ? 'rgba(187, 244, 81, 0.12)' : 'rgba(56, 189, 248, 0.12)';
+    var badgeBorder = isTop ? 'rgba(187, 244, 81, 0.45)' : 'rgba(56, 189, 248, 0.45)';
+
+    ctx.font = 'bold 20px monospace';
+    var bWidth = ctx.measureText(badgeLabel).width + 36;
+    var bHeight = 40;
+    var bX = (W - bWidth) / 2;
+    var bY = 222;
+
+    ctx.fillStyle = badgeBg;
+    drawRoundRectCur(ctx, bX, bY, bWidth, bHeight, 20);
+    ctx.fill();
+
+    ctx.strokeStyle = badgeBorder;
+    ctx.lineWidth = 1.5;
+    drawRoundRectCur(ctx, bX, bY, bWidth, bHeight, 20);
+    ctx.stroke();
+
+    ctx.fillStyle = badgeColor;
+    ctx.textAlign = 'center';
+    ctx.fillText(badgeLabel, W / 2, bY + 27);
+    ctx.restore();
+
+    // 3. Tarjeta Central del Artista (x=90, y=290, W=900, H=1310)
+    var cardX = 90;
+    var cardY = 290;
+    var cardW = 900;
+    var cardH = 1310;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+    ctx.shadowBlur = 60;
+    ctx.shadowOffsetY = 24;
+    ctx.fillStyle = 'rgba(14, 15, 20, 0.96)';
+    drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 28);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 2;
+    drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 28);
+    ctx.stroke();
+
+    // 4. Foto / Carátula del Artista (y=340, W=780, H=740)
+    var photoX = cardX + 60;
+    var photoY = cardY + 50;
+    var photoW = cardW - 120;
+    var photoH = 720;
+
+    ctx.save();
+    drawRoundRectCur(ctx, photoX, photoY, photoW, photoH, 20);
+    ctx.clip();
+
+    if (artistImg && artistImg.complete && (artistImg.naturalWidth > 0 || artistImg.width > 0)) {
+      var iw = artistImg.naturalWidth || artistImg.width;
+      var ih = artistImg.naturalHeight || artistImg.height;
+      var sc = Math.max(photoW / iw, photoH / ih);
+      var dw = iw * sc;
+      var dh = ih * sc;
+      var dx = photoX + (photoW - dw) / 2;
+      var dy = photoY + (photoH - dh) / 2;
+      ctx.drawImage(artistImg, dx, dy, dw, dh);
+    } else {
+      var fbGrad = ctx.createLinearGradient(photoX, photoY, photoX + photoW, photoY + photoH);
+      fbGrad.addColorStop(0, '#131b2e');
+      fbGrad.addColorStop(0.5, '#0d131f');
+      fbGrad.addColorStop(1, '#07090e');
+      ctx.fillStyle = fbGrad;
+      ctx.fillRect(photoX, photoY, photoW, photoH);
+
+      ctx.fillStyle = 'rgba(187, 244, 81, 0.2)';
+      ctx.font = '900 180px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(artistName.charAt(0).toUpperCase() || '♪', photoX + photoW / 2, photoY + photoH / 2 + 60);
+    }
+
+    var photoDark = ctx.createLinearGradient(photoX, photoY + photoH - 180, photoX, photoY + photoH);
+    photoDark.addColorStop(0, 'rgba(14, 15, 20, 0)');
+    photoDark.addColorStop(1, 'rgba(14, 15, 20, 0.85)');
+    ctx.fillStyle = photoDark;
+    ctx.fillRect(photoX, photoY + photoH - 180, photoW, 180);
+    ctx.restore();
+
+    ctx.strokeStyle = '#bbf451';
+    ctx.lineWidth = 3.5;
+    drawRoundRectCur(ctx, photoX, photoY, photoW, photoH, 20);
+    ctx.stroke();
+
+    // Badge de Ubicación sobre la foto
+    ctx.save();
+    var cityBadge = '📍 ' + (city || 'MÉXICO').toUpperCase();
+    ctx.font = 'bold 18px monospace';
+    var cbW = ctx.measureText(cityBadge).width + 28;
+    var cbH = 36;
+    var cbX = photoX + photoW - cbW - 16;
+    var cbY = photoY + 16;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.78)';
+    drawRoundRectCur(ctx, cbX, cbY, cbW, cbH, 8);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+    ctx.lineWidth = 1.2;
+    drawRoundRectCur(ctx, cbX, cbY, cbW, cbH, 8);
+    ctx.stroke();
+    ctx.fillStyle = '#38bdf8';
+    ctx.textAlign = 'center';
+    ctx.fillText(cityBadge, cbX + cbW / 2, cbY + 24);
+    ctx.restore();
+
+    // 5. Nombre del Artista & Información
+    var infoY = photoY + photoH + 45;
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 50px sans-serif';
+    ctx.fillText(truncateStringCur(artistName.toUpperCase(), 24), W / 2, infoY);
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 22px monospace';
+    ctx.fillText('// ' + genre.toUpperCase() + '  •  ' + city.toUpperCase(), W / 2, infoY + 45);
+
+    var cleanBio = bio ? bio.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim() : '';
+    if (cleanBio.length > 180) cleanBio = cleanBio.slice(0, 175) + '...';
+    if (!cleanBio) {
+      cleanBio = 'Propuesta seleccionada para la curaduría oficial de The New Indie Wave por su autenticidad y sonido independiente.';
+    }
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+    ctx.font = 'italic 23px sans-serif';
+    wrapTextCenteredCur(ctx, '“' + cleanBio + '”', W / 2, infoY + 110, 780, 36);
+
+    // Pill de Verificación
+    var pillY = cardY + cardH - 64;
+    var vLabel = '● PROYECTO SELECCIONADO EN EL RADAR TNIW';
+    ctx.font = 'bold 18px monospace';
+    var vW = ctx.measureText(vLabel).width + 36;
+    var vH = 38;
+    var vX = (W - vW) / 2;
+    ctx.fillStyle = 'rgba(187, 244, 81, 0.12)';
+    drawRoundRectCur(ctx, vX, pillY, vW, vH, 19);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
+    ctx.lineWidth = 1.2;
+    drawRoundRectCur(ctx, vX, pillY, vW, vH, 19);
+    ctx.stroke();
+    ctx.fillStyle = '#bbf451';
+    ctx.fillText(vLabel, W / 2, pillY + 25);
+    ctx.restore();
+
+    // 6. Tarjeta Inferior de Llamado a la Acción
+    var footY = 1640;
+    var footH = 190;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(10, 12, 16, 0.95)';
+    drawRoundRectCur(ctx, cardX, footY, cardW, footH, 20);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+    ctx.lineWidth = 1.5;
+    drawRoundRectCur(ctx, cardX, footY, cardW, footH, 20);
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'bold 19px monospace';
+    ctx.fillText('CONOCE SU PERFIL COMPLETO Y MÚSICA EN:', W / 2, footY + 48);
+
+    ctx.fillStyle = '#bbf451';
+    ctx.font = '900 32px monospace';
+    ctx.fillText('thenewindiewave.online/artistas.html', W / 2, footY + 98);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 21px monospace';
+    ctx.fillText('🔗 ENLACE EN BIO  •  @THE.NEW.INDIE.WAVE', W / 2, footY + 148);
+    ctx.restore();
+
+    try {
+      var dataUrl = canvas.toDataURL('image/png');
+      _curCachedAmRadarStoryDataUrl = dataUrl;
+    } catch(e) {
+      console.warn('Radar canvas toDataURL notice:', e);
+    }
+  }
+
   function wrapTextCenteredCur(ctx, text, centerX, startY, maxWidth, lineHeight) {
     var words = text.split(' ');
     var lines = [];
@@ -5064,13 +5468,24 @@ Instagram:
           <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">9:16 HD</span>
         </div>
 
+        <!-- SELECTOR DE PESTAÑAS DE STORY (SI HAY AMBAS) -->
+        <div id="amStoryTabContainer" style="display: none; gap: 6px; background: rgba(0,0,0,0.5); padding: 4px; border-radius: 6px; border: 1px solid var(--border);">
+          <button type="button" id="btnTabStoryRadar" onclick="switchAmStoryView('radar')" style="flex: 1; padding: 7px 10px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border-radius: 4px; border: none; cursor: pointer; background: var(--accent-lime); color: #000;">
+            🌟 Artista en Radar
+          </button>
+          <button type="button" id="btnTabStoryPlaylist" onclick="switchAmStoryView('playlist')" style="flex: 1; padding: 7px 10px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border-radius: 4px; border: none; cursor: pointer; background: transparent; color: var(--text-muted);">
+            🎵 Playlist Oficial
+          </button>
+        </div>
+
         <div style="background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; justify-content: center; align-items: center;">
-          <canvas id="amStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 220px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
+          <canvas id="amRadarStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 220px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
+          <canvas id="amStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 220px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: none;"></canvas>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <button onclick="downloadAutoMessageStory()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 12.5px; font-weight: 800; padding: 12px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
-            📥 Descargar Imagen de Historia (PNG HD)
+            📥 Descargar Historia en HD (PNG)
           </button>
           <button onclick="copyAutoMessageStoryToClipboard()" style="background: rgba(255,255,255,0.06); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border-strong); cursor: pointer;">
             📋 Copiar Imagen al Portapapeles
