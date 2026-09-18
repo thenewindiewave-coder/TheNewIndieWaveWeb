@@ -31,6 +31,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.thenewindiewave.online/blog</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://www.thenewindiewave.online/manifiesto</loc>
     <lastmod>2026-09-15</lastmod>
     <changefreq>monthly</changefreq>
