@@ -1112,6 +1112,7 @@
       <button class="tab-btn" onclick="switchTab('playlists_manager', this)">[ 🏷️ GESTIÓN DE PLAYLISTS & ETIQUETAS ]</button>
       <button class="tab-btn" onclick="switchTab('radar_manager', this)">[ 🌟 ARTISTAS EN EL RADAR ]</button>
       <button class="tab-btn" onclick="switchTab('auto_message', this)">[ 🤖 MENSAJE AUTOMÁTICO ]</button>
+      <button class="tab-btn" onclick="switchTab('news_scout', this)" style="color: var(--accent-cyan); border-color: rgba(56,189,248,0.4);">[ 📡 BOT SCOUT // NOTICIAS INDIE ]</button>
       <button class="tab-btn" onclick="openBlogArticleModal()" style="color: var(--accent-lime); border-color: rgba(187,244,81,0.4);">[ ⚡ REDACTAR ARTÍCULO BLOG ]</button>
     </div>
 
@@ -1132,6 +1133,49 @@
   <!-- LIST OF TRACKS -->
   <div class="queue-list" id="queueContainer">
     <div class="empty-box">Cargando envíos desde Supabase...</div>
+  </div>
+
+
+  <!-- PANEL BOT SCOUT DE NOTICIAS INDIE -->
+  <div id="newsScoutContainer" style="display:none; margin-top:24px;">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:28px; margin-bottom:28px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:16px;">
+        <div>
+          <div style="font-family:var(--font-mono); font-size:11px; color:var(--accent-cyan); letter-spacing:1px; margin-bottom:6px;">
+            ● SISTEMA AUTÓNOMO // RADAR DE MEDIOS EN ESPAÑOL
+          </div>
+          <h2 style="font-family:var(--font-heading); font-size:24px; font-weight:900; color:#fff;">
+            BOT SCOUT DE NOTICIAS INDIE: MÉXICO, LATAM & ESPAÑA
+          </h2>
+        </div>
+        <button onclick="scanNewsScoutLive()" id="btnScanScout" class="btn-refresh" style="background:rgba(56,189,248,0.12); color:var(--accent-cyan); border-color:var(--accent-cyan);">
+          📡 Escanear Medios en Vivo Ahora
+        </button>
+      </div>
+
+      <p style="color:var(--text-muted); font-size:13.5px; max-width:800px; line-height:1.6; margin-bottom:20px;">
+        El bot rastrea en vivo 9 medios independientes de México, Latinoamérica y España. Aquí puedes ver las novedades detectadas en tiempo real y publicarlas con 1 clic en el blog, o dejar que el bot automático las publique a diario a las 8:00 AM.
+      </p>
+
+      <!-- CHIPS DE FUENTES -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin-right:4px;">FUENTES ACTIVAS:</span>
+        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇲🇽 WARP Magazine</span>
+        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇲🇽 Sopitas Música</span>
+        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇲🇽 Setlist.me</span>
+        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇦🇷 Indie Hoy</span>
+        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🌎 Cuchara Sónica</span>
+        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇪🇸 MondoSonoro</span>
+        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇪🇸 Binaural</span>
+        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇪🇸 Muzikalia</span>
+        <span class="chip-btn active" style="background:rgba(255,255,255,0.06); color:#fff; border-color:var(--border-strong);">🇪🇸 Jenesaispop</span>
+      </div>
+    </div>
+
+    <!-- LISTADO DE NOTICIAS DETECTADAS EN VIVO -->
+    <div id="scoutNewsList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:20px;">
+      <div class="empty-box" style="grid-column: 1/-1;">Haz clic en "Escanear Medios en Vivo Ahora" para consultar el radar...</div>
+    </div>
   </div>
 
 </main>
@@ -1263,6 +1307,17 @@
       toolbar.style.display = (tab === 'playlists_manager' || tab === 'radar_manager' || tab === 'auto_message') ? 'none' : 'flex';
     }
 
+    if(tab === 'news_scout') {
+      currentTab = tab;
+      document.getElementById('queueContainer').style.display = 'none';
+      document.getElementById('queueToolbar').style.display = 'none';
+      var pm = document.getElementById('playlistManagerContainer'); if(pm) pm.style.display = 'none';
+      var rm = document.getElementById('radarManagerContainer'); if(rm) rm.style.display = 'none';
+      var am = document.getElementById('autoMessageContainer'); if(am) am.style.display = 'none';
+      var sc = document.getElementById('newsScoutContainer'); if(sc) { sc.style.display = 'block'; scanNewsScoutLive(); }
+      return;
+    }
+    var scEl = document.getElementById('newsScoutContainer'); if(scEl) scEl.style.display = 'none';
     if(tab === 'playlists_manager') {
       loadPlaylistsForManager();
     } else if(tab === 'radar_manager') {

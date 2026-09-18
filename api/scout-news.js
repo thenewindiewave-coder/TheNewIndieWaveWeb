@@ -1,151 +1,142 @@
 /**
- * BOT SCOUT DE NOTICIAS AUTOMÁTICO — THE NEW INDIE WAVE
- * Especializado 100% en la escena independiente de MÉXICO, LATINOAMÉRICA y ESPAÑA.
- * Rastrea los medios más influyentes de la cultura indie en español, extrae las noticias
- * más frescas, las procesa con IA y las publica en Supabase en formato rápido (1.5 min).
+ * SERVERLESS ENDPOINT PARA CONTROLAR EL BOT SCOUT DESDE EL PANEL DE CURADOR
+ * Permite escanear medios en vivo y publicar noticias seleccionadas con 1 clic.
  */
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.supabase.co';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
-// FUENTES OFICIALES DE LA ESCENA INDIE: MÉXICO, LATINOAMÉRICA Y ESPAÑA
 const RSS_FEEDS = [
-  // MÉXICO
   { name: 'WARP Magazine (México)', url: 'https://warp.la/feed/', region: 'México' },
   { name: 'Sopitas Música (México)', url: 'https://www.sopitas.com/feed/', region: 'México' },
   { name: 'Setlist.me (México)', url: 'https://setlist.me/feed/', region: 'México' },
-
-  // LATINOAMÉRICA (Argentina, Chile, Colombia, Perú, etc.)
-  { name: 'Indie Hoy (Latinoamérica)', url: 'https://indiehoy.com/feed/', region: 'Latinoamérica' },
-  { name: 'Cuchara Sónica (Iberoamérica)', url: 'https://cucharasonica.com/feed/', region: 'Latinoamérica' },
-
-  // ESPAÑA
+  { name: 'Indie Hoy (Latam)', url: 'https://indiehoy.com/feed/', region: 'Latinoamérica' },
+  { name: 'Cuchara Sónica (Latam)', url: 'https://cucharasonica.com/feed/', region: 'Latinoamérica' },
   { name: 'MondoSonoro (España)', url: 'https://www.mondosonoro.com/feed/', region: 'España' },
   { name: 'Binaural (España)', url: 'https://binaural.es/feed/', region: 'España' },
   { name: 'Muzikalia (España)', url: 'https://muzikalia.com/feed/', region: 'España' },
   { name: 'Jenesaispop (España)', url: 'https://jenesaispop.com/feed/', region: 'España' }
 ];
 
-async function runNewsScout() {
-  console.log('🤖 [TNIW Scout Bot] Iniciando patrullaje de medios indie en México, Latam y España...');
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  if (!SUPABASE_SERVICE_KEY) {
-    console.error('❌ Error: Falta SUPABASE_SERVICE_ROLE_KEY.');
-    process.exit(1);
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // 1. Obtener slugs existentes en Supabase para evitar duplicados
-  let existingSlugs = new Set();
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/articles?select=slug`, {
-      headers: {
-        'apikey': SUPABASE_SERVICE_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-      }
-    });
-    if (res.ok) {
-      const rows = await res.json();
-      rows.forEach(r => existingSlugs.add(r.slug));
-      console.log(`✓ Verificados ${existingSlugs.size} artículos existentes en Supabase.`);
-    }
-  } catch (err) {
-    console.warn('Aviso al leer slugs previos:', err.message);
-  }
-
-  // 2. Rastreo de Feeds
-  const candidateArticles = [];
-
-  for (const feed of RSS_FEEDS) {
+  // 1. GET: ESCANEAR MEDIOS EN VIVO Y DEVOLVER EL RADAR
+  if (req.method === 'GET') {
     try {
-      console.log(`📡 [${feed.region}] Consultando: ${feed.name}...`);
-      const response = await fetch(feed.url, {
-        headers: { 
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) TheNewIndieWave/1.0' 
+      // Slugs en Supabase
+      let existingSlugs = new Set();
+      try {
+        const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?select=slug`, {
+          headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` }
+        });
+        if (dbRes.ok) {
+          const rows = await dbRes.json();
+          rows.forEach(r => existingSlugs.add(r.slug));
         }
-      });
-      if (!response.ok) continue;
+      } catch(e) {}
 
-      const xml = await response.text();
-      const items = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
+      const detectedNews = [];
 
-      for (const rawItem of items.slice(0, 4)) {
-        const titleMatch = rawItem.match(/<title>([\s\S]*?)<\/title>/);
-        const linkMatch = rawItem.match(/<link>([\s\S]*?)<\/link>/);
-        const descMatch = rawItem.match(/<description>([\s\S]*?)<\/description>/);
+      for (const feed of RSS_FEEDS) {
+        try {
+          const r = await fetch(feed.url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 TNIW-Curator/1.0' }
+          });
+          if (!r.ok) continue;
+          const xml = await r.text();
+          const items = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
 
-        if (titleMatch && linkMatch) {
-          const rawTitle = cleanXml(titleMatch[1]);
-          const link = cleanXml(linkMatch[1]);
-          const desc = descMatch ? cleanXml(descMatch[1]) : '';
+          for (const rawItem of items.slice(0, 3)) {
+            const titleMatch = rawItem.match(/<title>([\s\S]*?)<\/title>/);
+            const linkMatch = rawItem.match(/<link>([\s\S]*?)<\/link>/);
+            const descMatch = rawItem.match(/<description>([\s\S]*?)<\/description>/);
 
-          // Filtrar noticias irrelevantes de cine o chismes; priorizar música y lanzamientos
-          if (isMusicRelevant(rawTitle, desc)) {
-            candidateArticles.push({
-              source: feed.name,
-              region: feed.region,
-              title: rawTitle,
-              link,
-              desc
-            });
+            if (titleMatch && linkMatch) {
+              const title = cleanXml(titleMatch[1]);
+              const link = cleanXml(linkMatch[1]);
+              const desc = descMatch ? cleanXml(descMatch[1]) : '';
+
+              if (isMusicRelevant(title, desc)) {
+                const s = slugify(title);
+                const isPublished = existingSlugs.has(s) || Array.from(existingSlugs).some(x => x.includes(s.slice(0, 20)));
+
+                detectedNews.push({
+                  source: feed.name,
+                  region: feed.region,
+                  title,
+                  link,
+                  desc: desc.slice(0, 180) + '...',
+                  slug: s,
+                  is_published: isPublished
+                });
+              }
+            }
           }
-        }
+        } catch(err) {}
       }
+
+      return res.status(200).json({
+        success: true,
+        count: detectedNews.length,
+        feeds: RSS_FEEDS.map(f => f.name),
+        news: detectedNews
+      });
+
     } catch (err) {
-      console.warn(`Aviso en ${feed.name}:`, err.message);
+      return res.status(500).json({ error: err.message });
     }
   }
 
-  console.log(`🎯 Encontradas ${candidateArticles.length} noticias musicales candidatas.`);
-  if (candidateArticles.length === 0) {
-    console.log('No se encontraron noticias nuevas en este ciclo.');
-    return;
-  }
+  // 2. POST: REDACTAR Y PUBLICAR UNA NOTICIA SELECCIONADA
+  if (req.method === 'POST') {
+    try {
+      const { title, source, region, link, desc } = req.body || {};
 
-  // 3. Seleccionar la más fresca y no procesada
-  let selected = null;
-  for (const candidate of candidateArticles) {
-    const testSlug = slugify(candidate.title);
-    if (!existingSlugs.has(testSlug) && !Array.from(existingSlugs).some(s => s.includes(testSlug.slice(0, 20)))) {
-      selected = candidate;
-      break;
+      if (!title) {
+        return res.status(400).json({ error: 'Falta el título de la noticia.' });
+      }
+
+      const prompt = `Noticia indie de ${region || 'Iberoamérica'} vía ${source || 'Medios'}:
+Título: "${title}"
+Detalles: "${desc || ''}"
+Fuente original: ${link || ''}`;
+
+      const meta = { title, source: source || 'Medios Indie', region: region || 'Iberoamérica', link: link || '#' };
+      const article = await generateEditorialPiece(prompt, meta);
+
+      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/articles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(article)
+      });
+
+      if (!insertRes.ok) {
+        const errText = await insertRes.text();
+        return res.status(500).json({ error: 'Error al insertar en Supabase', details: errText });
+      }
+
+      const inserted = await insertRes.json();
+      return res.status(200).json({
+        success: true,
+        message: '¡Noticia redactada y publicada en el Blog!',
+        article: inserted && inserted[0] ? inserted[0] : article,
+        url: `https://www.thenewindiewave.online/blog#${article.slug}`
+      });
+
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
     }
-  }
-
-  if (!selected) {
-    console.log('✓ Todas las noticias del día ya están cubiertas en el blog. Cero duplicados.');
-    return;
-  }
-
-  console.log(`⭐ Noticia seleccionada: "${selected.title}" [${selected.region} - ${selected.source}]`);
-
-  // 4. Redactar con IA o Motor Editorial
-  const prompt = `Noticia indie de ${selected.region} vía ${selected.source}:
-Título: "${selected.title}"
-Detalles: "${selected.desc}"
-Enlace fuente: ${selected.link}`;
-
-  const article = await generateEditorialPiece(prompt, selected);
-
-  // 5. Inyectar en Supabase
-  const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/articles`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_SERVICE_KEY,
-      'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-      'Prefer': 'return=representation'
-    },
-    body: JSON.stringify(article)
-  });
-
-  if (insertRes.ok) {
-    console.log(`🎉 ¡ÉXITO! Artículo publicado en the new indie wave:`);
-    console.log(`   Título: "${article.title}"`);
-    console.log(`   Región: ${selected.region}`);
-    console.log(`   URL: /blog#${article.slug}`);
-  } else {
-    const errText = await insertRes.text();
-    console.error('❌ Error al guardar en Supabase:', errText);
   }
 }
 
@@ -157,10 +148,7 @@ function isMusicRelevant(title, desc) {
     'shoegaze', 'post-punk', 'rock', 'pop', 'presenta', 'estreno', 'música', 'musica'
   ];
   const ignoreKeywords = ['película', 'pelicula', 'serie', 'tráiler', 'trailer', 'netflix', 'hbo', 'taquilla', 'marvel'];
-  
-  if (ignoreKeywords.some(k => text.includes(k) && !text.includes('soundtrack'))) {
-    return false;
-  }
+  if (ignoreKeywords.some(k => text.includes(k) && !text.includes('soundtrack'))) return false;
   return musicKeywords.some(k => text.includes(k));
 }
 
@@ -205,13 +193,11 @@ REGLAS:
           return buildArticleObject(parsed, meta);
         }
       }
-    } catch(e) {
-      console.warn("Gemini fallo:", e.message);
-    }
+    } catch(e) {}
   }
 
-  // Fallback autónomo si no hay API externa
-  const slug = `radar-${meta.region.toLowerCase()}-${slugify(meta.title)}-${Date.now().toString().slice(-4)}`;
+  // Fallback autónomo
+  const slug = `radar-${slugify(meta.region)}-${slugify(meta.title)}-${Date.now().toString().slice(-4)}`;
   return {
     slug,
     title: `Radar ${meta.region}: ${meta.title.slice(0, 65)}`,
@@ -260,18 +246,10 @@ function buildArticleObject(parsed, meta) {
 }
 
 function cleanXml(str) {
-  return str
-    .replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&#8216;|&#8217;/g, "'")
-    .replace(/&#8220;|&#8221;/g, '"')
-    .replace(/&amp;/g, '&')
-    .trim();
+  return str.replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1').replace(/<[^>]+>/g, '').replace(/&#8216;|&#8217;/g, "'").replace(/&#8220;|&#8221;/g, '"').replace(/&amp;/g, '&').trim();
 }
 
 function slugify(text) {
   if (!text) return 'nota-' + Math.floor(Math.random()*1000);
   return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
-
-runNewsScout();
