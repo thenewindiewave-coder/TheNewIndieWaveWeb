@@ -3477,6 +3477,116 @@
   var _activeAmStoryTab = 'radar';
   var _loadedRadarArtistImages = {};
 
+  var _curAmSelectedRadarArtist = null;
+  var _customRadarStoryImage = null;
+  var _radarStoryVideoFrameOffset = 0;
+  var _amVideoFrameDebounceTimer = null;
+
+  function isArtistMediaVideo(artist) {
+    if (!artist) return false;
+    if (artist.media_type === 'video') return true;
+    var url = (artist.media_url || artist.image || artist.mediaUrl || artist.img || '').toLowerCase();
+    return url.includes('/video/upload/') || url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov');
+  }
+
+  function updateAmStoryCustomizerUI() {
+    var customizer = document.getElementById('amStoryImageCustomizer');
+    if (!customizer) return;
+
+    var isRadar = Boolean(_curAmSelectedRadarArtist) && _activeAmStoryTab === 'radar';
+    customizer.style.display = isRadar ? 'flex' : 'none';
+
+    var videoSec = document.getElementById('amVideoFrameControlSection');
+    var isVideo = isArtistMediaVideo(_curAmSelectedRadarArtist);
+    if (videoSec) {
+      videoSec.style.display = isVideo ? 'flex' : 'none';
+    }
+
+    var slider = document.getElementById('amVideoFrameSlider');
+    if (slider) slider.value = _radarStoryVideoFrameOffset || 0;
+
+    var valEl = document.getElementById('amVideoFrameValue');
+    if (valEl) valEl.textContent = (_radarStoryVideoFrameOffset || 0).toFixed(1) + 's';
+
+    var notice = document.getElementById('amStoryCustomImageNotice');
+    if (notice) {
+      notice.style.display = _customRadarStoryImage ? 'block' : 'none';
+    }
+  }
+
+  function onAmVideoFrameSliderInput(val) {
+    var sec = parseFloat(val) || 0;
+    var valEl = document.getElementById('amVideoFrameValue');
+    if (valEl) valEl.textContent = sec.toFixed(1) + 's';
+
+    clearTimeout(_amVideoFrameDebounceTimer);
+    _amVideoFrameDebounceTimer = setTimeout(function() {
+      applyAmVideoFrameOffset(sec);
+    }, 180);
+  }
+
+  function onAmVideoFrameSliderChange(val) {
+    clearTimeout(_amVideoFrameDebounceTimer);
+    applyAmVideoFrameOffset(parseFloat(val) || 0);
+  }
+
+  function stepAmVideoFrame(delta) {
+    var cur = _radarStoryVideoFrameOffset || 0;
+    var next = Math.max(0, Math.min(30, +(cur + delta).toFixed(1)));
+    var slider = document.getElementById('amVideoFrameSlider');
+    if (slider) slider.value = next;
+    var valEl = document.getElementById('amVideoFrameValue');
+    if (valEl) valEl.textContent = next.toFixed(1) + 's';
+    applyAmVideoFrameOffset(next);
+  }
+
+  function setAmVideoFrameDirect(sec) {
+    var slider = document.getElementById('amVideoFrameSlider');
+    if (slider) slider.value = sec;
+    var valEl = document.getElementById('amVideoFrameValue');
+    if (valEl) valEl.textContent = sec.toFixed(1) + 's';
+    applyAmVideoFrameOffset(sec);
+  }
+
+  function applyAmVideoFrameOffset(sec) {
+    _radarStoryVideoFrameOffset = sec;
+    _customRadarStoryImage = null; // Quitar imagen personalizada si se navega el video
+    updateAmStoryCustomizerUI();
+    if (_curAmSelectedRadarArtist) {
+      generateRadarArtistStoryCanvas(_curAmSelectedRadarArtist, 'amRadarStoryCanvas');
+    }
+  }
+
+  function handleAmStoryCustomFileUpload(input) {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('⚠️ Selecciona un archivo de imagen válido (JPG, PNG o WEBP)');
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      _customRadarStoryImage = e.target.result;
+      updateAmStoryCustomizerUI();
+      if (_curAmSelectedRadarArtist) {
+        generateRadarArtistStoryCanvas(_curAmSelectedRadarArtist, 'amRadarStoryCanvas');
+      }
+      showToast('✓ Imagen personalizada aplicada a la Story');
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  function resetAmStoryImageToOriginal() {
+    _customRadarStoryImage = null;
+    _radarStoryVideoFrameOffset = 0;
+    updateAmStoryCustomizerUI();
+    if (_curAmSelectedRadarArtist) {
+      generateRadarArtistStoryCanvas(_curAmSelectedRadarArtist, 'amRadarStoryCanvas');
+    }
+    showToast('✓ Imagen restaurada al video original');
+  }
+
   function switchAmStoryView(view) {
     _activeAmStoryTab = view;
     var btnRadar = document.getElementById('btnTabStoryRadar');
@@ -3507,6 +3617,7 @@
         btnRadar.style.color = 'var(--text-muted)';
       }
     }
+    updateAmStoryCustomizerUI();
   }
 
   function handleAutoMessageFormSubmit(e) {
@@ -3579,6 +3690,9 @@
     var displayName = (selectedArtistObj && selectedArtistObj.name) ? selectedArtistObj.name : (artistName || 'Artista');
     _curAmArtistName = displayName;
     _curAmSongTitle = songTitle;
+    _curAmSelectedRadarArtist = selectedArtistObj;
+    _customRadarStoryImage = null;
+    _radarStoryVideoFrameOffset = 0;
 
     var fullMessage = '';
     var communityCopy = '';
@@ -3713,6 +3827,7 @@ ${playlistUrl}`;
     if (commEl) commEl.value = communityCopy;
     var modal = document.getElementById('autoMessageModal');
     if (modal) modal.style.display = 'flex';
+    updateAmStoryCustomizerUI();
     showToast('✓ Mensaje, Copy y Story generados con éxito');
   }
 
@@ -4616,17 +4731,21 @@ ${playlistUrl}`;
       cleanBio = cleanBio.slice(0, 205) + '...';
     }
 
-    // 2. Imagen de Cloudinary
-    var imageUrl = (artist && (artist.media_url || artist.image || artist.mediaUrl || artist.img || artist.cover)) || '';
-    if (imageUrl) {
-      imageUrl = imageUrl.trim();
-      // Si el archivo en Cloudinary es video .mp4, obtener el frame fotográfico en JPG
-      if (imageUrl.includes('cloudinary.com')) {
-        if (imageUrl.toLowerCase().endsWith('.mp4')) {
-          imageUrl = imageUrl.replace(/\.mp4(\?.*)?$/i, '.jpg$1');
-        }
-        if (imageUrl.includes('/video/upload/')) {
-          imageUrl = imageUrl.replace('/video/upload/', '/video/upload/so_0/');
+    // 2. Imagen de Cloudinary o Personalizada
+    var imageUrl = '';
+    if (_customRadarStoryImage) {
+      imageUrl = _customRadarStoryImage;
+    } else {
+      imageUrl = (artist && (artist.media_url || artist.image || artist.mediaUrl || artist.img || artist.cover)) || '';
+      if (imageUrl) {
+        imageUrl = imageUrl.trim();
+        // Si el archivo en Cloudinary es video, obtener el frame fotográfico en JPG con el offset configurado
+        if (imageUrl.includes('cloudinary.com')) {
+          imageUrl = imageUrl.replace(/\.(mp4|mov|webm|m4v)(\?.*)?$/i, '.jpg$2');
+          var offsetSec = (_radarStoryVideoFrameOffset !== undefined && _radarStoryVideoFrameOffset !== null) ? _radarStoryVideoFrameOffset : 0;
+          if (imageUrl.includes('/video/upload/')) {
+            imageUrl = imageUrl.replace(/\/video\/upload\/(so_[0-9.]+\/)?/i, '/video/upload/so_' + offsetSec + '/');
+          }
         }
       }
     }
@@ -4638,13 +4757,18 @@ ${playlistUrl}`;
         artistImg = _loadedRadarArtistImages[imageUrl];
       } else if (!_loadedRadarArtistImages[imageUrl]) {
         var imgLoader = new Image();
-        imgLoader.crossOrigin = 'anonymous';
+        if (!imageUrl.startsWith('data:')) {
+          imgLoader.crossOrigin = 'anonymous';
+        }
         imgLoader.onload = function() {
           _loadedRadarArtistImages[imageUrl] = imgLoader;
           generateRadarArtistStoryCanvas(artist, targetCanvasId);
         };
         imgLoader.onerror = function() {
           var fallbackImg = new Image();
+          if (!imageUrl.startsWith('data:')) {
+            fallbackImg.crossOrigin = 'anonymous';
+          }
           fallbackImg.onload = function() {
             _loadedRadarArtistImages[imageUrl] = fallbackImg;
             generateRadarArtistStoryCanvas(artist, targetCanvasId);
@@ -5685,6 +5809,53 @@ ${playlistUrl}`;
         <div style="background: #09090b; border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; justify-content: center; align-items: center;">
           <canvas id="amRadarStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 220px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: block;"></canvas>
           <canvas id="amStoryCanvas" width="1080" height="1920" style="width: 100%; max-width: 220px; height: auto; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: none;"></canvas>
+        </div>
+
+        <!-- PANEL DE AJUSTE DE IMAGEN / FOTOGRAMA PARA LA STORY -->
+        <div id="amStoryImageCustomizer" style="background: rgba(0,0,0,0.35); border: 1px solid var(--border-strong); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+              <span>🎛️</span> <span>Ajustar Foto de la Story</span>
+            </span>
+            <button type="button" id="btnResetAmStoryImage" onclick="resetAmStoryImageToOriginal()" title="Volver a la imagen / fotograma inicial" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; padding: 3px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s ease;">
+              ↺ Restaurar
+            </button>
+          </div>
+
+          <!-- SECCIÓN 1: FOTOGRAMA DEL VIDEO (SI EL ARTISTA TIENE VIDEO) -->
+          <div id="amVideoFrameControlSection" style="display: none; flex-direction: column; gap: 8px; background: rgba(255,255,255,0.02); padding: 10px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;">
+                🎞️ Segundo del video:
+              </span>
+              <span id="amVideoFrameValue" style="font-family: var(--font-mono); font-size: 12px; font-weight: 800; color: var(--accent-lime); background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(187,244,81,0.3);">
+                0.0s
+              </span>
+            </div>
+
+            <input type="range" id="amVideoFrameSlider" min="0" max="30" step="0.5" value="0" oninput="onAmVideoFrameSliderInput(this.value)" onchange="onAmVideoFrameSliderChange(this.value)" style="width: 100%; accent-color: var(--accent-lime); cursor: pointer; height: 6px;">
+
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
+              <button type="button" onclick="stepAmVideoFrame(-1)" title="Retroceder 1 segundo" style="background: #09090b; border: 1px solid var(--border); color: #fff; font-family: var(--font-mono); font-size: 10px; font-weight: 700; padding: 5px 0; border-radius: 4px; cursor: pointer;">-1s</button>
+              <button type="button" onclick="setAmVideoFrameDirect(0)" style="background: #09090b; border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; padding: 5px 0; border-radius: 4px; cursor: pointer;">0s</button>
+              <button type="button" onclick="setAmVideoFrameDirect(2)" style="background: #09090b; border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; padding: 5px 0; border-radius: 4px; cursor: pointer;">2s</button>
+              <button type="button" onclick="setAmVideoFrameDirect(4)" style="background: #09090b; border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; padding: 5px 0; border-radius: 4px; cursor: pointer;">4s</button>
+              <button type="button" onclick="setAmVideoFrameDirect(7)" style="background: #09090b; border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; padding: 5px 0; border-radius: 4px; cursor: pointer;">7s</button>
+              <button type="button" onclick="setAmVideoFrameDirect(10)" style="background: #09090b; border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; padding: 5px 0; border-radius: 4px; cursor: pointer;">10s</button>
+              <button type="button" onclick="stepAmVideoFrame(1)" title="Avanzar 1 segundo" style="background: #09090b; border: 1px solid var(--border); color: #fff; font-family: var(--font-mono); font-size: 10px; font-weight: 700; padding: 5px 0; border-radius: 4px; cursor: pointer;">+1s</button>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 2: SUBIR FOTO ALTERNATIVA (SOLO STORY) -->
+          <div>
+            <input type="file" id="amStoryCustomFileInput" accept="image/*" onchange="handleAmStoryCustomFileUpload(this)" style="display: none;">
+            <button type="button" onclick="document.getElementById('amStoryCustomFileInput').click()" style="width: 100%; background: rgba(56,189,248,0.08); border: 1px dashed var(--accent-cyan); color: var(--accent-cyan); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 9px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
+              <span>📁</span> <span>Subir Foto Alternativa (Solo Story)</span>
+            </button>
+            <div id="amStoryCustomImageNotice" style="display: none; font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); margin-top: 6px; text-align: center;">
+              ✨ Foto alternativa personalizada activa en la Story
+            </div>
+          </div>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
