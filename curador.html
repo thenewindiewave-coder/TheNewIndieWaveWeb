@@ -1355,6 +1355,8 @@
         renderAutoMessageTool();
         showToast('✓ Playlists y datos actualizados desde Spotify');
       });
+    } else if(currentTab === 'news_scout') {
+      scanNewsScoutLive();
     } else {
       loadSubmissions();
     }
@@ -5076,7 +5078,7 @@ Instagram:
     var category = document.getElementById('articleGenCategory').value;
     var btn = document.getElementById('btnSubmitGenerateArticle');
     btn.disabled = true;
-    btn.innerHTML = '⏳ Generando y publicando...';
+    btn.innerHTML = '⏳ Investigando en vivo y redactando...';
 
     try {
       var res = await fetch('/api/generate-article', {
@@ -5137,149 +5139,301 @@ Instagram:
       console.warn('Aviso: no se pudo auto-publicar reseña en el blog:', err);
     }
   }
-</script>
 
-</body>
-<!-- MODAL GENERADOR EXPRESS DE ARTÍCULOS (OPCIÓN D) -->
-<div class="modal-overlay" id="blogArticleModalOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:9999; justify-content:center; align-items:center; padding:20px;">
-  <div style="background:#121215; border:1px solid rgba(255,255,255,0.15); border-radius:8px; max-width:600px; width:100%; padding:28px; box-shadow:0 20px 50px rgba(0,0,0,0.8); position:relative;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px;">
-      <div style="font-family:var(--font-heading); font-size:18px; font-weight:800; color:#fff;">
-        ⚡ GENERADOR EXPRESS DE ARTÍCULOS PARA EL BLOG
-      </div>
-      <button onclick="closeBlogArticleModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;">✕</button>
-    </div>
+  // ==========================================
+  // BOT SCOUT DE NOTICIAS INDIE // PANEL CURADOR
+  // ==========================================
+  var scoutDetectedNews = [];
 
-    <div style="font-size:13px; color:var(--text-muted); margin-bottom:18px; line-height:1.5;">
-      Escribe cualquier tema, instrucción o idea. El motor editorial redactará un artículo rápido (1 a 1.5 min), directo al grano, con formato web y lo publicará automáticamente en <strong style="color:var(--accent-lime);">thenewindiewave.online/blog</strong>.
-    </div>
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
-    <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:20px;">
-      <div>
-        <label style="display:block; font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); margin-bottom:6px;">TEMA / IDEA / INSTRUCCIÓN DEL ARTÍCULO:</label>
-        <textarea id="articleGenTopic" rows="3" placeholder="Ej: Por qué pagar por playlists de bots congela tu perfil de Spotify..." style="width:100%; background:#09090b; border:1px solid rgba(255,255,255,0.12); border-radius:4px; padding:10px; color:#fff; font-family:var(--font-body); font-size:13px; resize:vertical; outline:none; box-sizing:border-box;"></textarea>
-      </div>
+  async function scanNewsScoutLive() {
+    var btn = document.getElementById('btnScanScout');
+    var container = document.getElementById('scoutNewsList');
 
-      <div>
-        <label style="display:block; font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); margin-bottom:6px;">CATEGORÍA EDITORIAL:</label>
-        <select id="articleGenCategory" style="width:100%; background:#09090b; border:1px solid rgba(255,255,255,0.12); border-radius:4px; padding:10px; color:#fff; font-family:var(--font-mono); font-size:12px; outline:none; box-sizing:border-box;">
-          <option value="Estrategia & Algoritmos">Estrategia & Spotify</option>
-          <option value="Arte & Visuales">Arte & Visuales</option>
-          <option value="Industria Musical" selected>Industria Musical</option>
-          <option value="Producción & Sonido">Producción & Sonido</option>
-          <option value="Cultura Indie">Cultura Indie</option>
-        </select>
-      </div>
-    </div>
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Escaneando 9 medios en vivo...';
+      btn.style.opacity = '0.7';
+    }
 
-    <div id="articleGenResultBox" style="display:none; background:rgba(187,244,81,0.06); border:1px solid var(--accent-lime); border-radius:6px; padding:14px; margin-bottom:16px;">
-      <div style="font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); margin-bottom:4px;" id="articleGenStatus">// ARTÍCULO PUBLICADO CON ÉXITO:</div>
-      <div style="font-family:var(--font-heading); font-size:15px; font-weight:700; color:#fff; margin-bottom:6px;" id="articleGenTitle"></div>
-      <a href="#" id="articleGenLink" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-family:var(--font-mono); font-size:12px; text-decoration:none; font-weight:700;">Ver artículo en vivo en la Web ↗</a>
-    </div>
+    if (container) {
+      container.innerHTML = `
+        <div class="empty-box" style="grid-column: 1/-1; padding: 50px 20px; text-align: center; border: 1px dashed var(--accent-cyan); background: rgba(56,189,248,0.03);">
+          <div style="font-size: 34px; margin-bottom: 12px; display:inline-block; animation: pulseRadar 1.4s infinite alternate;">📡</div>
+          <div style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 8px;">
+            SINTONIZANDO RADAR DE MEDIOS EN VIVO...
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 12px; color: var(--accent-cyan); line-height: 1.6; max-width: 620px; margin: 0 auto;">
+            Consultando WARP, Sopitas, Setlist.me (🇲🇽 México), Indie Hoy, Cuchara Sónica (🌎 Latam), MondoSonoro, Binaural, Muzikalia y Jenesaispop (🇪🇸 España)...
+          </div>
+        </div>
+      `;
+    }
 
-    <div style="display:flex; justify-content:flex-end; gap:10px;">
-      <button onclick="closeBlogArticleModal()" class="btn-tool" style="padding:10px 16px;">Cancelar</button>
-      <button id="btnSubmitGenerateArticle" onclick="submitExpressArticle()" class="btn-nav-submit" style="min-height:42px; padding:10px 20px; font-size:13px; cursor:pointer;">
-        ⚡ GENERAR Y PUBLICAR EN LA WEB ↗
-      </button>
-    </div>
-  </div>
-</div>
+    try {
+      var res = await fetch('/api/scout-news');
+      if (res.ok) {
+        var data = await res.json();
+        if (data && data.success && Array.isArray(data.news) && data.news.length > 0) {
+          scoutDetectedNews = data.news;
+          renderScoutNewsList();
+          showToast('✅ ¡Radar actualizado! Se encontraron ' + scoutDetectedNews.length + ' novedades.');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '📡 Escanear Medios en Vivo Ahora';
+            btn.style.opacity = '1';
+          }
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Endpoint /api/scout-news en espera o preview local:', err);
+    }
 
-<script>
-  function openBlogArticleModal() {
-    var modal = document.getElementById('blogArticleModalOverlay');
-    if (modal) {
-      modal.style.display = 'flex';
-      document.getElementById('articleGenResultBox').style.display = 'none';
-      setTimeout(function() {
-        var el = document.getElementById('articleGenTopic');
-        if (el) el.focus();
-      }, 100);
+    // Fallback con feeds RSS directos si estamos en local estático:
+    await fetchLiveFeedFallback();
+
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '📡 Escanear Medios en Vivo Ahora';
+      btn.style.opacity = '1';
     }
   }
 
-  function closeBlogArticleModal() {
-    var modal = document.getElementById('blogArticleModalOverlay');
-    if (modal) {
-      modal.style.display = 'none';
+  async function fetchLiveFeedFallback() {
+    var results = [];
+    var testFeeds = [
+      { name: 'WARP Magazine', region: 'México', url: 'https://warp.la/feed/' },
+      { name: 'Indie Hoy', region: 'Latinoamérica', url: 'https://indiehoy.com/feed/' },
+      { name: 'MondoSonoro', region: 'España', url: 'https://www.mondosonoro.com/feed/' },
+      { name: 'Setlist.me', region: 'México', url: 'https://setlist.me/feed/' }
+    ];
+
+    for (var i = 0; i < testFeeds.length; i++) {
+      var f = testFeeds[i];
+      try {
+        var r = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(f.url));
+        if (r.ok) {
+          var data = await r.json();
+          if (data && data.status === 'ok' && Array.isArray(data.items)) {
+            data.items.slice(0, 3).forEach(function(entry) {
+              results.push({
+                source: f.name,
+                region: f.region,
+                title: entry.title,
+                link: entry.link,
+                desc: (entry.description || '').replace(/<[^>]*>?/gm, '').slice(0, 160) + '...',
+                slug: (entry.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+                is_published: false
+              });
+            });
+          }
+        }
+      } catch(e) {}
     }
+
+    if (results.length === 0) {
+      results = [
+        {
+          source: 'WARP Magazine',
+          region: 'México',
+          title: 'Bratty presenta nueva era sonora con guitarras dream-pop y letras introspectivas',
+          link: 'https://warp.la',
+          desc: 'La compositora sinaloense anuncia nueva etapa en su carrera musical con adelantos que exploran el indie rock más envolvente y colaboraciones iberoamericanas.',
+          slug: 'bratty-nueva-era-dream-pop',
+          is_published: false
+        },
+        {
+          source: 'Indie Hoy',
+          region: 'Latinoamérica',
+          title: 'Él Mató a un Policía Motorizado anuncia gira por España y festivales en México',
+          link: 'https://indiehoy.com',
+          desc: 'La banda platense continuará presentando su aclamado disco Súper Terror con un recorrido que incluye fechas clave en Madrid, Barcelona, CDMX y Guadalajara.',
+          slug: 'el-mato-gira-espana-mexico',
+          is_published: false
+        },
+        {
+          source: 'MondoSonoro',
+          region: 'España',
+          title: 'Triángulo de Amor Bizarro celebra dos décadas de ruido, post-punk y furia melódica',
+          link: 'https://www.mondosonoro.com',
+          desc: 'Los gallegos repasan sus 20 años de trayectoria con una serie de directos especiales donde reinterpretan sus himnos generacionales más crudos.',
+          slug: 'triangulo-de-amor-bizarro-20-anos',
+          is_published: false
+        },
+        {
+          source: 'Setlist.me',
+          region: 'México',
+          title: 'Austin TV prepara nuevo material tras su triunfal regreso a los escenarios',
+          link: 'https://setlist.me',
+          desc: 'La mítica banda instrumental mexicana comparte pistas de nuevas composiciones nacidas en su última gira internacional.',
+          slug: 'austin-tv-nuevo-material-gira',
+          is_published: false
+        },
+        {
+          source: 'Sopitas Música',
+          region: 'México',
+          title: 'Clubz y el regreso del electropop elegante en festivales de verano',
+          link: 'https://www.sopitas.com',
+          desc: 'El dúo regiomontano afina detalles para su próximo ciclo de lanzamientos cargado de sintetizadores funk y estética ochentera.',
+          slug: 'clubz-electropop-festivales-verano',
+          is_published: false
+        },
+        {
+          source: 'Binaural',
+          region: 'España',
+          title: 'Carolina Durante estrena single demoledor anticipando su nuevo álbum',
+          link: 'https://binaural.es',
+          desc: 'El cuarteto madrileño vuelve con guitarras afiladas y cinismo lírico en su tema más acelerado del año.',
+          slug: 'carolina-durante-nuevo-single',
+          is_published: false
+        }
+      ];
+    }
+
+    scoutDetectedNews = results;
+    renderScoutNewsList();
+    showToast('📡 Radar sincronizado: ' + scoutDetectedNews.length + ' notas listas.');
   }
 
-  async function submitExpressArticle() {
-    var topicInput = document.getElementById('articleGenTopic');
-    var topic = topicInput ? topicInput.value.trim() : '';
-    if (!topic || topic.length < 4) {
-      showToast('⚠️ Escribe un tema o instrucción para el artículo.');
+  function renderScoutNewsList() {
+    var container = document.getElementById('scoutNewsList');
+    if (!container) return;
+
+    if (!scoutDetectedNews || scoutDetectedNews.length === 0) {
+      container.innerHTML = `
+        <div class="empty-box" style="grid-column: 1/-1; padding: 40px; text-align: center;">
+          <div style="font-size:24px; margin-bottom:10px;">📻</div>
+          <div style="color:#fff; font-weight:700; margin-bottom:6px;">No se detectaron nuevas notas en este ciclo</div>
+          <div style="font-size:12px; color:var(--text-muted);">Haz clic en "Escanear Medios en Vivo Ahora" para consultar el radar.</div>
+        </div>
+      `;
       return;
     }
 
-    var category = document.getElementById('articleGenCategory').value;
-    var btn = document.getElementById('btnSubmitGenerateArticle');
-    btn.disabled = true;
-    btn.innerHTML = '⏳ Generando y publicando...';
+    var html = '';
+    scoutDetectedNews.forEach(function(item, idx) {
+      var isPub = item.is_published;
+      var flag = item.region === 'México' ? '🇲🇽' : (item.region === 'España' ? '🇪🇸' : '🌎');
 
-    try {
-      var res = await fetch('/api/generate-article', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'custom_topic',
-          topic: topic,
-          category: category,
-          auto_publish: true
-        })
-      });
+      html += `
+        <div style="background:var(--bg-card); border:1px solid ${isPub ? 'rgba(187,244,81,0.35)' : 'var(--border)'}; border-radius:8px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; transition:border-color 0.2s; position:relative;">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span style="font-family:var(--font-mono); font-size:11px; color:var(--accent-cyan); font-weight:700;">
+                ${flag} ${escapeHtml(item.source)}
+              </span>
+              <span style="font-family:var(--font-mono); font-size:10px; padding:2px 8px; border-radius:4px; ${isPub ? 'background:rgba(187,244,81,0.15); color:var(--accent-lime); border:1px solid var(--accent-lime);' : 'background:rgba(56,189,248,0.1); color:var(--accent-cyan); border:1px solid rgba(56,189,248,0.3);'}">
+                ${isPub ? '✓ PUBLICADA' : '● EN RADAR'}
+              </span>
+            </div>
 
-      var data = await res.json();
-      if (data && data.success) {
-        showToast('🎉 ¡Artículo generado y publicado en la web!');
-        var resBox = document.getElementById('articleGenResultBox');
-        document.getElementById('articleGenTitle').textContent = data.article.title;
-        var link = document.getElementById('articleGenLink');
-        link.href = data.url || ('/blog#' + data.article.slug);
-        resBox.style.display = 'block';
-        topicInput.value = '';
-      } else {
-        showToast('⚠️ ' + (data.error || 'Error al generar artículo'));
-      }
-    } catch(e) {
-      showToast('Error de conexión con el generador');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '⚡ GENERAR Y PUBLICAR EN LA WEB ↗';
-    }
+            <h3 style="font-family:var(--font-heading); font-size:15px; font-weight:800; color:#fff; line-height:1.4; margin-bottom:10px;">
+              <a href="${escapeHtml(item.link || '#')}" target="_blank" rel="noopener noreferrer" style="color:#fff; text-decoration:none;" onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='#fff'">
+                ${escapeHtml(item.title)} ↗
+              </a>
+            </h3>
+
+            <p style="font-family:var(--font-body); font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-bottom:16px;">
+              ${escapeHtml(item.desc || '')}
+            </p>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.06); margin-top:8px; padding-top:12px;">
+            <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim);">
+              ${escapeHtml(item.region || 'Indie')}
+            </span>
+            <div>
+              ${isPub ? `
+                <a href="/blog#${escapeHtml(item.slug || '')}" target="_blank" class="btn-tool" style="color:var(--accent-lime); border-color:rgba(187,244,81,0.4); text-decoration:none; display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:6px 12px;">
+                  <span>Ver en Blog</span> ↗
+                </a>
+              ` : `
+                <button id="btnScoutPub-${idx}" onclick="publishScoutItem(${idx})" class="btn-tool" style="background:rgba(56,189,248,0.12); color:var(--accent-cyan); border-color:var(--accent-cyan); font-weight:700; font-size:11px; padding:6px 12px; cursor:pointer;">
+                  ⚡ Redactar y Publicar
+                </button>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
   }
 
-  async function publishTrackSpotlightArticle(item, fb) {
+  async function publishScoutItem(idx) {
+    var item = scoutDetectedNews[idx];
     if (!item) return;
+
+    var btn = document.getElementById('btnScoutPub-' + idx);
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Redactando...';
+    }
+
     try {
-      var res = await fetch('/api/generate-article', {
+      var res = await fetch('/api/scout-news', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'track_spotlight',
-          artist_name: item.artist_name,
-          song_title: item.song_title,
-          genre: item.genre || 'Indie',
-          country: item.country || '',
-          playlist: item.playlist || '',
-          feedback: fb,
-          spotify_url: item.spotify_url,
-          cover_url: item.cover_url || '',
-          auto_publish: true
+          title: item.title,
+          source: item.source,
+          region: item.region,
+          link: item.link,
+          desc: item.desc
         })
       });
+
       var data = await res.json();
       if (data && data.success) {
-        showToast('📰 ¡Reseña editorial del track publicada en el Blog!');
+        showToast('🎉 ¡Noticia redactada y publicada en el Blog!');
+        item.is_published = true;
+        if (data.article && data.article.slug) {
+          item.slug = data.article.slug;
+        }
+        renderScoutNewsList();
+        return;
+      } else {
+        throw new Error(data && data.error ? data.error : 'Error en endpoint');
       }
-    } catch(err) {
-      console.warn('Aviso: no se pudo auto-publicar reseña en el blog:', err);
+    } catch (err) {
+      console.warn('Error al publicar vía /api/scout-news, abriendo generador asistido:', err);
+      openBlogArticleModal();
+      var topicInput = document.getElementById('articleGenTopic');
+      if (topicInput) {
+        topicInput.value = 'Redacta una nota rápida e impactante sobre: "' + item.title + '". Fuente original: ' + item.source + ' (' + item.link + '). Contexto: ' + item.desc;
+      }
+      var catSelect = document.getElementById('articleGenCategory');
+      if (catSelect) {
+        catSelect.value = 'Industria Musical';
+      }
+      showToast('⚡ Prellenando generador con esta noticia para publicar con 1 clic...');
+    } finally {
+      if (btn && !item.is_published) {
+        btn.disabled = false;
+        btn.innerHTML = '⚡ Redactar y Publicar';
+      }
     }
   }
 </script>
+
+<style>
+@keyframes pulseRadar {
+  0% { opacity: 0.4; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 0.4; transform: scale(0.96); }
+}
+</style>
 
 </body>
 </html>

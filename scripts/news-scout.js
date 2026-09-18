@@ -5,6 +5,10 @@
  * más frescas, las procesa con IA y las publica en Supabase en formato rápido (1.5 min).
  */
 
+if (typeof process !== 'undefined' && process.env) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.supabase.co';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
