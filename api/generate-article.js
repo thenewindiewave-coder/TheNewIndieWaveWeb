@@ -99,10 +99,14 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Debes proporcionar un tema o instrucción en el campo topic.' });
       }
 
+      // INVESTIGACIÓN WEB EN TIEMPO REAL: Extraer hechos reales de internet antes de redactar
+      const liveFacts = await fetchLiveWebFacts(topic.trim());
+
       articlePayload = await generateArticleWithAI({
         topic: topic.trim(),
         category,
-        auto_publish
+        auto_publish,
+        liveFacts
       });
     }
 
@@ -142,31 +146,65 @@ export default async function handler(req, res) {
   }
 }
 
-async function generateArticleWithAI({ topic, category, auto_publish }) {
+// BUSCADOR EN VIVO DE INTERNET (Extrae hechos, fechas, recintos y noticias en tiempo real)
+async function fetchLiveWebFacts(query) {
+  try {
+    const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    if (!res.ok) return [];
+
+    const html = await res.text();
+    const results = [];
+    const regex = /<a class="result__snippet[^>]*>([\s\S]*?)<\/a>/g;
+
+    let match;
+    while ((match = regex.exec(html)) !== null && results.length < 6) {
+      const cleanSnippet = match[1].replace(/<[^>]+>/g, '').trim();
+      if (cleanSnippet && cleanSnippet.length > 20) {
+        results.push(cleanSnippet);
+      }
+    }
+    return results;
+  } catch (err) {
+    console.warn("Aviso: no se pudo consultar web en vivo:", err.message);
+    return [];
+  }
+}
+
+async function generateArticleWithAI({ topic, category, auto_publish, liveFacts = [] }) {
   const GEMINI_KEY = process.env.GEMINI_API_KEY;
   const GROQ_KEY = process.env.GROQ_API_KEY;
   const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
-  const systemPrompt = `Eres Rodrigo DL Moral, fundador y curador del colectivo musical independiente "The New Indie Wave" (TNIW).
-Tu misión es redactar un artículo editorial rápido, punchy, fresco y directo al hueso para músicos independientes y amantes de la música.
-CRÍTICA Y ESTILO ESTRICTO:
-- Lectura rápida de 1 a 1.5 minutos (alrededor de 200 a 300 palabras).
-- CERO tecnicismos académicos, CERO clichés de IA como "en el vasto tapiz", "es crucial", "sumérgete", "un testimonio de".
-- Tono directo, honesto, como una charla entre colegas de estudio o un hilo viral bien armado: con ganchos inmediatos, párrafos cortos de 2 líneas, viñetas para escanear y una cita editorial destacada.
-- Debes responder ÚNICAMENTE un objeto JSON válido con los siguientes campos:
+  const factsContext = liveFacts.length > 0 
+    ? `\nHECHOS Y DATOS REALES EXTRAÍDOS EN VIVO DE INTERNET SOBRE ESTA NOTICIA:\n- ${liveFacts.join('\n- ')}\nIMPORTANTE: Basa tu crónica en estos hechos verídicos (fechas, recintos, artistas, canciones, contexto). NO inventes datos que contradigan la realidad.`
+    : '';
+
+  const systemPrompt = `Eres Rodrigo DL Moral, fundador y curador de "The New Indie Wave" (TNIW).
+Tu misión es escribir una crónica o reseña de actualidad musical con periodismo real, rápido y directo al hueso.
+REGLAS DE ORO:
+- RIGOR CON LOS HECHOS: Te proporcionamos datos y noticias reales extraídos en vivo de internet. Úsalos con precisión (lugares, fechas, nombres de canciones, invitados especiales, anécdotas).
+- FORMATO DE ALTA RETENCIÓN: Lectura de 1 a 1.5 minutos (220 a 300 palabras). Cero relleno aburrido.
+- CERO CLICHÉS DE IA: Prohibido usar "en el vasto tapiz", "es crucial", "sumérgete", "un testimonio de", "en un mundo donde".
+- ESTILO: Fresco, apasionado, de tú a tú, crítico pero respetuoso del arte.
+- RESPONDE EXCLUSIVAMENTE UN OBJETO JSON VÁLIDO CON ESTA ESTRUCTURA EXACTA:
 {
-  "title": "Título corto con gancho brutal (máximo 12 palabras)",
-  "slug": "slug-en-minusculas-con-guiones",
-  "summary": "Resumen directo en 2 oraciones (máximo 30 palabras)",
-  "content": "Cuerpo del artículo en formato HTML con etiquetas <p class=\"lead\">, <h2>, <ul> o <ol>, <li>, y un <blockquote> con una frase contundente",
+  "title": "Titular con gancho brutal que resuma la noticia real (máximo 12 palabras)",
+  "slug": "slug-amigable-en-minusculas-con-guiones",
+  "summary": "Resumen directo en 2 oraciones que enganche al lector (máximo 30 palabras)",
+  "content": "Cuerpo en HTML limpio con <p class=\"lead\">, <h2>, <ul> o <ol> con 3 puntos clave con viñetas, y un <blockquote> reflexivo",
   "read_time": "1.5 min",
   "tags": ["Etiqueta1", "Etiqueta2", "Etiqueta3"],
-  "image_keyword": "palabra en inglés para foto de Unsplash, ej: synthesizer, vinyl, cassette, guitar, concert"
+  "image_keyword": "palabra en inglés para la foto de portada (ej: orchestra, concert, guitar, vinyl, stage)"
 }`;
 
-  const userPrompt = `Tema o instrucción solicitada: "${topic}". Categoría: "${category}".`;
+  const userPrompt = `Noticia o tema solicitado: "${topic}". Categoría: "${category}".${factsContext}`;
 
-  // 1. INTENTO CON GEMINI (SI ESTÁ CONFIGURADO)
+  // 1. GEMINI CON DATOS EN VIVO
   if (GEMINI_KEY) {
     try {
       const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
@@ -188,11 +226,11 @@ CRÍTICA Y ESTILO ESTRICTO:
         }
       }
     } catch (e) {
-      console.warn("Gemini fallo, probando fallback:", e.message);
+      console.warn("Gemini fallo, probando siguiente:", e.message);
     }
   }
 
-  // 2. INTENTO CON GROQ (SI ESTÁ CONFIGURADO)
+  // 2. GROQ CON DATOS EN VIVO
   if (GROQ_KEY) {
     try {
       const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -223,7 +261,7 @@ CRÍTICA Y ESTILO ESTRICTO:
     }
   }
 
-  // 3. INTENTO CON OPENAI (SI ESTÁ CONFIGURADO)
+  // 3. OPENAI CON DATOS EN VIVO
   if (OPENAI_KEY) {
     try {
       const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -254,23 +292,30 @@ CRÍTICA Y ESTILO ESTRICTO:
     }
   }
 
-  // 4. MOTOR EDITORIAL AUTÓNOMO PUNCHY (FALLBACK SEGURO)
-  const title = `Lo que debes saber sobre: ${capitalize(topic)}`;
-  const slug = `editorial-${slugify(topic)}-${Date.now().toString().slice(-4)}`;
-  const summary = `Un análisis rápido y al grano sobre ${topic}, enfocado en artistas independientes que buscan impacto real en 2026.`;
-  const content = `
-    <p class="lead">Hablemos claro sobre <strong>${escapeHtml(topic)}</strong>: en una escena musical saturada de ruido y fórmulas copiadas, quien no entiende este principio está regalando su tiempo y sus canciones.</p>
+  // 4. MOTOR EDITORIAL BASADO EN HECHOS (SI NO HAY CLAVE DE PAGO AÚN)
+  const factsListHtml = liveFacts.length > 0 
+    ? liveFacts.slice(0, 3).map(f => `<li><strong>Hecho clave:</strong> ${escapeHtml(f)}</li>`).join('')
+    : `<li><strong>Relevancia:</strong> Marca un precedente clave para la escena y la industria musical independiente.</li>
+       <li><strong>Impacto:</strong> Desafía las fórmulas comerciales tradicionales y apuesta por una propuesta con carácter propio.</li>
+       <li><strong>Lectura TNIW:</strong> Una muestra de que el cruce de géneros y la audacia sonora siguen siendo el verdadero motor cultural.</li>`;
 
-    <h2>3 puntos clave que nadie te dice:</h2>
+  const title = `Lo que debes saber: ${capitalize(topic)}`;
+  const slug = `noticia-${slugify(topic)}-${Date.now().toString().slice(-4)}`;
+  const summary = liveFacts.length > 0 
+    ? liveFacts[0].slice(0, 140) + '...'
+    : `Análisis directo sobre ${topic} desde la perspectiva editorial de The New Indie Wave.`;
+
+  const content = `
+    <p class="lead">Las noticias vuelan, pero los momentos culturales que definen la música se analizan con calma. <strong>${escapeHtml(topic)}</strong> no es una fecha más en el calendario: es una declaración de intenciones.</p>
+
+    <h2>Los puntos que marcan la diferencia:</h2>
     <ul>
-      <li><strong>El algoritmo no es tu enemigo, es un espejo:</strong> Si tu música no retiene la atención en los primeros 10 segundos, no es culpa de Spotify; es que falta afilar el gancho inicial.</li>
-      <li><strong>Comunidad antes que números vacíos:</strong> Vale 100 veces más tener 200 oyentes leales que te compran una playera y van a tus shows que 20,000 streams de bots en Asia.</li>
-      <li><strong>Calidad sobre prisa:</strong> Tómate el tiempo de cuidar el máster, la portada y la historia detrás de tu rola antes de soltarla al vacío de internet.</li>
+      ${factsListHtml}
     </ul>
 
-    <blockquote>"El mayor error de un proyecto indie no es la falta de presupuesto: es la falta de paciencia y autenticidad en su mensaje."</blockquote>
+    <blockquote>"Cuando las barreras de género se rompen y los artistas se atreven a arriesgar, la música recupera su poder de sorprender." — <strong>Rodrigo DL Moral</strong></blockquote>
 
-    <p>Aplica esto en tu próximo lanzamiento y verás cómo la respuesta de la gente real cambia por completo.</p>
+    <p>Seguiremos de cerca las repercusiones de este suceso y su impacto en los artistas emergentes de nuestra comunidad.</p>
   `;
 
   return {
@@ -284,7 +329,7 @@ CRÍTICA Y ESTILO ESTRICTO:
     author_avatar: 'rodrigo_studio_web.jpg',
     image_url: getRandomMusicCover(),
     read_time: '1.5 min',
-    tags: [category, 'Música Indie', 'Consejos', 'TNIW'],
+    tags: [category, 'Actualidad', 'Música', 'TNIW'],
     featured: false,
     published: auto_publish !== false,
     published_at: new Date().toISOString()
@@ -293,11 +338,11 @@ CRÍTICA Y ESTILO ESTRICTO:
 
 function formatGeneratedPayload(parsed, category, auto_publish) {
   const images = {
+    orchestra: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80',
+    concert: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
     guitar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
     vinyl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=80',
-    studio: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=80',
-    synth: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
-    concert: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80'
+    studio: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=80'
   };
 
   const key = (parsed.image_keyword || '').toLowerCase();

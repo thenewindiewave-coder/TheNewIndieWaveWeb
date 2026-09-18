@@ -1,0 +1,30 @@
+name: TNIW Music News Scout Bot
+
+on:
+  schedule:
+    # Corre todos los días a las 14:00 UTC (8:00 AM hora México)
+    - cron: '0 14 * * *'
+  # Permite ejecutarlo manualmente con 1 clic en la pestaña Actions de GitHub
+  workflow_dispatch:
+
+jobs:
+  scout-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del Repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Ejecutar Scout Bot de Noticias TNIW
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.supabase.co' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          node scripts/news-scout.js
