@@ -3495,10 +3495,29 @@
 
     if (radarSelectVal && radarSelectVal !== 'none' && radarSelectVal !== 'custom') {
       selectedArtistObj = cleanRadarList.find(function(a){ return a.id === radarSelectVal; });
+      if (!selectedArtistObj && window.RADAR_ARTISTS) {
+        selectedArtistObj = window.RADAR_ARTISTS.find(function(a){ return a && a.id === radarSelectVal; });
+      }
     } else if (cleanRadarUrl) {
       var matchId = cleanRadarUrl.match(/artista=([^&]+)/);
       if (matchId) {
-        selectedArtistObj = cleanRadarList.find(function(a){ return a.id === decodeURIComponent(matchId[1]); });
+        var aId = decodeURIComponent(matchId[1]);
+        selectedArtistObj = cleanRadarList.find(function(a){ return a.id === aId; });
+        if (!selectedArtistObj && window.RADAR_ARTISTS) {
+          selectedArtistObj = window.RADAR_ARTISTS.find(function(a){ return a && a.id === aId; });
+        }
+      }
+    }
+
+    if (!selectedArtistObj && artistName && radarSelectVal !== 'none') {
+      var matchName = artistName.trim().toLowerCase();
+      selectedArtistObj = cleanRadarList.find(function(a){
+        return a && a.name && a.name.trim().toLowerCase() === matchName;
+      });
+      if (!selectedArtistObj && window.RADAR_ARTISTS) {
+        selectedArtistObj = window.RADAR_ARTISTS.find(function(a){
+          return a && a.name && a.name.trim().toLowerCase() === matchName;
+        });
       }
     }
 
@@ -3510,7 +3529,9 @@
         genre: genre || 'Indie',
         type: 'radar',
         order: 1,
-        image: ''
+        image: '',
+        media_url: '',
+        short_bio: ''
       };
     }
 
@@ -4506,13 +4527,42 @@ Instagram:
     var W = 1080;
     var H = 1920;
 
+    // Resetear lienzo y estado gráfico para evitar cualquier duplicación o sombra residual
+    ctx.clearRect(0, 0, W, H);
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+
     var artistName = (artist && artist.name) ? artist.name : 'Artista en el Radar';
     var city = (artist && artist.city) ? artist.city : 'México';
     var genre = (artist && artist.genre) ? artist.genre : 'Música Indie';
-    var order = (artist && artist.order) ? artist.order : 1;
+    var order = (artist && artist.order !== undefined && artist.order !== null) ? parseInt(artist.order, 10) : 1;
     var type = (artist && artist.type) ? artist.type : 'radar';
-    var bio = (artist && artist.bio) ? artist.bio : '';
-    var imageUrl = (artist && artist.image) ? artist.image : '';
+
+    // 3. Reseña corta real de la nota de Cloudinary / Radar
+    var rawBio = (artist && (artist.short_bio || artist.full_review || artist.bio || artist.career_notes || artist.events_note)) || '';
+    var cleanBio = rawBio.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+    if (cleanBio.length > 210) {
+      cleanBio = cleanBio.slice(0, 205) + '...';
+    }
+
+    // 2. Imagen de Cloudinary
+    var imageUrl = (artist && (artist.media_url || artist.image || artist.mediaUrl || artist.img || artist.cover)) || '';
+    if (imageUrl) {
+      imageUrl = imageUrl.trim();
+      // Si el archivo en Cloudinary es video .mp4, obtener el frame fotográfico en JPG
+      if (imageUrl.includes('cloudinary.com')) {
+        if (imageUrl.toLowerCase().endsWith('.mp4')) {
+          imageUrl = imageUrl.replace(/\.mp4(\?.*)?$/i, '.jpg$1');
+        }
+        if (imageUrl.includes('/video/upload/')) {
+          imageUrl = imageUrl.replace('/video/upload/', '/video/upload/so_0/');
+        }
+      }
+    }
 
     // Manejo de carga asíncrona de la foto del artista
     var artistImg = null;
@@ -4527,7 +4577,15 @@ Instagram:
           generateRadarArtistStoryCanvas(artist, targetCanvasId);
         };
         imgLoader.onerror = function() {
-          _loadedRadarArtistImages[imageUrl] = 'error';
+          var fallbackImg = new Image();
+          fallbackImg.onload = function() {
+            _loadedRadarArtistImages[imageUrl] = fallbackImg;
+            generateRadarArtistStoryCanvas(artist, targetCanvasId);
+          };
+          fallbackImg.onerror = function() {
+            _loadedRadarArtistImages[imageUrl] = 'error';
+          };
+          fallbackImg.src = imageUrl;
         };
         imgLoader.src = imageUrl;
       }
@@ -4562,6 +4620,10 @@ Instagram:
 
     // 2. Cabecera Branding
     ctx.save();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     ctx.fillStyle = '#bbf451';
     ctx.font = 'bold 21px monospace';
     ctx.textAlign = 'center';
@@ -4573,32 +4635,34 @@ Instagram:
     ctx.shadowBlur = 25;
     ctx.fillText('ARTISTAS EN EL RADAR', W / 2, 182);
     ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
 
-    // Badge de puesto / categoría
+    // 1. Badge de categoría: Solo '⭐ TOP 10' o '📻 RADAR GENERAL' (sin número de puesto)
     var isTop = (type === 'top3' || (order && order <= 10));
-    var badgeLabel = isTop ? ('⭐ TOP 10 // PUESTO #' + order) : ('📻 RADAR EDITORIAL' + (order ? (' // #' + order) : ''));
+    var badgeLabel = isTop ? '⭐ TOP 10' : '📻 RADAR GENERAL';
     var badgeColor = isTop ? '#bbf451' : '#38bdf8';
     var badgeBg = isTop ? 'rgba(187, 244, 81, 0.12)' : 'rgba(56, 189, 248, 0.12)';
     var badgeBorder = isTop ? 'rgba(187, 244, 81, 0.45)' : 'rgba(56, 189, 248, 0.45)';
 
     ctx.font = 'bold 20px monospace';
-    var bWidth = ctx.measureText(badgeLabel).width + 36;
-    var bHeight = 40;
+    var bWidth = ctx.measureText(badgeLabel).width + 42;
+    var bHeight = 42;
     var bX = (W - bWidth) / 2;
     var bY = 222;
 
     ctx.fillStyle = badgeBg;
-    drawRoundRectCur(ctx, bX, bY, bWidth, bHeight, 20);
+    drawRoundRectCur(ctx, bX, bY, bWidth, bHeight, 21);
     ctx.fill();
 
     ctx.strokeStyle = badgeBorder;
     ctx.lineWidth = 1.5;
-    drawRoundRectCur(ctx, bX, bY, bWidth, bHeight, 20);
+    drawRoundRectCur(ctx, bX, bY, bWidth, bHeight, 21);
     ctx.stroke();
 
     ctx.fillStyle = badgeColor;
     ctx.textAlign = 'center';
-    ctx.fillText(badgeLabel, W / 2, bY + 27);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(badgeLabel, W / 2, bY + (bHeight / 2));
     ctx.restore();
 
     // 3. Tarjeta Central del Artista (x=90, y=290, W=900, H=1310)
@@ -4607,6 +4671,7 @@ Instagram:
     var cardW = 900;
     var cardH = 1310;
 
+    // Sombra exterior de la tarjeta principal
     ctx.save();
     ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
     ctx.shadowBlur = 60;
@@ -4614,12 +4679,19 @@ Instagram:
     ctx.fillStyle = 'rgba(14, 15, 20, 0.96)';
     drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 28);
     ctx.fill();
-    ctx.shadowBlur = 0;
+    ctx.restore(); // Se restaura para que la sombra no afecte nada interior
 
+    // Borde de la tarjeta
+    ctx.save();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
     ctx.lineWidth = 2;
     drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 28);
     ctx.stroke();
+    ctx.restore();
 
     // 4. Foto / Carátula del Artista (y=340, W=780, H=740)
     var photoX = cardX + 60;
@@ -4628,6 +4700,10 @@ Instagram:
     var photoH = 720;
 
     ctx.save();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     drawRoundRectCur(ctx, photoX, photoY, photoW, photoH, 20);
     ctx.clip();
 
@@ -4648,10 +4724,11 @@ Instagram:
       ctx.fillStyle = fbGrad;
       ctx.fillRect(photoX, photoY, photoW, photoH);
 
-      ctx.fillStyle = 'rgba(187, 244, 81, 0.2)';
+      ctx.fillStyle = 'rgba(187, 244, 81, 0.25)';
       ctx.font = '900 180px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(artistName.charAt(0).toUpperCase() || '♪', photoX + photoW / 2, photoY + photoH / 2 + 60);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(artistName.charAt(0).toUpperCase() || '♪', photoX + photoW / 2, photoY + photoH / 2);
     }
 
     var photoDark = ctx.createLinearGradient(photoX, photoY + photoH - 180, photoX, photoY + photoH);
@@ -4661,13 +4738,23 @@ Instagram:
     ctx.fillRect(photoX, photoY + photoH - 180, photoW, 180);
     ctx.restore();
 
+    ctx.save();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     ctx.strokeStyle = '#bbf451';
     ctx.lineWidth = 3.5;
     drawRoundRectCur(ctx, photoX, photoY, photoW, photoH, 20);
     ctx.stroke();
+    ctx.restore();
 
     // Badge de Ubicación sobre la foto
     ctx.save();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     var cityBadge = '📍 ' + (city || 'MÉXICO').toUpperCase();
     ctx.font = 'bold 18px monospace';
     var cbW = ctx.measureText(cityBadge).width + 28;
@@ -4683,14 +4770,20 @@ Instagram:
     ctx.stroke();
     ctx.fillStyle = '#38bdf8';
     ctx.textAlign = 'center';
-    ctx.fillText(cityBadge, cbX + cbW / 2, cbY + 24);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(cityBadge, cbX + cbW / 2, cbY + (cbH / 2));
     ctx.restore();
 
     // 5. Nombre del Artista & Información
     var infoY = photoY + photoH + 45;
 
     ctx.save();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = '#ffffff';
     ctx.font = '900 50px sans-serif';
     ctx.fillText(truncateStringCur(artistName.toUpperCase(), 24), W / 2, infoY);
@@ -4699,39 +4792,52 @@ Instagram:
     ctx.font = 'bold 22px monospace';
     ctx.fillText('// ' + genre.toUpperCase() + '  •  ' + city.toUpperCase(), W / 2, infoY + 45);
 
-    var cleanBio = bio ? bio.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim() : '';
-    if (cleanBio.length > 180) cleanBio = cleanBio.slice(0, 175) + '...';
-    if (!cleanBio) {
-      cleanBio = 'Propuesta seleccionada para la curaduría oficial de The New Indie Wave por su autenticidad y sonido independiente.';
+    if (cleanBio) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.font = 'italic 23px sans-serif';
+      wrapTextCenteredCur(ctx, '“' + cleanBio + '”', W / 2, infoY + 110, 780, 36);
     }
+    ctx.restore();
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
-    ctx.font = 'italic 23px sans-serif';
-    wrapTextCenteredCur(ctx, '“' + cleanBio + '”', W / 2, infoY + 110, 780, 36);
-
-    // Pill de Verificación
+    // 4. Pill de Verificación: PERFECTAMENTE CENTRADO
     var pillY = cardY + cardH - 64;
     var vLabel = '● PROYECTO SELECCIONADO EN EL RADAR TNIW';
+    ctx.save();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     ctx.font = 'bold 18px monospace';
-    var vW = ctx.measureText(vLabel).width + 36;
+    var vTextWidth = ctx.measureText(vLabel).width;
+    var vW = vTextWidth + 40;
     var vH = 38;
     var vX = (W - vW) / 2;
+
     ctx.fillStyle = 'rgba(187, 244, 81, 0.12)';
     drawRoundRectCur(ctx, vX, pillY, vW, vH, 19);
     ctx.fill();
+
     ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
     ctx.lineWidth = 1.2;
     drawRoundRectCur(ctx, vX, pillY, vW, vH, 19);
     ctx.stroke();
+
     ctx.fillStyle = '#bbf451';
-    ctx.fillText(vLabel, W / 2, pillY + 25);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(vLabel, W / 2, pillY + (vH / 2));
     ctx.restore();
 
-    // 6. Tarjeta Inferior de Llamado a la Acción
-    var footY = 1640;
-    var footH = 190;
+    // 5 & 6. Tarjeta Inferior de Llamado a la Acción (Actualizada según requerimientos)
+    var footY = 1655;
+    var footH = 160;
 
     ctx.save();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
     ctx.fillStyle = 'rgba(10, 12, 16, 0.95)';
     drawRoundRectCur(ctx, cardX, footY, cardW, footH, 20);
     ctx.fill();
@@ -4741,17 +4847,14 @@ Instagram:
     ctx.stroke();
 
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillStyle = '#94a3b8';
-    ctx.font = 'bold 19px monospace';
-    ctx.fillText('CONOCE SU PERFIL COMPLETO Y MÚSICA EN:', W / 2, footY + 48);
+    ctx.font = 'bold 20px monospace';
+    ctx.fillText('LEE LA RESEÑA COMPLETA Y MÚSICA EN:', W / 2, footY + 54);
 
     ctx.fillStyle = '#bbf451';
-    ctx.font = '900 32px monospace';
-    ctx.fillText('thenewindiewave.online/artistas.html', W / 2, footY + 98);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 21px monospace';
-    ctx.fillText('🔗 ENLACE EN BIO  •  @THE.NEW.INDIE.WAVE', W / 2, footY + 148);
+    ctx.font = '900 38px monospace';
+    ctx.fillText('thenewindiewave.online', W / 2, footY + 114);
     ctx.restore();
 
     try {
