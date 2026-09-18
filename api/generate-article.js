@@ -56,10 +56,6 @@ export default async function handler(req, res) {
         }
       }
 
-      const cleanFeedback = feedback && feedback.trim().length > 10 
-        ? feedback.trim() 
-        : 'Propuesta sonora con identidad genuina, producción orgánica y un gancho melódico que destaca de inmediato.';
-
       const slug = `radar-tniw-${slugify(artist_name)}-${slugify(song_title)}-${Date.now().toString().slice(-4)}`;
       const title = `Descubrimiento Radar: "${song_title}" de ${artist_name}`;
       const summary = `Desde ${country || 'la escena independiente'}, ${artist_name} presenta "${song_title}", una descarga fresca de ${genre || 'música indie'} recién añadida a nuestras playlists oficiales.`;
@@ -67,9 +63,9 @@ export default async function handler(req, res) {
       const content = `
         <p class="lead">Cada semana escuchamos cientos de canciones de toda Iberoamérica en <strong>The New Indie Wave</strong>. Muy pocas logran atrapar la atención desde los primeros 15 segundos con tanta honestidad y carácter como <strong>"${escapeHtml(song_title)}"</strong> de <strong>${escapeHtml(artist_name)}</strong>.</p>
 
-        <p>${escapeHtml(cleanFeedback)}</p>
+        <p>El lanzamiento destaca por una propuesta sonora con identidad genuina, texturas envolventes y un gancho melódico que conecta de inmediato con la audiencia.</p>
 
-        <p>El balance entre instrumentación orgánica y textura vocal logra transmitir una atmósfera singular sin perder fuerza melódica. Por su propuesta fresca y carácter sonoro auténtico, ha sido seleccionada para rotar en nuestra playlist oficial <em>"${escapeHtml(playlist || 'Selección Oficial TNIW')}"</em> en Spotify.</p>
+        <p>El balance entre instrumentación y arreglos logra transmitir una atmósfera singular sin perder fuerza rítmica. Por su frescura y carácter sonoro auténtico, ha sido seleccionada para rotar en nuestra playlist oficial <em>"${escapeHtml(playlist || 'Selección Oficial TNIW')}"</em> en Spotify.</p>
 
         ${spotifyEmbedHtml}
 

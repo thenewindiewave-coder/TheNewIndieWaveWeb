@@ -1800,7 +1800,7 @@
     showToast(status === 'accepted' ? '🎉 ¡Canción ACEPTADA! Añadiendo a Spotify...' : '✓ Envío marcado como declinado');
 
     if (status === 'accepted' && item) {
-      publishTrackSpotlightArticle(item, fb);
+      publishTrackSpotlightArticle(item);
     }
 
     if (status === 'accepted' && item && item.spotify_url && item.playlist) {
@@ -4594,8 +4594,15 @@ Instagram:
     // 1. Fondo Oficial
     if (_curStoryBgImage.complete && _curStoryBgImage.naturalWidth > 0) {
       ctx.drawImage(_curStoryBgImage, 0, 0, W, H);
-      ctx.fillStyle = 'rgba(9, 9, 12, 0.72)';
+      ctx.fillStyle = 'rgba(9, 9, 12, 0.82)';
       ctx.fillRect(0, 0, W, H);
+      // Mapear y oscurecer completamente la zona inferior para eliminar cualquier texto previo del fondo
+      var botFade = ctx.createLinearGradient(0, 1400, 0, H);
+      botFade.addColorStop(0, 'rgba(9, 9, 12, 0.75)');
+      botFade.addColorStop(0.3, '#07080c');
+      botFade.addColorStop(1, '#050609');
+      ctx.fillStyle = botFade;
+      ctx.fillRect(0, 1400, W, H - 1400);
     } else {
       var bgGrad = ctx.createLinearGradient(0, 0, 0, H);
       bgGrad.addColorStop(0, '#090a0f');
@@ -4627,13 +4634,13 @@ Instagram:
     ctx.fillStyle = '#bbf451';
     ctx.font = 'bold 21px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('// THE NEW INDIE WAVE  •  CURADURÍA EDITORIAL //', W / 2, 115);
+    ctx.fillText('// THE NEW INDIE WAVE  •  CURADURÍA EDITORIAL //', W / 2, 110);
 
     ctx.fillStyle = '#ffffff';
     ctx.font = '900 48px sans-serif';
     ctx.shadowColor = 'rgba(187, 244, 81, 0.65)';
     ctx.shadowBlur = 25;
-    ctx.fillText('ARTISTAS EN EL RADAR', W / 2, 182);
+    ctx.fillText('ARTISTAS EN EL RADAR', W / 2, 172);
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent';
 
@@ -4646,17 +4653,17 @@ Instagram:
 
     ctx.font = 'bold 20px monospace';
     var bWidth = ctx.measureText(badgeLabel).width + 42;
-    var bHeight = 42;
+    var bHeight = 40;
     var bX = (W - bWidth) / 2;
-    var bY = 222;
+    var bY = 210;
 
     ctx.fillStyle = badgeBg;
-    drawRoundRectCur(ctx, bX, bY, bWidth, bHeight, 21);
+    drawRoundRectCur(ctx, bX, bY, bWidth, bHeight, 20);
     ctx.fill();
 
     ctx.strokeStyle = badgeBorder;
     ctx.lineWidth = 1.5;
-    drawRoundRectCur(ctx, bX, bY, bWidth, bHeight, 21);
+    drawRoundRectCur(ctx, bX, bY, bWidth, bHeight, 20);
     ctx.stroke();
 
     ctx.fillStyle = badgeColor;
@@ -4665,21 +4672,21 @@ Instagram:
     ctx.fillText(badgeLabel, W / 2, bY + (bHeight / 2));
     ctx.restore();
 
-    // 3. Tarjeta Central del Artista (x=90, y=290, W=900, H=1310)
+    // 3. Tarjeta Central del Artista (Diseño Unificado - Cero Espacio Muerto)
     var cardX = 90;
-    var cardY = 290;
+    var cardY = 265;
     var cardW = 900;
-    var cardH = 1310;
+    var cardH = 1430;
 
     // Sombra exterior de la tarjeta principal
     ctx.save();
     ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
     ctx.shadowBlur = 60;
     ctx.shadowOffsetY = 24;
-    ctx.fillStyle = 'rgba(14, 15, 20, 0.96)';
+    ctx.fillStyle = 'rgba(14, 15, 20, 0.98)';
     drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 28);
     ctx.fill();
-    ctx.restore(); // Se restaura para que la sombra no afecte nada interior
+    ctx.restore();
 
     // Borde de la tarjeta
     ctx.save();
@@ -4687,16 +4694,16 @@ Instagram:
     ctx.shadowBlur = 0;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
     ctx.lineWidth = 2;
     drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, 28);
     ctx.stroke();
     ctx.restore();
 
-    // 4. Foto / Carátula del Artista (y=340, W=780, H=740)
-    var photoX = cardX + 60;
-    var photoY = cardY + 50;
-    var photoW = cardW - 120;
+    // 4. Foto / Carátula del Artista (y=310, W=800, H=720)
+    var photoX = cardX + 50;
+    var photoY = cardY + 45;
+    var photoW = cardW - 100;
     var photoH = 720;
 
     ctx.save();
@@ -4775,7 +4782,7 @@ Instagram:
     ctx.restore();
 
     // 5. Nombre del Artista & Información
-    var infoY = photoY + photoH + 45;
+    var infoY = photoY + photoH + 46;
 
     ctx.save();
     ctx.shadowColor = 'transparent';
@@ -4785,22 +4792,56 @@ Instagram:
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = '#ffffff';
-    ctx.font = '900 50px sans-serif';
+    ctx.font = '900 52px sans-serif';
     ctx.fillText(truncateStringCur(artistName.toUpperCase(), 24), W / 2, infoY);
 
     ctx.fillStyle = '#38bdf8';
     ctx.font = 'bold 22px monospace';
-    ctx.fillText('// ' + genre.toUpperCase() + '  •  ' + city.toUpperCase(), W / 2, infoY + 45);
+    ctx.fillText('// ' + genre.toUpperCase() + '  •  ' + city.toUpperCase(), W / 2, infoY + 42);
 
+    var quoteBottomY = infoY + 85;
     if (cleanBio) {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
       ctx.font = 'italic 23px sans-serif';
-      wrapTextCenteredCur(ctx, '“' + cleanBio + '”', W / 2, infoY + 110, 780, 36);
+      quoteBottomY = wrapTextCenteredCur(ctx, '“' + cleanBio + '”', W / 2, infoY + 95, 780, 34);
     }
     ctx.restore();
 
-    // 4. Pill de Verificación: PERFECTAMENTE CENTRADO
-    var pillY = cardY + cardH - 64;
+    // 6. CAJA DE LLAMADO A LA ACCIÓN INTEGRADA (Elimina todo espacio muerto)
+    var ctaBoxY = Math.max(quoteBottomY + 28, cardY + 1140);
+    var ctaBoxW = 780;
+    var ctaBoxH = 120;
+    var ctaBoxX = (W - ctaBoxW) / 2;
+
+    ctx.save();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Fondo oscuro translúcido con borde cyan/neón
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
+    drawRoundRectCur(ctx, ctaBoxX, ctaBoxY, ctaBoxW, ctaBoxH, 16);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+    ctx.lineWidth = 1.4;
+    drawRoundRectCur(ctx, ctaBoxX, ctaBoxY, ctaBoxW, ctaBoxH, 16);
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'bold 19px monospace';
+    ctx.fillText('LEE LA RESEÑA COMPLETA Y MÚSICA EN:', W / 2, ctaBoxY + 38);
+
+    ctx.fillStyle = '#bbf451';
+    ctx.font = '900 34px monospace';
+    ctx.fillText('thenewindiewave.online', W / 2, ctaBoxY + 82);
+    ctx.restore();
+
+    // 7. Pill de Verificación Editorial (Perfectamente ubicado debajo del llamado a la acción)
+    var pillY = ctaBoxY + ctaBoxH + 22;
     var vLabel = '● PROYECTO SELECCIONADO EN EL RADAR TNIW';
     ctx.save();
     ctx.shadowColor = 'transparent';
@@ -4826,35 +4867,6 @@ Instagram:
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(vLabel, W / 2, pillY + (vH / 2));
-    ctx.restore();
-
-    // 5 & 6. Tarjeta Inferior de Llamado a la Acción (Actualizada según requerimientos)
-    var footY = 1655;
-    var footH = 160;
-
-    ctx.save();
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-
-    ctx.fillStyle = 'rgba(10, 12, 16, 0.95)';
-    drawRoundRectCur(ctx, cardX, footY, cardW, footH, 20);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
-    ctx.lineWidth = 1.5;
-    drawRoundRectCur(ctx, cardX, footY, cardW, footH, 20);
-    ctx.stroke();
-
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = 'bold 20px monospace';
-    ctx.fillText('LEE LA RESEÑA COMPLETA Y MÚSICA EN:', W / 2, footY + 54);
-
-    ctx.fillStyle = '#bbf451';
-    ctx.font = '900 38px monospace';
-    ctx.fillText('thenewindiewave.online', W / 2, footY + 114);
     ctx.restore();
 
     try {
@@ -4886,6 +4898,7 @@ Instagram:
       ctx.fillText(lines[i], centerX, startY + (i * lineHeight));
     }
     ctx.textAlign = 'left';
+    return startY + (lines.length * lineHeight);
   }
 
   function downloadCuratorStoryImage() {
@@ -5914,7 +5927,7 @@ Instagram:
     }
   }
 
-  async function publishTrackSpotlightArticle(item, fb) {
+  async function publishTrackSpotlightArticle(item) {
     if (!item) return;
     try {
       var coverUrl = item.cover_url || '';
@@ -5940,7 +5953,6 @@ Instagram:
           genre: item.genre || 'Indie',
           country: item.country || '',
           playlist: item.playlist || '',
-          feedback: fb,
           spotify_url: item.spotify_url,
           cover_url: coverUrl,
           auto_publish: true
