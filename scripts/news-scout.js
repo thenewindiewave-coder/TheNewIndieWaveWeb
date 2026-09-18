@@ -593,5 +593,4 @@ function slugify(text) {
   if (!text) return 'nota-' + Math.floor(Math.random()*1000);
   return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
-
-runNewsScout();
+main();
