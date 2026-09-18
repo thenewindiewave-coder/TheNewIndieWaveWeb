@@ -1208,6 +1208,7 @@
     <!-- CATEGORY CHIPS -->
     <div class="category-chips" id="categoryChips">
       <button class="chip-btn active" onclick="filterByCategory('all', this)">Todos</button>
+      <button class="chip-btn" onclick="filterByCategory('Artistas en el Radar', this)">🎯 Tracks en el Radar</button>
       <button class="chip-btn" onclick="filterByCategory('Estrategia & Algoritmos', this)">Estrategia & Spotify</button>
       <button class="chip-btn" onclick="filterByCategory('Arte & Visuales', this)">Arte & Visuales</button>
       <button class="chip-btn" onclick="filterByCategory('Industria Musical', this)">Industria Musical</button>
@@ -1216,11 +1217,35 @@
     </div>
   </div>
 
-  <!-- FEATURED ARTICLE HERO (COVER STORY) -->
+  <!-- FEATURED ARTICLE HERO (COVER STORY DE LAS 7 NOTICIAS) -->
   <div id="featuredHeroContainer"></div>
 
-  <!-- ARTICLES GRID (MÁXIMO 6 CARDS EN PORTADA + 1 HERO = EXACTAMENTE 7 NOTAS) -->
+  <!-- ARTICLES GRID (MÁXIMO 6 CARDS EN PORTADA + 1 HERO = EXACTAMENTE 7 NOTAS PRINCIPALES) -->
   <div id="articlesGrid" class="articles-grid"></div>
+
+  <!-- SECCIÓN DEDICADA: TRACKS EN EL RADAR (APARTADO AISLADO PARA NO DESPLAZAR NOTICIAS) -->
+  <section id="radarTracksSection" class="radar-tracks-section" style="margin: 60px 0 45px 0; border-top: 1px solid var(--border-strong); padding-top: 40px;">
+    <div class="radar-tracks-header" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+      <div>
+        <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; font-weight: 700;">
+          // SELECCIÓN OFICIAL SPOTIFY // DESCUBRIMIENTOS ACEPTADOS
+        </div>
+        <h2 style="font-family: var(--font-heading); font-size: clamp(22px, 3vw, 30px); font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; color: #fff;">
+          Tracks en el Radar
+        </h2>
+        <p style="color: var(--text-muted); font-size: 14px; max-width: 650px; margin-top: 4px;">
+          Lanzamientos y proyectos independientes recién seleccionados e incorporados a nuestras playlists oficiales de Spotify con reseña curatorial.
+        </p>
+      </div>
+      <a href="/artistas" class="btn-outline" style="min-height: auto; padding: 9px 18px; font-size: 11.5px; text-decoration: none;">
+        Explorar Artistas en el Radar ↗
+      </a>
+    </div>
+    <div id="radarTracksGrid" class="articles-grid"></div>
+    <div id="radarEmptyState" style="display: none; text-align: center; padding: 30px 20px; color: var(--text-muted); font-family: var(--font-mono); font-size: 12px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border);">
+      // NO HAY TRACKS EN EL RADAR POR AHORA
+    </div>
+  </section>
 
   <!-- BOTÓN VER ARCHIVO HISTÓRICO -->
   <div class="archive-action-wrapper" id="archiveActionWrapper">
@@ -1498,6 +1523,19 @@
     checkUrlHash();
   }
 
+  // SEPARACIÓN DE CONTENIDOS: NOTICIAS EDITORIALES vs TRACKS EN EL RADAR
+  function getEditorialArticles() {
+    return allArticles.filter(function(art) {
+      return art.category !== 'Artistas en el Radar';
+    });
+  }
+
+  function getRadarTrackArticles() {
+    return allArticles.filter(function(art) {
+      return art.category === 'Artistas en el Radar';
+    });
+  }
+
   // FILTRAR Y RENDERIZAR
   function getFilteredArticles() {
     return allArticles.filter(function(art) {
@@ -1517,93 +1555,152 @@
     });
   }
 
+  function renderArticleCardHtml(art, isTrack) {
+    var catBadge = isTrack 
+      ? '<span class="card-cat-tag" style="background:rgba(30,215,96,0.15); color:#1ed760; border-color:rgba(30,215,96,0.35);">🟢 TRACK EN PLAYLIST</span>'
+      : '<span class="card-cat-tag">' + escapeHtml(art.category || 'Cultura Indie') + '</span>';
+
+    return `
+      <div class="article-card" onclick="openArticle('${escapeHtml(art.slug)}')">
+        <div class="card-media">
+          <img src="${escapeHtml(art.image_url)}" alt="${escapeHtml(art.title)}" class="card-img" loading="lazy">
+          ${catBadge}
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span>${formatDate(art.published_at)}</span>
+            <span class="meta-dot"></span>
+            <span>${escapeHtml(art.read_time || (isTrack ? '1.5 min' : '4 min'))}</span>
+          </div>
+          <h3 class="card-title">${escapeHtml(art.title)}</h3>
+          <p class="card-summary">${escapeHtml(art.summary)}</p>
+          <div class="card-footer">
+            <span class="card-arrow" style="margin-left: auto;">${isTrack ? 'Escuchar & Leer ↗' : 'Leer artículo ↗'}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function renderArticles() {
     var filtered = getFilteredArticles();
     var heroContainer = document.getElementById('featuredHeroContainer');
     var gridContainer = document.getElementById('articlesGrid');
     var emptyState = document.getElementById('emptyState');
     var countBadge = document.getElementById('articlesCountBadge');
+    var radarSection = document.getElementById('radarTracksSection');
+    var radarGrid = document.getElementById('radarTracksGrid');
+    var radarEmpty = document.getElementById('radarEmptyState');
 
-    if (filtered.length === 0) {
-      heroContainer.innerHTML = '';
-      gridContainer.innerHTML = '';
-      emptyState.style.display = 'block';
-      if (countBadge) countBadge.textContent = '0 artículos encontrados';
-      return;
-    }
+    var radarTracks = getRadarTrackArticles();
 
-    emptyState.style.display = 'none';
-
-    // REGLA CLAVE: EXACTAMENTE 7 NOTICIAS EN PORTADA (1 DESTACADA COVER + 6 REGULARES EN GRID)
-    var featured = null;
-    var regularList = [];
-
+    // 1. MODO PORTADA GENERAL ("Todos" sin búsqueda activa):
+    // REGLA CRUCIAL: Las 7 Noticias Principales se toman EXCLUSIVAMENTE de noticias editoriales.
+    // Los tracks de artistas van en su propio apartado dedicado y NUNCA desplazan a las 7 noticias.
     if (currentCategory === 'all' && !currentSearchQuery) {
-      featured = filtered.find(function(a) { return a.featured; }) || filtered[0];
-      // Tomar exactamente 6 del resto para tener 1 + 6 = 7
-      regularList = filtered.filter(function(a) { return a.slug !== featured.slug; }).slice(0, 6);
-      
-      var totalDisplayed = (featured ? 1 : 0) + regularList.length;
-      if (countBadge) countBadge.textContent = totalDisplayed + ' artículos en portada';
-    } else {
-      featured = null;
-      regularList = filtered;
-      if (countBadge) countBadge.textContent = filtered.length + (filtered.length === 1 ? ' artículo encontrado' : ' artículos encontrados');
-    }
+      var editorialList = getEditorialArticles();
+      var featured = editorialList.find(function(a) { return a.featured; }) || editorialList[0];
+      var regularList = editorialList.filter(function(a) { return a.slug !== (featured ? featured.slug : ''); }).slice(0, 6);
 
-    // RENDER FEATURED HERO
-    if (featured) {
-      heroContainer.innerHTML = `
-        <div class="featured-hero" onclick="openArticle('${escapeHtml(featured.slug)}')">
-          <div class="featured-media">
-            <img src="${escapeHtml(featured.image_url)}" alt="${escapeHtml(featured.title)}" class="featured-img" loading="lazy">
-            <div class="featured-badge-tag">⚡ DESTACADO // COVER STORY</div>
-          </div>
-          <div class="featured-content">
-            <div class="meta-row">
-              <span class="meta-cat">${escapeHtml(featured.category)}</span>
-              <span class="meta-dot"></span>
-              <span>${formatDate(featured.published_at)}</span>
-              <span class="meta-dot"></span>
-              <span>${escapeHtml(featured.read_time || '4 min')}</span>
+      if (!featured && regularList.length === 0) {
+        heroContainer.innerHTML = '';
+        gridContainer.innerHTML = '';
+        emptyState.style.display = 'block';
+      } else {
+        emptyState.style.display = 'none';
+
+        // Render Hero Destacado
+        if (featured) {
+          heroContainer.innerHTML = `
+            <div class="featured-hero" onclick="openArticle('${escapeHtml(featured.slug)}')">
+              <div class="featured-media">
+                <img src="${escapeHtml(featured.image_url)}" alt="${escapeHtml(featured.title)}" class="featured-img" loading="lazy">
+                <div class="featured-badge-tag">⚡ DESTACADO // COVER STORY</div>
+              </div>
+              <div class="featured-content">
+                <div class="meta-row">
+                  <span class="meta-cat">${escapeHtml(featured.category)}</span>
+                  <span class="meta-dot"></span>
+                  <span>${formatDate(featured.published_at)}</span>
+                  <span class="meta-dot"></span>
+                  <span>${escapeHtml(featured.read_time || '4 min')}</span>
+                </div>
+                <h2 class="featured-title">${escapeHtml(featured.title)}</h2>
+                <p class="featured-summary">${escapeHtml(featured.summary)}</p>
+                <div class="author-row">
+                  <img src="rodrigo_studio_web.jpg" alt="${escapeHtml(featured.author || 'Rodrigo dL Moral')}" class="author-avatar" onerror="this.src='rodrigo_studio.jpg'">
+                  <span>Por <strong>${escapeHtml(featured.author || 'Rodrigo dL Moral')}</strong></span>
+                  <div class="btn-read-more">Leer artículo completo ↗</div>
+                </div>
+              </div>
             </div>
-            <h2 class="featured-title">${escapeHtml(featured.title)}</h2>
-            <p class="featured-summary">${escapeHtml(featured.summary)}</p>
-            <div class="author-row">
-              <img src="rodrigo_studio_web.jpg" alt="${escapeHtml(featured.author || 'Rodrigo dL Moral')}" class="author-avatar" onerror="this.src='rodrigo_studio.jpg'">
-              <span>Por <strong>${escapeHtml(featured.author || 'Rodrigo dL Moral')}</strong></span>
-              <div class="btn-read-more">Leer artículo completo ↗</div>
-            </div>
-          </div>
-        </div>
-      `;
-    } else {
+          `;
+        } else {
+          heroContainer.innerHTML = '';
+        }
+
+        // Render 6 Noticias Principales en Grid
+        gridContainer.innerHTML = regularList.map(function(art) {
+          return renderArticleCardHtml(art, false);
+        }).join('');
+      }
+
+      // Render Apartado Dedicado: Tracks en el Radar
+      if (radarSection) {
+        radarSection.style.display = 'block';
+        if (radarTracks.length === 0) {
+          if (radarGrid) radarGrid.innerHTML = '';
+          if (radarEmpty) radarEmpty.style.display = 'block';
+        } else {
+          if (radarEmpty) radarEmpty.style.display = 'none';
+          if (radarGrid) {
+            radarGrid.innerHTML = radarTracks.map(function(art) {
+              return renderArticleCardHtml(art, true);
+            }).join('');
+          }
+        }
+      }
+
+      var totalNews = (featured ? 1 : 0) + regularList.length;
+      if (countBadge) {
+        countBadge.textContent = totalNews + ' noticias principales · ' + radarTracks.length + ' tracks en el radar';
+      }
+
+    } else if (currentCategory.toLowerCase() === 'artistas en el radar') {
+      // 2. MODO FILTRADO: PESTAÑA "Tracks en el Radar"
+      if (radarSection) radarSection.style.display = 'none';
       heroContainer.innerHTML = '';
-    }
 
-    // RENDER GRID
-    gridContainer.innerHTML = regularList.map(function(art) {
-      return `
-        <div class="article-card" onclick="openArticle('${escapeHtml(art.slug)}')">
-          <div class="card-media">
-            <img src="${escapeHtml(art.image_url)}" alt="${escapeHtml(art.title)}" class="card-img" loading="lazy">
-            <span class="card-cat-tag">${escapeHtml(art.category)}</span>
-          </div>
-          <div class="card-body">
-            <div class="card-meta">
-              <span>${formatDate(art.published_at)}</span>
-              <span class="meta-dot"></span>
-              <span>${escapeHtml(art.read_time || '4 min')}</span>
-            </div>
-            <h3 class="card-title">${escapeHtml(art.title)}</h3>
-            <p class="card-summary">${escapeHtml(art.summary)}</p>
-            <div class="card-footer">
-              <span class="card-arrow" style="margin-left: auto;">Leer artículo ↗</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
+      var matches = filtered;
+      if (matches.length === 0) {
+        gridContainer.innerHTML = '';
+        emptyState.style.display = 'block';
+        if (countBadge) countBadge.textContent = '0 tracks en el radar';
+      } else {
+        emptyState.style.display = 'none';
+        gridContainer.innerHTML = matches.map(function(art) {
+          return renderArticleCardHtml(art, true);
+        }).join('');
+        if (countBadge) countBadge.textContent = matches.length + (matches.length === 1 ? ' track en el radar' : ' tracks en el radar');
+      }
+
+    } else {
+      // 3. MODO FILTRADO POR OTRA CATEGORÍA O BÚSQUEDA
+      if (radarSection) radarSection.style.display = 'none';
+      heroContainer.innerHTML = '';
+
+      if (filtered.length === 0) {
+        gridContainer.innerHTML = '';
+        emptyState.style.display = 'block';
+        if (countBadge) countBadge.textContent = '0 artículos encontrados';
+      } else {
+        emptyState.style.display = 'none';
+        gridContainer.innerHTML = filtered.map(function(art) {
+          return renderArticleCardHtml(art, art.category === 'Artistas en el Radar');
+        }).join('');
+        if (countBadge) countBadge.textContent = filtered.length + (filtered.length === 1 ? ' artículo encontrado' : ' artículos encontrados');
+      }
+    }
   }
 
   // RENDER SECCIÓN DE ARCHIVO HISTÓRICO

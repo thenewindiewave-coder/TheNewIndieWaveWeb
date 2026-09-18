@@ -31,8 +31,9 @@ export default async function handler(req, res) {
       // Responder a Telegram inmediatamente para detener la animación del botón
       await answerCallbackQuery(cq.id, 'Procesando tu elección...');
 
-      // Validar que solo Rodrigo pueda autorizar
-      if (fromId !== TELEGRAM_CHAT_ID) {
+      // Validar que Rodrigo esté autorizado (soporta user id o chat id)
+      const isAuthorized = (fromId === TELEGRAM_CHAT_ID) || (String(cq.message?.chat?.id || '') === TELEGRAM_CHAT_ID);
+      if (!isAuthorized) {
         await sendTelegramText('⛔ Acceso no autorizado.', cq.message?.chat?.id || fromId);
         return res.status(200).json({ ok: true });
       }
@@ -57,7 +58,8 @@ export default async function handler(req, res) {
       const fromId = String(msg.from?.id || '');
       const text = msg.text.trim();
 
-      if (fromId !== TELEGRAM_CHAT_ID) {
+      const isAuthorized = (fromId === TELEGRAM_CHAT_ID) || (String(msg.chat?.id || '') === TELEGRAM_CHAT_ID);
+      if (!isAuthorized) {
         return res.status(200).json({ ok: true });
       }
 
@@ -138,7 +140,7 @@ async function handlePublishBySlug(slug, chatId) {
       summary: editorial.summary,
       content: editorial.content,
       category: 'Cultura Indie',
-      image_url: editorial.image_url || item.image_url,
+      image_url: editorial.image_url || item.image_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
       published: true,
       published_at: new Date().toISOString()
     })
@@ -336,7 +338,7 @@ Responde ÚNICAMENTE un JSON válido con esta estructura:
 }
 
 // -----------------------------------------------------------------------------
-// REGLA DE 7 NOTICIAS EN PORTADA
+// REGLA DE 7 NOTICIAS EN PORTADA (EXCLUSIVA PARA NOTICIAS EDITORIALES)
 // -----------------------------------------------------------------------------
 async function enforceSevenArticlesLimit() {
   try {
@@ -348,8 +350,14 @@ async function enforceSevenArticlesLimit() {
     });
     if (pubCheckRes.ok) {
       const pubArticles = await pubCheckRes.json();
-      if (pubArticles && pubArticles.length > 7) {
-        const toArchive = pubArticles.slice(7);
+      // Filtrar SOLO noticias editoriales (las notas de canciones de "Artistas en el Radar" nunca se cuentan ni se archivan)
+      const editorialArticles = (pubArticles || []).filter(a => 
+        a.category !== 'Artistas en el Radar' && 
+        a.category !== 'scout_queue' && 
+        a.category !== 'scout_discarded'
+      );
+      if (editorialArticles.length > 7) {
+        const toArchive = editorialArticles.slice(7);
         for (const item of toArchive) {
           await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(item.slug)}`, {
             method: 'PATCH',
@@ -382,7 +390,7 @@ async function answerCallbackQuery(cqId, text) {
 
 async function sendTelegramText(text, chatId) {
   try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -392,6 +400,19 @@ async function sendTelegramText(text, chatId) {
         disable_web_page_preview: false
       })
     });
+    if (!res.ok) {
+      // Fallback a texto plano sin parse_mode si falla por formateo o caracteres especiales
+      const plainText = text.replace(/[*_`\[\]()]/g, '');
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: plainText,
+          disable_web_page_preview: false
+        })
+      });
+    }
   } catch(e) {}
 }
 

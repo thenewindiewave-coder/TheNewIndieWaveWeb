@@ -140,35 +140,43 @@ export default async function handler(req, res) {
 
     const insertedData = await insertRes.json();
 
-    // Auto-archivar notas antiguas para que la portada del Blog muestre exactamente 7 noticias
-    try {
-      const pubCheckRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?published=eq.true&order=published_at.desc`, {
-        headers: {
-          'apikey': SUPABASE_SERVICE_KEY,
-          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-        }
-      });
-      if (pubCheckRes.ok) {
-        const pubArticles = await pubCheckRes.json();
-        if (pubArticles && pubArticles.length > 7) {
-          const toArchive = pubArticles.slice(7);
-          for (const item of toArchive) {
-            await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(item.slug)}`, {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_SERVICE_KEY,
-                'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-                'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify({ published: false })
-            });
+    // Auto-archivar notas editoriales antiguas para que la portada del Blog muestre exactamente 7 noticias
+    // Las notas de canciones ('Artistas en el Radar') nunca se auto-archivan con este límite ni desplazan noticias
+    if (articlePayload.category !== 'Artistas en el Radar') {
+      try {
+        const pubCheckRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?published=eq.true&order=published_at.desc`, {
+          headers: {
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
           }
-          console.log(`[generate-article] Auto-archivadas ${toArchive.length} notas antiguas para mantener el límite de 7.`);
+        });
+        if (pubCheckRes.ok) {
+          const pubArticles = await pubCheckRes.json();
+          const editorialArticles = (pubArticles || []).filter(a => 
+            a.category !== 'Artistas en el Radar' && 
+            a.category !== 'scout_queue' && 
+            a.category !== 'scout_discarded'
+          );
+          if (editorialArticles.length > 7) {
+            const toArchive = editorialArticles.slice(7);
+            for (const item of toArchive) {
+              await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(item.slug)}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'apikey': SUPABASE_SERVICE_KEY,
+                  'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({ published: false })
+              });
+            }
+            console.log(`[generate-article] Auto-archivadas ${toArchive.length} notas editoriales antiguas para mantener el límite de 7.`);
+          }
         }
+      } catch (archiveErr) {
+        console.warn('[generate-article] Error auto-archivando notas editoriales:', archiveErr);
       }
-    } catch (archiveErr) {
-      console.warn('[generate-article] Error auto-archivando notas:', archiveErr);
     }
 
     return res.status(200).json({
