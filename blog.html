@@ -735,11 +735,12 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 16px;
+    padding: 16px 20px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border);
     border-radius: 6px;
-    margin-bottom: 32px;
+    margin-top: 40px;
+    margin-bottom: 24px;
   }
 
   .reader-author-avatar {
@@ -1155,6 +1156,11 @@
 
       <h1 class="reader-title" id="readerTitle">Título del Artículo</h1>
 
+      <article class="reader-content" id="readerContent">
+        <!-- Contenido renderizado dinámicamente -->
+      </article>
+
+      <!-- FIRMA DEL AUTOR AL FINAL DE LA NOTA -->
       <div class="reader-author-box">
         <img src="rodrigo_studio_web.jpg" alt="Rodrigo dL Moral" id="readerAuthorAvatar" class="reader-author-avatar" onerror="this.src='rodrigo_studio.jpg'">
         <div>
@@ -1162,10 +1168,6 @@
           <div class="reader-author-role" id="readerAuthorRole">Curador & Fundador @ The New Indie Wave</div>
         </div>
       </div>
-
-      <article class="reader-content" id="readerContent">
-        <!-- Contenido renderizado dinámicamente -->
-      </article>
 
       <!-- BARRA PARA COMPARTIR -->
       <div class="reader-share-bar">
