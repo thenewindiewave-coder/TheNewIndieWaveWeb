@@ -11,11 +11,23 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.s
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
 const RSS_FEEDS = [
+  // 🇲🇽 MÉXICO (CASA / ALMA MATER TNIW - 10 MEDIOS LÍDERES)
   { name: 'WARP Magazine (México)', url: 'https://warp.la/feed/', region: 'México' },
+  { name: 'Indie Rocks! (México)', url: 'https://www.indierocks.mx/feed/', region: 'México' },
   { name: 'Sopitas Música (México)', url: 'https://www.sopitas.com/feed/', region: 'México' },
+  { name: 'Me Hace Ruido (México)', url: 'https://mehaceruido.com/feed/', region: 'México' },
+  { name: 'Filter México', url: 'https://filtermexico.com/feed/', region: 'México' },
   { name: 'Setlist.me (México)', url: 'https://setlist.me/feed/', region: 'México' },
+  { name: 'Revista Kuadro (México)', url: 'https://revistakuadro.com/feed/', region: 'México' },
+  { name: 'Pólvora Rock (México)', url: 'https://polvora.com.mx/feed/', region: 'México' },
+  { name: 'Grita Radio (México)', url: 'https://gritaradio.com/feed/', region: 'México' },
+  { name: 'Rolling Stone en Español (México)', url: 'https://es.rollingstone.com/feed/', region: 'México' },
+
+  // 🌎 LATINOAMÉRICA
   { name: 'Indie Hoy (Latam)', url: 'https://indiehoy.com/feed/', region: 'Latinoamérica' },
   { name: 'Cuchara Sónica (Latam)', url: 'https://cucharasonica.com/feed/', region: 'Latinoamérica' },
+
+  // 🇪🇸 ESPAÑA
   { name: 'MondoSonoro (España)', url: 'https://www.mondosonoro.com/feed/', region: 'España' },
   { name: 'Binaural (España)', url: 'https://binaural.es/feed/', region: 'España' },
   { name: 'Muzikalia (España)', url: 'https://muzikalia.com/feed/', region: 'España' },

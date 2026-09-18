@@ -52,12 +52,22 @@
 
     var width = 0;
     var height = 0;
+    var docHeight = 0;
     var dots = [];
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    function getDocHeight() {
+      return Math.max(
+        document.documentElement.scrollHeight || 0,
+        document.body.scrollHeight || 0,
+        window.innerHeight || 0
+      );
+    }
 
     function buildDots() {
       width = window.innerWidth;
       height = window.innerHeight;
+      docHeight = getDocHeight();
 
       canvas.width = Math.floor(width * dpr);
       canvas.height = Math.floor(height * dpr);
@@ -69,15 +79,14 @@
 
       dots = [];
 
-      // Malla densa similar a la referencia (paso de ~20px a ~22px)
+      // Malla densa que abarca todo el largo del documento scrollable
       var step = width < 768 ? 20 : 22;
       var cols = Math.ceil(width / step) + 1;
-      var rows = Math.ceil(height / step) + 1;
+      var rows = Math.ceil(docHeight / step) + 1;
 
       for (var r = 0; r <= rows; r++) {
         var rowOffset = (r % 2) * (step * 0.5); // Escalonado hexagonal/matriz
         for (var c = 0; c <= cols; c++) {
-          // 65% de probabilidad de nodo activo para densidad rica y uniforme
           if (Math.random() < 0.65) {
             var jitterX = (Math.random() - 0.5) * (step * 0.45);
             var jitterY = (Math.random() - 0.5) * (step * 0.45);
@@ -85,13 +94,10 @@
             var x = c * step + rowOffset + jitterX;
             var y = r * step + jitterY;
 
-            if (x >= -10 && x <= width + 10 && y >= -10 && y <= height + 10) {
+            if (x >= -10 && x <= width + 10 && y >= -10 && y <= docHeight + 10) {
               var isLime = Math.random() < 0.12; // 12% tinte verde lima TNIW
-              // Tamaños finos y nítidos: 0.75px a 1.4px
               var size = Math.random() < 0.2 ? 1.35 : (Math.random() < 0.65 ? 0.95 : 0.75);
-              // Atenuación suave y perfecta confirmada por el usuario (0.08 a 0.28)
               var baseAlpha = Math.random() * 0.20 + 0.08;
-              // Parpadeo más rápido y activo (3x más dinámico)
               var speed = Math.random() * 0.055 + 0.035;
               var phase = Math.random() * Math.PI * 2;
 
@@ -116,6 +122,15 @@
       resizeTimer = setTimeout(buildDots, 150);
     });
 
+    // Detectar si el documento crece (ej. carga de notas vía Supabase)
+    var lastDocHeightCheck = 0;
+    setInterval(function() {
+      var currentH = getDocHeight();
+      if (Math.abs(currentH - docHeight) > 300) {
+        buildDots();
+      }
+    }, 1200);
+
     buildDots();
 
     var animId = null;
@@ -126,13 +141,22 @@
       var delta = timestamp - lastTime;
       lastTime = timestamp;
 
-      // Normalizar avance con delta time
       var stepFactor = Math.min(delta / 16.6, 2.5);
+      var scrollY = window.scrollY || window.pageYOffset || 0;
 
       ctx.clearRect(0, 0, width, height);
 
       for (var i = 0; i < dots.length; i++) {
         var dot = dots[i];
+        
+        // Calcular posición en pantalla según el desplazamiento actual del documento (scroll 1:1)
+        var screenY = dot.y - scrollY;
+
+        // Culling: omitir puntos fuera de la vista actual para máximo rendimiento (60 FPS)
+        if (screenY < -15 || screenY > height + 15) {
+          continue;
+        }
+
         dot.phase += dot.speed * stepFactor;
 
         // Parpadeo suave senoidal
@@ -142,7 +166,7 @@
         if (alpha > 0.42) alpha = 0.42;
 
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2);
+        ctx.arc(dot.x, screenY, dot.size, 0, Math.PI * 2);
 
         if (dot.isLime) {
           ctx.fillStyle = 'rgba(187, 244, 81, ' + alpha.toFixed(3) + ')';
