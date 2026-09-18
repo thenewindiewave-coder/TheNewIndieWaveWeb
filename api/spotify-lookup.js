@@ -47,6 +47,7 @@ export default async function handler(req, res) {
   const { url, id, type } = req.query || {};
   let targetId = id;
   let isPlaylist = type === 'playlist';
+  let isAlbum = type === 'album';
 
   if (!targetId && url) {
     const raw = url.trim();
@@ -56,6 +57,12 @@ export default async function handler(req, res) {
     } else if (raw.includes('spotify:playlist:')) {
       isPlaylist = true;
       targetId = raw.split('spotify:playlist:')[1].split('?')[0];
+    } else if (raw.includes('album/')) {
+      isAlbum = true;
+      targetId = raw.split('album/')[1].split('?')[0].split('&')[0].split('/')[0];
+    } else if (raw.includes('spotify:album:')) {
+      isAlbum = true;
+      targetId = raw.split('spotify:album:')[1].split('?')[0];
     } else if (raw.includes('track/')) {
       isPlaylist = false;
       targetId = raw.split('track/')[1].split('?')[0].split('&')[0].split('/')[0];
@@ -130,7 +137,40 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2. Manejo de Tracks
+    // 2. Manejo de Álbumes / Sencillos
+    if (isAlbum) {
+      const albRes = await fetch(`https://api.spotify.com/v1/albums/${targetId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!albRes.ok) {
+        return res.status(404).json({ error: 'Álbum no encontrado en Spotify.' });
+      }
+
+      const albData = await albRes.json();
+      const firstTrack = (albData.tracks && albData.tracks.items && albData.tracks.items.length > 0)
+        ? albData.tracks.items[0]
+        : null;
+
+      const title = firstTrack ? firstTrack.name : albData.name;
+      const artist = albData.artists ? albData.artists.map(a => a.name).join(', ') : 'Artista Desconocido';
+      const cover = (albData.images && albData.images.length > 0) ? albData.images[0].url : '';
+      const trackId = firstTrack ? firstTrack.id : targetId;
+      const spotify_url = `https://open.spotify.com/track/${trackId}`;
+
+      return res.status(200).json({
+        success: true,
+        type: 'track',
+        track_id: trackId,
+        title,
+        artist,
+        cover,
+        spotify_url,
+        preview_url: firstTrack ? firstTrack.preview_url : null
+      });
+    }
+
+    // 3. Manejo de Tracks directos
     const trackRes = await fetch(`https://api.spotify.com/v1/tracks/${targetId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });

@@ -1525,6 +1525,27 @@
     });
   }
 
+  // 8 Playlists Oficiales de Spotify de The New Indie Wave
+  var OFFICIAL_PLAYLISTS = [
+    { id: "79SKuyss3MfkzvOJGnaisB", name: "Mezcla de rolas urbanas para farmear Aura" },
+    { id: "4mcJJz8GiKTuxieL9Jziln", name: "Darkwave oscuro y atmosférico para la madrugada" },
+    { id: "7bbYPZ5ia4IGRP2fT47kXr", name: "Música urbana con flow y ritmo para moverte" },
+    { id: "5OLiBaOPAe5cBEdV1AoSd1", name: "Metal intenso para liberar toda tu energía" },
+    { id: "6cuhRpfYmEt0vYCT9mFLKc", name: "Rock para sacar la rabia y el enojo acumulado" },
+    { id: "20uF7xCOW8zldDCiAowxuF", name: "SoftSongs para esos domingos sin hacer nada" },
+    { id: "0Ty7tTNh1ONGyOLuasPREj", name: "Dreamy Songs para escuchar en la intimidad de tu habitación" },
+    { id: "36ribRboGB3DwM821oYokl", name: "SynthPop para cuando solo quieres bailar" }
+  ];
+
+  function renderPlaylistSelectOptions(selectedName) {
+    var normSel = (selectedName || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    return OFFICIAL_PLAYLISTS.map(function(pl) {
+      var normPl = pl.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+      var isSelected = (normSel === normPl || normSel.includes(normPl.substring(0, 10)) || normPl.includes(normSel.substring(0, 10)));
+      return '<option value="' + pl.name + '" ' + (isSelected ? 'selected' : '') + '>' + pl.name + '</option>';
+    }).join('');
+  }
+
   // 4. Renderizado Compacto de Canciones
   function renderQueue() {
     var container = document.getElementById('queueContainer');
@@ -1600,18 +1621,26 @@
       if (currentTab === 'pending') {
         actionBlock = `
           <div class="review-console" style="margin-top: 14px;">
+            <div style="margin-bottom: 12px; background: rgba(187, 244, 81, 0.05); border: 1px solid rgba(187, 244, 81, 0.25); border-radius: 6px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+              <label for="sel-playlist-${item.id}" style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-lime); display: flex; align-items: center; gap: 6px;">
+                🎯 Playlist Destino en Spotify:
+              </label>
+              <select id="sel-playlist-${item.id}" style="background: #18181b; border: 1px solid rgba(187, 244, 81, 0.4); color: #fff; padding: 6px 12px; border-radius: 4px; font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; outline: none; flex: 1; min-width: 250px;">
+                ${renderPlaylistSelectOptions(item.playlist)}
+              </select>
+            </div>
             <div class="feedback-header">
               <span>FEEDBACK EDITORIAL PARA EL ARTISTA:</span>
               <button class="btn-ai-assist" onclick="generateAiFeedback('${item.id}', '${item.genre}', '${item.playlist}')">
                 ✨ Generar Borrador con IA
               </button>
             </div>
-            <textarea class="feedback-textarea" id="fb-${item.id}" onfocus="markAsListening('${item.id}')" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
+            <textarea class="feedback-textarea" id="fb-${item.id}" placeholder="Escribe al menos 15 palabras de feedback honesto sobre la mezcla, mood o producción...">${item.feedback || ''}</textarea>
             <div class="decision-actions">
               <button class="btn-decline" onclick="updateDecision('${item.id}', 'declined')">
                 ✕ Declinar Envío
               </button>
-              <button class="btn-accept" onclick="updateDecision('${item.id}', 'accepted')">
+              <button class="btn-accept" id="btn-accept-${item.id}" onclick="updateDecision('${item.id}', 'accepted')">
                 ✓ Aceptar para Playlist & Redes ↗
               </button>
             </div>
@@ -1620,24 +1649,35 @@
       } else if (currentTab === 'accepted') {
         actionBlock = `
           <div style="background: rgba(187, 244, 81, 0.04); border: 1px solid rgba(187, 244, 81, 0.25); border-radius: 6px; padding: 14px; margin-top: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
-              <span style="color: var(--accent-lime); font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+              <span id="accepted-pl-badge-${item.id}" style="color: var(--accent-lime); font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;">
                 ✓ ACEPTADA EN PLAYLIST: ${item.playlist}
               </span>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button onclick="insertToSpotifyManual('${item.spotify_url}', '${item.playlist}')" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  ⚡ Insertar / Re-insertar en Spotify
-                </button>
-                <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  🎨 Generar Pack Promocional (Artista) ↗
-                </button>
-                <button onclick="openWhatsAppGroupGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}')" style="background: rgba(37, 211, 102, 0.15); color: #25D366; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(37, 211, 102, 0.4); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  💬 Generar Post Grupo (Comunidad) ↗
-                </button>
-              </div>
+            </div>
+
+            <!-- Selector de re-asignación e inserción a Spotify -->
+            <div style="background: rgba(0,0,0,0.4); border: 1px dashed rgba(187, 244, 81, 0.3); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); font-weight: 600;">
+                ⚡ Re-insertar en Playlist:
+              </span>
+              <select id="reinsert-playlist-${item.id}" style="background: #18181b; border: 1px solid var(--border-strong); color: #fff; padding: 6px 10px; border-radius: 4px; font-family: var(--font-mono); font-size: 11px; outline: none; flex: 1; min-width: 240px;">
+                ${renderPlaylistSelectOptions(item.playlist)}
+              </select>
+              <button id="btn-reinsert-${item.id}" onclick="insertToSpotifyManual('${item.id}')" style="background: #1DB954; color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: none; padding: 7px 14px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                ⚡ Re-insertar en Spotify
+              </button>
+            </div>
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                🎨 Generar Pack Promocional (Artista) ↗
+              </button>
+              <button onclick="openWhatsAppGroupGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}')" style="background: rgba(37, 211, 102, 0.15); color: #25D366; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(37, 211, 102, 0.4); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                💬 Generar Post Grupo (Comunidad) ↗
+              </button>
             </div>
             ${item.feedback ? `
-              <div style="font-size: 12.5px; color: var(--text-main); background: rgba(0,0,0,0.4); padding: 10px 12px; border-radius: 4px; border-left: 3px solid var(--accent-lime);">
+              <div style="font-size: 12.5px; color: var(--text-main); background: rgba(0,0,0,0.4); padding: 10px 12px; border-radius: 4px; border-left: 3px solid var(--accent-lime); margin-top: 10px;">
                 <strong>Feedback Enviado:</strong> "${item.feedback}"
               </div>
             ` : ''}
@@ -1759,94 +1799,177 @@
     } catch(e){}
   }
 
-  async function insertToSpotifyManual(spotifyUrl, playlistName) {
+  async function insertToSpotifyManual(recordIdOrUrl, optPlaylist) {
+    var item = null;
+    var targetPlaylist = optPlaylist;
+    var spotifyUrl = recordIdOrUrl;
+    var recordId = null;
+
+    if (recordIdOrUrl && allSubmissions.some(function(s){ return String(s.id) === String(recordIdOrUrl); })) {
+      recordId = recordIdOrUrl;
+      item = allSubmissions.find(function(s){ return String(s.id) === String(recordIdOrUrl); });
+      spotifyUrl = item.spotify_url;
+      var selEl = document.getElementById('reinsert-playlist-' + recordId);
+      targetPlaylist = selEl ? selEl.value : item.playlist;
+    }
+
+    var btn = recordId ? document.getElementById('btn-reinsert-' + recordId) : null;
+    var origText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Conectando...';
+    }
+
+    showToast('⏳ Conectando con Spotify para insertar track en "' + targetPlaylist + '"...');
     var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
-    showToast('⏳ Conectando con Spotify para insertar track...');
+    var cleanToken = (rToken && rToken !== 'null' && rToken !== 'undefined' && rToken.trim()) ? rToken.trim() : undefined;
+
     try {
       var res = await fetch('/api/spotify-add-track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           spotify_url: spotifyUrl,
-          playlist_name: playlistName,
-          refresh_token: rToken
+          playlist_name: targetPlaylist,
+          song_title: item ? item.song_title : undefined,
+          artist_name: item ? item.artist_name : undefined,
+          refresh_token: cleanToken
         })
       });
+
       var data = await res.json();
-      if(data.success) {
-        showToast('⚡ ¡Canción insertada físicamente en Spotify con éxito!');
+
+      if (data.success) {
+        var finalUrl = data.track_url || spotifyUrl;
+        if (item) {
+          item.playlist = targetPlaylist;
+          item.spotify_url = finalUrl;
+        }
+
+        if (recordId) {
+          try {
+            await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify({
+                playlist: targetPlaylist,
+                spotify_url: finalUrl,
+                spotify_added: true,
+                updated_at: new Date().toISOString()
+              })
+            });
+          } catch(e){}
+
+          var badge = document.getElementById('accepted-pl-badge-' + recordId);
+          if (badge) badge.textContent = '✓ ACEPTADA EN PLAYLIST: ' + targetPlaylist;
+        }
+
+        showToast('⚡ ¡Canción insertada físicamente en Spotify (' + targetPlaylist + ') con éxito!');
       } else if (data.needs_auth) {
         showToast('⚠️ Haz clic en "Vincular Spotify" arriba primero.');
       } else {
+        alert('⚠️ Error al insertar en Spotify:\n\n' + (data.error || 'Error desconocido'));
         showToast('⚠️ ' + (data.error || 'Error al insertar en Spotify'));
       }
     } catch(e) {
+      console.error('Error insertToSpotifyManual:', e);
       showToast('Error de conexión con Spotify API');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
     }
   }
 
   async function updateDecision(recordId, status) {
     var fbEl = document.getElementById('fb-' + recordId);
-    var fb = fbEl ? fbEl.value : '';
+    var fb = fbEl ? fbEl.value.trim() : '';
 
     var item = allSubmissions.find(function(s){ return String(s.id) === String(recordId); });
-    if(item) {
-      item.status = status;
-      item.feedback = fb;
-    }
-    renderQueue();
-    updateMetrics();
+    if (!item) return;
 
-    showToast(status === 'accepted' ? '🎉 ¡Canción ACEPTADA! Añadiendo a Spotify...' : '✓ Envío marcado como declinado');
+    if (status === 'accepted') {
+      var selPl = document.getElementById('sel-playlist-' + recordId);
+      var targetPlaylist = selPl ? selPl.value : (item.playlist || 'Dreamy Songs para escuchar en la intimidad de tu habitación');
 
-    if (status === 'accepted' && item) {
-      publishTrackSpotlightArticle(item);
-    }
+      var btnAccept = document.getElementById('btn-accept-' + recordId);
+      var origBtnText = btnAccept ? btnAccept.innerHTML : '';
+      if (btnAccept) {
+        btnAccept.disabled = true;
+        btnAccept.innerHTML = '⏳ Insertando en Spotify...';
+      }
 
-    if (status === 'accepted' && item && item.spotify_url && item.playlist) {
+      showToast('⏳ Conectando con Spotify para insertar en "' + targetPlaylist + '"...');
       var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
-      fetch('/api/spotify-add-track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          spotify_url: item.spotify_url,
-          playlist_name: item.playlist,
-          refresh_token: rToken
-        })
-      })
-      .then(function(res){ return res.json(); })
-      .then(function(data){
-        if (data.success) {
-          showToast('⚡ ¡Canción insertada físicamente en tu Playlist de Spotify!');
-        } else if (data.needs_auth) {
-          showToast('⚠️ Vincula tu cuenta de Spotify arriba para inserción automática.');
-        } else {
-          console.warn('Spotify add warning:', data.error);
+      var cleanToken = (rToken && rToken !== 'null' && rToken !== 'undefined' && rToken.trim()) ? rToken.trim() : undefined;
+
+      try {
+        var spotRes = await fetch('/api/spotify-add-track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            spotify_url: item.spotify_url,
+            playlist_name: targetPlaylist,
+            song_title: item.song_title,
+            artist_name: item.artist_name,
+            refresh_token: cleanToken
+          })
+        });
+
+        var spotData = await spotRes.json();
+
+        if (!spotRes.ok || !spotData.success) {
+          if (btnAccept) {
+            btnAccept.disabled = false;
+            btnAccept.innerHTML = origBtnText;
+          }
+
+          var errMsg = spotData.error || 'No se pudo agregar el track a Spotify';
+          console.error('Error insertando en Spotify:', spotData);
+
+          // Asegurar en Supabase que permanezca como 'pending' (y NO se marque como 'listening' ni 'accepted')
+          try {
+            await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify({
+                status: 'pending',
+                playlist: targetPlaylist,
+                updated_at: new Date().toISOString()
+              })
+            });
+          } catch(e){}
+
+          item.status = 'pending';
+          item.playlist = targetPlaylist;
+          renderQueue();
+          updateMetrics();
+
+          alert('⚠️ NO SE PUDO AGREGAR A SPOTIFY:\n\n' + errMsg + '\n\nLa canción PERMANECE EN PENDIENTES para que puedas revisarla.');
+          showToast('⚠️ Spotify no pudo insertar la canción. Sigue en PENDIENTES.');
+          return;
         }
-      })
-      .catch(function(err){
-        console.error('Error al insertar en Spotify:', err);
-      });
-    }
 
-    try {
-      var res = await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          status: status,
-          feedback: fb,
-          updated_at: new Date().toISOString()
-        })
-      });
+        // ¡ÉXITO COMPROBADO EN SPOTIFY!
+        var finalSpotifyUrl = spotData.track_url || item.spotify_url;
+        item.spotify_url = finalSpotifyUrl;
+        item.playlist = targetPlaylist;
+        item.status = 'accepted';
+        item.feedback = fb;
 
-      if(!res.ok) {
-        await fetch(SUPABASE_URL + '/rest/v1/submissions?track_id=eq.' + recordId, {
+        // Guardar en Supabase
+        await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -1855,13 +1978,80 @@
             'Prefer': 'return=minimal'
           },
           body: JSON.stringify({
-            status: status,
+            status: 'accepted',
+            playlist: targetPlaylist,
+            spotify_url: finalSpotifyUrl,
+            spotify_added: true,
             feedback: fb,
             updated_at: new Date().toISOString()
           })
         });
+
+        renderQueue();
+        updateMetrics();
+        showToast('🎉 ¡Canción aceptada e insertada en Spotify exitosamente!');
+
+        publishTrackSpotlightArticle(item);
+
+      } catch (err) {
+        if (btnAccept) {
+          btnAccept.disabled = false;
+          btnAccept.innerHTML = origBtnText;
+        }
+        console.error('Error en proceso de aceptación:', err);
+
+        // Asegurar que no quede en listening
+        try {
+          await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              status: 'pending',
+              updated_at: new Date().toISOString()
+            })
+          });
+        } catch(e){}
+
+        item.status = 'pending';
+        renderQueue();
+        updateMetrics();
+
+        alert('⚠️ Error de conexión con Spotify API:\n\n' + err.message + '\n\nLa canción PERMANECE EN PENDIENTES.');
+        showToast('⚠️ Error de conexión con Spotify. Canción sigue en PENDIENTES.');
       }
-    } catch(e) {}
+      return;
+    }
+
+    // Caso de declinar (rechazada)
+    if (status === 'declined' || status === 'rejected') {
+      item.status = 'declined';
+      item.feedback = fb;
+      renderQueue();
+      updateMetrics();
+      showToast('✓ Envío marcado como declinado');
+
+      try {
+        await fetch(SUPABASE_URL + '/rest/v1/submissions?id=eq.' + recordId, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            status: 'declined',
+            feedback: fb,
+            updated_at: new Date().toISOString()
+          })
+        });
+      } catch(e) {}
+    }
   }
 
   // 6. GESTIÓN DE PLAYLISTS & ETIQUETAS
