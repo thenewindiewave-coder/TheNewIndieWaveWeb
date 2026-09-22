@@ -9,6 +9,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.s
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
 const FALLBACK_PLAYLIST_IDS = [
+  '56UTFQQSDPuY5cjxDol5Ob',
   '79SKuyss3MfkzvOJGnaisB',
   '4mcJJz8GiKTuxieL9Jziln',
   '7bbYPZ5ia4IGRP2fT47kXr',
@@ -106,6 +107,7 @@ function detectCategory(name, description) {
 }
 
 const FALLBACK_STATIC_PLAYLISTS = [
+  { id: '56UTFQQSDPuY5cjxDol5Ob', name: 'Electrónica emergente para perder el control en la pista', description: 'Sonidos sintéticos fuera del radar. Beats emergentes, vanguardia y producciones independientes que van del Indie Dance, IDM y Electronica hasta el Synthwave y Melodic Techno. Dale play y descubre el futuro. THE NEW INDIE WAVE!', followers: 0, tracks_count: 0, spotify_url: 'https://open.spotify.com/playlist/56UTFQQSDPuY5cjxDol5Ob', category: 'electronic', genres: ['Indie Dance', 'IDM', 'Electronica', 'Melodic Techno', 'Synthwave'] },
   { id: '79SKuyss3MfkzvOJGnaisB', name: 'Mezcla de rolas urbanas para farmear Aura', description: 'Ritmos de asfalto, humo y cantina. Curada por The New Indie Wave.', followers: 1450, tracks_count: 25, spotify_url: 'https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB', category: 'urbano', genres: ['Urbano', 'Rap', 'Reggae', 'Latino'] },
   { id: '4mcJJz8GiKTuxieL9Jziln', name: 'Darkwave oscuro y atmosférico para la madrugada', description: 'Sintetizadores fríos y una ciudad que respira distinto. Curada por The New Indie Wave.', followers: 1650, tracks_count: 60, spotify_url: 'https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln', category: 'darkwave', genres: ['Darkwave', 'Synthwave', 'Post-punk', 'Coldwave'] },
   { id: '7bbYPZ5ia4IGRP2fT47kXr', name: 'Música urbana con flow y ritmo para moverte', description: 'El beat que te levanta del sillón antes de que decidas si querías bailar o no.', followers: 1200, tracks_count: 48, spotify_url: 'https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr', category: 'urbano', genres: ['Urbano', 'Trap', 'Reggaetón', 'Flow'] },

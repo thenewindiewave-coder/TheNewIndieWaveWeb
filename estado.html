@@ -1108,6 +1108,7 @@
     "Soft Pop suave para esos domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
     "Dream Pop intimo para escuchar solo en tu cuarto": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
     "SynthPop para cuando solo quieres bailar": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl",
+    "Electrónica emergente para perder el control en la pista": "https://open.spotify.com/playlist/56UTFQQSDPuY5cjxDol5Ob",
 
     // Variantes anteriores compatibles
     "Hard rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
@@ -1132,6 +1133,7 @@
         return playlistLinksMap[k];
       }
     }
+    if (norm.includes('electronica') || norm.includes('emergente') || norm.includes('pista')) return "https://open.spotify.com/playlist/56UTFQQSDPuY5cjxDol5Ob";
     if (norm.includes('dream') || norm.includes('habitacion') || norm.includes('cuarto')) return "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj";
     if (norm.includes('darkwave') || norm.includes('madrugada')) return "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln";
     if (norm.includes('metal') || norm.includes('energia')) return "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1";

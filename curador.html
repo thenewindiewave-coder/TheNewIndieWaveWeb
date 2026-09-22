@@ -1324,7 +1324,9 @@
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
   var playlistLinksMap = {
-    // 8 Playlists Oficiales de Spotify
+    // 9 Playlists Oficiales de Spotify
+    "Electrónica emergente para perder el control en la pista": "https://open.spotify.com/playlist/56UTFQQSDPuY5cjxDol5Ob",
+    "Electronica emergente para perder el control en la pista": "https://open.spotify.com/playlist/56UTFQQSDPuY5cjxDol5Ob",
     "Mezcla de rolas urbanas para farmear Aura": "https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB",
     "Darkwave oscuro y atmosf\u00E9rico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln",
     "M\u00FAsica urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
@@ -1410,6 +1412,7 @@
       allSubmissions = await res.json();
       updateMetrics();
       renderQueue();
+      syncPlaylistsFromSpotify();
       showToast('✓ Cola de envíos actualizada');
     } catch(err) {
       container.innerHTML = '<div class="empty-box">No se pudieron cargar los envíos. Verifica tu conexión.</div>';
@@ -1525,8 +1528,9 @@
     });
   }
 
-  // 8 Playlists Oficiales de Spotify de The New Indie Wave
+  // 9 Playlists Oficiales de Spotify de The New Indie Wave
   var OFFICIAL_PLAYLISTS = [
+    { id: "56UTFQQSDPuY5cjxDol5Ob", name: "Electrónica emergente para perder el control en la pista" },
     { id: "79SKuyss3MfkzvOJGnaisB", name: "Mezcla de rolas urbanas para farmear Aura" },
     { id: "4mcJJz8GiKTuxieL9Jziln", name: "Darkwave oscuro y atmosférico para la madrugada" },
     { id: "7bbYPZ5ia4IGRP2fT47kXr", name: "Música urbana con flow y ritmo para moverte" },
@@ -1537,11 +1541,40 @@
     { id: "36ribRboGB3DwM821oYokl", name: "SynthPop para cuando solo quieres bailar" }
   ];
 
+  // Sincronización dinámica automática de playlists desde la API de Spotify
+  async function syncPlaylistsFromSpotify() {
+    try {
+      var res = await fetch('/api/playlists');
+      if (res.ok) {
+        var data = await res.json();
+        var list = data.playlists || (Array.isArray(data) ? data : []);
+        if (Array.isArray(list) && list.length > 0) {
+          var added = false;
+          list.forEach(function(p) {
+            if (p && p.id && p.name) {
+              playlistLinksMap[p.name] = p.spotify_url || ('https://open.spotify.com/playlist/' + p.id);
+              var exists = OFFICIAL_PLAYLISTS.some(function(op){ 
+                return op.id === p.id || op.name.toLowerCase().trim() === p.name.toLowerCase().trim(); 
+              });
+              if (!exists) {
+                OFFICIAL_PLAYLISTS.push({ id: p.id, name: p.name });
+                added = true;
+              }
+            }
+          });
+          if (added && typeof renderQueue === 'function') {
+            renderQueue();
+          }
+        }
+      }
+    } catch(e) {}
+  }
+
   function renderPlaylistSelectOptions(selectedName) {
     var normSel = (selectedName || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
     return OFFICIAL_PLAYLISTS.map(function(pl) {
       var normPl = pl.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-      var isSelected = (normSel === normPl || normSel.includes(normPl.substring(0, 10)) || normPl.includes(normSel.substring(0, 10)));
+      var isSelected = (normSel === normPl || (normSel.length >= 8 && normPl.includes(normSel.substring(0, 10))) || (normPl.length >= 8 && normSel.includes(normPl.substring(0, 10))));
       return '<option value="' + pl.name + '" ' + (isSelected ? 'selected' : '') + '>' + pl.name + '</option>';
     }).join('');
   }
@@ -4290,6 +4323,13 @@ ${playlistUrl}`;
       { name: "Déjate llevar", artist: "Rodrigo dl Moral" },
       { name: "Blue Monday", artist: "Rodrigo dl Moral" }
     ],
+    "Electrónica emergente para perder el control en la pista": [
+      { name: "Solitarium", artist: "MART.INN" },
+      { name: "Midnight Dance 90's - Remix", artist: "Rodrigo dl Moral" },
+      { name: "Blue Monday", artist: "Rodrigo dl Moral" },
+      { name: "OASIS", artist: "AarǿnViz" },
+      { name: "Guerra Fría", artist: "Blue Larimar Music" }
+    ],
     "Rock indie para manejar de noche sin rumbo": [
       { name: "Blue Monday", artist: "Rodrigo dl Moral" },
       { name: "Déjate llevar", artist: "Rodrigo dl Moral" },
@@ -4323,6 +4363,9 @@ ${playlistUrl}`;
     }
 
     // 2. Coincidencia por Palabras Clave Esenciales (Garantiza 100% de éxito con mayúsculas/acentos)
+    if (normPName.includes('electronica') || normPName.includes('emergente') || normPName.includes('pista') || normPName.includes('control') || normPUrl.includes('56utf')) {
+      return _curatedPlaylistTracks["Electrónica emergente para perder el control en la pista"] || _curatedPlaylistTracks["SynthPop para cuando solo quieres bailar"];
+    }
     if (normPName.includes('metal') || normPName.includes('energia') || normPUrl.includes('5olib')) {
       return _curatedPlaylistTracks["Metal intenso para liberar toda tu energía"];
     }

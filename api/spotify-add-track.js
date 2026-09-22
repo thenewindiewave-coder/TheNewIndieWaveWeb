@@ -5,7 +5,9 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.s
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
 const PLAYLIST_ID_MAP = {
-  // 8 Playlists Oficiales de Spotify (Nombres exactos en el perfil de Rodrigo)
+  // 9 Playlists Oficiales de Spotify (Nombres exactos en el perfil de Rodrigo)
+  "Electrónica emergente para perder el control en la pista": "56UTFQQSDPuY5cjxDol5Ob",
+  "Electronica emergente para perder el control en la pista": "56UTFQQSDPuY5cjxDol5Ob",
   "Mezcla de rolas urbanas para farmear Aura": "79SKuyss3MfkzvOJGnaisB",
   "Darkwave oscuro y atmosférico para la madrugada": "4mcJJz8GiKTuxieL9Jziln",
   "Música urbana con flow y ritmo para moverte": "7bbYPZ5ia4IGRP2fT47kXr",
@@ -32,6 +34,7 @@ const PLAYLIST_ID_MAP = {
 
 // Mapeo por palabras clave si el título varía
 const KEYWORD_PLAYLIST_MAP = [
+  { keys: ['electronica', 'emergente', 'pista', 'perder', 'control'], id: '56UTFQQSDPuY5cjxDol5Ob', name: 'Electrónica emergente para perder el control en la pista' },
   { keys: ['aura'], id: '79SKuyss3MfkzvOJGnaisB', name: 'Mezcla de rolas urbanas para farmear Aura' },
   { keys: ['darkwave', 'madrugada'], id: '4mcJJz8GiKTuxieL9Jziln', name: 'Darkwave oscuro y atmosférico para la madrugada' },
   { keys: ['flow', 'ritmo', 'moverte'], id: '7bbYPZ5ia4IGRP2fT47kXr', name: 'Música urbana con flow y ritmo para moverte' },
