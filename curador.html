@@ -6752,7 +6752,9 @@ ${playlistUrl}`;
 
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var data = await res.json();
-      blogManagerArticles = data || [];
+      blogManagerArticles = (data || []).filter(function(a){
+        return a.category !== 'scout_queue' && a.category !== 'scout_discarded';
+      });
 
       // Update metrics
       var total = blogManagerArticles.length;

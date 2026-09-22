@@ -123,10 +123,15 @@ async function runMorningScout() {
           let feedImg = null;
           const mediaMatch = rawItem.match(/<media:content[^>]+url=["']([^"']+)["']/i);
           const encMatch = rawItem.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
+          const thumbMatch = rawItem.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i);
           const imgTagMatch = rawItem.match(/<img[^>]+src=["']([^"']+)["']/i);
+          const contentImgMatch = rawItem.match(/<content:encoded[\s\S]*?<img[^>]+src=["']([^"']+)["']/i);
+
           if (mediaMatch) feedImg = mediaMatch[1];
           else if (encMatch) feedImg = encMatch[1];
+          else if (thumbMatch) feedImg = thumbMatch[1];
           else if (imgTagMatch) feedImg = imgTagMatch[1];
+          else if (contentImgMatch) feedImg = contentImgMatch[1];
 
           if (isMusicRelevant(rawTitle, desc)) {
             const testSlug = slugify(rawTitle);
@@ -178,6 +183,18 @@ async function runMorningScout() {
     return;
   }
 
+  // Resolver imagen real para los 5 candidatos (OG Image del medio original o foto del artista)
+  for (const c of topCandidates) {
+    if (!c.image_url || c.image_url.includes('unsplash.com')) {
+      const real = await resolveRealArticleImage({
+        suppliedImg: c.image_url,
+        articleUrl: c.link,
+        title: c.title
+      });
+      if (real) c.image_url = real;
+    }
+  }
+
   // 3. Guardar en Supabase en la cola pendiente (category = 'scout_queue', published = false)
   // Limpiar cola pendiente anterior para no saturar
   try {
@@ -205,7 +222,7 @@ async function runMorningScout() {
           summary: c.desc.slice(0, 160),
           content: JSON.stringify(c),
           category: 'scout_queue',
-          image_url: c.image_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
+          image_url: c.image_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
           published: false,
           tags: [c.region, 'Radar TNIW']
         })
@@ -339,6 +356,17 @@ Enlace fuente: ${meta.link}`;
   if (updateRes.ok) {
     console.log(`🎉 ¡Fallback de las 5:00 PM ejecutado con éxito!`);
     
+    // Eliminar definitivamente las demás notas de scout_queue para que no queden como archivadas
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/articles?category=eq.scout_queue&published=eq.false`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+        }
+      });
+    } catch(e) {}
+
     // Auto-archivar para mantener exactamente 7 notas en portada
     await enforceSevenArticlesLimit();
 
@@ -482,6 +510,103 @@ function isMusicRelevant(title, desc) {
     return false;
   }
   return musicKeywords.some(k => text.includes(k));
+}
+
+async function fetchOgImageFromUrl(url) {
+  if (!url || !url.startsWith('http')) return null;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4500);
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    const html = await res.text();
+    const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
+                    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i) ||
+                    html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
+    if (ogMatch && ogMatch[1] && ogMatch[1].startsWith('http')) {
+      return ogMatch[1];
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function fetchRealArtistImage(name) {
+  if (!name || typeof name !== 'string') return null;
+  const clean = name.trim()
+    .replace(/^reseña\s+(sobre\s+)?(la\s+)?(nueva\s+)?(canción|cancion|disco|rolita|rola)\s+(de\s+)?/i, '')
+    .replace(/^nueva\s+(canción|cancion|disco)\s+(de\s+)?/i, '')
+    .replace(/^de\s+/i, '')
+    .trim();
+  if (clean.length < 2) return null;
+
+  // 1. Deezer Artist API
+  try {
+    const res = await fetch(`https://api.deezer.com/search/artist?q=${encodeURIComponent(clean)}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 TNIW/1.0' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.data && data.data.length > 0) {
+        const item = data.data.find(a => a.name.toLowerCase() === clean.toLowerCase()) || data.data[0];
+        const img = item.picture_xl || item.picture_big;
+        if (img && !img.includes('default')) {
+          return img;
+        }
+      }
+    }
+  } catch(e) {}
+
+  // 2. Wikipedia PageImages API
+  try {
+    const wikiUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(clean)}&prop=pageimages&format=json&pithumbsize=1200`;
+    const res = await fetch(wikiUrl, { headers: { 'User-Agent': 'Mozilla/5.0 TNIW/1.0' } });
+    if (res.ok) {
+      const data = await res.json();
+      const pages = data.query?.pages;
+      if (pages) {
+        const pageKey = Object.keys(pages)[0];
+        const thumb = pages[pageKey]?.thumbnail?.source;
+        if (thumb) return thumb;
+      }
+    }
+  } catch(e) {}
+
+  return null;
+}
+
+async function resolveRealArticleImage({ suppliedImg, articleUrl, artistName, title }) {
+  if (suppliedImg && suppliedImg.startsWith('http') && !suppliedImg.includes('unsplash.com')) {
+    return suppliedImg;
+  }
+  if (articleUrl && articleUrl.startsWith('http')) {
+    const ogImg = await fetchOgImageFromUrl(articleUrl);
+    if (ogImg) return ogImg;
+  }
+  if (artistName) {
+    const artistImg = await fetchRealArtistImage(artistName);
+    if (artistImg) return artistImg;
+  }
+  if (title) {
+    const parts = title.split(/[:\-\"“”—,«»]/);
+    for (const part of parts) {
+      const cleanCandidate = part.replace(/radar|méxico|mexico|latam|españa|estrena|estrenan|nuevo|nueva|canción|cancion|sencillo|disco|álbum|album|vuelve|regresó|regreso|anuncia|presenta|festeja/gi, '').trim();
+      if (cleanCandidate.length >= 3 && cleanCandidate.split(' ').length <= 4) {
+        const found = await fetchRealArtistImage(cleanCandidate);
+        if (found) return found;
+      }
+    }
+  }
+  const rotatingCovers = [
+    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80'
+  ];
+  return rotatingCovers[Math.floor(Math.random() * rotatingCovers.length)];
 }
 
 async function generateEditorialPiece(promptContext, meta) {
