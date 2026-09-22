@@ -7461,7 +7461,8 @@ ${playlistUrl}`;
     }
   }
 
-  // AUTO-ARCHIVADO: GARANTIZAR QUE EXACTAMENTE MÁXIMO 7 NOTICIAS ESTÉN ACTIVAS EN PORTADA
+  // AUTO-ARCHIVADO: GARANTIZAR QUE EXACTAMENTE MÁXIMO 7 NOTICIAS EDITORIALES ESTÉN ACTIVAS EN PORTADA
+  // Las notas de Descubrimiento Radar NUNCA entran en este límite ni desplazan noticias
   async function enforceMaxPublishedArticlesLimit(maxCount) {
     try {
       maxCount = maxCount || 7;
@@ -7472,7 +7473,11 @@ ${playlistUrl}`;
         }
       });
       if (!res.ok) return;
-      var pubList = await res.json();
+      var allPubList = await res.json();
+      // Filtrar SOLO noticias editoriales (Descubrimiento Radar NO entra en estos límites)
+      var pubList = (allPubList || []).filter(function(a) {
+        return !isRadarDiscovery(a) && a.category !== 'scout_queue' && a.category !== 'scout_discarded';
+      });
       if (pubList && pubList.length > maxCount) {
         var toArchive = pubList.slice(maxCount);
         for (var i = 0; i < toArchive.length; i++) {
@@ -7487,7 +7492,7 @@ ${playlistUrl}`;
             body: JSON.stringify({ published: false })
           });
         }
-        console.log('Auto-archivadas ' + toArchive.length + ' notas antiguas para mantener el límite exacto de ' + maxCount + ' en portada.');
+        console.log('Auto-archivadas ' + toArchive.length + ' notas editoriales antiguas para mantener el límite exacto de ' + maxCount + ' en portada.');
       }
     } catch(err) {
       console.warn('Error en enforceMaxPublishedArticlesLimit:', err);

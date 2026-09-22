@@ -401,8 +401,15 @@ async function enforceSevenArticlesLimit() {
     });
     if (pubCheckRes.ok) {
       const pubArticles = await pubCheckRes.json();
-      if (pubArticles && pubArticles.length > 7) {
-        const toArchive = pubArticles.slice(7);
+      const editorialArticles = (pubArticles || []).filter(a => {
+        const cat = (a.category || '').toLowerCase().trim();
+        const title = (a.title || '').toLowerCase().trim();
+        const slug = (a.slug || '').toLowerCase().trim();
+        const isRadar = cat === 'artistas en el radar' || title.startsWith('descubrimiento radar') || slug.startsWith('radar-tniw-');
+        return !isRadar && cat !== 'scout_queue' && cat !== 'scout_discarded';
+      });
+      if (editorialArticles.length > 7) {
+        const toArchive = editorialArticles.slice(7);
         for (const item of toArchive) {
           await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(item.slug)}`, {
             method: 'PATCH',

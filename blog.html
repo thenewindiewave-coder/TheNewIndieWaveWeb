@@ -1524,15 +1524,25 @@
   }
 
   // SEPARACIÓN DE CONTENIDOS: NOTICIAS EDITORIALES vs TRACKS EN EL RADAR
+  function isRadarDiscovery(art) {
+    if (!art) return false;
+    var cat = (art.category || '').toLowerCase().trim();
+    var title = (art.title || '').toLowerCase().trim();
+    var slug = (art.slug || '').toLowerCase().trim();
+    return cat === 'artistas en el radar' || 
+           title.startsWith('descubrimiento radar') || 
+           slug.startsWith('radar-tniw-');
+  }
+
   function getEditorialArticles() {
     return allArticles.filter(function(art) {
-      return art.category !== 'Artistas en el Radar';
+      return !isRadarDiscovery(art) && art.category !== 'scout_queue' && art.category !== 'scout_discarded';
     });
   }
 
   function getRadarTrackArticles() {
     return allArticles.filter(function(art) {
-      return art.category === 'Artistas en el Radar';
+      return isRadarDiscovery(art);
     });
   }
 

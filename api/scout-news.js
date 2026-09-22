@@ -168,11 +168,13 @@ Fuente original: ${link || ''}`;
         });
         if (pubCheckRes.ok) {
           const pubArticles = await pubCheckRes.json();
-          const editorialArticles = (pubArticles || []).filter(a => 
-            a.category !== 'Artistas en el Radar' && 
-            a.category !== 'scout_queue' && 
-            a.category !== 'scout_discarded'
-          );
+          const editorialArticles = (pubArticles || []).filter(a => {
+            const cat = (a.category || '').toLowerCase().trim();
+            const title = (a.title || '').toLowerCase().trim();
+            const slug = (a.slug || '').toLowerCase().trim();
+            const isRadar = cat === 'artistas en el radar' || title.startsWith('descubrimiento radar') || slug.startsWith('radar-tniw-');
+            return !isRadar && cat !== 'scout_queue' && cat !== 'scout_discarded';
+          });
           if (editorialArticles.length > 7) {
             const toArchive = editorialArticles.slice(7);
             for (const item of toArchive) {
