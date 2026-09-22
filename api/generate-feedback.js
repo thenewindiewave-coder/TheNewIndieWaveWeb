@@ -169,7 +169,7 @@ function cleanAiOutput(text) {
  * Cruza de forma profunda el género musical, notas artísticas,
  * título y nombre para crear una devolución rica y única.
  */
-export function synthesizeEditorialFeedback({
+function synthesizeEditorialFeedback({
   artist_name,
   song_title,
   genre,
