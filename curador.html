@@ -6577,6 +6577,102 @@ ${playlistUrl}`;
   </div>
 </div>
 
+<!-- MODAL GENERADOR DE STORY Y MOCKUPS SOCIALES PARA NOTICIAS / BLOG -->
+<div class="modal-overlay" id="articleStoryModalOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); backdrop-filter:blur(14px); z-index:10001; justify-content:center; align-items:center; padding:16px;">
+  <div style="background:#121215; border:1px solid rgba(187,244,81,0.3); border-radius:12px; max-width:1150px; width:100%; max-height:94vh; overflow-y:auto; padding:24px; box-shadow:0 25px 60px rgba(0,0,0,0.95); position:relative; box-sizing:border-box;">
+    
+    <!-- Top Header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:14px;">
+      <div>
+        <div style="font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); letter-spacing:1px; margin-bottom:4px;">
+          // GENERADOR SOCIAL EDITORIAL // MOCKUP & COPY
+        </div>
+        <h3 id="artStoryModalTitle" style="font-family:var(--font-heading); font-size:20px; font-weight:900; color:#fff; margin:0; line-height:1.3; max-width:850px;">
+          Generar Story para Redes Sociales
+        </h3>
+      </div>
+      <button onclick="closeArticleStoryModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; padding:4px 8px; line-height:1;">✕</button>
+    </div>
+
+    <!-- Grid Container -->
+    <div style="display:grid; grid-template-columns:minmax(320px, 440px) 1fr; gap:24px; align-items:start;" class="article-story-grid">
+      
+      <!-- COLUMNA IZQUIERDA: CANVAS MOCKUP (Story / Post) -->
+      <div style="display:flex; flex-direction:column; gap:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px;">
+        
+        <!-- Format Tabs (Story 9:16 vs Post 1:1) -->
+        <div style="display:flex; gap:8px; justify-content:space-between; align-items:center;">
+          <div style="font-family:var(--font-mono); font-size:11px; color:#94a3b8; font-weight:700;">FORMATO:</div>
+          <div style="display:flex; gap:6px;">
+            <button id="btnArtFormatStory" onclick="setArticleStoryFormat('story')" style="background:var(--accent-lime); color:#000; border:none; padding:6px 12px; border-radius:6px; font-family:var(--font-mono); font-size:11px; font-weight:800; cursor:pointer;">
+              📱 Story (9:16)
+            </button>
+            <button id="btnArtFormatPost" onclick="setArticleStoryFormat('post')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid rgba(255,255,255,0.12); padding:6px 12px; border-radius:6px; font-family:var(--font-mono); font-size:11px; font-weight:700; cursor:pointer;">
+              🟦 Post (1:1)
+            </button>
+          </div>
+        </div>
+
+        <!-- Canvas Display Area -->
+        <div style="background:#09090b; border:1px solid rgba(187,244,81,0.2); border-radius:8px; padding:12px; display:flex; justify-content:center; align-items:center; min-height:420px; overflow:hidden;">
+          <canvas id="articleStoryCanvas" width="1080" height="1920" style="width:100%; max-width:250px; height:auto; border-radius:8px; box-shadow:0 12px 36px rgba(0,0,0,0.8); display:block;"></canvas>
+        </div>
+
+        <!-- Canvas Actions -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button onclick="downloadArticleStoryImage()" style="background:var(--accent-lime); color:#000; font-family:var(--font-mono); font-size:11px; font-weight:800; padding:10px; border-radius:6px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 14px rgba(187,244,81,0.25);">
+            <span>⬇️</span> Descargar PNG
+          </button>
+          <button onclick="copyArticleStoryImageToClipboard()" style="background:rgba(255,255,255,0.1); color:#fff; font-family:var(--font-mono); font-size:11px; font-weight:700; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.16); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <span>📋</span> Copiar Imagen
+          </button>
+        </div>
+      </div>
+
+      <!-- COLUMNA DERECHA: COPY EDITORIAL & REDES -->
+      <div style="display:flex; flex-direction:column; gap:14px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:18px;">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div style="font-family:var(--font-mono); font-size:11px; color:var(--accent-lime); font-weight:700;">
+            ESTILO DE COPY EDITORIAL:
+          </div>
+          <!-- Selector de Estilo de Copy -->
+          <div style="display:flex; gap:6px;">
+            <button id="btnCopyStyleViral" onclick="setArticleCopyStyle('viral')" style="background:rgba(187,244,81,0.2); color:var(--accent-lime); border:1px solid var(--accent-lime); padding:5px 10px; border-radius:5px; font-family:var(--font-mono); font-size:10.5px; font-weight:700; cursor:pointer;">
+              🔥 Story / Reel
+            </button>
+            <button id="btnCopyStyleEditorial" onclick="setArticleCopyStyle('editorial')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid rgba(255,255,255,0.12); padding:5px 10px; border-radius:5px; font-family:var(--font-mono); font-size:10.5px; font-weight:600; cursor:pointer;">
+              📰 Editorial
+            </button>
+            <button id="btnCopyStyleX" onclick="setArticleCopyStyle('x')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid rgba(255,255,255,0.12); padding:5px 10px; border-radius:5px; font-family:var(--font-mono); font-size:10.5px; font-weight:600; cursor:pointer;">
+              ⚡ Breve / X
+            </button>
+          </div>
+        </div>
+
+        <!-- Textarea del Copy -->
+        <textarea id="articleSocialCopyText" rows="13" style="width:100%; background:#09090b; border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:14px; color:#fff; font-family:var(--font-mono); font-size:12.5px; line-height:1.6; resize:vertical; box-sizing:border-box; outline:none;"></textarea>
+
+        <!-- Acciones de Copy -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button onclick="copyArticleSocialCopy()" style="flex:1; background:var(--accent-lime); color:#000; font-family:var(--font-mono); font-size:12px; font-weight:800; padding:12px 18px; border-radius:6px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 16px rgba(187,244,81,0.25);">
+            <span>📋</span> Copiar Texto / Copy
+          </button>
+          <button onclick="regenerateArticleSocialCopy()" style="background:rgba(255,255,255,0.06); color:#fff; font-family:var(--font-mono); font-size:11.5px; font-weight:600; padding:12px 16px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <span>🔄</span> Cambiar Variante
+          </button>
+        </div>
+
+        <!-- Ficha Rápida del Artículo -->
+        <div id="artStoryQuickDetails" style="margin-top:6px; padding:12px; background:rgba(0,0,0,0.3); border-radius:6px; border:1px solid rgba(255,255,255,0.06); font-family:var(--font-mono); font-size:11px; color:#94a3b8; display:flex; flex-direction:column; gap:6px;">
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <script>
   function openBlogArticleModal() {
     var modal = document.getElementById('blogArticleModalOverlay');
@@ -7310,6 +7406,11 @@ ${playlistUrl}`;
             <button onclick="deleteArticlePermanently('${escapeHtml(art.slug)}', '${escapeHtml(art.title.replace(/'/g, ''))}')" class="btn-tool" style="font-size:10.5px; padding:6px 12px; text-align:left; color:#ef4444; border-color:rgba(239,68,68,0.25); cursor:pointer; opacity:0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
               🗑️ Eliminar Nota
             </button>
+
+            <!-- GENERAR STORY Y MOCKUP SOCIAL -->
+            <button onclick="openArticleStoryGenerator('${escapeHtml(art.slug)}')" class="btn-tool" style="font-size:11px; padding:7px 12px; text-align:left; color:var(--accent-lime); border-color:rgba(187,244,81,0.4); background:rgba(187,244,81,0.08); font-weight:800; cursor:pointer; display:flex; align-items:center; gap:6px; margin-top:2px;" onmouseover="this.style.background='rgba(187,244,81,0.2)'" onmouseout="this.style.background='rgba(187,244,81,0.08)'">
+              <span>📱</span> GENERAR STORY
+            </button>
           </div>
 
         </div>
@@ -7923,6 +8024,733 @@ ${playlistUrl}`;
       }
     }
   }
+
+  // ==========================================
+  // GENERADOR DE STORY Y MOCKUPS SOCIALES (BLOG / NOTICIAS)
+  // ==========================================
+  var _currentStoryArticle = null;
+  var _currentStoryFormat = 'story'; // 'story' | 'post'
+  var _currentCopyStyle = 'viral';   // 'viral' | 'editorial' | 'x'
+  var _copyVariantCounter = 0;
+  var _articleImageCache = {};
+
+  function openArticleStoryGenerator(slug) {
+    var art = (blogManagerArticles || []).find(function(a){ return a.slug === slug; });
+    if (!art) {
+      showToast('⚠️ No se encontró la nota seleccionada.');
+      return;
+    }
+    _currentStoryArticle = art;
+    _copyVariantCounter = 0;
+
+    var modal = document.getElementById('articleStoryModalOverlay');
+    if (!modal) return;
+
+    // Título en cabecera
+    var titleEl = document.getElementById('artStoryModalTitle');
+    if (titleEl) {
+      titleEl.textContent = '📱 Generador Social: ' + (art.title || 'Nota TNIW');
+    }
+
+    // Ficha rápida
+    var quickEl = document.getElementById('artStoryQuickDetails');
+    if (quickEl) {
+      var isRadar = (typeof isRadarDiscovery === 'function') && isRadarDiscovery(art);
+      var categoryLabel = isRadar ? '🛰️ Descubrimiento Radar' : (art.category || 'Cultura Indie');
+      var tagsStr = (art.tags && art.tags.length) ? art.tags.map(function(t){ return '#' + t.replace(/\s+/g, ''); }).join(' ') : '#TheNewIndieWave';
+      var fullUrl = 'https://thenewindiewave.online/blog#' + encodeURIComponent(art.slug || '');
+      
+      quickEl.innerHTML = `
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;">
+          <span><strong>Categoría:</strong> <span style="color:var(--accent-lime);">${escapeHtml(categoryLabel)}</span></span>
+          <span><strong>Lectura:</strong> ${escapeHtml(art.read_time || '3 min')}</span>
+        </div>
+        <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          <strong>Enlace permanente:</strong> <a href="${fullUrl}" target="_blank" style="color:var(--accent-cyan); text-decoration:none;">${fullUrl}</a>
+        </div>
+        <div style="color:#64748b;">
+          <strong>Tags:</strong> ${escapeHtml(tagsStr)}
+        </div>
+      `;
+    }
+
+    // Restablecer tabs
+    setArticleStoryFormat(_currentStoryFormat || 'story', false);
+    setArticleCopyStyle(_currentCopyStyle || 'viral');
+
+    // Cargar imagen si existe
+    if (art.image_url && !_articleImageCache[art.image_url]) {
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function() {
+        _articleImageCache[art.image_url] = img;
+        if (_currentStoryArticle && _currentStoryArticle.slug === art.slug) {
+          renderArticleStoryCanvas(_currentStoryArticle, _currentStoryFormat);
+        }
+      };
+      img.onerror = function() {
+        var fallbackImg = new Image();
+        fallbackImg.onload = function() {
+          _articleImageCache[art.image_url] = fallbackImg;
+          if (_currentStoryArticle && _currentStoryArticle.slug === art.slug) {
+            renderArticleStoryCanvas(_currentStoryArticle, _currentStoryFormat);
+          }
+        };
+        fallbackImg.onerror = function() {
+          _articleImageCache[art.image_url] = 'error';
+        };
+        fallbackImg.src = art.image_url;
+      };
+      img.src = art.image_url;
+    }
+
+    // Render inicial de Canvas
+    renderArticleStoryCanvas(art, _currentStoryFormat);
+
+    modal.style.display = 'flex';
+  }
+
+  function closeArticleStoryModal() {
+    var modal = document.getElementById('articleStoryModalOverlay');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function setArticleStoryFormat(fmt, shouldRerender) {
+    _currentStoryFormat = fmt;
+    var btnStory = document.getElementById('btnArtFormatStory');
+    var btnPost = document.getElementById('btnArtFormatPost');
+    var canvas = document.getElementById('articleStoryCanvas');
+
+    if (btnStory && btnPost) {
+      if (fmt === 'story') {
+        btnStory.style.background = 'var(--accent-lime)';
+        btnStory.style.color = '#000';
+        btnStory.style.border = 'none';
+        btnStory.style.fontWeight = '800';
+
+        btnPost.style.background = 'rgba(255,255,255,0.06)';
+        btnPost.style.color = '#cbd5e1';
+        btnPost.style.border = '1px solid rgba(255,255,255,0.12)';
+        btnPost.style.fontWeight = '600';
+
+        if (canvas) {
+          canvas.style.maxWidth = '250px';
+          canvas.style.aspectRatio = '9/16';
+        }
+      } else {
+        btnPost.style.background = 'var(--accent-lime)';
+        btnPost.style.color = '#000';
+        btnPost.style.border = 'none';
+        btnPost.style.fontWeight = '800';
+
+        btnStory.style.background = 'rgba(255,255,255,0.06)';
+        btnStory.style.color = '#cbd5e1';
+        btnStory.style.border = '1px solid rgba(255,255,255,0.12)';
+        btnStory.style.fontWeight = '600';
+
+        if (canvas) {
+          canvas.style.maxWidth = '340px';
+          canvas.style.aspectRatio = '1/1';
+        }
+      }
+    }
+
+    if (shouldRerender !== false && _currentStoryArticle) {
+      renderArticleStoryCanvas(_currentStoryArticle, fmt);
+    }
+  }
+
+  function setArticleCopyStyle(style) {
+    _currentCopyStyle = style;
+    var btnViral = document.getElementById('btnCopyStyleViral');
+    var btnEd = document.getElementById('btnCopyStyleEditorial');
+    var btnX = document.getElementById('btnCopyStyleX');
+
+    [
+      { el: btnViral, id: 'viral' },
+      { el: btnEd, id: 'editorial' },
+      { el: btnX, id: 'x' }
+    ].forEach(function(item) {
+      if (item.el) {
+        if (item.id === style) {
+          item.el.style.background = 'rgba(187,244,81,0.2)';
+          item.el.style.color = 'var(--accent-lime)';
+          item.el.style.border = '1px solid var(--accent-lime)';
+          item.el.style.fontWeight = '700';
+        } else {
+          item.el.style.background = 'rgba(255,255,255,0.06)';
+          item.el.style.color = '#cbd5e1';
+          item.el.style.border = '1px solid rgba(255,255,255,0.12)';
+          item.el.style.fontWeight = '600';
+        }
+      }
+    });
+
+    if (_currentStoryArticle) {
+      updateArticleSocialCopyText();
+    }
+  }
+
+  function regenerateArticleSocialCopy() {
+    _copyVariantCounter = (_copyVariantCounter + 1) % 3;
+    updateArticleSocialCopyText();
+    showToast('✓ Variante de copy actualizada');
+  }
+
+  function updateArticleSocialCopyText() {
+    var ta = document.getElementById('articleSocialCopyText');
+    if (!ta || !_currentStoryArticle) return;
+    var art = _currentStoryArticle;
+    var style = _currentCopyStyle;
+    var variant = _copyVariantCounter;
+
+    var title = art.title || '';
+    var summary = art.summary || '';
+    var slug = art.slug || '';
+    var url = 'https://thenewindiewave.online/blog#' + encodeURIComponent(slug);
+    var isRadar = (typeof isRadarDiscovery === 'function') && isRadarDiscovery(art);
+    var catTag = (art.category || 'CulturaIndie').replace(/[^a-zA-Z0-9]/g, '');
+    
+    var tags = (art.tags && art.tags.length) ? art.tags.map(function(t){ return '#' + t.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚ]/g, ''); }).join(' ') : '';
+    if (!tags) tags = '#TheNewIndieWave #IndieRock #MusicaIndie';
+
+    var copy = '';
+
+    if (style === 'viral') {
+      if (variant === 0) {
+        copy = `🚨 ¡NUEVA NOTA EN EL RADAR EDITORIAL! 🚨\n\n"${title}"\n\n${summary}\n\n👉 Toca el enlace para leer la cobertura completa y escuchar los lanzamientos destacados:\n🔗 ${url}\n\n${tags} #TheNewIndieWave #${catTag} #Descubrimientos`;
+      } else if (variant === 1) {
+        copy = `⚡ ¿YA ESCUCHASTE SOBRE ESTO? 🎧\n\n"${title}"\n\nUn vistazo a los sonidos y proyectos que están moviendo la escena indie ahora mismo.\n\n👇 Lee el artículo completo aquí:\n🔗 ${url}\n\n${tags} #TheNewIndieWave #IndieLatino #RadarIndie`;
+      } else {
+        copy = `💿 COBERTURA EXCLUSIVA TNIW 📻\n\n"${title}"\n\n${summary}\n\n👉 Encuentra la nota completa, análisis y enlaces oficiales en nuestra web:\n🔗 ${url}\n\n${tags} #TheNewIndieWave #MusicaNueva #${catTag}`;
+      }
+    } else if (style === 'editorial') {
+      if (variant === 0) {
+        copy = `📰 COBERTURA EDITORIAL // THE NEW INDIE WAVE\n\n"${title}"\n\n${summary}\n\nDescubre el análisis a fondo, contexto y todos los detalles en nuestro sitio oficial:\n🔗 ${url}\n\n#TheNewIndieWave #${catTag} #PeriodismoMusical #CulturaIndie #IndieWave ${tags}`;
+      } else if (variant === 1) {
+        copy = `🎙️ THE NEW INDIE WAVE // ARTÍCULOS & RESEÑAS\n\n"${title}"\n\n${summary}\n\nDisponible ya en nuestra plataforma:\n🔗 ${url}\n\n#TheNewIndieWave #PeriodismoMusical #MusicaIndie #${catTag}`;
+      } else {
+        copy = `✦ EDITORIAL INDIE // ${isRadar ? 'DESCUBRIMIENTO RADAR' : (art.category || 'CULTURA').toUpperCase()}\n\n"${title}"\n\n${summary}\n\nVisita the new indie wave para la experiencia completa:\n🔗 ${url}\n\n#TheNewIndieWave #${catTag} #IndieRock #CulturaMusical ${tags}`;
+      }
+    } else { // 'x' / Breve
+      if (variant === 0) {
+        copy = `⚡ "${title}"\n\n${summary.slice(0, 140)}${summary.length > 140 ? '...' : ''}\n\nLee la nota completa aquí 👇\n${url}\n\n#TheNewIndieWave #IndieMusic`;
+      } else if (variant === 1) {
+        copy = `🚨 NUEVO EN BLOG: "${title}"\n\nDetalles y cobertura completa en el link:\n${url}\n\n#TheNewIndieWave #${catTag}`;
+      } else {
+        copy = `📰 Editorial TNIW // "${title}"\n\n${url}\n\n#TheNewIndieWave #IndieRock`;
+      }
+    }
+
+    ta.value = copy;
+  }
+
+  function copyArticleSocialCopy() {
+    var ta = document.getElementById('articleSocialCopyText');
+    if (!ta) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ta.value).then(function() {
+        showToast('✓ ¡Copy para redes copiado con éxito!');
+      }).catch(function() {
+        ta.select();
+        document.execCommand('copy');
+        showToast('✓ ¡Copy copiado al portapapeles!');
+      });
+    } else {
+      ta.select();
+      document.execCommand('copy');
+      showToast('✓ ¡Copy copiado al portapapeles!');
+    }
+  }
+
+  // Helper de recorte y centrado de imagen en canvas (cover mode)
+  function drawCanvasCover(ctx, img, x, y, w, h) {
+    var nw = img.naturalWidth || img.width;
+    var nh = img.naturalHeight || img.height;
+    if (!nw || !nh) return;
+    var rTarget = w / h;
+    var rImg = nw / nh;
+    var sx, sy, sw, sh;
+    if (rImg > rTarget) {
+      sh = nh;
+      sw = nh * rTarget;
+      sx = (nw - sw) / 2;
+      sy = 0;
+    } else {
+      sw = nw;
+      sh = nw / rTarget;
+      sx = 0;
+      sy = (nh - sh) / 2;
+    }
+    ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  }
+
+  // Helper para dividir y dibujar texto envuelto con límite de líneas
+  function drawCanvasWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+    if (!text) return y;
+    var words = text.split(/\s+/);
+    var line = '';
+    var linesDrawn = 0;
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line ? (line + ' ' + words[n]) : words[n];
+      var testWidth = ctx.measureText(testLine).width;
+      if (testWidth > maxWidth && n > 0) {
+        if (maxLines && linesDrawn >= maxLines - 1) {
+          while (line.length > 0 && ctx.measureText(line + '...').width > maxWidth) {
+            line = line.slice(0, -1);
+          }
+          ctx.fillText(line + '...', x, y);
+          linesDrawn++;
+          return y + lineHeight;
+        }
+        ctx.fillText(line, x, y);
+        linesDrawn++;
+        line = words[n];
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    if (line && (!maxLines || linesDrawn < maxLines)) {
+      ctx.fillText(line, x, y);
+      y += lineHeight;
+    }
+    return y;
+  }
+
+  // RENDER PRINCIPAL CANVAS (STORY 9:16 O POST 1:1)
+  function renderArticleStoryCanvas(art, format) {
+    var canvas = document.getElementById('articleStoryCanvas');
+    if (!canvas || !art) return;
+    var ctx = canvas.getContext('2d');
+    var isStory = (format === 'story');
+
+    var W = 1080;
+    var H = isStory ? 1920 : 1080;
+    canvas.width = W;
+    canvas.height = H;
+
+    var coverImg = null;
+    if (art.image_url && _articleImageCache[art.image_url] && _articleImageCache[art.image_url] !== 'error') {
+      coverImg = _articleImageCache[art.image_url];
+    }
+
+    var isRadar = (typeof isRadarDiscovery === 'function') && isRadarDiscovery(art);
+    var categoryText = isRadar ? 'DESCUBRIMIENTO RADAR' : (art.category || 'EDITORIAL').toUpperCase();
+
+    // 1. Fondo Oscuro Principal
+    var bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#090a0f');
+    bgGrad.addColorStop(0.5, '#050608');
+    bgGrad.addColorStop(1, '#020304');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    // 2. Desenfoque ambiental con la portada del artículo
+    if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.globalAlpha = 0.26;
+      ctx.filter = 'blur(75px)';
+      ctx.drawImage(coverImg, -100, -100, W + 200, H + 200);
+      ctx.restore();
+
+      // Capa de degradado suave sobre el blur para unificar contraste
+      var overlay = ctx.createLinearGradient(0, 0, 0, H);
+      overlay.addColorStop(0, 'rgba(8, 9, 13, 0.72)');
+      overlay.addColorStop(0.5, 'rgba(5, 6, 9, 0.82)');
+      overlay.addColorStop(1, 'rgba(3, 3, 5, 0.94)');
+      ctx.fillStyle = overlay;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // 3. Destellos Neón en esquinas
+    var radCyan = ctx.createRadialGradient(W * 0.88, 220, 20, W * 0.88, 220, 520);
+    radCyan.addColorStop(0, 'rgba(56, 189, 248, 0.22)');
+    radCyan.addColorStop(1, 'rgba(56, 189, 248, 0)');
+    ctx.fillStyle = radCyan;
+    ctx.fillRect(0, 0, W, 800);
+
+    var radLime = ctx.createRadialGradient(W * 0.12, H - 260, 20, W * 0.12, H - 260, 550);
+    radLime.addColorStop(0, 'rgba(187, 244, 81, 0.18)');
+    radLime.addColorStop(1, 'rgba(187, 244, 81, 0)');
+    ctx.fillStyle = radLime;
+    ctx.fillRect(0, H - 800, W, 800);
+
+    // 4. Cuadrícula Cyberpunk sutil
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
+    ctx.lineWidth = 1;
+    for (var gx = 0; gx < W; gx += 48) {
+      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
+    }
+    for (var gy = 0; gy < H; gy += 48) {
+      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+    }
+
+    // ==========================================
+    // MODO STORY VERTICAL (1080 x 1920)
+    // ==========================================
+    if (isStory) {
+      // 5. CABECERA BRANDING (y: 85 - 170)
+      var logoSize = 78;
+      var logoX = 85;
+      var logoY = 85;
+
+      if (typeof _tniwLogoImg !== 'undefined' && _tniwLogoImg && _tniwLogoImg.complete && _tniwLogoImg.naturalWidth > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/2, 0, Math.PI * 2);
+        ctx.fillStyle = '#101014';
+        ctx.fill();
+        ctx.clip();
+        ctx.drawImage(_tniwLogoImg, logoX, logoY, logoSize, logoSize);
+        ctx.restore();
+
+        // Anillo Neón
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/2 + 2, 0, Math.PI * 2);
+        ctx.strokeStyle = '#BBF451';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 28px "Space Grotesk", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('THE NEW INDIE WAVE', logoX + logoSize + 18, logoY + 34);
+
+      ctx.fillStyle = '#bbf451';
+      ctx.font = 'bold 14px "Space Mono", monospace';
+      ctx.fillText('// ' + (isRadar ? 'RADAR DISCOVERY' : 'EDITORIAL MAGAZINE'), logoX + logoSize + 18, logoY + 62);
+      ctx.restore();
+
+      // Badge Categoría Superior Derecha
+      var catBadgeW = 280;
+      var catBadgeH = 36;
+      var catBadgeX = W - 85 - catBadgeW;
+      var catBadgeY = 105;
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      drawRoundRectCur(ctx, catBadgeX, catBadgeY, catBadgeW, catBadgeH, 8);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(187, 244, 81, 0.45)';
+      ctx.lineWidth = 1.5;
+      drawRoundRectCur(ctx, catBadgeX, catBadgeY, catBadgeW, catBadgeH, 8);
+      ctx.stroke();
+      ctx.fillStyle = '#bbf451';
+      ctx.font = 'bold 12px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('● ' + categoryText.slice(0, 22), catBadgeX + catBadgeW/2, catBadgeY + 23);
+      ctx.restore();
+
+      // 6. CARD DE IMAGEN CENTRAL (y: 200, W: 910, H: 860)
+      var cardX = 85;
+      var cardY = 200;
+      var cardW = 910;
+      var cardH = 860;
+      var cardR = 24;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.85)';
+      ctx.shadowBlur = 45;
+      ctx.shadowOffsetY = 18;
+      drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, cardR);
+      ctx.fillStyle = '#111216';
+      ctx.fill();
+      ctx.restore();
+
+      // Dibujar portada
+      ctx.save();
+      drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, cardR);
+      ctx.clip();
+      if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+        drawCanvasCover(ctx, coverImg, cardX, cardY, cardW, cardH);
+
+        // Degradado inferior dentro de la foto
+        var photoGrad = ctx.createLinearGradient(0, cardY + cardH - 260, 0, cardY + cardH);
+        photoGrad.addColorStop(0, 'rgba(0,0,0,0)');
+        photoGrad.addColorStop(1, 'rgba(9, 10, 14, 0.9)');
+        ctx.fillStyle = photoGrad;
+        ctx.fillRect(cardX, cardY + cardH - 260, cardW, 260);
+      } else {
+        // Fallback procedural con estilo editorial
+        var fGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
+        fGrad.addColorStop(0, '#171923');
+        fGrad.addColorStop(1, '#0c0d12');
+        ctx.fillStyle = fGrad;
+        ctx.fillRect(cardX, cardY, cardW, cardH);
+
+        ctx.fillStyle = '#bbf451';
+        ctx.font = 'bold 24px "Space Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚡ THE NEW INDIE WAVE // EDITORIAL', cardX + cardW/2, cardY + cardH/2 - 20);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '16px monospace';
+        ctx.fillText('thenewindiewave.online', cardX + cardW/2, cardY + cardH/2 + 20);
+      }
+      ctx.restore();
+
+      // Borde Neón Card
+      ctx.save();
+      ctx.strokeStyle = 'rgba(187, 244, 81, 0.55)';
+      ctx.lineWidth = 3;
+      drawRoundRectCur(ctx, cardX, cardY, cardW, cardH, cardR);
+      ctx.stroke();
+      ctx.restore();
+
+      // Tag sobre la imagen
+      ctx.save();
+      var tagW = isRadar ? 270 : 230;
+      var tagH = 34;
+      var tagX = cardX + 24;
+      var tagY = cardY + 24;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+      drawRoundRectCur(ctx, tagX, tagY, tagW, tagH, 6);
+      ctx.fill();
+      ctx.strokeStyle = '#bbf451';
+      ctx.lineWidth = 1.5;
+      drawRoundRectCur(ctx, tagX, tagY, tagW, tagH, 6);
+      ctx.stroke();
+      ctx.fillStyle = '#bbf451';
+      ctx.font = 'bold 12.5px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isRadar ? '📻 DESCUBRIMIENTO RADAR' : '⚡ NOTA EDITORIAL', tagX + tagW/2, tagY + 22);
+      ctx.restore();
+
+      // 7. ZONA EDITORIAL (TÍTULO + RESUMEN)
+      var textStartY = cardY + cardH + 60;
+      var maxTextW = cardW;
+
+      // TÍTULO DEL ARTÍCULO
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      ctx.shadowBlur = 20;
+      ctx.font = '900 44px "Space Grotesk", "Outfit", sans-serif';
+      ctx.textAlign = 'left';
+      var afterTitleY = drawCanvasWrappedText(ctx, (art.title || '').toUpperCase(), cardX, textStartY, maxTextW, 54, 4);
+      ctx.restore();
+
+      // METADATOS: TIEMPO DE LECTURA & BADGE
+      var metaY = afterTitleY + 20;
+      ctx.save();
+      ctx.fillStyle = '#bbf451';
+      ctx.font = 'bold 16px "Space Mono", monospace';
+      ctx.textAlign = 'left';
+      var readTime = art.read_time || '3 min';
+      ctx.fillText('⏱ ' + readTime.toUpperCase() + ' DE LECTURA  •  ⚡ THENEWINDIEWAVE.ONLINE', cardX, metaY);
+      ctx.restore();
+
+      // RESUMEN / BAJADA EDITORIAL
+      var summaryY = metaY + 44;
+      ctx.save();
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '500 23px "Space Mono", monospace, sans-serif';
+      ctx.textAlign = 'left';
+      var cleanSummary = (art.summary || '').replace(/\s+/g, ' ');
+      drawCanvasWrappedText(ctx, cleanSummary, cardX, summaryY, maxTextW, 36, 3);
+      ctx.restore();
+
+      // 8. STICKER CALL TO ACTION INFERIOR (y: 1720)
+      var ctaX = cardX;
+      var ctaY = 1715;
+      var ctaW = cardW;
+      var ctaH = 92;
+      var ctaR = 46;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(187, 244, 81, 0.35)';
+      ctx.shadowBlur = 30;
+      ctx.shadowOffsetY = 6;
+      var ctaGrad = ctx.createLinearGradient(ctaX, ctaY, ctaX + ctaW, ctaY);
+      ctaGrad.addColorStop(0, '#bbf451');
+      ctaGrad.addColorStop(1, '#a3e635');
+      ctx.fillStyle = ctaGrad;
+      drawRoundRectCur(ctx, ctaX, ctaY, ctaW, ctaH, ctaR);
+      ctx.fill();
+
+      ctx.fillStyle = '#09090b';
+      ctx.font = '900 26px "Space Grotesk", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('👉 TOCA PARA LEER LA NOTA COMPLETA ↗', ctaX + ctaW/2, ctaY + 56);
+      ctx.restore();
+
+      // Firma Oficial al pie
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+      ctx.font = 'bold 15px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('thenewindiewave.online/blog  •  The New Indie Wave', W/2, ctaY + ctaH + 42);
+      ctx.restore();
+
+    } else {
+      // ==========================================
+      // MODO POST CUADRADO (1080 x 1080)
+      // ==========================================
+      var pad = 65;
+      var postCardW = W - (pad * 2);
+
+      // Cabecera Post
+      var postLogoSize = 58;
+      var postLogoX = pad;
+      var postLogoY = 48;
+
+      if (typeof _tniwLogoImg !== 'undefined' && _tniwLogoImg && _tniwLogoImg.complete && _tniwLogoImg.naturalWidth > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(postLogoX + postLogoSize/2, postLogoY + postLogoSize/2, postLogoSize/2, 0, Math.PI * 2);
+        ctx.fillStyle = '#101014';
+        ctx.fill();
+        ctx.clip();
+        ctx.drawImage(_tniwLogoImg, postLogoX, postLogoY, postLogoSize, postLogoSize);
+        ctx.restore();
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(postLogoX + postLogoSize/2, postLogoY + postLogoSize/2, postLogoSize/2 + 2, 0, Math.PI * 2);
+        ctx.strokeStyle = '#BBF451';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 24px "Space Grotesk", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('THE NEW INDIE WAVE', postLogoX + postLogoSize + 16, postLogoY + 28);
+      ctx.fillStyle = '#bbf451';
+      ctx.font = 'bold 12.5px "Space Mono", monospace';
+      ctx.fillText('// ' + categoryText, postLogoX + postLogoSize + 16, postLogoY + 48);
+      ctx.restore();
+
+      // Card Imagen Superior Post (H: 500)
+      var imgY = 125;
+      var imgH = 500;
+      var imgR = 18;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.85)';
+      ctx.shadowBlur = 35;
+      ctx.shadowOffsetY = 12;
+      drawRoundRectCur(ctx, pad, imgY, postCardW, imgH, imgR);
+      ctx.fillStyle = '#111216';
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      drawRoundRectCur(ctx, pad, imgY, postCardW, imgH, imgR);
+      ctx.clip();
+      if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
+        drawCanvasCover(ctx, coverImg, pad, imgY, postCardW, imgH);
+      } else {
+        var pfGrad = ctx.createLinearGradient(pad, imgY, pad + postCardW, imgY + imgH);
+        pfGrad.addColorStop(0, '#171923');
+        pfGrad.addColorStop(1, '#0b0c10');
+        ctx.fillStyle = pfGrad;
+        ctx.fillRect(pad, imgY, postCardW, imgH);
+
+        ctx.fillStyle = '#bbf451';
+        ctx.font = 'bold 22px "Space Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚡ THE NEW INDIE WAVE // EDITORIAL', pad + postCardW/2, imgY + imgH/2);
+      }
+      ctx.restore();
+
+      // Borde Neón Post
+      ctx.save();
+      ctx.strokeStyle = 'rgba(187, 244, 81, 0.5)';
+      ctx.lineWidth = 2.5;
+      drawRoundRectCur(ctx, pad, imgY, postCardW, imgH, imgR);
+      ctx.stroke();
+      ctx.restore();
+
+      // TÍTULO DEL POST
+      var postTextY = imgY + imgH + 50;
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 36px "Space Grotesk", "Outfit", sans-serif';
+      ctx.textAlign = 'left';
+      var postNextY = drawCanvasWrappedText(ctx, (art.title || '').toUpperCase(), pad, postTextY, postCardW, 44, 3);
+      ctx.restore();
+
+      // RESUMEN
+      var postSummY = postNextY + 16;
+      ctx.save();
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '500 19px "Space Mono", monospace';
+      ctx.textAlign = 'left';
+      drawCanvasWrappedText(ctx, (art.summary || '').replace(/\s+/g, ' '), pad, postSummY, postCardW, 28, 2);
+      ctx.restore();
+
+      // BANNER INFERIOR
+      var barY = 985;
+      var barH = 54;
+      ctx.save();
+      ctx.fillStyle = 'rgba(187, 244, 81, 0.12)';
+      drawRoundRectCur(ctx, pad, barY, postCardW, barH, 27);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(187, 244, 81, 0.5)';
+      ctx.lineWidth = 1.5;
+      drawRoundRectCur(ctx, pad, barY, postCardW, barH, 27);
+      ctx.stroke();
+
+      ctx.fillStyle = '#bbf451';
+      ctx.font = 'bold 15px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('🔗 LEER NOTA COMPLETA EN THENEWINDIEWAVE.ONLINE ↗', pad + postCardW/2, barY + 34);
+      ctx.restore();
+    }
+  }
+
+  function downloadArticleStoryImage() {
+    var canvas = document.getElementById('articleStoryCanvas');
+    if (!canvas || !_currentStoryArticle) return;
+    try {
+      var dataUrl = canvas.toDataURL('image/png');
+      var a = document.createElement('a');
+      var formatSuffix = _currentStoryFormat === 'post' ? 'POST-1x1' : 'STORY-9x16';
+      a.download = 'TNIW-' + formatSuffix + '-' + (_currentStoryArticle.slug || 'noticia') + '.png';
+      a.href = dataUrl;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('✓ Descargando mockup (' + formatSuffix + ' HD)...');
+    } catch(err) {
+      console.error(err);
+      showToast('⚠️ Error al generar descarga: ' + err.message);
+    }
+  }
+
+  function copyArticleStoryImageToClipboard() {
+    var canvas = document.getElementById('articleStoryCanvas');
+    if (!canvas) return;
+    if (!navigator.clipboard || !window.ClipboardItem) {
+      showToast('⚠️ Tu navegador no soporta copiado directo. ¡Usa Descargar PNG!');
+      return;
+    }
+    try {
+      canvas.toBlob(function(blob) {
+        if (!blob) {
+          showToast('⚠️ No se pudo generar la imagen para el portapapeles.');
+          return;
+        }
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+          .then(function() {
+            showToast('✓ ¡Imagen del Story copiada al portapapeles!');
+          })
+          .catch(function(err) {
+            console.warn('Clipboard write error:', err);
+            showToast('⚠️ No se pudo copiar directo. ¡Usa "Descargar PNG"!');
+          });
+      }, 'image/png');
+    } catch(err) {
+      console.warn('Canvas toBlob tainted/error:', err);
+      showToast('⚠️ Portapapeles bloqueado por imagen externa. Usa "Descargar PNG".');
+    }
+  }
 </script>
 
 <style>
@@ -7930,6 +8758,11 @@ ${playlistUrl}`;
   0% { opacity: 0.4; transform: scale(0.96); }
   50% { opacity: 1; transform: scale(1.06); }
   100% { opacity: 0.4; transform: scale(0.96); }
+}
+@media (max-width: 860px) {
+  .article-story-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 </style>
 
