@@ -6673,7 +6673,7 @@ ${playlistUrl}`;
             <span style="font-size:16px;">⚡</span> PUBLICAR AUTOMÁTICAMENTE
           </button>
           <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:10.5px; color:#6ee7b7; padding:0 4px;">
-            <span>📡 Social Hub // FB & IG (Post + Story) · Threads · X</span>
+            <span>📡 Social Hub // FB & IG (Post + Story) · Threads · X · TikTok</span>
             <span style="color:#94a3b8;">Estado: Directo</span>
           </div>
           <div id="socialHubPublishStatus" style="display:none; margin-top:6px; padding:12px 14px; border-radius:8px; font-family:var(--font-mono); font-size:11.5px; line-height:1.5;"></div>
@@ -9032,7 +9032,8 @@ ${playlistUrl}`;
           { id: 'facebook', type: 'post', types: ['post'], options: { shareAsStory: false } },
           { id: 'instagram', type: 'post', types: ['post'], options: { showInFeed: true, shareAsStory: false } },
           { id: 'threads', type: 'post', types: ['post'], options: { whoCanReply: 'everyone' } },
-          { id: 'x', type: 'post', types: ['post'], options: { whoCanReply: 'everyone' } }
+          { id: 'x', type: 'post', types: ['post'], options: { whoCanReply: 'everyone' } },
+          { id: 'tiktok', type: 'post', types: ['post'], options: { allowDuet: true, visibility: 'public', allowStitch: true, isYourBrand: false, allowComments: true, isBrandedContent: false, commercialContent: false } }
         ],
         mode: 'now',
         status: 'published',
@@ -9044,12 +9045,13 @@ ${playlistUrl}`;
         brand_id: SOCIAL_HUB_CONFIG.brandId,
         content: copyText,
         media_url: postUploadUrl,
-        platforms: ['facebook', 'instagram', 'threads', 'x'],
+        platforms: ['facebook', 'instagram', 'threads', 'x', 'tiktok'],
         platform_post_types: {
           facebook: 'post',
           instagram: 'post',
           threads: 'post',
-          x: 'post'
+          x: 'post',
+          tiktok: 'post'
         },
         payload: feedBundle,
         scheduled_at: nowIso,
@@ -9125,7 +9127,7 @@ ${playlistUrl}`;
             🎉 ¡Publicaciones enviadas con éxito a Social Hub!
           </div>
           <div>✓ <strong>Facebook & Instagram:</strong> Post Feed (1:1) e Historia (9:16) encolados.</div>
-          <div>✓ <strong>Threads & X (Twitter):</strong> Post (1:1) con copy y portada encolados.</div>
+          <div>✓ <strong>Threads, X (Twitter) & TikTok:</strong> Post (1:1) con copy y portada encolados.</div>
           <div style="margin-top:6px; font-size:10.5px; color:#94a3b8;">
             El motor de n8n / Social Hub las publicará automáticamente en tus redes en breves minutos.
           </div>
