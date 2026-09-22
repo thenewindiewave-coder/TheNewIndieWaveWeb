@@ -221,8 +221,9 @@ REGLAS CRÍTICAS:
 
     const insertedData = await insertRes.json();
 
-    // Auto-archivar notas editoriales antiguas para que la portada del Blog muestre exactamente 7 noticias
-    // Las notas de canciones ('Artistas en el Radar') nunca se auto-archivan con este límite ni desplazan noticias
+    // Auto-archivar notas antiguas según su categoría con límites independientes:
+    // - Noticias editoriales: máximo 7 en vivo
+    // - Tracks en el Radar: máximo 6 en vivo
     if (articlePayload.category !== 'Artistas en el Radar') {
       try {
         const pubCheckRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?published=eq.true&order=published_at.desc`, {
@@ -259,6 +260,43 @@ REGLAS CRÍTICAS:
         }
       } catch (archiveErr) {
         console.warn('[generate-article] Error auto-archivando notas editoriales:', archiveErr);
+      }
+    } else {
+      // Mantener límite independiente de 6 notas en vivo para Tracks en el Radar
+      try {
+        const pubCheckRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?published=eq.true&order=published_at.desc`, {
+          headers: {
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+          }
+        });
+        if (pubCheckRes.ok) {
+          const pubArticles = await pubCheckRes.json();
+          const radarArticles = (pubArticles || []).filter(a => {
+            const cat = (a.category || '').toLowerCase().trim();
+            const title = (a.title || '').toLowerCase().trim();
+            const slug = (a.slug || '').toLowerCase().trim();
+            return cat === 'artistas en el radar' || title.startsWith('descubrimiento radar') || slug.startsWith('radar-tniw-');
+          });
+          if (radarArticles.length > 6) {
+            const toArchive = radarArticles.slice(6);
+            for (const item of toArchive) {
+              await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(item.slug)}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'apikey': SUPABASE_SERVICE_KEY,
+                  'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({ published: false })
+              });
+            }
+            console.log(`[generate-article] Auto-archivados ${toArchive.length} tracks en el radar antiguos para mantener el límite de 6.`);
+          }
+        }
+      } catch (archiveRadarErr) {
+        console.warn('[generate-article] Error auto-archivando tracks en el radar:', archiveRadarErr);
       }
     }
 

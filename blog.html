@@ -1664,7 +1664,7 @@
         } else {
           if (radarEmpty) radarEmpty.style.display = 'none';
           if (radarGrid) {
-            radarGrid.innerHTML = radarTracks.map(function(art) {
+            radarGrid.innerHTML = radarTracks.slice(0, 6).map(function(art) {
               return renderArticleCardHtml(art, true);
             }).join('');
           }
@@ -1673,7 +1673,7 @@
 
       var totalNews = (featured ? 1 : 0) + regularList.length;
       if (countBadge) {
-        countBadge.textContent = totalNews + ' noticias principales · ' + radarTracks.length + ' tracks en el radar';
+        countBadge.textContent = totalNews + ' noticias principales · ' + Math.min(radarTracks.length, 6) + ' tracks en el radar';
       }
 
     } else if (currentCategory.toLowerCase() === 'artistas en el radar') {

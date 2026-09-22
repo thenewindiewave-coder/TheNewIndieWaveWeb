@@ -7461,11 +7461,13 @@ ${playlistUrl}`;
     }
   }
 
-  // AUTO-ARCHIVADO: GARANTIZAR QUE EXACTAMENTE MÁXIMO 7 NOTICIAS EDITORIALES ESTÉN ACTIVAS EN PORTADA
-  // Las notas de Descubrimiento Radar NUNCA entran en este límite ni desplazan noticias
-  async function enforceMaxPublishedArticlesLimit(maxCount) {
+  // AUTO-ARCHIVADO: GARANTIZAR INDEPENDIENTEMENTE:
+  // - EXACTAMENTE MÁXIMO 7 NOTICIAS EDITORIALES EN PORTADA
+  // - EXACTAMENTE MÁXIMO 6 TRACKS EN EL RADAR EN VIVO
+  async function enforceMaxPublishedArticlesLimit(maxNewsCount, maxRadarCount) {
     try {
-      maxCount = maxCount || 7;
+      maxNewsCount = maxNewsCount || 7;
+      maxRadarCount = maxRadarCount || 6;
       var res = await fetch(SUPABASE_URL + '/rest/v1/articles?published=eq.true&order=published_at.desc', {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -7474,14 +7476,15 @@ ${playlistUrl}`;
       });
       if (!res.ok) return;
       var allPubList = await res.json();
-      // Filtrar SOLO noticias editoriales (Descubrimiento Radar NO entra en estos límites)
-      var pubList = (allPubList || []).filter(function(a) {
+
+      // 1. Límite independiente de 7 Noticias Editoriales
+      var newsList = (allPubList || []).filter(function(a) {
         return !isRadarDiscovery(a) && a.category !== 'scout_queue' && a.category !== 'scout_discarded';
       });
-      if (pubList && pubList.length > maxCount) {
-        var toArchive = pubList.slice(maxCount);
-        for (var i = 0; i < toArchive.length; i++) {
-          await fetch(SUPABASE_URL + '/rest/v1/articles?slug=eq.' + encodeURIComponent(toArchive[i].slug), {
+      if (newsList && newsList.length > maxNewsCount) {
+        var toArchiveNews = newsList.slice(maxNewsCount);
+        for (var i = 0; i < toArchiveNews.length; i++) {
+          await fetch(SUPABASE_URL + '/rest/v1/articles?slug=eq.' + encodeURIComponent(toArchiveNews[i].slug), {
             method: 'PATCH',
             headers: {
               'apikey': SUPABASE_ANON_KEY,
@@ -7492,7 +7495,28 @@ ${playlistUrl}`;
             body: JSON.stringify({ published: false })
           });
         }
-        console.log('Auto-archivadas ' + toArchive.length + ' notas editoriales antiguas para mantener el límite exacto de ' + maxCount + ' en portada.');
+        console.log('Auto-archivadas ' + toArchiveNews.length + ' notas editoriales antiguas para mantener el límite de ' + maxNewsCount + ' en portada.');
+      }
+
+      // 2. Límite independiente de 6 Tracks en el Radar
+      var radarList = (allPubList || []).filter(function(a) {
+        return isRadarDiscovery(a);
+      });
+      if (radarList && radarList.length > maxRadarCount) {
+        var toArchiveRadar = radarList.slice(maxRadarCount);
+        for (var j = 0; j < toArchiveRadar.length; j++) {
+          await fetch(SUPABASE_URL + '/rest/v1/articles?slug=eq.' + encodeURIComponent(toArchiveRadar[j].slug), {
+            method: 'PATCH',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ published: false })
+          });
+        }
+        console.log('Auto-archivados ' + toArchiveRadar.length + ' tracks de radar antiguos para mantener el límite de ' + maxRadarCount + ' en vivo.');
       }
     } catch(err) {
       console.warn('Error en enforceMaxPublishedArticlesLimit:', err);
@@ -8230,7 +8254,7 @@ ${playlistUrl}`;
     var variant = _copyVariantCounter;
 
     var title = art.title || '';
-    var summary = art.summary || '';
+    var summary = cleanSummarySource(art.summary || '');
     var slug = art.slug || '';
     var url = 'https://thenewindiewave.online/blog#' + encodeURIComponent(slug);
     var isRadar = (typeof isRadarDiscovery === 'function') && isRadarDiscovery(art);
@@ -8360,6 +8384,19 @@ ${playlistUrl}`;
       y += lineHeight;
     }
     return y;
+  }
+
+  // Helper para omitir fuentes externas ("Cobertura vía Sopitas", "Vía ...", "Fuente:") en el mockup social
+  function cleanSummarySource(text) {
+    if (!text) return '';
+    var cleaned = text
+      .replace(/\s*[\.\s]*(?:cobertura\s+(?:v[ií]a|por)|v[ií]a\b|fuente\s*:|prensa\s*:)\s+[^.\n!]+[.\n!]?/gi, '')
+      .trim();
+    cleaned = cleaned.replace(/([!?])\./g, '$1');
+    if (cleaned && !/[.!?]$/.test(cleaned)) {
+      cleaned += '.';
+    }
+    return cleaned;
   }
 
   // Helper adaptativo: calcula la fuente más grande posible que quepa sin desbordar el área designada
@@ -8613,7 +8650,7 @@ ${playlistUrl}`;
       // RESUMEN / TEXTO BREVE (ADAPTATIVO Y GIGANTE SEGÚN NÚMERO DE CARACTERES)
       var summaryStartY = afterTitleY + 44;
       var availableSummaryH = (ctaY - 45) - summaryStartY;
-      var cleanSummary = (art.summary || '').replace(/\s+/g, ' ');
+      var cleanSummary = cleanSummarySource((art.summary || '').replace(/\s+/g, ' '));
 
       drawAdaptiveCanvasText(ctx, cleanSummary, cardX, summaryStartY, maxTextW, availableSummaryH, {
         minFontSize: 30,
@@ -8638,9 +8675,9 @@ ${playlistUrl}`;
       ctx.fill();
 
       ctx.fillStyle = '#09090b';
-      ctx.font = '900 38px "Space Grotesk", sans-serif';
+      ctx.font = '900 36px "Space Grotesk", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('⚡ THENEWINDIEWAVE.ONLINE ↗', ctaX + ctaW/2, ctaY + 70);
+      ctx.fillText('⚡ THENEWINDIEWAVE.ONLINE/BLOG ↗', ctaX + ctaW/2, ctaY + 70);
       ctx.restore();
 
       // Firma Oficial al pie
@@ -8751,7 +8788,7 @@ ${playlistUrl}`;
       var barH = 70;
       var barR = 35;
       var availablePostSummH = (barY - 30) - postSummY;
-      drawAdaptiveCanvasText(ctx, (art.summary || '').replace(/\s+/g, ' '), pad, postSummY, postCardW, availablePostSummH, {
+      drawAdaptiveCanvasText(ctx, cleanSummarySource((art.summary || '').replace(/\s+/g, ' ')), pad, postSummY, postCardW, availablePostSummH, {
         minFontSize: 22,
         maxFontSize: 30,
         fontWeight: '600',
@@ -8772,9 +8809,9 @@ ${playlistUrl}`;
       ctx.stroke();
 
       ctx.fillStyle = '#bbf451';
-      ctx.font = 'bold 22px "Space Mono", monospace';
+      ctx.font = 'bold 21px "Space Mono", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('⚡ THENEWINDIEWAVE.ONLINE ↗', pad + postCardW/2, barY + 44);
+      ctx.fillText('⚡ THENEWINDIEWAVE.ONLINE/BLOG ↗', pad + postCardW/2, barY + 44);
       ctx.restore();
     }
   }
