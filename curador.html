@@ -8310,6 +8310,25 @@ ${playlistUrl}`;
     ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
   }
 
+  // Helper para dividir texto en líneas ajustadas a un ancho máximo
+  function getWrappedLines(ctx, text, maxWidth) {
+    if (!text) return [];
+    var words = text.split(/\s+/);
+    var lines = [];
+    var currentLine = '';
+    for (var i = 0; i < words.length; i++) {
+      var test = currentLine ? (currentLine + ' ' + words[i]) : words[i];
+      if (ctx.measureText(test).width > maxWidth && i > 0) {
+        lines.push(currentLine);
+        currentLine = words[i];
+      } else {
+        currentLine = test;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines;
+  }
+
   // Helper para dividir y dibujar texto envuelto con límite de líneas
   function drawCanvasWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
     if (!text) return y;
@@ -8341,6 +8360,67 @@ ${playlistUrl}`;
       y += lineHeight;
     }
     return y;
+  }
+
+  // Helper adaptativo: calcula la fuente más grande posible que quepa sin desbordar el área designada
+  function drawAdaptiveCanvasText(ctx, text, x, startY, maxWidth, maxHeight, opts) {
+    if (!text) return startY;
+    opts = opts || {};
+    var minFont = opts.minFontSize || 26;
+    var maxFont = opts.maxFontSize || 50;
+    var weight = opts.fontWeight || '600';
+    var family = opts.fontFamily || '"Space Mono", monospace, sans-serif';
+    var lineRatio = opts.lineHeightRatio || 1.38;
+    var maxAllowedLines = opts.maxLines || 10;
+    var color = opts.color || '#ffffff';
+
+    var bestSize = minFont;
+    var bestLines = [];
+    var bestLineHeight = Math.round(minFont * lineRatio);
+
+    // Probar desde el tamaño máximo hacia abajo hasta encontrar el tamaño que quepa 100%
+    for (var s = maxFont; s >= minFont; s -= 2) {
+      ctx.font = weight + ' ' + s + 'px ' + family;
+      var testLines = getWrappedLines(ctx, text, maxWidth);
+      var testLineH = Math.round(s * lineRatio);
+      var totalH = testLines.length * testLineH;
+
+      if (totalH <= maxHeight && testLines.length <= maxAllowedLines) {
+        bestSize = s;
+        bestLines = testLines;
+        bestLineHeight = testLineH;
+        break;
+      }
+      bestSize = s;
+      bestLines = testLines;
+      bestLineHeight = testLineH;
+    }
+
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = weight + ' ' + bestSize + 'px ' + family;
+    ctx.textAlign = 'left';
+    if (opts.shadow) {
+      ctx.shadowColor = opts.shadow.color || 'rgba(0,0,0,0.95)';
+      ctx.shadowBlur = opts.shadow.blur || 25;
+    }
+
+    var currY = startY;
+    for (var i = 0; i < bestLines.length; i++) {
+      if (i === maxAllowedLines - 1 && i < bestLines.length - 1) {
+        var truncLine = bestLines[i];
+        while (truncLine.length > 0 && ctx.measureText(truncLine + '...').width > maxWidth) {
+          truncLine = truncLine.slice(0, -1);
+        }
+        ctx.fillText(truncLine + '...', x, currY);
+        currY += bestLineHeight;
+        break;
+      }
+      ctx.fillText(bestLines[i], x, currY);
+      currY += bestLineHeight;
+    }
+    ctx.restore();
+    return currY;
   }
 
   // RENDER PRINCIPAL CANVAS (STORY 9:16 O POST 1:1)
@@ -8506,47 +8586,46 @@ ${playlistUrl}`;
       ctx.stroke();
       ctx.restore();
 
-      // 7. ZONA EDITORIAL (TÍTULO + RESUMEN EN TAMAÑO GIGANTE)
-      var textStartY = cardY + cardH + 58;
+      // 7. ZONA EDITORIAL (TÍTULO ADAPTATIVO + RESUMEN ADAPTATIVO GIGANTE)
+      var textStartY = cardY + cardH + 54;
       var maxTextW = cardW;
 
-      // TÍTULO DEL ARTÍCULO (GRANDE Y PESADO)
-      ctx.save();
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-      ctx.shadowBlur = 28;
-      ctx.font = '900 58px "Space Grotesk", "Outfit", sans-serif';
-      ctx.textAlign = 'left';
-      var afterTitleY = drawCanvasWrappedText(ctx, (art.title || '').toUpperCase(), cardX, textStartY, maxTextW, 70, 3);
-      ctx.restore();
-
-      // METADATOS: TIEMPO DE LECTURA & WEB
-      var metaY = afterTitleY + 32;
-      ctx.save();
-      ctx.fillStyle = '#bbf451';
-      ctx.font = 'bold 28px "Space Mono", monospace';
-      ctx.textAlign = 'left';
-      var readTime = art.read_time || '3 min';
-      ctx.fillText('⏱ ' + readTime.toUpperCase() + ' DE LECTURA  •  ⚡ THENEWINDIEWAVE.ONLINE', cardX, metaY);
-      ctx.restore();
-
-      // RESUMEN / BAJADA EDITORIAL (MUCHO MÁS GRANDE Y LEGIBLE A SIMPLE VISTA)
-      var summaryY = metaY + 52;
-      ctx.save();
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '600 38px "Space Mono", monospace, sans-serif';
-      ctx.textAlign = 'left';
-      var cleanSummary = (art.summary || '').replace(/\s+/g, ' ');
-      drawCanvasWrappedText(ctx, cleanSummary, cardX, summaryY, maxTextW, 54, 4);
-      ctx.restore();
+      // TÍTULO DEL ARTÍCULO (ADAPTATIVO: FONT GRANDE SIN CORTAR PALABRAS)
+      var maxTitleH = 220;
+      var afterTitleY = drawAdaptiveCanvasText(ctx, (art.title || '').toUpperCase(), cardX, textStartY, maxTextW, maxTitleH, {
+        minFontSize: 46,
+        maxFontSize: 60,
+        fontWeight: '900',
+        fontFamily: '"Space Grotesk", "Outfit", sans-serif',
+        lineHeightRatio: 1.18,
+        maxLines: 3,
+        color: '#ffffff',
+        shadow: { color: 'rgba(0, 0, 0, 0.95)', blur: 28 }
+      });
 
       // 8. STICKER CALL TO ACTION INFERIOR (y: 1680)
       var ctaX = cardX;
       var ctaY = 1680;
       var ctaW = cardW;
-      var ctaH = 112;
-      var ctaR = 56;
+      var ctaH = 114;
+      var ctaR = 57;
 
+      // RESUMEN / TEXTO BREVE (ADAPTATIVO Y GIGANTE SEGÚN NÚMERO DE CARACTERES)
+      var summaryStartY = afterTitleY + 44;
+      var availableSummaryH = (ctaY - 45) - summaryStartY;
+      var cleanSummary = (art.summary || '').replace(/\s+/g, ' ');
+
+      drawAdaptiveCanvasText(ctx, cleanSummary, cardX, summaryStartY, maxTextW, availableSummaryH, {
+        minFontSize: 30,
+        maxFontSize: 50,
+        fontWeight: '600',
+        fontFamily: '"Space Mono", monospace, sans-serif',
+        lineHeightRatio: 1.38,
+        maxLines: 8,
+        color: '#ffffff'
+      });
+
+      // BOTÓN NEÓN CON EL SITIO WEB
       ctx.save();
       ctx.shadowColor = 'rgba(187, 244, 81, 0.45)';
       ctx.shadowBlur = 38;
@@ -8559,9 +8638,9 @@ ${playlistUrl}`;
       ctx.fill();
 
       ctx.fillStyle = '#09090b';
-      ctx.font = '900 36px "Space Grotesk", sans-serif';
+      ctx.font = '900 38px "Space Grotesk", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('👉 TOCA PARA LEER LA NOTA COMPLETA ↗', ctaX + ctaW/2, ctaY + 68);
+      ctx.fillText('⚡ THENEWINDIEWAVE.ONLINE ↗', ctaX + ctaW/2, ctaY + 70);
       ctx.restore();
 
       // Firma Oficial al pie
@@ -8654,28 +8733,35 @@ ${playlistUrl}`;
       ctx.stroke();
       ctx.restore();
 
-      // TÍTULO DEL POST
-      var postTextY = imgY + imgH + 46;
-      ctx.save();
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 44px "Space Grotesk", "Outfit", sans-serif';
-      ctx.textAlign = 'left';
-      var postNextY = drawCanvasWrappedText(ctx, (art.title || '').toUpperCase(), pad, postTextY, postCardW, 52, 2);
-      ctx.restore();
+      // TÍTULO DEL POST (ADAPTATIVO)
+      var postTextY = imgY + imgH + 42;
+      var afterPostTitleY = drawAdaptiveCanvasText(ctx, (art.title || '').toUpperCase(), pad, postTextY, postCardW, 115, {
+        minFontSize: 34,
+        maxFontSize: 46,
+        fontWeight: '900',
+        fontFamily: '"Space Grotesk", "Outfit", sans-serif',
+        lineHeightRatio: 1.18,
+        maxLines: 2,
+        color: '#ffffff'
+      });
 
-      // RESUMEN
-      var postSummY = postNextY + 18;
-      ctx.save();
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '600 28px "Space Mono", monospace';
-      ctx.textAlign = 'left';
-      drawCanvasWrappedText(ctx, (art.summary || '').replace(/\s+/g, ' '), pad, postSummY, postCardW, 38, 2);
-      ctx.restore();
-
-      // BANNER INFERIOR
+      // RESUMEN DEL POST (ADAPTATIVO)
+      var postSummY = afterPostTitleY + 18;
       var barY = 965;
       var barH = 70;
       var barR = 35;
+      var availablePostSummH = (barY - 30) - postSummY;
+      drawAdaptiveCanvasText(ctx, (art.summary || '').replace(/\s+/g, ' '), pad, postSummY, postCardW, availablePostSummH, {
+        minFontSize: 22,
+        maxFontSize: 30,
+        fontWeight: '600',
+        fontFamily: '"Space Mono", monospace',
+        lineHeightRatio: 1.34,
+        maxLines: 3,
+        color: '#ffffff'
+      });
+
+      // BANNER INFERIOR CON EL SITIO WEB
       ctx.save();
       ctx.fillStyle = 'rgba(187, 244, 81, 0.16)';
       drawRoundRectCur(ctx, pad, barY, postCardW, barH, barR);
@@ -8686,9 +8772,9 @@ ${playlistUrl}`;
       ctx.stroke();
 
       ctx.fillStyle = '#bbf451';
-      ctx.font = 'bold 21px "Space Mono", monospace';
+      ctx.font = 'bold 22px "Space Mono", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('🔗 LEER NOTA COMPLETA EN THENEWINDIEWAVE.ONLINE ↗', pad + postCardW/2, barY + 44);
+      ctx.fillText('⚡ THENEWINDIEWAVE.ONLINE ↗', pad + postCardW/2, barY + 44);
       ctx.restore();
     }
   }
