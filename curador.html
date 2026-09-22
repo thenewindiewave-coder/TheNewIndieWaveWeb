@@ -8132,6 +8132,7 @@ ${playlistUrl}`;
       var isRadar = (typeof isRadarDiscovery === 'function') && isRadarDiscovery(art);
       var categoryLabel = isRadar ? '🛰️ Descubrimiento Radar' : (art.category || 'Cultura Indie');
       var tagsStr = (art.tags && art.tags.length) ? art.tags.map(function(t){ return '#' + t.replace(/\s+/g, ''); }).join(' ') : '#TheNewIndieWave';
+      var shortUrl = getArticleShortUrl(art);
       var fullUrl = 'https://thenewindiewave.online/blog#' + encodeURIComponent(art.slug || '');
       
       quickEl.innerHTML = `
@@ -8140,7 +8141,10 @@ ${playlistUrl}`;
           <span><strong>Lectura estimada:</strong> ${escapeHtml(art.read_time || '3 min')}</span>
         </div>
         <div style="word-break:break-all; overflow-wrap:anywhere;">
-          <strong>Enlace permanente:</strong> <a href="${fullUrl}" target="_blank" style="color:var(--accent-cyan); text-decoration:none;">${fullUrl}</a>
+          <strong>Enlace Corto Redes:</strong> <a href="${shortUrl}" target="_blank" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${shortUrl}</a>
+        </div>
+        <div style="word-break:break-all; overflow-wrap:anywhere; font-size:10.5px; color:#64748b;">
+          <strong>Enlace largo:</strong> <a href="${fullUrl}" target="_blank" style="color:#64748b; text-decoration:none;">${fullUrl}</a>
         </div>
         <div style="color:#64748b; word-break:break-word;">
           <strong>Tags:</strong> ${escapeHtml(tagsStr)}
@@ -8258,6 +8262,25 @@ ${playlistUrl}`;
     showToast('✓ Variante de copy actualizada');
   }
 
+  function getArticleShortCode(art) {
+    if (!art) return '';
+    if (art.id && typeof art.id === 'string' && art.id.length >= 8) {
+      return art.id.slice(0, 8);
+    }
+    if (art.slug) {
+      var parts = art.slug.split('-');
+      var last = parts[parts.length - 1];
+      if (last && last.length >= 4) return last;
+      return art.slug;
+    }
+    return '';
+  }
+
+  function getArticleShortUrl(art) {
+    var code = getArticleShortCode(art);
+    return 'https://thenewindiewave.online/b/' + (code || (art && art.slug) || '');
+  }
+
   function updateArticleSocialCopyText() {
     var ta = document.getElementById('articleSocialCopyText');
     if (!ta || !_currentStoryArticle) return;
@@ -8268,7 +8291,7 @@ ${playlistUrl}`;
     var title = art.title || '';
     var summary = cleanSummarySource(art.summary || '');
     var slug = art.slug || '';
-    var url = 'https://thenewindiewave.online/blog#' + encodeURIComponent(slug);
+    var shortUrl = getArticleShortUrl(art);
     var isRadar = (typeof isRadarDiscovery === 'function') && isRadarDiscovery(art);
     var catTag = (art.category || 'CulturaIndie').replace(/[^a-zA-Z0-9]/g, '');
     
@@ -8279,27 +8302,27 @@ ${playlistUrl}`;
 
     if (style === 'viral') {
       if (variant === 0) {
-        copy = `🚨 ¡NUEVA NOTA EN EL RADAR EDITORIAL! 🚨\n\n"${title}"\n\n${summary}\n\n👉 Toca el enlace para leer la cobertura completa y escuchar los lanzamientos destacados:\n🔗 ${url}\n\n${tags} #TheNewIndieWave #${catTag} #Descubrimientos`;
+        copy = `🚨 ¡NUEVA NOTA EN EL RADAR EDITORIAL! 🚨\n\n"${title}"\n\n${summary}\n\n👉 Toca el enlace para leer la cobertura completa y escuchar los lanzamientos destacados:\n🔗 ${shortUrl}\n\n${tags} #TheNewIndieWave #${catTag} #Descubrimientos`;
       } else if (variant === 1) {
-        copy = `⚡ ¿YA ESCUCHASTE SOBRE ESTO? 🎧\n\n"${title}"\n\nUn vistazo a los sonidos y proyectos que están moviendo la escena indie ahora mismo.\n\n👇 Lee el artículo completo aquí:\n🔗 ${url}\n\n${tags} #TheNewIndieWave #IndieLatino #RadarIndie`;
+        copy = `⚡ ¿YA ESCUCHASTE SOBRE ESTO? 🎧\n\n"${title}"\n\nUn vistazo a los sonidos y proyectos que están moviendo la escena indie ahora mismo.\n\n👇 Lee el artículo completo aquí:\n🔗 ${shortUrl}\n\n${tags} #TheNewIndieWave #IndieLatino #RadarIndie`;
       } else {
-        copy = `💿 COBERTURA EXCLUSIVA TNIW 📻\n\n"${title}"\n\n${summary}\n\n👉 Encuentra la nota completa, análisis y enlaces oficiales en nuestra web:\n🔗 ${url}\n\n${tags} #TheNewIndieWave #MusicaNueva #${catTag}`;
+        copy = `💿 COBERTURA EXCLUSIVA TNIW 📻\n\n"${title}"\n\n${summary}\n\n👉 Encuentra la nota completa, análisis y enlaces oficiales en nuestra web:\n🔗 ${shortUrl}\n\n${tags} #TheNewIndieWave #MusicaNueva #${catTag}`;
       }
     } else if (style === 'editorial') {
       if (variant === 0) {
-        copy = `📰 COBERTURA EDITORIAL // THE NEW INDIE WAVE\n\n"${title}"\n\n${summary}\n\nDescubre el análisis a fondo, contexto y todos los detalles en nuestro sitio oficial:\n🔗 ${url}\n\n#TheNewIndieWave #${catTag} #PeriodismoMusical #CulturaIndie #IndieWave ${tags}`;
+        copy = `📰 COBERTURA EDITORIAL // THE NEW INDIE WAVE\n\n"${title}"\n\n${summary}\n\nDescubre el análisis a fondo, contexto y todos los detalles en nuestro sitio oficial:\n🔗 ${shortUrl}\n\n#TheNewIndieWave #${catTag} #PeriodismoMusical #CulturaIndie #IndieWave ${tags}`;
       } else if (variant === 1) {
-        copy = `🎙️ THE NEW INDIE WAVE // ARTÍCULOS & RESEÑAS\n\n"${title}"\n\n${summary}\n\nDisponible ya en nuestra plataforma:\n🔗 ${url}\n\n#TheNewIndieWave #PeriodismoMusical #MusicaIndie #${catTag}`;
+        copy = `🎙️ THE NEW INDIE WAVE // ARTÍCULOS & RESEÑAS\n\n"${title}"\n\n${summary}\n\nDisponible ya en nuestra plataforma:\n🔗 ${shortUrl}\n\n#TheNewIndieWave #PeriodismoMusical #MusicaIndie #${catTag}`;
       } else {
-        copy = `✦ EDITORIAL INDIE // ${isRadar ? 'DESCUBRIMIENTO RADAR' : (art.category || 'CULTURA').toUpperCase()}\n\n"${title}"\n\n${summary}\n\nVisita the new indie wave para la experiencia completa:\n🔗 ${url}\n\n#TheNewIndieWave #${catTag} #IndieRock #CulturaMusical ${tags}`;
+        copy = `✦ EDITORIAL INDIE // ${isRadar ? 'DESCUBRIMIENTO RADAR' : (art.category || 'CULTURA').toUpperCase()}\n\n"${title}"\n\n${summary}\n\nVisita the new indie wave para la experiencia completa:\n🔗 ${shortUrl}\n\n#TheNewIndieWave #${catTag} #IndieRock #CulturaMusical ${tags}`;
       }
     } else { // 'x' / Breve
       if (variant === 0) {
-        copy = `⚡ "${title}"\n\n${summary.slice(0, 140)}${summary.length > 140 ? '...' : ''}\n\nLee la nota completa aquí 👇\n${url}\n\n#TheNewIndieWave #IndieMusic`;
+        copy = `⚡ "${title}"\n\n${summary.slice(0, 140)}${summary.length > 140 ? '...' : ''}\n\nLee la nota completa aquí 👇\n${shortUrl}\n\n#TheNewIndieWave #IndieMusic`;
       } else if (variant === 1) {
-        copy = `🚨 NUEVO EN BLOG: "${title}"\n\nDetalles y cobertura completa en el link:\n${url}\n\n#TheNewIndieWave #${catTag}`;
+        copy = `🚨 NUEVO EN BLOG: "${title}"\n\nDetalles y cobertura completa en el link:\n${shortUrl}\n\n#TheNewIndieWave #${catTag}`;
       } else {
-        copy = `📰 Editorial TNIW // "${title}"\n\n${url}\n\n#TheNewIndieWave #IndieRock`;
+        copy = `📰 Editorial TNIW // "${title}"\n\n${shortUrl}\n\n#TheNewIndieWave #IndieRock`;
       }
     }
 

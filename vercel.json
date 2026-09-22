@@ -8,6 +8,10 @@
     {
       "source": "/api/generate-feedback",
       "destination": "/api/generate-article"
+    },
+    {
+      "source": "/b/:code",
+      "destination": "/blog.html"
     }
   ],
   "headers": [

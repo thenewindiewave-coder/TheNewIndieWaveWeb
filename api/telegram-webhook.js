@@ -182,6 +182,11 @@ async function handlePublishBySlug(slug, chatId) {
     console.warn('[telegram-webhook] Error auto-publicando en Social Hub:', shErr);
   }
 
+  const shortCode = (item.id && typeof item.id === 'string' && item.id.length >= 8)
+    ? item.id.slice(0, 8)
+    : (item.slug ? (item.slug.split('-').pop() || item.slug) : '');
+  const noteShortUrl = `https://thenewindiewave.online/b/${shortCode || encodeURIComponent(item.slug || '')}`;
+
   // 6. Enviar mensaje de éxito a Rodrigo
   const successMsg = [
     `🎉 *¡NOTICIA PUBLICADA CON ÉXITO EN EL BLOG!*`,
@@ -190,7 +195,7 @@ async function handlePublishBySlug(slug, chatId) {
     `🏷️ *Categoría:* Cultura Indie // ${escapeMarkdown(meta.region || 'Indie')}`,
     `📸 *Foto:* Vía ${escapeMarkdown(meta.source || 'Prensa')} / Oficial`,
     ``,
-    `🔗 [Ver Artículo en el Blog](https://thenewindiewave.online/blog#${item.slug})`,
+    `🔗 [Ver Artículo en el Blog](${noteShortUrl})`,
     `⚡ Portada sincronizada en 7 notas.`,
     socialHubSent ? `📡 *¡Enviada a Social Hub!* (FB, IG Post+Story, Threads, X, TikTok)` : `⚠️ Social Hub: no se pudo sincronizar automáticamente.`
   ].join('\n');
@@ -644,7 +649,10 @@ async function pushArticleToSocialHub(article) {
     const cleanSummary = (article.summary || '')
       .replace(/\s*[\.\s]*(?:cobertura\s+(?:v[ií]a|por)|v[ií]a\b|fuente\s*:|prensa\s*:)\s+[^.\n!]+[.\n!]?/gi, '')
       .trim();
-    const url = `https://thenewindiewave.online/blog#${encodeURIComponent(article.slug || '')}`;
+    const shortCode = (article.id && typeof article.id === 'string' && article.id.length >= 8)
+      ? article.id.slice(0, 8)
+      : (article.slug ? (article.slug.split('-').pop() || article.slug) : '');
+    const url = `https://thenewindiewave.online/b/${shortCode || encodeURIComponent(article.slug || '')}`;
 
     const isTrack = (article.category === 'Artistas en el Radar') ||
                     title.toLowerCase().includes('descubrimiento radar') ||

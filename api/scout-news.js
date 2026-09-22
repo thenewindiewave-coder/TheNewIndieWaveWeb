@@ -206,12 +206,19 @@ Fuente original: ${link || ''}`;
         console.warn('[scout-news] Error auto-publicando en Social Hub:', shErr);
       }
 
+      const createdArt = inserted && inserted[0] ? inserted[0] : article;
+      const shortCode = (createdArt.id && typeof createdArt.id === 'string' && createdArt.id.length >= 8)
+        ? createdArt.id.slice(0, 8)
+        : (createdArt.slug ? (createdArt.slug.split('-').pop() || createdArt.slug) : '');
+      const shortUrl = `https://thenewindiewave.online/b/${shortCode || encodeURIComponent(createdArt.slug || '')}`;
+
       return res.status(200).json({
         success: true,
         message: '¡Noticia redactada y publicada en el Blog!',
-        article: inserted && inserted[0] ? inserted[0] : article,
+        article: createdArt,
         social_hub: socialHubSent,
-        url: `https://www.thenewindiewave.online/blog#${article.slug}`
+        url: shortUrl,
+        full_url: `https://www.thenewindiewave.online/blog#${article.slug}`
       });
 
     } catch (err) {
@@ -275,7 +282,10 @@ async function pushArticleToSocialHub(article) {
     const cleanSummary = (article.summary || '')
       .replace(/\s*[\.\s]*(?:cobertura\s+(?:v[ií]a|por)|v[ií]a\b|fuente\s*:|prensa\s*:)\s+[^.\n!]+[.\n!]?/gi, '')
       .trim();
-    const url = `https://thenewindiewave.online/blog#${encodeURIComponent(article.slug || '')}`;
+    const shortCode = (article.id && typeof article.id === 'string' && article.id.length >= 8)
+      ? article.id.slice(0, 8)
+      : (article.slug ? (article.slug.split('-').pop() || article.slug) : '');
+    const url = `https://thenewindiewave.online/b/${shortCode || encodeURIComponent(article.slug || '')}`;
 
     const isTrack = (article.category === 'Artistas en el Radar') ||
                     title.toLowerCase().includes('descubrimiento radar') ||

@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Noticias, Guías & Crónicas de la Industria | The New Indie Wave</title>
 <meta name="description" content="Artículos de análisis sobre la industria musical, algoritmos de Spotify, identidad visual, producción de audio y cultura independiente curados por The New Indie Wave.">
+<base href="/">
 <link rel="canonical" href="https://www.thenewindiewave.online/blog">
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="apple-touch-icon" href="favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/favicon.png">
 
 <!-- OPEN GRAPH & TWITTER CARDS -->
 <meta property="og:title" content="Noticias & Editorial // The New Indie Wave">
@@ -1806,14 +1807,71 @@
     renderArticles();
   }
 
-  // MODAL LECTOR (READER VIEW CON RESOLUCIÓN PERMANENTE DE URL)
-  async function openArticle(slug) {
-    if (!slug) return;
-    var article = allArticles.find(function(a) { return a.slug === slug; }) || archivedArticles.find(function(a) { return a.slug === slug; });
+  // FUNCIONES DE RESOLUCIÓN Y ENLACES CORTOS (/b/xxxx)
+  function getArticleShortCode(art) {
+    if (!art) return '';
+    if (art.id && typeof art.id === 'string' && art.id.length >= 8) {
+      return art.id.slice(0, 8);
+    }
+    if (art.slug) {
+      var parts = art.slug.split('-');
+      var last = parts[parts.length - 1];
+      if (last && last.length >= 4) return last;
+      return art.slug;
+    }
+    return '';
+  }
+
+  function getArticleShortUrl(art) {
+    var code = getArticleShortCode(art);
+    return 'https://thenewindiewave.online/b/' + (code || (art && art.slug) || '');
+  }
+
+  function findArticleLocally(target) {
+    if (!target) return null;
+    var t = decodeURIComponent(target).toLowerCase().trim();
+    var all = (allArticles || []).concat(archivedArticles || []);
+
+    // 1. Coincidencia exacta por slug
+    var match = all.find(function(a) { 
+      return (a.slug || '').toLowerCase().trim() === t; 
+    });
+    if (match) return match;
+
+    // 2. Coincidencia exacta por ID UUID
+    match = all.find(function(a) { 
+      return (a.id || '').toLowerCase() === t; 
+    });
+    if (match) return match;
+
+    // 3. Coincidencia por prefijo del ID (ej: primeros 8 caracteres "ac77a26e")
+    if (t.length >= 6) {
+      match = all.find(function(a) { 
+        return (a.id || '').toLowerCase().startsWith(t); 
+      });
+      if (match) return match;
+    }
+
+    // 4. Coincidencia por sufijo del slug (ej. sufijo numérico "7419")
+    match = all.find(function(a) {
+      var s = (a.slug || '').toLowerCase().trim();
+      return s.endsWith('-' + t) || s === t;
+    });
+    if (match) return match;
+
+    return null;
+  }
+
+  // MODAL LECTOR (READER VIEW CON RESOLUCIÓN PERMANENTE Y SHORT LINKS)
+  async function openArticle(targetCodeOrSlug) {
+    if (!targetCodeOrSlug) return;
+    var article = findArticleLocally(targetCodeOrSlug);
+
     if (!article) {
-      // Búsqueda directa en Supabase por si la nota fue archivada (mantiene URL único permanente)
+      // Búsqueda directa en Supabase por si la nota fue archivada o viene de link directo
       try {
-        var res = await fetch(SUPABASE_URL + '/rest/v1/articles?slug=eq.' + encodeURIComponent(slug), {
+        var cleanTarget = decodeURIComponent(targetCodeOrSlug).trim();
+        var res = await fetch(SUPABASE_URL + '/rest/v1/articles?slug=eq.' + encodeURIComponent(cleanTarget), {
           headers: {
             'apikey': SUPABASE_ANON_KEY,
             'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
@@ -1823,6 +1881,23 @@
           var arr = await res.json();
           if (arr && arr.length > 0) {
             article = arr[0];
+          }
+        }
+
+        // Si no se encontró por slug directo, intentar buscar por id o término
+        if (!article && cleanTarget.length >= 6) {
+          var idRes = await fetch(SUPABASE_URL + '/rest/v1/articles?order=published_at.desc&limit=50', {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+            }
+          });
+          if (idRes.ok) {
+            var idArr = await idRes.json();
+            article = (idArr || []).find(function(a) {
+              return (a.id || '').toLowerCase().startsWith(cleanTarget.toLowerCase()) ||
+                     (a.slug || '').toLowerCase().endsWith('-' + cleanTarget.toLowerCase());
+            });
           }
         }
       } catch(e) {}
@@ -1874,15 +1949,17 @@
     // Inyectar contenido
     document.getElementById('readerContent').innerHTML = article.content || '<p>' + escapeHtml(article.summary) + '</p>';
 
-    // Preparar enlaces de compartir
-    var currentUrl = window.location.origin + window.location.pathname + '#' + article.slug;
-    var shareMsg = encodeURIComponent('Te recomiendo este artículo en The New Indie Wave: "' + article.title + '" ' + currentUrl);
+    // Enlaces cortos y compartir
+    var shortUrl = getArticleShortUrl(article);
+    var shareMsg = encodeURIComponent('Te recomiendo este artículo en The New Indie Wave: "' + article.title + '" ' + shortUrl);
     
     document.getElementById('shareWhatsApp').href = 'https://api.whatsapp.com/send?text=' + shareMsg;
     document.getElementById('shareTwitter').href = 'https://twitter.com/intent/tweet?text=' + shareMsg;
 
-    // Actualizar hash URL
-    window.location.hash = article.slug;
+    // Actualizar hash URL si no estamos en /b/
+    if (!window.location.pathname.startsWith('/b/')) {
+      window.location.hash = article.slug;
+    }
 
     var overlay = document.getElementById('readerOverlay');
     overlay.classList.add('active');
@@ -1896,9 +1973,9 @@
     document.body.style.overflow = '';
     activeArticle = null;
     
-    // Limpiar hash sin recargar
+    // Si viene de /b/:code o hash, retornar a /blog limpiamente
     if (history.pushState) {
-      history.pushState("", document.title, window.location.pathname + window.location.search);
+      history.pushState("", document.title, '/blog');
     } else {
       window.location.hash = '';
     }
@@ -1913,13 +1990,13 @@
 
   function copyArticleLink() {
     if (!activeArticle) return;
-    var url = window.location.origin + window.location.pathname + '#' + activeArticle.slug;
+    var shortUrl = getArticleShortUrl(activeArticle);
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(function() {
-        showToast('✓ Enlace del artículo copiado al portapapeles');
+      navigator.clipboard.writeText(shortUrl).then(function() {
+        showToast('✓ Enlace corto copiado: ' + shortUrl);
       });
     } else {
-      showToast('Enlace: ' + url);
+      showToast('Enlace: ' + shortUrl);
     }
   }
 
@@ -1931,8 +2008,16 @@
     }
   });
 
-  // VERIFICAR SI HAY HASH EN LA URL AL CARGAR
+  // VERIFICAR SI HAY SHORT LINK /b/:code O HASH EN LA URL AL CARGAR
   function checkUrlHash() {
+    // 1. Detectar si la URL es /b/:code (a través de Vercel rewrite)
+    var pathMatch = window.location.pathname.match(/^\/b\/([a-zA-Z0-9_-]+)/i);
+    if (pathMatch && pathMatch[1]) {
+      openArticle(pathMatch[1]);
+      return;
+    }
+
+    // 2. Detectar si la URL contiene hash (#slug o #code)
     var hash = window.location.hash.replace('#', '').trim();
     if (hash) {
       openArticle(hash);
@@ -1948,6 +2033,6 @@
     loadArticles();
   });
 </script>
-<script src="twinkle-bg.js" defer></script>
+<script src="/twinkle-bg.js" defer></script>
 </body>
 </html>
