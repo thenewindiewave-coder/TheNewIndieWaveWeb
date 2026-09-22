@@ -6667,6 +6667,18 @@ ${playlistUrl}`;
         <div id="artStoryQuickDetails" style="margin-top:6px; padding:14px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid rgba(255,255,255,0.08); font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; display:flex; flex-direction:column; gap:8px; min-width:0; overflow-wrap:anywhere; word-break:break-all; box-sizing:border-box;">
         </div>
 
+        <!-- BOTÓN PUBLICAR AUTOMÁTICAMENTE EN SOCIAL HUB -->
+        <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">
+          <button id="btnAutoPublishSocialHub" onclick="publishArticleToSocialHub()" style="width:100%; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#ffffff; font-family:var(--font-mono); font-size:13px; font-weight:900; letter-spacing:0.5px; padding:15px 20px; border-radius:8px; border:1px solid rgba(52,211,153,0.5); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 6px 22px rgba(16,185,129,0.38); transition:all 0.2s ease;" onmouseover="this.style.filter='brightness(1.15)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.filter='none'; this.style.transform='none'">
+            <span style="font-size:16px;">⚡</span> PUBLICAR AUTOMÁTICAMENTE
+          </button>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:10.5px; color:#6ee7b7; padding:0 4px;">
+            <span>📡 Social Hub // FB & IG (Post + Story) · Threads · X</span>
+            <span style="color:#94a3b8;">Estado: Directo</span>
+          </div>
+          <div id="socialHubPublishStatus" style="display:none; margin-top:6px; padding:12px 14px; border-radius:8px; font-family:var(--font-mono); font-size:11.5px; line-height:1.5;"></div>
+        </div>
+
       </div>
 
     </div>
@@ -8881,6 +8893,270 @@ ${playlistUrl}`;
     } catch(err) {
       console.warn('Canvas toBlob tainted/error:', err);
       showToast('⚠️ Imagen protegida. Usa el botón "Descargar PNG".');
+    }
+  }
+
+  // ==========================================
+  // PUBLICACIÓN AUTOMÁTICA EN SOCIAL HUB (THE NEW INDIE WAVE)
+  // ==========================================
+  var SOCIAL_HUB_CONFIG = {
+    brandId: '6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c',
+    brandName: 'The New Indie Wave',
+    cloudinary: {
+      cloudName: 'ckknw1do',
+      apiKey: '576643641599951',
+      apiSecret: 'BqRSk2zRcn2-BtMi9BIHHiRyTfQ',
+      folder: 'social-hub/6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c'
+    },
+    supabase: {
+      url: 'https://gcorvulignbmbjsgekpo.supabase.co',
+      serviceKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjb3J2dWxpZ25ibWJqc2dla3BvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTM2NDg1OSwiZXhwIjoyMDg2OTQwODU5fQ.aRHvDWcIOSlUPBB0xGctZYI85gf3FrqMaTphnmOeS58'
+    }
+  };
+
+  async function uploadCanvasToCloudinary(dataUrl, prefix) {
+    var ts = Math.floor(Date.now() / 1000);
+    var folder = SOCIAL_HUB_CONFIG.cloudinary.folder;
+    var secret = SOCIAL_HUB_CONFIG.cloudinary.apiSecret;
+    var strToSign = 'folder=' + folder + '&timestamp=' + ts + secret;
+
+    var encoder = new TextEncoder();
+    var hashBuffer = await crypto.subtle.digest('SHA-1', encoder.encode(strToSign));
+    var hashArray = Array.from(new Uint8Array(hashBuffer));
+    var signature = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+
+    var formData = new FormData();
+    formData.append('file', dataUrl);
+    formData.append('api_key', SOCIAL_HUB_CONFIG.cloudinary.apiKey);
+    formData.append('timestamp', ts.toString());
+    formData.append('signature', signature);
+    formData.append('folder', folder);
+
+    var res = await fetch('https://api.cloudinary.com/v1_1/' + SOCIAL_HUB_CONFIG.cloudinary.cloudName + '/image/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      var errData = await res.json().catch(function(){ return {}; });
+      throw new Error((errData.error && errData.error.message) || 'Fallo de subida en Cloudinary');
+    }
+
+    var json = await res.json();
+    return json.secure_url;
+  }
+
+  async function publishArticleToSocialHub() {
+    if (!_currentStoryArticle) {
+      showToast('⚠️ No hay artículo cargado en el generador.');
+      return;
+    }
+
+    var btn = document.getElementById('btnAutoPublishSocialHub');
+    var statusBox = document.getElementById('socialHubPublishStatus');
+    var copyText = (document.getElementById('articleSocialCopyText') || {}).value || '';
+    var art = _currentStoryArticle;
+    var origFormat = _currentStoryFormat || 'story';
+
+    if (!copyText.trim()) {
+      showToast('⚠️ El copy para redes está vacío.');
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.8';
+      btn.style.cursor = 'not-allowed';
+      btn.innerHTML = '<span>⏳</span> Conectando con Social Hub...';
+    }
+
+    if (statusBox) {
+      statusBox.style.display = 'block';
+      statusBox.style.background = 'rgba(16,185,129,0.08)';
+      statusBox.style.border = '1px solid rgba(16,185,129,0.25)';
+      statusBox.style.color = '#a7f3d0';
+      statusBox.innerHTML = '⚡ <strong>Preparando artes en alta resolución...</strong>';
+    }
+
+    try {
+      var canvas = document.getElementById('articleStoryCanvas');
+      if (!canvas) throw new Error('No se encontró el elemento canvas del generador.');
+
+      // Paso 1: Renderizar y capturar artes en ambos formatos (Story 9:16 y Post 1:1)
+      if (statusBox) {
+        statusBox.innerHTML = '📸 <strong>Paso 1/3:</strong> Renderizando Story (9:16) y Post (1:1)...';
+      }
+
+      // Captura Story (9:16)
+      renderArticleStoryCanvas(art, 'story');
+      var storyDataUrl = canvas.toDataURL('image/png');
+
+      // Captura Post (1:1)
+      renderArticleStoryCanvas(art, 'post');
+      var postDataUrl = canvas.toDataURL('image/png');
+
+      // Restaurar el formato que el usuario tenía en pantalla
+      renderArticleStoryCanvas(art, origFormat);
+
+      // Paso 2: Subir ambas imágenes a Cloudinary (carpeta The New Indie Wave)
+      if (statusBox) {
+        statusBox.innerHTML = '☁️ <strong>Paso 2/3:</strong> Subiendo artes a Cloudinary (TNIW)...';
+      }
+
+      var storyUploadUrl = await uploadCanvasToCloudinary(storyDataUrl, 'story');
+      var postUploadUrl = await uploadCanvasToCloudinary(postDataUrl, 'post');
+
+      // Paso 3: Crear registros en Supabase de Social Hub (Feed y Story)
+      if (statusBox) {
+        statusBox.innerHTML = '🚀 <strong>Paso 3/3:</strong> Programando publicaciones en Social Hub...';
+      }
+
+      var postGroupId = 'grp_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7);
+      var nowIso = new Date().toISOString();
+      var nowObj = new Date();
+      var dateStr = nowIso.split('T')[0];
+      var hourStr = nowObj.getHours().toString().padStart(2, '0');
+      var minuteStr = nowObj.getMinutes().toString().padStart(2, '0');
+      var periodStr = nowObj.getHours() >= 12 ? 'PM' : 'AM';
+
+      // Registro 1: Post Feed (Facebook, Instagram, Threads, X)
+      var feedBundle = {
+        id: Math.random().toString(36).substr(2, 9),
+        media: postUploadUrl,
+        mediaUrls: [postUploadUrl],
+        mediaType: 'photo',
+        original_filename: 'TNIW_Post_' + (art.slug || 'art') + '.png',
+        post_group_id: postGroupId,
+        content: copyText,
+        platforms: [
+          { id: 'facebook', type: 'post', types: ['post'], options: { shareAsStory: false } },
+          { id: 'instagram', type: 'post', types: ['post'], options: { showInFeed: true, shareAsStory: false } },
+          { id: 'threads', type: 'post', types: ['post'], options: { whoCanReply: 'everyone' } },
+          { id: 'x', type: 'post', types: ['post'], options: { whoCanReply: 'everyone' } }
+        ],
+        mode: 'now',
+        status: 'published',
+        timestamp: { date: dateStr, hour: hourStr, minute: minuteStr, period: periodStr },
+        createdAt: nowIso
+      };
+
+      var recordFeed = {
+        brand_id: SOCIAL_HUB_CONFIG.brandId,
+        content: copyText,
+        media_url: postUploadUrl,
+        platforms: ['facebook', 'instagram', 'threads', 'x'],
+        platform_post_types: {
+          facebook: 'post',
+          instagram: 'post',
+          threads: 'post',
+          x: 'post'
+        },
+        payload: feedBundle,
+        scheduled_at: nowIso,
+        status: 'pending',
+        post_type: 'post'
+      };
+
+      // Registro 2: Story (Facebook, Instagram)
+      var storyBundle = {
+        id: Math.random().toString(36).substr(2, 9),
+        media: storyUploadUrl,
+        mediaUrls: [storyUploadUrl],
+        mediaType: 'photo',
+        original_filename: 'TNIW_Story_' + (art.slug || 'art') + '.png',
+        post_group_id: postGroupId,
+        content: copyText,
+        platforms: [
+          { id: 'facebook', type: 'story', types: ['story'], options: { shareAsStory: false } },
+          { id: 'instagram', type: 'story', types: ['story'], options: { showInFeed: false, shareAsStory: false } }
+        ],
+        mode: 'now',
+        status: 'published',
+        timestamp: { date: dateStr, hour: hourStr, minute: minuteStr, period: periodStr },
+        createdAt: nowIso
+      };
+
+      var recordStory = {
+        brand_id: SOCIAL_HUB_CONFIG.brandId,
+        content: copyText,
+        media_url: storyUploadUrl,
+        platforms: ['facebook', 'instagram'],
+        platform_post_types: {
+          facebook: 'story',
+          instagram: 'story'
+        },
+        payload: storyBundle,
+        scheduled_at: nowIso,
+        status: 'pending',
+        post_type: 'story'
+      };
+
+      var insertRes = await fetch(SOCIAL_HUB_CONFIG.supabase.url + '/rest/v1/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SOCIAL_HUB_CONFIG.supabase.serviceKey,
+          'Authorization': 'Bearer ' + SOCIAL_HUB_CONFIG.supabase.serviceKey,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify([recordFeed, recordStory])
+      });
+
+      if (!insertRes.ok) {
+        var errBody = await insertRes.text();
+        throw new Error('Error al guardar en Social Hub Supabase: ' + errBody);
+      }
+
+      // Finalización exitosa
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.style.background = 'linear-gradient(135deg, #059669 0%, #047857 100%)';
+        btn.innerHTML = '<span>✅</span> ¡PUBLICADO EN SOCIAL HUB!';
+      }
+
+      if (statusBox) {
+        statusBox.style.background = 'rgba(16,185,129,0.12)';
+        statusBox.style.border = '1px solid rgba(16,185,129,0.35)';
+        statusBox.style.color = '#6ee7b7';
+        statusBox.innerHTML = `
+          <div style="font-weight:800; font-size:12px; margin-bottom:4px; color:#fff;">
+            🎉 ¡Publicaciones enviadas con éxito a Social Hub!
+          </div>
+          <div>✓ <strong>Facebook & Instagram:</strong> Post Feed (1:1) e Historia (9:16) encolados.</div>
+          <div>✓ <strong>Threads & X (Twitter):</strong> Post (1:1) con copy y portada encolados.</div>
+          <div style="margin-top:6px; font-size:10.5px; color:#94a3b8;">
+            El motor de n8n / Social Hub las publicará automáticamente en tus redes en breves minutos.
+          </div>
+        `;
+      }
+
+      showToast('✓ ¡Enviado a Social Hub para publicación automática!');
+
+      setTimeout(function() {
+        if (btn) {
+          btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+          btn.innerHTML = '<span style="font-size:16px;">⚡</span> PUBLICAR AUTOMÁTICAMENTE';
+        }
+      }, 7000);
+
+    } catch(err) {
+      console.error('[Social Hub Publish Error]:', err);
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        btn.innerHTML = '<span>⚠️</span> REINTENTAR PUBLICACIÓN';
+      }
+      if (statusBox) {
+        statusBox.style.background = 'rgba(239,68,68,0.1)';
+        statusBox.style.border = '1px solid rgba(239,68,68,0.3)';
+        statusBox.style.color = '#fca5a5';
+        statusBox.innerHTML = '❌ <strong>Error al publicar:</strong> ' + escapeHtml(err.message || 'Error desconocido');
+      }
+      showToast('❌ Error: ' + (err.message || 'No se pudo comunicar con Social Hub'));
     }
   }
 </script>
