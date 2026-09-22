@@ -138,7 +138,7 @@ Título: "${title}"
 Detalles: "${desc || ''}"
 Fuente original: ${link || ''}`;
 
-      const meta = { title, source: source || 'Medios Indie', region: region || 'Iberoamérica', link: link || '#', image_url };
+      const meta = { title, source: source || 'Medios Indie', region: region || 'Iberoamérica', link: link || '#', image_url, desc };
       const article = await generateEditorialPiece(prompt, meta);
 
       const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/articles`, {
@@ -504,41 +504,115 @@ async function resolveRealArticleImage({ suppliedImg, articleUrl, artistName, ti
   return 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80';
 }
 
+// -----------------------------------------------------------------------------
+// EXTRACCIÓN DE CONTENIDO REAL DEL ARTÍCULO FUENTE (WEB SCRAPING)
+// -----------------------------------------------------------------------------
+async function fetchArticleBody(url) {
+  if (!url || !url.startsWith('http')) return '';
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8'
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return '';
+    const html = await res.text();
+
+    const cleaned = html
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<header[\s\S]*?<\/header>/gi, '')
+      .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+      .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+      .replace(/<aside[\s\S]*?<\/aside>/gi, '');
+
+    const pMatches = cleaned.match(/<p[^>]*>([\s\S]*?)<\/p>/gi) || [];
+    const valid = [];
+    const ignoreKeywords = [
+      'cookie', 'política de privacidad', 'derechos reservados', 'suscríbete', 'newsletter',
+      'outdated browser', 'upgrade your browser', 'googletag', 'publicidad', 'anuncio',
+      'posted in', 'comentarios', 'deja un comentario', 'site-header', 'custom-logo', 'more by',
+      'todos los derechos', 'términos y condiciones', 'aviso legal', 'compartir en', 'whatsapp'
+    ];
+
+    for (const rawP of pMatches) {
+      const text = rawP
+        .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&#8216;|&#8217;/g, "'")
+        .replace(/&#8220;|&#8221;/g, '"')
+        .replace(/&amp;/g, '&')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      if (text.length >= 45 && !ignoreKeywords.some(k => text.toLowerCase().includes(k)) && !/\S+@\S+\.\S+/.test(text)) {
+        valid.push(text);
+      }
+    }
+    return valid.slice(0, 8).join('\n\n');
+  } catch (e) {
+    return '';
+  }
+}
+
 async function generateEditorialPiece(promptContext, meta) {
   const GEMINI_KEY = process.env.GEMINI_API_KEY;
-  const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+  const GROQ_KEY = process.env.GROQ_API_KEY || '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';
   const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
-  const systemPrompt = `Eres redactor y curador editorial para la revista digital "The New Indie Wave" (TNIW).
-Tu misión es redactar una crónica o reseña de actualidad musical sobre la siguiente noticia de la escena indie de ${meta.region} (reportada originalmente por ${meta.source}).
+  // 1. Extraer el contenido real y hechos concretos de la fuente original
+  let scrapedBody = '';
+  if (meta.link && meta.link.startsWith('http')) {
+    scrapedBody = await fetchArticleBody(meta.link);
+  }
+  const cleanDesc = (meta.desc || '').replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+  const factualContext = scrapedBody && scrapedBody.length >= 80 ? scrapedBody : (cleanDesc || meta.title);
 
-DIRECTRICES EDITORIALES ESTRICTAS:
-1. PERIODISMO MUSICAL REAL Y NATURAL:
-   - Redacta en prosa periodística fluida, atractiva y orgánica (2 a 3 párrafos bien estructurados).
-   - PROHIBIDO USAR LISTAS DE "3 CLAVES PARA ENTENDER LA MOVIDA", VIÑETAS ARTIFICIALES O FÓRMULAS REPETITIVAS.
-   - PROHIBIDO ROTUNDAMENTE FABRICAR O INVENTAR CITAS O FRASES ATRIBUIDAS A RODRIGO DL MORAL. No inventes declaraciones ni uses blockquotes falsos.
-   - Párrafo 1: Noticia directa y gancho (qué pasó, qué banda o artista protagoniza la novedad, qué lanzaron o anunciaron).
-   - Párrafo 2: Contexto musical, sonido, estética de la propuesta, colaboraciones o relevancia para la escena de ${meta.region}.
-   - Párrafo 3: Conclusión o recomendación de escucha con el espíritu independiente de TNIW.
-2. ATRIBUCIÓN Y TRANSPARENCIA ÉTICA:
-   - Al final incluye el crédito de la fuente original:
+  const systemPrompt = `Eres redactor y periodista musical de la revista digital "The New Indie Wave" (TNIW).
+Tu misión es redactar un artículo periodístico completo, detallado y riguroso sobre la siguiente noticia de la escena de ${meta.region || 'Iberoamérica'} (reportada originalmente por ${meta.source}).
+
+REGLAS EDITORIALES OBLIGATORIAS:
+1. INFORMACIÓN CONCRETA Y DATOS DUROS (OBLIGATORIO):
+   - La nota DEBE informar de verdad: incluye fechas exactas, horarios, sedes/recintos específicos, nombres propios de artistas, bandas, festivales, sellos discográficos, expositores o tiendas involucradas.
+   - Párrafo 1: Noticia directa con los hechos esenciales (qué acontecimiento es, cuándo sucede y dónde con datos específicos).
+   - Párrafo 2: Detalles concretos y desarrollo (actividades, participantes, lanzamientos, canciones, colaboradores o peculiaridades).
+   - Párrafo 3: Contexto musical y relevancia cultural para la escena independiente desde el criterio editorial de TNIW.
+2. PROHIBIDO TOTALMENTE EL RELLENO GENÉRICO / CORPORATIVO:
+   - PROHIBIDO usar fórmulas vacías como "El pulso de la música independiente suma una nueva noticia...", "Un acontecimiento relevante que reafirma el dinamismo...", "En The New Indie Wave seguimos de cerca el impacto...", o "marcan la pauta en los circuitos autogestivos".
+   - PROHIBIDO inventar citas o blockquotes falsos atribuidos a Rodrigo dL Moral.
+   - Redacta periodismo musical real, orgánico, ágil y apasionado, como una revista musical moderna de primer nivel.
+3. ATRIBUCIÓN TRANSPARENTE:
+   - Al final del contenido incluye el pie de página de atribución:
      <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">Fuente original: <a href="${meta.link}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${meta.source} ↗</a> · Foto: Vía ${meta.source} / Prensa oficial</div>
-3. FORMATO JSON OBLIGATORIO:
+4. FORMATO JSON OBLIGATORIO:
 Responde ÚNICAMENTE un JSON válido con esta estructura:
 {
-  "title": "Titular periodístico atractivo y natural (máximo 12 palabras)",
+  "title": "Titular periodístico informativo y atractivo (máximo 12 palabras)",
   "slug": "slug-limpio-en-minusculas-con-guiones",
-  "summary": "Resumen directo de la noticia en 2 oraciones (máximo 35 palabras)",
-  "content": "Cuerpo completo del artículo en HTML limpio con párrafos <p> y <div class=\"source-credit\"> sin listas forzadas ni citas inventadas",
+  "summary": "Resumen directo con datos esenciales (fechas, lugar, hecho principal, máximo 35 palabras)",
+  "content": "Cuerpo completo del artículo en HTML limpio con 3 párrafos <p> informativos y el bloque <div class=\\"source-credit\\">",
   "photo_credit": "Vía ${meta.source} / Prensa oficial",
   "category": "Cultura Indie",
   "read_time": "1.5 min",
-  "tags": ["${meta.region}", "Música Indie", "Lanzamiento", "TNIW"],
+  "tags": ["${meta.region || 'Música Indie'}", "Música Indie", "Lanzamiento", "TNIW"],
   "artist_name": "Nombre exacto de la banda o artista principal (ej. Editors, Clubz, Carolina Durante). Si no aplica, dejar vacío."
 }`;
 
+  const userPrompt = `Noticia: "${meta.title}"
+Fuente: ${meta.source} (${meta.link})
+Región: ${meta.region || 'Iberoamérica'}
+
+HECHOS Y CONTENIDO EXTRAÍDO DE LA FUENTE:
+${factualContext}`;
+
   if (GROQ_KEY) {
-    const groqModels = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b'];
+    const groqModels = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
     for (const modelName of groqModels) {
       try {
         const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -551,11 +625,11 @@ Responde ÚNICAMENTE un JSON válido con esta estructura:
             model: modelName,
             messages: [
               { role: 'system', content: systemPrompt },
-              { role: 'user', content: promptContext }
+              { role: 'user', content: userPrompt }
             ],
             response_format: { type: "json_object" },
-            temperature: 0.6,
-            max_tokens: 1200
+            temperature: 0.4,
+            max_tokens: 1400
           })
         });
         if (res.ok) {
@@ -573,63 +647,69 @@ Responde ÚNICAMENTE un JSON válido con esta estructura:
   }
 
   if (GEMINI_KEY) {
-    try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${promptContext}` }] }],
-          generationConfig: { responseMimeType: "application/json" }
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (rawJson) {
-          const parsed = JSON.parse(rawJson.replace(/```json/g, '').replace(/```/g, '').trim());
-          return await buildArticleObject(parsed, meta);
+    const geminiModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+    for (const gModel of geminiModels) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${gModel}:generateContent?key=${GEMINI_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+            generationConfig: { responseMimeType: "application/json" }
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (rawJson) {
+            const parsed = JSON.parse(rawJson.replace(/```json/g, '').replace(/```/g, '').trim());
+            return await buildArticleObject(parsed, meta);
+          }
         }
-      }
-    } catch(e) {}
+      } catch(e) {}
+    }
   }
 
-  // Fallback autónomo: Redacción periodística orgánica y natural
+  // Fallback autónomo inteligente (basado en hechos reales extraídos, JAMÁS relleno vacío)
   const realImg = await resolveRealArticleImage({
     suppliedImg: meta.image_url,
     articleUrl: meta.link,
     title: meta.title
   });
 
-  const slug = `radar-${slugify(meta.region)}-${slugify(meta.title)}-${Date.now().toString().slice(-4)}`;
-  const cleanDesc = (meta.desc || '').replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
-  const summaryText = cleanDesc.length > 25
-    ? (cleanDesc.slice(0, 160) + (cleanDesc.length > 160 ? '...' : ''))
-    : `Novedades en la escena independiente de ${meta.region}: ${meta.title}. Cobertura vía ${meta.source}.`;
+  const slug = `radar-${slugify(meta.region || 'indie')}-${slugify(meta.title)}-${Date.now().toString().slice(-4)}`;
+  const rawParagraphs = factualContext.split('\n\n').filter(p => p.trim().length > 35);
+  const summaryText = rawParagraphs[0]
+    ? (rawParagraphs[0].length > 160 ? rawParagraphs[0].slice(0, 157) + '...' : rawParagraphs[0])
+    : `${meta.title}. Novedades en la escena de ${meta.region || 'Iberoamérica'}.`;
 
   const photoCredit = `Vía ${meta.source} / Prensa oficial`;
+
+  let synthesizedHtml = '';
+  if (rawParagraphs.length >= 2) {
+    synthesizedHtml = rawParagraphs.slice(0, 3).map(p => `<p>${escapeHtml(p)}</p>`).join('\n');
+  } else {
+    synthesizedHtml = `<p>${escapeHtml(factualContext)}</p>`;
+  }
+
+  synthesizedHtml += `
+    <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">
+      Fuente original: <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${escapeHtml(meta.source)} ↗</a> · Foto: ${photoCredit}
+    </div>
+  `;
 
   return {
     slug,
     title: meta.title.length > 80 ? meta.title.slice(0, 77) + '...' : meta.title,
     summary: summaryText,
-    content: `
-      <p class="lead">El pulso de la música independiente en <strong>${escapeHtml(meta.region)}</strong> suma una nueva noticia destacada de la mano de <strong>${escapeHtml(meta.source)}</strong>: <strong>${escapeHtml(meta.title)}</strong>.</p>
-      
-      <p>${escapeHtml(cleanDesc || 'Un acontecimiento relevante que reafirma el dinamismo y la constante evolución de las propuestas sonoras que marcan la pauta en los circuitos autogestivos de la región.')}</p>
-
-      <p>En <strong>The New Indie Wave</strong> seguimos de cerca el impacto de este tipo de anuncios y lanzamientos, manteniendo el compromiso de conectar a nuestra comunidad con la música que desafía los estándares comerciales.</p>
-
-      <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">
-        Fuente original: <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${escapeHtml(meta.source)} ↗</a> · Foto: ${photoCredit}
-      </div>
-    `,
+    content: synthesizedHtml,
     category: 'Cultura Indie',
     author: 'Rodrigo dL Moral',
     author_role: 'Curador & Fundador TNIW',
     author_avatar: 'rodrigo_studio_web.jpg',
     image_url: realImg,
     read_time: '1.5 min',
-    tags: [meta.region, 'Música Indie', 'Radar TNIW'],
+    tags: [meta.region || 'Indie', 'Música Indie', 'Radar TNIW'],
     featured: false,
     published: true,
     published_at: new Date().toISOString()

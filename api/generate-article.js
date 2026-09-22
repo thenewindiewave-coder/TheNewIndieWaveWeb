@@ -45,7 +45,7 @@ export default async function handler(req, res) {
       const cleanNotes = (notes || '').replace(/\[WA:\s*[^\]]+\]\s*/gi, '').replace(/\[WhatsApp:\s*[^\]]+\]\s*/gi, '').trim();
 
       const GEMINI_KEY = process.env.GEMINI_API_KEY;
-      const GROQ_KEY = process.env.GROQ_API_KEY;
+      const GROQ_KEY = process.env.GROQ_API_KEY || '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';
       const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
       const systemPrompt = `Eres Rodrigo dL Moral, curador editorial y fundador de la plataforma musical "The New Indie Wave" (TNIW).
@@ -90,7 +90,7 @@ REGLAS CRÍTICAS:
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
             body: JSON.stringify({
-              model: 'llama-3.3-70b-versatile',
+              model: 'openai/gpt-oss-120b',
               messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
               temperature: 0.85,
               max_tokens: 300
@@ -531,7 +531,7 @@ async function fetchLiveWebFacts(query) {
 }
 
 async function generateArticleWithAI({ topic, category, auto_publish, liveFacts = [] }) {
-  const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+  const GROQ_KEY = process.env.GROQ_API_KEY || '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';
   const GEMINI_KEY = process.env.GEMINI_API_KEY;
   const OPENAI_KEY = process.env.OPENAI_API_KEY;
 

@@ -9,7 +9,7 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8942664442:AAEDXBe
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '5821470884';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.supabase.co';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
-const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+const GROQ_KEY = process.env.GROQ_API_KEY || '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';
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 export default async function handler(req, res) {
@@ -387,37 +387,113 @@ async function resolveRealArticleImage({ suppliedImg, articleUrl, artistName, ti
 }
 
 // -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// EXTRACCIÓN DE CONTENIDO REAL DEL ARTÍCULO FUENTE (WEB SCRAPING)
+// -----------------------------------------------------------------------------
+async function fetchArticleBody(url) {
+  if (!url || !url.startsWith('http')) return '';
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8'
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return '';
+    const html = await res.text();
+
+    const cleaned = html
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<header[\s\S]*?<\/header>/gi, '')
+      .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+      .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+      .replace(/<aside[\s\S]*?<\/aside>/gi, '');
+
+    const pMatches = cleaned.match(/<p[^>]*>([\s\S]*?)<\/p>/gi) || [];
+    const valid = [];
+    const ignoreKeywords = [
+      'cookie', 'política de privacidad', 'derechos reservados', 'suscríbete', 'newsletter',
+      'outdated browser', 'upgrade your browser', 'googletag', 'publicidad', 'anuncio',
+      'posted in', 'comentarios', 'deja un comentario', 'site-header', 'custom-logo', 'more by',
+      'todos los derechos', 'términos y condiciones', 'aviso legal', 'compartir en', 'whatsapp'
+    ];
+
+    for (const rawP of pMatches) {
+      const text = rawP
+        .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&#8216;|&#8217;/g, "'")
+        .replace(/&#8220;|&#8221;/g, '"')
+        .replace(/&amp;/g, '&')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      if (text.length >= 45 && !ignoreKeywords.some(k => text.toLowerCase().includes(k)) && !/\S+@\S+\.\S+/.test(text)) {
+        valid.push(text);
+      }
+    }
+    return valid.slice(0, 8).join('\n\n');
+  } catch (e) {
+    return '';
+  }
+}
+
+// -----------------------------------------------------------------------------
 // GENERADOR PERIODÍSTICO EDITORIAL
 // -----------------------------------------------------------------------------
 async function generateArticleJournalism(meta) {
-  const systemPrompt = `Eres redactor y curador editorial para la revista digital "The New Indie Wave" (TNIW).
-Tu misión es redactar una crónica o reseña de actualidad musical sobre la siguiente noticia de la escena indie de ${meta.region || 'México'} (reportada originalmente por ${meta.source}).
+  // 1. Extraer el contenido real y hechos concretos de la fuente original
+  let scrapedBody = '';
+  if (meta.link && meta.link.startsWith('http')) {
+    scrapedBody = await fetchArticleBody(meta.link);
+  }
+  const cleanDesc = (meta.desc || '').replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+  const factualContext = scrapedBody && scrapedBody.length >= 80 ? scrapedBody : (cleanDesc || meta.title);
 
-DIRECTRICES EDITORIALES ESTRICTAS:
-1. PERIODISMO MUSICAL REAL Y NATURAL:
-   - Redacta en prosa periodística fluida, atractiva y orgánica (2 a 3 párrafos bien estructurados).
-   - PROHIBIDO USAR LISTAS DE "3 CLAVES PARA ENTENDER LA MOVIDA", VIÑETAS ARTIFICIALES O FÓRMULAS REPETITIVAS.
-   - PROHIBIDO ROTUNDAMENTE FABRICAR O INVENTAR CITAS O FRASES ATRIBUIDAS A RODRIGO DL MORAL. No inventes declaraciones ni uses blockquotes falsos.
-   - Párrafo 1: Noticia directa y gancho (qué pasó, qué banda o artista protagoniza la novedad, qué lanzaron o anunciaron).
-   - Párrafo 2: Contexto musical, sonido, estética de la propuesta, colaboraciones o relevancia para la escena de ${meta.region}.
-   - Párrafo 3: Conclusión o recomendación de escucha con el espíritu independiente de TNIW.
-2. ATRIBUCIÓN Y TRANSPARENCIA ÉTICA:
-   - Al final incluye el crédito de la fuente original:
+  const systemPrompt = `Eres redactor y periodista musical de la revista digital "The New Indie Wave" (TNIW).
+Tu misión es redactar un artículo periodístico completo, detallado y riguroso sobre la siguiente noticia de la escena de ${meta.region || 'México'} (reportada originalmente por ${meta.source}).
+
+REGLAS EDITORIALES OBLIGATORIAS:
+1. INFORMACIÓN CONCRETA Y DATOS DUROS (OBLIGATORIO):
+   - La nota DEBE informar de verdad: incluye fechas exactas, horarios, sedes/recintos específicos, nombres propios de artistas, bandas, festivales, sellos discográficos, expositores o tiendas involucradas.
+   - Párrafo 1: Noticia directa con los hechos esenciales (qué acontecimiento es, cuándo sucede y dónde con datos específicos).
+   - Párrafo 2: Detalles concretos y desarrollo (actividades, participantes, lanzamientos, canciones, colaboradores o peculiaridades).
+   - Párrafo 3: Contexto musical y relevancia cultural para la escena independiente desde el criterio editorial de TNIW.
+2. PROHIBIDO TOTALMENTE EL RELLENO GENÉRICO / CORPORATIVO:
+   - PROHIBIDO usar fórmulas vacías como "El pulso de la música independiente suma una nueva noticia...", "Un acontecimiento relevante que reafirma el dinamismo...", "En The New Indie Wave seguimos de cerca el impacto...", o "marcan la pauta en los circuitos autogestivos".
+   - PROHIBIDO inventar citas o blockquotes falsos atribuidos a Rodrigo dL Moral.
+   - Redacta periodismo musical real, orgánico, ágil y apasionado, como una revista musical moderna de primer nivel.
+3. ATRIBUCIÓN TRANSPARENTE:
+   - Al final del contenido incluye el pie de página de atribución:
      <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">Fuente original: <a href="${meta.link}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${meta.source} ↗</a> · Foto: Vía ${meta.source} / Prensa oficial</div>
-3. FORMATO JSON OBLIGATORIO:
+4. FORMATO JSON OBLIGATORIO:
 Responde ÚNICAMENTE un JSON válido con esta estructura:
 {
-  "title": "Titular periodístico atractivo y natural (máximo 12 palabras)",
-  "summary": "Resumen directo de la noticia en 2 oraciones (máximo 35 palabras)",
-  "content": "Cuerpo completo del artículo en HTML limpio con párrafos <p> y <div class=\"source-credit\"> sin listas forzadas ni citas inventadas",
-  "artist_name": "Nombre exacto de la banda o artista principal (ej. Beach House, Jessica Simpson, Interpol). Si no aplica, dejar vacío."
+  "title": "Titular periodístico informativo y atractivo (máximo 12 palabras)",
+  "summary": "Resumen directo con datos esenciales (fechas, lugar, hecho principal, máximo 35 palabras)",
+  "content": "Cuerpo completo del artículo en HTML limpio con 3 párrafos <p> informativos y el bloque <div class=\\"source-credit\\">",
+  "artist_name": "Nombre exacto del artista, banda o colectivo principal. Si no aplica, dejar vacío."
 }`;
+
+  const userPrompt = `Noticia: "${meta.title}"
+Fuente: ${meta.source} (${meta.link})
+Región: ${meta.region || 'México'}
+
+HECHOS Y CONTENIDO EXTRAÍDO DE LA FUENTE:
+${factualContext}`;
 
   let parsedArtistName = null;
   let articleResult = null;
 
+  // Intentar con Groq
   if (GROQ_KEY) {
-    const groqModels = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b'];
+    const groqModels = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
     for (const model of groqModels) {
       try {
         const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -427,11 +503,11 @@ Responde ÚNICAMENTE un JSON válido con esta estructura:
             model,
             messages: [
               { role: 'system', content: systemPrompt },
-              { role: 'user', content: `Título: "${meta.title}". Detalles: "${meta.desc}". Fuente: ${meta.source} (${meta.link})` }
+              { role: 'user', content: userPrompt }
             ],
             response_format: { type: "json_object" },
-            temperature: 0.6,
-            max_tokens: 1200
+            temperature: 0.4,
+            max_tokens: 1400
           })
         });
         if (res.ok) {
@@ -440,7 +516,7 @@ Responde ÚNICAMENTE un JSON válido con esta estructura:
           if (raw) {
             const parsed = JSON.parse(raw.replace(/```json/g, '').replace(/```/g, '').trim());
             parsedArtistName = parsed.artist_name || null;
-            let bodyHtml = parsed.content || `<p>${escapeHtml(meta.desc)}</p>`;
+            let bodyHtml = parsed.content || `<p>${escapeHtml(factualContext.slice(0, 400))}</p>`;
             if (!bodyHtml.includes('source-credit')) {
               bodyHtml += `
                 <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">
@@ -450,7 +526,7 @@ Responde ÚNICAMENTE un JSON válido con esta estructura:
             }
             articleResult = {
               title: parsed.title || meta.title,
-              summary: parsed.summary || meta.desc.slice(0, 160),
+              summary: parsed.summary || cleanDesc.slice(0, 160),
               content: bodyHtml
             };
             break;
@@ -460,27 +536,69 @@ Responde ÚNICAMENTE un JSON válido con esta estructura:
     }
   }
 
-  // Fallback orgánico si no hay conexión de IA
+  // Intentar con Gemini si Groq no respondió
+  if (!articleResult && GEMINI_KEY) {
+    const geminiModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+    for (const gModel of geminiModels) {
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${gModel}:generateContent?key=${GEMINI_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+            generationConfig: { responseMimeType: "application/json" }
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (raw) {
+            const parsed = JSON.parse(raw.replace(/```json/g, '').replace(/```/g, '').trim());
+            parsedArtistName = parsed.artist_name || null;
+            let bodyHtml = parsed.content || `<p>${escapeHtml(factualContext.slice(0, 400))}</p>`;
+            if (!bodyHtml.includes('source-credit')) {
+              bodyHtml += `
+                <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">
+                  Fuente original: <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${escapeHtml(meta.source)} ↗</a> · Foto: Vía ${escapeHtml(meta.source)} / Prensa oficial
+                </div>
+              `;
+            }
+            articleResult = {
+              title: parsed.title || meta.title,
+              summary: parsed.summary || cleanDesc.slice(0, 160),
+              content: bodyHtml
+            };
+            break;
+          }
+        }
+      } catch (e) {}
+    }
+  }
+
+  // Fallback autónomo inteligente (basado en hechos reales extraídos, JAMÁS relleno vacío)
   if (!articleResult) {
-    const cleanDesc = (meta.desc || '').replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
-    const summaryText = cleanDesc.length > 25
-      ? (cleanDesc.slice(0, 160) + (cleanDesc.length > 160 ? '...' : ''))
-      : `Novedades en la escena independiente de ${meta.region || 'México'}: ${meta.title}. Cobertura vía ${meta.source}.`;
+    const rawParagraphs = factualContext.split('\n\n').filter(p => p.trim().length > 35);
+    const summaryText = rawParagraphs[0]
+      ? (rawParagraphs[0].length > 160 ? rawParagraphs[0].slice(0, 157) + '...' : rawParagraphs[0])
+      : `${meta.title}. Novedades en la escena de ${meta.region || 'México'}.`;
+
+    let synthesizedHtml = '';
+    if (rawParagraphs.length >= 2) {
+      synthesizedHtml = rawParagraphs.slice(0, 3).map(p => `<p>${escapeHtml(p)}</p>`).join('\n');
+    } else {
+      synthesizedHtml = `<p>${escapeHtml(factualContext)}</p>`;
+    }
+
+    synthesizedHtml += `
+      <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">
+        Fuente original: <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${escapeHtml(meta.source)} ↗</a> · Foto: Vía ${escapeHtml(meta.source)} / Prensa oficial
+      </div>
+    `;
 
     articleResult = {
       title: meta.title.length > 80 ? meta.title.slice(0, 77) + '...' : meta.title,
       summary: summaryText,
-      content: `
-        <p class="lead">El pulso de la música independiente en <strong>${escapeHtml(meta.region || 'México')}</strong> suma una nueva noticia destacada de la mano de <strong>${escapeHtml(meta.source)}</strong>: <strong>${escapeHtml(meta.title)}</strong>.</p>
-        
-        <p>${escapeHtml(cleanDesc || 'Un acontecimiento relevante que reafirma el dinamismo y la constante evolución de las propuestas sonoras que marcan la pauta en los circuitos autogestivos de la región.')}</p>
-
-        <p>En <strong>The New Indie Wave</strong> seguimos de cerca el impacto de este tipo de anuncios y lanzamientos, manteniendo el compromiso de conectar a nuestra comunidad con la música que desafía los estándares comerciales.</p>
-
-        <div class="source-credit" style="font-family:var(--font-mono); font-size:11.5px; color:#94a3b8; border-left:3px solid var(--accent-cyan); padding:10px 14px; margin-top:24px; background:rgba(255,255,255,0.03); border-radius:0 6px 6px 0;">
-          Fuente original: <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-lime); font-weight:700; text-decoration:none;">${escapeHtml(meta.source)} ↗</a> · Foto: Vía ${escapeHtml(meta.source)} / Prensa oficial
-        </div>
-      `
+      content: synthesizedHtml
     };
   }
 
