@@ -1165,22 +1165,30 @@
       </div>
 
       <!-- METRIC CHIPS -->
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.06);">
-        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:12px 16px;">
-          <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-dim); text-transform:uppercase;">Total en Base de Datos</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.06);">
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:12px 14px;">
+          <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-dim); text-transform:uppercase;">Total Base de Datos</div>
           <div id="bmTotalCount" style="font-family:var(--font-heading); font-size:22px; font-weight:900; color:#fff; margin-top:2px;">--</div>
         </div>
-        <div style="background:rgba(187,244,81,0.04); border:1px solid rgba(187,244,81,0.15); border-radius:6px; padding:12px 16px;">
+        <div style="background:rgba(56,189,248,0.04); border:1px solid rgba(56,189,248,0.25); border-radius:6px; padding:12px 14px;">
+          <div style="font-family:var(--font-mono); font-size:10px; color:var(--accent-cyan); text-transform:uppercase;">📰 Noticias</div>
+          <div id="bmNewsCount" style="font-family:var(--font-heading); font-size:22px; font-weight:900; color:var(--accent-cyan); margin-top:2px;">--</div>
+        </div>
+        <div style="background:rgba(187,244,81,0.04); border:1px solid rgba(187,244,81,0.25); border-radius:6px; padding:12px 14px;">
+          <div style="font-family:var(--font-mono); font-size:10px; color:var(--accent-lime); text-transform:uppercase;">🎯 Descubrimientos Radar</div>
+          <div id="bmRadarCount" style="font-family:var(--font-heading); font-size:22px; font-weight:900; color:var(--accent-lime); margin-top:2px;">--</div>
+        </div>
+        <div style="background:rgba(187,244,81,0.04); border:1px solid rgba(187,244,81,0.15); border-radius:6px; padding:12px 14px;">
           <div style="font-family:var(--font-mono); font-size:10px; color:var(--accent-lime); text-transform:uppercase;">Publicadas en Vivo</div>
           <div id="bmPublishedCount" style="font-family:var(--font-heading); font-size:22px; font-weight:900; color:var(--accent-lime); margin-top:2px;">--</div>
         </div>
-        <div style="background:rgba(245,158,11,0.04); border:1px solid rgba(245,158,11,0.15); border-radius:6px; padding:12px 16px;">
-          <div style="font-family:var(--font-mono); font-size:10px; color:#f59e0b; text-transform:uppercase;">Archivadas (URL Permanente)</div>
+        <div style="background:rgba(245,158,11,0.04); border:1px solid rgba(245,158,11,0.15); border-radius:6px; padding:12px 14px;">
+          <div style="font-family:var(--font-mono); font-size:10px; color:#f59e0b; text-transform:uppercase;">Archivadas</div>
           <div id="bmArchivedCount" style="font-family:var(--font-heading); font-size:22px; font-weight:900; color:#f59e0b; margin-top:2px;">--</div>
         </div>
-        <div style="background:rgba(56,189,248,0.04); border:1px solid rgba(56,189,248,0.15); border-radius:6px; padding:12px 16px;">
-          <div style="font-family:var(--font-mono); font-size:10px; color:var(--accent-cyan); text-transform:uppercase;">Cover Story Actual</div>
-          <div id="bmFeaturedTitle" style="font-family:var(--font-heading); font-size:13px; font-weight:800; color:#fff; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="--">--</div>
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:12px 14px;">
+          <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-muted); text-transform:uppercase;">Cover Story Actual</div>
+          <div id="bmFeaturedTitle" style="font-family:var(--font-heading); font-size:12.5px; font-weight:800; color:#fff; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="--">--</div>
         </div>
       </div>
     </div>
@@ -1287,14 +1295,43 @@
     </div>
 
     <!-- FILTERS AND SEARCH TOOLBAR -->
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
-      <div style="display:flex; gap:8px;" id="bmFilterButtons">
-        <button id="bmFilterAll" onclick="filterBlogManager('all')" class="chip-btn active" style="font-family:var(--font-mono); font-size:11px; padding:6px 14px; border-radius:4px; cursor:pointer;">Todas</button>
-        <button id="bmFilterPub" onclick="filterBlogManager('published')" class="chip-btn" style="font-family:var(--font-mono); font-size:11px; padding:6px 14px; border-radius:4px; cursor:pointer;">En Vivo</button>
-        <button id="bmFilterArch" onclick="filterBlogManager('archived')" class="chip-btn" style="font-family:var(--font-mono); font-size:11px; padding:6px 14px; border-radius:4px; cursor:pointer;">Archivadas</button>
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin-bottom:20px; display:flex; flex-direction:column; gap:12px;">
+      <!-- FILA 1: TIPO DE PUBLICACIÓN (NOTICIAS VS DESCUBRIMIENTOS RADAR) -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;" id="bmTypeButtons">
+          <span style="font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-right:4px;">
+            Categoría:
+          </span>
+          <button id="bmTypeAll" onclick="setBlogManagerType('all')" class="chip-btn active" style="font-family:var(--font-mono); font-size:11.5px; padding:7px 15px; border-radius:6px; cursor:pointer; font-weight:700;">
+            📑 Todas (<span id="bmCountTypeAll">--</span>)
+          </button>
+          <button id="bmTypeNews" onclick="setBlogManagerType('news')" class="chip-btn" style="font-family:var(--font-mono); font-size:11.5px; padding:7px 15px; border-radius:6px; cursor:pointer; font-weight:700;">
+            📰 Noticias Musicales (<span id="bmCountTypeNews">--</span>)
+          </button>
+          <button id="bmTypeRadar" onclick="setBlogManagerType('radar')" class="chip-btn" style="font-family:var(--font-mono); font-size:11.5px; padding:7px 15px; border-radius:6px; cursor:pointer; font-weight:700;">
+            🎯 Descubrimientos Radar (<span id="bmCountTypeRadar">--</span>)
+          </button>
+        </div>
+
+        <div style="flex:1; max-width:380px; min-width:240px;">
+          <input type="text" id="bmSearchInput" oninput="renderBlogManagerList()" placeholder="🔍 Buscar por título, artista o tag..." style="width:100%; background:#121215; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:8px 14px; border-radius:6px; font-family:var(--font-mono); font-size:12px; outline:none; box-sizing:border-box;">
+        </div>
       </div>
-      <div style="flex:1; max-width:400px;">
-        <input type="text" id="bmSearchInput" oninput="renderBlogManagerList()" placeholder="🔍 Buscar por título, categoría, artista o tag..." style="width:100%; background:var(--bg-card); border:1px solid var(--border); color:#fff; padding:8px 14px; border-radius:6px; font-family:var(--font-mono); font-size:12px; outline:none;">
+
+      <!-- FILA 2: SUB-FILTRO DE ESTADO (EN VIVO / ARCHIVADAS) -->
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.08);">
+        <span style="font-family:var(--font-mono); font-size:10.5px; color:var(--text-dim); text-transform:uppercase; margin-right:4px;">
+          Estado:
+        </span>
+        <button id="bmFilterAll" onclick="filterBlogManager('all')" class="chip-btn active" style="font-family:var(--font-mono); font-size:11px; padding:5px 12px; border-radius:4px; cursor:pointer;">
+          Todo Estado
+        </button>
+        <button id="bmFilterPub" onclick="filterBlogManager('published')" class="chip-btn" style="font-family:var(--font-mono); font-size:11px; padding:5px 12px; border-radius:4px; cursor:pointer;">
+          ● En Vivo (<span id="bmCountSubPub">--</span>)
+        </button>
+        <button id="bmFilterArch" onclick="filterBlogManager('archived')" class="chip-btn" style="font-family:var(--font-mono); font-size:11px; padding:5px 12px; border-radius:4px; cursor:pointer;">
+          ○ Archivadas (<span id="bmCountSubArch">--</span>)
+        </button>
       </div>
     </div>
 
@@ -6975,13 +7012,58 @@ ${playlistUrl}`;
   // GESTIÓN DE NOTICIAS & BLOG EDITORIAL (SUPABASE)
   // ==========================================
   var blogManagerArticles = [];
-  var currentBmFilter = 'all';
+  var currentBmFilter = 'all'; // 'all' | 'published' | 'archived'
+  var currentBmType = 'all'; // 'all' | 'news' | 'radar'
   var editingArticleSlug = null;
+
+  function isRadarDiscovery(art) {
+    if (!art) return false;
+    var cat = (art.category || '').toLowerCase().trim();
+    var title = (art.title || '').toLowerCase().trim();
+    var slug = (art.slug || '').toLowerCase().trim();
+    return cat === 'artistas en el radar' || 
+           title.startsWith('descubrimiento radar') || 
+           slug.startsWith('radar-tniw-');
+  }
+
+  function setBlogManagerType(type) {
+    currentBmType = type;
+    ['bmTypeAll', 'bmTypeNews', 'bmTypeRadar'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+    });
+    if (type === 'all') {
+      var b = document.getElementById('bmTypeAll'); if (b) b.classList.add('active');
+    } else if (type === 'news') {
+      var b = document.getElementById('bmTypeNews'); if (b) b.classList.add('active');
+    } else if (type === 'radar') {
+      var b = document.getElementById('bmTypeRadar'); if (b) b.classList.add('active');
+    }
+    updateBlogSubFilterCounters();
+    renderBlogManagerList();
+  }
+
+  function updateBlogSubFilterCounters() {
+    var basePool = blogManagerArticles.filter(function(art) {
+      var isRadar = isRadarDiscovery(art);
+      if (currentBmType === 'news' && isRadar) return false;
+      if (currentBmType === 'radar' && !isRadar) return false;
+      return true;
+    });
+
+    var subPub = basePool.filter(function(a){ return a.published !== false; }).length;
+    var subArch = basePool.length - subPub;
+
+    var elPub = document.getElementById('bmCountSubPub');
+    if (elPub) elPub.textContent = subPub;
+    var elArch = document.getElementById('bmCountSubArch');
+    if (elArch) elArch.textContent = subArch;
+  }
 
   async function loadBlogManagerArticles() {
     var listContainer = document.getElementById('blogManagerList');
     if (listContainer) {
-      listContainer.innerHTML = '<div class="empty-box" style="padding:40px; text-align:center;"><div style="font-size:24px; margin-bottom:8px;">⏳</div><div>Cargando noticias y artículos desde Supabase...</div></div>';
+      listContainer.innerHTML = '<div class="empty-box" style="padding:40px; text-align:center;"><div style="font-size:24px; margin-bottom:8px;">⏳</div><div>Cargando noticias y descubrimientos radar desde Supabase...</div></div>';
     }
 
     try {
@@ -7003,13 +7085,27 @@ ${playlistUrl}`;
       var published = blogManagerArticles.filter(function(a){ return a.published !== false; }).length;
       var archived = total - published;
       var featuredArt = blogManagerArticles.find(function(a){ return a.featured === true; });
+      var radarCount = blogManagerArticles.filter(isRadarDiscovery).length;
+      var newsCount = total - radarCount;
 
       var totalEl = document.getElementById('bmTotalCount');
       if (totalEl) totalEl.textContent = total;
+      var newsEl = document.getElementById('bmNewsCount');
+      if (newsEl) newsEl.textContent = newsCount;
+      var radarEl = document.getElementById('bmRadarCount');
+      if (radarEl) radarEl.textContent = radarCount;
       var pubEl = document.getElementById('bmPublishedCount');
       if (pubEl) pubEl.textContent = published;
       var archEl = document.getElementById('bmArchivedCount');
       if (archEl) archEl.textContent = archived;
+
+      var typeAllEl = document.getElementById('bmCountTypeAll');
+      if (typeAllEl) typeAllEl.textContent = total;
+      var typeNewsEl = document.getElementById('bmCountTypeNews');
+      if (typeNewsEl) typeNewsEl.textContent = newsCount;
+      var typeRadarEl = document.getElementById('bmCountTypeRadar');
+      if (typeRadarEl) typeRadarEl.textContent = radarCount;
+
       var featEl = document.getElementById('bmFeaturedTitle');
       if (featEl) {
         if (featuredArt) {
@@ -7023,6 +7119,7 @@ ${playlistUrl}`;
         }
       }
 
+      updateBlogSubFilterCounters();
       renderBlogManagerList();
     } catch(err) {
       console.error('Error al cargar artículos en Blog Manager:', err);
@@ -7062,10 +7159,18 @@ ${playlistUrl}`;
     var searchVal = (document.getElementById('bmSearchInput') ? document.getElementById('bmSearchInput').value : '').toLowerCase().trim();
 
     var filtered = blogManagerArticles.filter(function(art) {
+      var isRadar = isRadarDiscovery(art);
+
+      // 1. Filtro por Tipo de Contenido
+      if (currentBmType === 'news' && isRadar) return false;
+      if (currentBmType === 'radar' && !isRadar) return false;
+
+      // 2. Filtro por Estado
       var isPub = art.published !== false;
       if (currentBmFilter === 'published' && !isPub) return false;
       if (currentBmFilter === 'archived' && isPub) return false;
 
+      // 3. Filtro por Búsqueda
       if (searchVal) {
         var matchTitle = (art.title || '').toLowerCase().includes(searchVal);
         var matchCategory = (art.category || '').toLowerCase().includes(searchVal);
@@ -7077,11 +7182,18 @@ ${playlistUrl}`;
     });
 
     if (filtered.length === 0) {
+      var emptyMsg = 'No hay notas que coincidan con los filtros actuales.';
+      if (currentBmType === 'radar') {
+        emptyMsg = 'No se encontraron notas de Descubrimiento Radar bajo este estado. Recuerda que se generan automáticamente al aceptar tracks en la cola de envíos.';
+      } else if (currentBmType === 'news') {
+        emptyMsg = 'No se encontraron Noticias bajo este estado.';
+      }
+
       container.innerHTML = `
         <div class="empty-box" style="padding:40px; text-align:center;">
-          <div style="font-size:24px; margin-bottom:8px;">📰</div>
+          <div style="font-size:24px; margin-bottom:8px;">${currentBmType === 'radar' ? '🎯' : '📰'}</div>
           <div style="color:#fff; font-weight:700; margin-bottom:4px;">No se encontraron artículos</div>
-          <div style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">No hay notas que coincidan con los filtros actuales.</div>
+          <div style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">${emptyMsg}</div>
           <button onclick="openManualArticleModal()" class="btn-refresh" style="background:rgba(187,244,81,0.15); color:var(--accent-lime); border-color:var(--accent-lime); cursor:pointer;">
             ➕ Redactar Nueva Nota
           </button>
@@ -7094,6 +7206,7 @@ ${playlistUrl}`;
     filtered.forEach(function(art) {
       var isPub = art.published !== false;
       var isFeat = art.featured === true;
+      var isRadar = isRadarDiscovery(art);
       var pubDateFormatted = 'Reciente';
       try {
         if (art.published_at) {
@@ -7111,7 +7224,7 @@ ${playlistUrl}`;
           
           <!-- THUMBNAIL -->
           <div style="width:110px; height:80px; border-radius:6px; overflow:hidden; background:#09090b; border:1px solid rgba(255,255,255,0.1); flex-shrink:0; display:flex; align-items:center; justify-content:center;">
-            ${art.image_url ? `<img src="${escapeHtml(art.image_url)}" alt="Cover" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none; font-size:24px;">📰</span>` : `<span style="font-size:24px;">📰</span>`}
+            ${art.image_url ? `<img src="${escapeHtml(art.image_url)}" alt="Cover" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none; font-size:24px;">${isRadar ? '🎯' : '📰'}</span>` : `<span style="font-size:24px;">${isRadar ? '🎯' : '📰'}</span>`}
           </div>
 
           <!-- CONTENIDO PRINCIPAL -->
@@ -7123,13 +7236,24 @@ ${playlistUrl}`;
                   ★ DESTACADA (COVER STORY)
                 </span>
               ` : ''}
+
+              <!-- BADGE TIPO: NOTICIA vs DESCUBRIMIENTO RADAR -->
+              ${isRadar ? `
+                <span style="background:rgba(187,244,81,0.12); color:var(--accent-lime); border:1px solid rgba(187,244,81,0.35); font-family:var(--font-mono); font-size:10px; font-weight:800; padding:2px 8px; border-radius:4px; display:inline-flex; align-items:center; gap:4px;">
+                  🎯 DESCUBRIMIENTO RADAR
+                </span>
+              ` : `
+                <span style="background:rgba(56,189,248,0.12); color:var(--accent-cyan); border:1px solid rgba(56,189,248,0.35); font-family:var(--font-mono); font-size:10px; font-weight:800; padding:2px 8px; border-radius:4px; display:inline-flex; align-items:center; gap:4px;">
+                  📰 NOTICIA EDITORIAL
+                </span>
+              `}
               
               <span style="font-family:var(--font-mono); font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; ${isPub ? 'background:rgba(187,244,81,0.1); color:var(--accent-lime); border:1px solid rgba(187,244,81,0.3);' : 'background:rgba(245,158,11,0.1); color:#f59e0b; border:1px solid rgba(245,158,11,0.3);'}">
                 ${isPub ? '● EN VIVO' : '○ ARCHIVADA'}
               </span>
 
-              <span style="font-family:var(--font-mono); font-size:10.5px; color:var(--accent-cyan); font-weight:700;">
-                ${escapeHtml(art.category || 'Editorial')}
+              <span style="font-family:var(--font-mono); font-size:10.5px; color:${isRadar ? 'var(--accent-lime)' : 'var(--accent-cyan)'}; font-weight:700;">
+                ${escapeHtml(art.category || (isRadar ? 'Artistas en el Radar' : 'Cultura Indie'))}
               </span>
 
               <span style="color:var(--text-dim); font-size:11px;">•</span>
