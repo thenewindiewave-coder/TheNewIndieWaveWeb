@@ -4,6 +4,10 @@
     {
       "source": "/artista",
       "destination": "/api/artista"
+    },
+    {
+      "source": "/api/generate-feedback",
+      "destination": "/api/generate-article"
     }
   ],
   "headers": [

@@ -1819,6 +1819,7 @@
     var cleanNotes = rawNotes.replace(/\[WA:\s*[^\]]+\]\s*/gi, '').replace(/\[WhatsApp:\s*[^\]]+\]\s*/gi, '').trim();
 
     var payload = {
+      type: 'editorial_feedback',
       artist_name: item.artist_name || 'Artista',
       song_title: item.song_title || 'Track',
       genre: item.genre || 'Indie',
