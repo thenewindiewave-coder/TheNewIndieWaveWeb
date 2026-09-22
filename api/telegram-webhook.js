@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 // ==============================================================================
 // VERCEL SERVERLESS FUNCTION: /api/telegram-webhook
 // Receptor de interacción de Telegram para Curaduría con 1 Clic (TNIW Scout)
@@ -166,7 +168,21 @@ async function handlePublishBySlug(slug, chatId) {
   // 4. Auto-archivar notas antiguas para que la portada mantenga exactamente 7 notas
   await enforceSevenArticlesLimit();
 
-  // 5. Enviar mensaje de éxito a Rodrigo
+  // 5. Auto-publicar en Social Hub (Post en FB, IG, Threads, X, TikTok + Story en FB, IG)
+  let socialHubSent = false;
+  try {
+    socialHubSent = await pushArticleToSocialHub({
+      title: editorial.title,
+      summary: editorial.summary,
+      slug: item.slug,
+      image_url: editorial.image_url,
+      category: 'Cultura Indie'
+    });
+  } catch(shErr) {
+    console.warn('[telegram-webhook] Error auto-publicando en Social Hub:', shErr);
+  }
+
+  // 6. Enviar mensaje de éxito a Rodrigo
   const successMsg = [
     `🎉 *¡NOTICIA PUBLICADA CON ÉXITO EN EL BLOG!*`,
     ``,
@@ -175,7 +191,8 @@ async function handlePublishBySlug(slug, chatId) {
     `📸 *Foto:* Vía ${escapeMarkdown(meta.source || 'Prensa')} / Oficial`,
     ``,
     `🔗 [Ver Artículo en el Blog](https://thenewindiewave.online/blog#${item.slug})`,
-    `⚡ Portada sincronizada en 7 notas.`
+    `⚡ Portada sincronizada en 7 notas.`,
+    socialHubSent ? `📡 *¡Enviada a Social Hub!* (FB, IG Post+Story, Threads, X, TikTok)` : `⚠️ Social Hub: no se pudo sincronizar automáticamente.`
   ].join('\n');
 
   await sendTelegramText(successMsg, chatId);
@@ -570,4 +587,171 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+// ==============================================================================
+// PUBLICACIÓN AUTOMÁTICA EN SOCIAL HUB (THE NEW INDIE WAVE)
+// ==============================================================================
+async function uploadImageToCloudinary(remoteImageUrl) {
+  if (!remoteImageUrl || typeof remoteImageUrl !== 'string') return null;
+  if (remoteImageUrl.includes('res.cloudinary.com')) return remoteImageUrl;
+
+  try {
+    const cloudName = 'ckknw1do';
+    const apiKey = '576643641599951';
+    const apiSecret = 'BqRSk2zRcn2-BtMi9BIHHiRyTfQ';
+    const folder = 'social-hub/6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c';
+    const timestamp = Math.floor(Date.now() / 1000);
+
+    const strToSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
+    const signature = crypto.createHash('sha1').update(strToSign).digest('hex');
+
+    const body = new URLSearchParams();
+    body.append('file', remoteImageUrl);
+    body.append('api_key', apiKey);
+    body.append('timestamp', timestamp.toString());
+    body.append('signature', signature);
+    body.append('folder', folder);
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: body
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.secure_url) return data.secure_url;
+    }
+  } catch (err) {
+    console.warn('[Social Hub Cloudinary Upload Error]:', err.message);
+  }
+  return remoteImageUrl;
+}
+
+async function pushArticleToSocialHub(article) {
+  if (!article) return false;
+  try {
+    const finalImageUrl = await uploadImageToCloudinary(article.image_url);
+    const postGroupId = `grp_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 7)}`;
+    const nowIso = new Date().toISOString();
+    const nowObj = new Date();
+    const dateStr = nowIso.split('T')[0];
+    const hourStr = nowObj.getHours().toString().padStart(2, '0');
+    const minuteStr = nowObj.getMinutes().toString().padStart(2, '0');
+    const periodStr = nowObj.getHours() >= 12 ? 'PM' : 'AM';
+
+    const title = article.title || '';
+    const cleanSummary = (article.summary || '')
+      .replace(/\s*[\.\s]*(?:cobertura\s+(?:v[ií]a|por)|v[ií]a\b|fuente\s*:|prensa\s*:)\s+[^.\n!]+[.\n!]?/gi, '')
+      .trim();
+    const url = `https://thenewindiewave.online/blog#${encodeURIComponent(article.slug || '')}`;
+
+    const isTrack = (article.category === 'Artistas en el Radar') ||
+                    title.toLowerCase().includes('descubrimiento radar') ||
+                    (article.slug || '').startsWith('radar-tniw-');
+
+    const copyText = isTrack
+      ? `🚨 ¡NUEVO TRACK EN EL RADAR EDITORIAL! 📡✨\n\n"${title}"\n\n${cleanSummary}\n\n👉 Escucha el track y lee la reseña completa aquí:\n🔗 ${url}\n\n#TheNewIndieWave #ArtistasEnElRadar #Descubrimientos #MusicaNueva #IndieMusic`
+      : `🚨 ¡NUEVA NOTA EN EL RADAR EDITORIAL! 🚨\n\n"${title}"\n\n${cleanSummary}\n\n👉 Lee la cobertura completa en el blog:\n🔗 ${url}\n\n#TheNewIndieWave #CulturaIndie #MusicaIndie #BlogMusical`;
+
+    // 1. Post Feed (Facebook, Instagram, Threads, X, TikTok)
+    const feedBundle = {
+      id: Math.random().toString(36).substr(2, 9),
+      media: finalImageUrl,
+      mediaUrls: [finalImageUrl],
+      mediaType: 'photo',
+      original_filename: `tniw_post_${article.slug || 'art'}.png`,
+      post_group_id: postGroupId,
+      content: copyText,
+      platforms: [
+        { id: 'facebook', type: 'post', types: ['post'], options: { shareAsStory: false } },
+        { id: 'instagram', type: 'post', types: ['post'], options: { showInFeed: true, shareAsStory: false } },
+        { id: 'threads', type: 'post', types: ['post'], options: { whoCanReply: 'everyone' } },
+        { id: 'x', type: 'post', types: ['post'], options: { whoCanReply: 'everyone' } },
+        { id: 'tiktok', type: 'post', types: ['post'], options: { allowDuet: true, visibility: 'public', allowStitch: true, isYourBrand: false, allowComments: true, isBrandedContent: false, commercialContent: false } }
+      ],
+      mode: 'now',
+      status: 'published',
+      timestamp: { date: dateStr, hour: hourStr, minute: minuteStr, period: periodStr },
+      createdAt: nowIso
+    };
+
+    const recordFeed = {
+      brand_id: '6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c',
+      content: copyText,
+      media_url: finalImageUrl,
+      platforms: ['facebook', 'instagram', 'threads', 'x', 'tiktok'],
+      platform_post_types: {
+        facebook: 'post',
+        instagram: 'post',
+        threads: 'post',
+        x: 'post',
+        tiktok: 'post'
+      },
+      payload: feedBundle,
+      scheduled_at: nowIso,
+      status: 'pending',
+      post_type: 'post'
+    };
+
+    // 2. Story (Facebook, Instagram)
+    const storyBundle = {
+      id: Math.random().toString(36).substr(2, 9),
+      media: finalImageUrl,
+      mediaUrls: [finalImageUrl],
+      mediaType: 'photo',
+      original_filename: `tniw_story_${article.slug || 'art'}.png`,
+      post_group_id: postGroupId,
+      content: copyText,
+      platforms: [
+        { id: 'facebook', type: 'story', types: ['story'], options: { shareAsStory: false } },
+        { id: 'instagram', type: 'story', types: ['story'], options: { showInFeed: false, shareAsStory: false } }
+      ],
+      mode: 'now',
+      status: 'published',
+      timestamp: { date: dateStr, hour: hourStr, minute: minuteStr, period: periodStr },
+      createdAt: nowIso
+    };
+
+    const recordStory = {
+      brand_id: '6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c',
+      content: copyText,
+      media_url: finalImageUrl,
+      platforms: ['facebook', 'instagram'],
+      platform_post_types: {
+        facebook: 'story',
+        instagram: 'story'
+      },
+      payload: storyBundle,
+      scheduled_at: nowIso,
+      status: 'pending',
+      post_type: 'story'
+    };
+
+    const SOCIAL_HUB_SUPABASE_URL = 'https://gcorvulignbmbjsgekpo.supabase.co';
+    const SOCIAL_HUB_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjb3J2dWxpZ25ibWJqc2dla3BvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTM2NDg1OSwiZXhwIjoyMDg2OTQwODU5fQ.aRHvDWcIOSlUPBB0xGctZYI85gf3FrqMaTphnmOeS58';
+
+    const insertRes = await fetch(`${SOCIAL_HUB_SUPABASE_URL}/rest/v1/posts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SOCIAL_HUB_SUPABASE_KEY,
+        'Authorization': `Bearer ${SOCIAL_HUB_SUPABASE_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify([recordFeed, recordStory])
+    });
+
+    if (insertRes.ok) {
+      console.log(`[Social Hub] Post & Story encolados con éxito para: "${title}"`);
+      return true;
+    } else {
+      const errText = await insertRes.text();
+      console.warn('[Social Hub Supabase Error]:', errText);
+      return false;
+    }
+  } catch (err) {
+    console.error('[Social Hub Push Error]:', err);
+    return false;
+  }
 }

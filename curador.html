@@ -6796,7 +6796,7 @@ ${playlistUrl}`;
       });
       var data = await res.json();
       if (data && data.success) {
-        showToast('📰 ¡Reseña editorial del track publicada en el Blog!');
+        showToast(data.social_hub ? '🎉 ¡Track aceptado, reseña publicada y enviada a Social Hub!' : '📰 ¡Reseña editorial del track publicada en el Blog!');
       }
     } catch(err) {
       console.warn('Aviso: no se pudo auto-publicar reseña en el blog:', err);
