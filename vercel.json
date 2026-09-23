@@ -5,6 +5,18 @@
       "maxDuration": 60
     }
   },
+  "redirects": [
+    {
+      "source": "/embed",
+      "destination": "/playlists",
+      "permanent": true
+    },
+    {
+      "source": "/embed/:path*",
+      "destination": "/playlists",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/artista",

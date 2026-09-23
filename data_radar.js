@@ -37,13 +37,13 @@ function isArtistArchived(item) {
 }
 
 function getArtistRadarUrl(artist) {
-  if (!artist || !artist.id) return 'https://thenewindiewave.online/artistas.html';
-  return 'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(artist.id);
+  if (!artist || !artist.id) return 'https://www.thenewindiewave.online/artistas';
+  return 'https://www.thenewindiewave.online/artistas?artista=' + encodeURIComponent(artist.id);
 }
 
 function getArtistSocialShareUrl(artist) {
-  if (!artist || !artist.id) return 'https://thenewindiewave.online/artistas';
-  return 'https://thenewindiewave.online/artista?id=' + encodeURIComponent(artist.id);
+  if (!artist || !artist.id) return 'https://www.thenewindiewave.online/artistas';
+  return 'https://www.thenewindiewave.online/artista?id=' + encodeURIComponent(artist.id);
 }
 
 async function syncRadarFromSupabase() {

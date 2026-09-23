@@ -1398,7 +1398,7 @@
       if(rows && rows.length > 0 && (rows[0].status === 'pending' || rows[0].status === 'queue')) {
         if(banner) {
           banner.style.display = 'inline-flex';
-          banner.href = 'estado.html?id=' + encodeURIComponent(lastId);
+          banner.href = '/estado?id=' + encodeURIComponent(lastId);
         }
       } else {
         if(banner) banner.style.display = 'none';

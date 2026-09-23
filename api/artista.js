@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
   const name = artist ? artist.name : 'Artista en el Radar';
   const bio = artist ? (artist.short_bio || 'Descubre los nuevos proyectos musicales en The New Indie Wave.') : 'Descubre los proyectos musicales independientes y talentos emergentes en The New Indie Wave.';
   const genre = artist ? artist.genre : 'Indie Wave';
-  let imgUrl = 'https://thenewindiewave.online/logo.png';
+  let imgUrl = 'https://www.thenewindiewave.online/logo.png';
 
   if (artist && artist.media_url) {
     const rawUrl = artist.media_url.trim();
@@ -74,7 +74,7 @@ module.exports = async (req, res) => {
     }
   }
   const canonicalId = artist ? artist.id : targetId;
-  const redirectUrl = `https://thenewindiewave.online/artistas.html?artista=${encodeURIComponent(canonicalId)}`;
+  const redirectUrl = `https://www.thenewindiewave.online/artistas?artista=${encodeURIComponent(canonicalId)}`;
 
   const html = `<!DOCTYPE html>
 <html lang="es">

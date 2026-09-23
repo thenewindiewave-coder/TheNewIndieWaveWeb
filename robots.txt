@@ -5,6 +5,7 @@ Disallow: /curador
 Disallow: /curador.html
 Disallow: /estado
 Disallow: /estado.html
+Disallow: /embed/
 Disallow: /api/spotify-
 Disallow: /api/submit
 Disallow: /api/upload
