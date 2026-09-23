@@ -20,9 +20,19 @@ export default async function handler(req, res) {
 
   const code = decodeURIComponent(rawCode || '').trim();
 
+  function safeRedirect(url, status = 302) {
+    if (typeof res.redirect === 'function') {
+      try {
+        return res.redirect(status, url);
+      } catch(e) {}
+    }
+    res.writeHead(status, { Location: url });
+    return res.end();
+  }
+
   // Si no se proporcionó código, redirigir al blog
   if (!code) {
-    return res.redirect(302, 'https://www.thenewindiewave.online/blog');
+    return safeRedirect('https://www.thenewindiewave.online/blog');
   }
 
   let article = null;
@@ -77,7 +87,7 @@ export default async function handler(req, res) {
 
   // Si no se encuentra ningún artículo, enviar a /blog sin generar 404
   if (!article || !article.slug) {
-    return res.redirect(302, 'https://www.thenewindiewave.online/blog');
+    return safeRedirect('https://www.thenewindiewave.online/blog');
   }
 
   const targetUrl = `https://www.thenewindiewave.online/blog#${article.slug}`;
@@ -120,7 +130,7 @@ export default async function handler(req, res) {
   }
 
   // Para usuarios normales en navegador: Redirección inmediata 302 hacia /blog#slug
-  return res.redirect(302, targetUrl);
+  return safeRedirect(targetUrl);
 }
 
 function escapeHtml(str) {

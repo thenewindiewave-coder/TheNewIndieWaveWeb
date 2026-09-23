@@ -10,7 +10,11 @@
       "destination": "/api/generate-article"
     },
     {
-      "source": "/b/:code*",
+      "source": "/b",
+      "destination": "/api/b"
+    },
+    {
+      "source": "/b/:code",
       "destination": "/api/b?code=:code"
     }
   ],
