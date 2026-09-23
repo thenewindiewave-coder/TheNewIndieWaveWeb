@@ -11,7 +11,7 @@
     },
     {
       "source": "/b",
-      "destination": "/api/b"
+      "destination": "/blog"
     },
     {
       "source": "/b/:code",

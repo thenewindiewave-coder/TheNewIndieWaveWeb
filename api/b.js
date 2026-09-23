@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
 
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
   // Extraer el código desde req.query.code o desde req.url
-  let rawCode = req.query?.code || '';
+  let rawCode = (req.query && req.query.code) ? req.query.code : '';
   if (!rawCode && req.url) {
     const match = req.url.match(/\/b\/([^/?#]+)/i);
     if (match && match[1]) {
@@ -85,9 +85,9 @@ export default async function handler(req, res) {
     console.error('[ShortURL /b/ Error]:', err);
   }
 
-  // Si no se encuentra ningún artículo, enviar a /blog sin generar 404
+  // Si no se encuentra ningún artículo directamente, enviar a /blog#code para que el cliente lo resuelva
   if (!article || !article.slug) {
-    return safeRedirect('https://www.thenewindiewave.online/blog');
+    return safeRedirect(`https://www.thenewindiewave.online/blog#${encodeURIComponent(code)}`);
   }
 
   const targetUrl = `https://www.thenewindiewave.online/blog#${article.slug}`;
