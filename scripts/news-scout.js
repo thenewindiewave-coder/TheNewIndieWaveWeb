@@ -242,21 +242,20 @@ async function runMorningScout() {
     listText,
     `━━━━━━━━━━━━━━━━━━━`,
     `⚡ <b>Elige qué nota publicar:</b>`,
-    `• Toca un botón abajo para redactar y publicar con 1 clic en el blog.`,
-    `• O responde a este mensaje con el número <b>(1, 2, 3...)</b>.`,
+    `• Toca <b>⚡ Publicar #N</b> para publicarla normal en el blog.`,
+    `• Toca <b>⭐ Destacar #N</b> para publicarla como <b>NOTICIA DESTACADA (Cover Story)</b>.`,
+    `• O responde con el número (ej. <code>1</code> normal o <code>1*</code> destacada).`,
     ``,
     `⏳ <i>Si no respondes antes de las 5:00 PM, se publicará automáticamente 1 nota al azar.</i>`
   ].join('\n');
 
-  // Construir teclado de botones interactivos (máx 64 bytes para callback_data)
+  // Construir teclado de botones interactivos: 1 fila por nota con Publicar y Destacar
   const buttons = [];
-  for (let i = 0; i < topCandidates.length; i += 2) {
-    const row = [];
-    row.push({ text: `⚡ Publicar #${i + 1}`, callback_data: `pub:${i + 1}` });
-    if (i + 1 < topCandidates.length) {
-      row.push({ text: `⚡ Publicar #${i + 2}`, callback_data: `pub:${i + 2}` });
-    }
-    buttons.push(row);
+  for (let i = 0; i < topCandidates.length; i++) {
+    buttons.push([
+      { text: `⚡ Publicar #${i + 1}`, callback_data: `pub:${i + 1}` },
+      { text: `⭐ Destacar #${i + 1}`, callback_data: `feat:${i + 1}` }
+    ]);
   }
   buttons.push([{ text: `🚫 Descartar todas hoy`, callback_data: `discard_all` }]);
 

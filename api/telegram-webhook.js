@@ -45,9 +45,16 @@ export default async function handler(req, res) {
       if (data.startsWith('pub:')) {
         const val = data.replace('pub:', '').trim();
         if (/^[1-5]$/.test(val)) {
-          await handlePublishByNumber(parseInt(val, 10), cq.message?.chat?.id || TELEGRAM_CHAT_ID);
+          await handlePublishByNumber(parseInt(val, 10), cq.message?.chat?.id || TELEGRAM_CHAT_ID, false);
         } else {
-          await handlePublishBySlug(val, cq.message?.chat?.id || TELEGRAM_CHAT_ID);
+          await handlePublishBySlug(val, cq.message?.chat?.id || TELEGRAM_CHAT_ID, false);
+        }
+      } else if (data.startsWith('feat:')) {
+        const val = data.replace('feat:', '').trim();
+        if (/^[1-5]$/.test(val)) {
+          await handlePublishByNumber(parseInt(val, 10), cq.message?.chat?.id || TELEGRAM_CHAT_ID, true);
+        } else {
+          await handlePublishBySlug(val, cq.message?.chat?.id || TELEGRAM_CHAT_ID, true);
         }
       } else if (data === 'discard_all') {
         await handleDiscardAll(cq.message?.chat?.id || TELEGRAM_CHAT_ID);
@@ -56,7 +63,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // 2. MANEJO DE MENSAJES DE TEXTO DIRECTOS (ej. Rodrigo responde "1", "2", "/status")
+    // 2. MANEJO DE MENSAJES DE TEXTO DIRECTOS (ej. Rodrigo responde "1", "1*", "destacar 1", "/radar", "/status")
     if (update.message && update.message.text) {
       const msg = update.message;
       const fromId = String(msg.from?.id || '');
@@ -67,10 +74,25 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
-      // Si respondió con un número del 1 al 5
+      // Si respondió para publicar como DESTACADA (ej: "1*", "*1", "1 destacada", "destacar 1", "destacada 1", "1d", "d1")
+      const featMatch = text.match(/^(?:destacar\s*([1-5])|([1-5])\s*destacada?|([1-5])\*|\*([1-5])|d([1-5])|([1-5])d)$/i);
+      if (featMatch) {
+        const numStr = featMatch[1] || featMatch[2] || featMatch[3] || featMatch[4] || featMatch[5] || featMatch[6];
+        if (numStr) {
+          await handlePublishByNumber(parseInt(numStr, 10), msg.chat.id, true);
+          return res.status(200).json({ ok: true });
+        }
+      }
+
+      // Si respondió con un número del 1 al 5 para publicación estándar
       if (/^[1-5]$/.test(text)) {
         const num = parseInt(text, 10);
-        await handlePublishByNumber(num, msg.chat.id);
+        await handlePublishByNumber(num, msg.chat.id, false);
+        return res.status(200).json({ ok: true });
+      }
+
+      if (text.toLowerCase() === '/radar') {
+        await handleResendRadar(msg.chat.id);
         return res.status(200).json({ ok: true });
       }
 
@@ -88,9 +110,9 @@ export default async function handler(req, res) {
 }
 
 // -----------------------------------------------------------------------------
-// ACCIÓN: PUBLICAR POR SLUG
+// ACCIÓN: PUBLICAR POR SLUG (CON SOPORTE DE NOTICIA DESTACADA)
 // -----------------------------------------------------------------------------
-async function handlePublishBySlug(slug, chatId) {
+async function handlePublishBySlug(slug, chatId, isFeatured = false) {
   // 1. Buscar el item en la cola de Supabase
   const searchRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(slug)}`, {
     headers: {
@@ -125,10 +147,30 @@ async function handlePublishBySlug(slug, chatId) {
     };
   }
 
-  await sendTelegramText(`✍️ Redactando y publicando en el blog:\n*"${escapeMarkdown(item.title)}"*...`, chatId);
+  const announcingText = isFeatured
+    ? `✍️ Redactando y publicando como *NOTICIA DESTACADA (Cover Story)* en el blog:\n*"${escapeMarkdown(item.title)}"*...`
+    : `✍️ Redactando y publicando en el blog:\n*"${escapeMarkdown(item.title)}"*...`;
+
+  await sendTelegramText(announcingText, chatId);
 
   // 2. Redacción con periodismo musical orgánico
   const editorial = await generateArticleJournalism(meta);
+
+  // Si se marcó como destacada, desmarcar cualquier destacada previa para que esta sea la Cover Story reina
+  if (isFeatured) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/articles?featured=eq.true`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ featured: false })
+      });
+    } catch(e) {}
+  }
 
   // 3. Actualizar la nota en Supabase como publicada
   const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?id=eq.${item.id}`, {
@@ -145,6 +187,7 @@ async function handlePublishBySlug(slug, chatId) {
       content: editorial.content,
       category: 'Cultura Indie',
       image_url: editorial.image_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
+      featured: Boolean(isFeatured),
       published: true,
       published_at: new Date().toISOString()
     })
@@ -191,11 +234,12 @@ async function handlePublishBySlug(slug, chatId) {
 
   // 6. Enviar mensaje de éxito a Rodrigo
   const successMsg = [
-    `🎉 *¡NOTICIA PUBLICADA CON ÉXITO EN EL BLOG!*`,
+    isFeatured ? `⭐👑 *¡NOTICIA PUBLICADA COMO DESTACADA (COVER STORY)!*` : `🎉 *¡NOTICIA PUBLICADA CON ÉXITO EN EL BLOG!*`,
     ``,
     `📰 *${escapeMarkdown(editorial.title)}*`,
     `🏷️ *Categoría:* Cultura Indie // ${escapeMarkdown(meta.region || 'Indie')}`,
     `📸 *Foto:* Vía ${escapeMarkdown(meta.source || 'Prensa')} / Oficial`,
+    isFeatured ? `🌟 *Posición:* Hero Principal de Portada` : `📌 *Posición:* Feed Editorial Principal`,
     ``,
     `🔗 [Ver Artículo en el Blog](${noteShortUrl})`,
     `⚡ Portada sincronizada en 7 notas.`,
@@ -206,9 +250,9 @@ async function handlePublishBySlug(slug, chatId) {
 }
 
 // -----------------------------------------------------------------------------
-// ACCIÓN: PUBLICAR POR NÚMERO (1-5)
+// ACCIÓN: PUBLICAR POR NÚMERO (1-5) CON OPCIÓN DE DESTACADA
 // -----------------------------------------------------------------------------
-async function handlePublishByNumber(num, chatId) {
+async function handlePublishByNumber(num, chatId, isFeatured = false) {
   const queueRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?category=eq.scout_queue&published=eq.false&order=created_at.asc&limit=5`, {
     headers: {
       'apikey': SUPABASE_SERVICE_KEY,
@@ -233,7 +277,7 @@ async function handlePublishByNumber(num, chatId) {
     return;
   }
 
-  await handlePublishBySlug(list[idx].slug, chatId);
+  await handlePublishBySlug(list[idx].slug, chatId, isFeatured);
 }
 
 // -----------------------------------------------------------------------------
@@ -254,6 +298,67 @@ async function handleDiscardAll(chatId) {
 }
 
 // -----------------------------------------------------------------------------
+// ACCIÓN: RE-ENVIAR RADAR DE HOY (/radar)
+// -----------------------------------------------------------------------------
+async function handleResendRadar(chatId) {
+  const queueRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?category=eq.scout_queue&published=eq.false&order=created_at.asc&limit=5`, {
+    headers: {
+      'apikey': SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+    }
+  });
+
+  if (!queueRes.ok) {
+    await sendTelegramText('⚠️ No se pudo consultar la lista de noticias pendientes.', chatId);
+    return;
+  }
+
+  const list = await queueRes.json();
+  if (!list || list.length === 0) {
+    await sendTelegramText('ℹ️ No hay noticias pendientes en la cola del radar hoy (o ya fueron publicadas/descartadas).', chatId);
+    return;
+  }
+
+  const listText = list.map((item, i) => {
+    let source = 'Radar TNIW';
+    let region = 'México';
+    let link = 'https://thenewindiewave.online';
+    try {
+      const parsed = JSON.parse(item.content);
+      source = parsed.source || source;
+      region = parsed.region || region;
+      link = parsed.link || link;
+    } catch(e) {}
+    return `<b>${i + 1}.</b> [${escapeHtml(region)}] <b>${escapeHtml(source)}</b>\n"${escapeHtml(item.title)}"\n🔗 <a href="${link}">Leer fuente original</a>\n`;
+  }).join('\n');
+
+  const messageText = [
+    `📡 <b>RADAR DE NOTICIAS TNIW // 8:00 AM</b>`,
+    `¡Hola Rodrigo! Tienes <b>${list.length} noticias pendientes</b> en la cola de hoy:`,
+    ``,
+    listText,
+    `━━━━━━━━━━━━━━━━━━━`,
+    `⚡ <b>Elige qué nota publicar:</b>`,
+    `• Toca <b>⚡ Publicar #N</b> para publicarla normal en el blog.`,
+    `• Toca <b>⭐ Destacar #N</b> para publicarla como <b>NOTICIA DESTACADA (Cover Story)</b>.`,
+    `• O responde con el número (ej. <code>1</code> normal o <code>1*</code> destacada).`,
+    ``,
+    `⏳ <i>Si no respondes antes de las 5:00 PM, se publicará automáticamente 1 nota al azar.</i>`
+  ].join('\n');
+
+  const buttons = [];
+  for (let i = 0; i < list.length; i++) {
+    buttons.push([
+      { text: `⚡ Publicar #${i + 1}`, callback_data: `pub:${i + 1}` },
+      { text: `⭐ Destacar #${i + 1}`, callback_data: `feat:${i + 1}` }
+    ]);
+  }
+  buttons.push([{ text: `🚫 Descartar todas hoy`, callback_data: `discard_all` }]);
+
+  await sendTelegramButtons(messageText, buttons, chatId);
+}
+
+// -----------------------------------------------------------------------------
 // ACCIÓN: CONSULTAR STATUS (/status)
 // -----------------------------------------------------------------------------
 async function handleStatusCheck(chatId) {
@@ -264,14 +369,20 @@ async function handleStatusCheck(chatId) {
     headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` }
   });
 
-  const pubCount = pubRes.ok ? (await pubRes.json()).length : 0;
+  const pubList = pubRes.ok ? await pubRes.json() : [];
   const queueCount = queueRes.ok ? (await queueRes.json()).length : 0;
+  const currentFeatured = pubList.find(a => a.featured) || pubList[0];
 
   const msg = [
     `📊 *ESTADO DEL RADAR & BLOG TNIW:*`,
-    `• Notas en Portada: *${Math.min(pubCount, 7)}*`,
-    `• Notas en Archivo Histórico: *${Math.max(0, pubCount - 7)}*`,
+    `• Notas en Portada: *${Math.min(pubList.length, 7)}*`,
+    `• Notas en Archivo Histórico: *${Math.max(0, pubList.length - 7)}*`,
     `• Noticias Pendientes en Cola de Hoy: *${queueCount}*`,
+    currentFeatured ? `⭐ *Destacada Actual:* "${escapeMarkdown(currentFeatured.title)}"` : `⭐ *Destacada Actual:* Ninguna`,
+    ``,
+    `💡 *Comandos disponibles:*`,
+    `• \`/radar\` : Ver las noticias de hoy y sus botones (Publicar / Destacar).`,
+    `• \`/status\` : Consultar este resumen.`,
     ``,
     `🔗 https://thenewindiewave.online/blog`
   ].join('\n');
@@ -640,7 +751,7 @@ async function enforceSevenArticlesLimit() {
         return !isRadar && cat !== 'scout_queue' && cat !== 'scout_discarded';
       });
       if (editorialArticles.length > 7) {
-        const toArchive = editorialArticles.slice(7);
+        const toArchive = editorialArticles.slice(7).filter(a => !a.featured);
         for (const item of toArchive) {
           await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(item.slug)}`, {
             method: 'PATCH',
@@ -668,6 +779,37 @@ async function answerCallbackQuery(cqId, text) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ callback_query_id: cqId, text })
     });
+  } catch(e) {}
+}
+
+async function sendTelegramButtons(text, inlineKeyboard, chatId) {
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: 'HTML',
+        disable_web_page_preview: false,
+        reply_markup: {
+          inline_keyboard: inlineKeyboard
+        }
+      })
+    });
+    if (!res.ok) {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: text.replace(/<[^>]+>/g, ''),
+          reply_markup: {
+            inline_keyboard: inlineKeyboard
+          }
+        })
+      });
+    }
   } catch(e) {}
 }
 
