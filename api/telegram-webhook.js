@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 
+export const maxDuration = 60; // Permite hasta 60 segundos para IA, web scraping y Social Hub
+
 // ==============================================================================
 // VERCEL SERVERLESS FUNCTION: /api/telegram-webhook
 // Receptor de interacción de Telegram para Curaduría con 1 Clic (TNIW Scout)
@@ -123,7 +125,7 @@ async function handlePublishBySlug(slug, chatId) {
     };
   }
 
-  await sendTelegramText(`✍️ Redactando y publicando en el blog:\n*"${item.title}"*...`, chatId);
+  await sendTelegramText(`✍️ Redactando y publicando en el blog:\n*"${escapeMarkdown(item.title)}"*...`, chatId);
 
   // 2. Redacción con periodismo musical orgánico
   const editorial = await generateArticleJournalism(meta);
