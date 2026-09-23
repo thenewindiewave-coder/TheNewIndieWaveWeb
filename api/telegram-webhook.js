@@ -56,6 +56,9 @@ export default async function handler(req, res) {
         } else {
           await handlePublishBySlug(val, cq.message?.chat?.id || TELEGRAM_CHAT_ID, true);
         }
+      } else if (data.startsWith('set_feat:')) {
+        const slug = data.replace('set_feat:', '').trim();
+        await handleSetFeaturedBySlug(slug, cq.message?.chat?.id || TELEGRAM_CHAT_ID);
       } else if (data === 'discard_all') {
         await handleDiscardAll(cq.message?.chat?.id || TELEGRAM_CHAT_ID);
       }
@@ -63,7 +66,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // 2. MANEJO DE MENSAJES DE TEXTO DIRECTOS (ej. Rodrigo responde "1", "1*", "destacar 1", "/radar", "/status")
+    // 2. MANEJO DE MENSAJES DE TEXTO DIRECTOS (ej. Rodrigo responde "1", "1*", "destacar 1", "/destacar", "/radar", "/status")
     if (update.message && update.message.text) {
       const msg = update.message;
       const fromId = String(msg.from?.id || '');
@@ -74,7 +77,14 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
-      // Si respondió para publicar como DESTACADA (ej: "1*", "*1", "1 destacada", "destacar 1", "destacada 1", "1d", "d1")
+      // Comando para gestionar la nota destacada de portada en cualquier momento: /destacar o /destacar 1
+      if (text.toLowerCase() === '/destacar' || text.toLowerCase().startsWith('/destacar ')) {
+        const arg = text.replace(/\/destacar/i, '').trim();
+        await handleListFeaturedOptions(msg.chat.id, arg);
+        return res.status(200).json({ ok: true });
+      }
+
+      // Si respondió para publicar una nota del radar como DESTACADA (ej: "1*", "*1", "1 destacada", "destacar 1", "destacada 1", "1d", "d1")
       const featMatch = text.match(/^(?:destacar\s*([1-5])|([1-5])\s*destacada?|([1-5])\*|\*([1-5])|d([1-5])|([1-5])d)$/i);
       if (featMatch) {
         const numStr = featMatch[1] || featMatch[2] || featMatch[3] || featMatch[4] || featMatch[5] || featMatch[6];
@@ -388,6 +398,89 @@ async function handleStatusCheck(chatId) {
   ].join('\n');
 
   await sendTelegramText(msg, chatId);
+}
+
+// -----------------------------------------------------------------------------
+// ACCIÓN: GESTIONAR NOTICIA DESTACADA EN CUALQUIER MOMENTO (/destacar)
+// -----------------------------------------------------------------------------
+async function handleSetFeaturedBySlug(slug, chatId) {
+  // Desmarcar todas las anteriores
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/articles?featured=eq.true`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ featured: false })
+    });
+  } catch(e) {}
+
+  // Marcar la seleccionada como featured
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/articles?slug=eq.${encodeURIComponent(slug)}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify({ featured: true })
+  });
+
+  if (res.ok) {
+    const updated = await res.json();
+    const title = updated && updated[0] ? updated[0].title : slug;
+    await sendTelegramText(`⭐👑 *¡NOTICIA DESTACADA ACTUALIZADA!*\n\nLa nota:\n*"${escapeMarkdown(title)}"* \nahora ocupa la posición de *Cover Story (Hero Destacado)* en la portada del blog.\n\n🔗 https://thenewindiewave.online/blog`, chatId);
+  } else {
+    await sendTelegramText('⚠️ No se pudo actualizar la noticia destacada en Supabase.', chatId);
+  }
+}
+
+async function handleListFeaturedOptions(chatId, arg) {
+  const pubRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?published=eq.true&order=published_at.desc&limit=7`, {
+    headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` }
+  });
+  if (!pubRes.ok) {
+    await sendTelegramText('⚠️ Error al consultar los artículos publicados.', chatId);
+    return;
+  }
+  const list = await pubRes.json();
+  const editorial = (list || []).filter(a => {
+    const cat = (a.category || '').toLowerCase();
+    return cat !== 'artistas en el radar' && !cat.includes('radar');
+  });
+
+  if (editorial.length === 0) {
+    await sendTelegramText('ℹ️ No hay noticias editoriales publicadas para destacar.', chatId);
+    return;
+  }
+
+  // Si pasó un número como argumento: ej "/destacar 1"
+  if (/^[1-7]$/.test(arg)) {
+    const idx = parseInt(arg, 10) - 1;
+    if (idx >= 0 && idx < editorial.length) {
+      await handleSetFeaturedBySlug(editorial[idx].slug, chatId);
+      return;
+    }
+  }
+
+  const buttons = editorial.map((item, i) => {
+    const isCur = item.featured ? ' (⭐ ACTUAL)' : '';
+    const label = `${i + 1}. ${item.title.slice(0, 26)}...${isCur}`;
+    return [{ text: label, callback_data: `set_feat:${item.slug}` }];
+  });
+
+  const msg = [
+    `👑 <b>SELECCIONAR NOTICIA DESTACADA (COVER STORY)</b>`,
+    `Toca una de las notas de portada para fijarla como el <b>Hero Principal</b> en el blog:`,
+    ``,
+    `🔗 https://thenewindiewave.online/blog`
+  ].join('\n');
+
+  await sendTelegramButtons(msg, buttons, chatId);
 }
 
 // -----------------------------------------------------------------------------
