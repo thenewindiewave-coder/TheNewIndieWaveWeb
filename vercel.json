@@ -15,7 +15,7 @@
     },
     {
       "source": "/b/:code",
-      "destination": "/api/b?code=:code"
+      "destination": "/api/b"
     }
   ],
   "headers": [

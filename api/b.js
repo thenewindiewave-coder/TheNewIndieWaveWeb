@@ -125,8 +125,12 @@ export default async function handler(req, res) {
 </body>
 </html>`;
 
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(html);
+    if (typeof res.status === 'function' && typeof res.send === 'function') {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.status(200).send(html);
+    }
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(html);
   }
 
   // Para usuarios normales en navegador: Redirección inmediata 302 hacia /blog#slug
