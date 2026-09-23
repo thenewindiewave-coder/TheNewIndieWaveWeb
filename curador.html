@@ -2258,9 +2258,8 @@
 
         renderQueue();
         updateMetrics();
-        showToast('🎉 ¡Canción aceptada e insertada en Spotify exitosamente!');
-
-        publishTrackSpotlightArticle(item);
+        var playlistUrl = (spotData && spotData.playlist_id) ? ('https://open.spotify.com/playlist/' + spotData.playlist_id) : getPlaylistSpotifyUrl(targetPlaylist);
+        publishTrackSpotlightArticle(item, playlistUrl);
 
       } catch (err) {
         if (btnAccept) {
@@ -6763,7 +6762,28 @@ ${playlistUrl}`;
     }
   }
 
-  async function publishTrackSpotlightArticle(item) {
+  function getPlaylistSpotifyUrl(playlistName, playlistId) {
+    if (playlistId) return 'https://open.spotify.com/playlist/' + playlistId;
+    if (!playlistName) return '';
+    var found = (OFFICIAL_PLAYLISTS || []).find(function(p) {
+      return p.name === playlistName || p.id === playlistName;
+    });
+    if (found) return 'https://open.spotify.com/playlist/' + found.id;
+    return '';
+  }
+
+  function loadImgPromise(src) {
+    return new Promise(function(resolve) {
+      if (!src) return resolve(null);
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function() { resolve(img); };
+      img.onerror = function() { resolve(null); };
+      img.src = src;
+    });
+  }
+
+  async function publishTrackSpotlightArticle(item, playlistUrl) {
     if (!item) return;
     try {
       var coverUrl = item.cover_url || '';
@@ -6779,6 +6799,36 @@ ${playlistUrl}`;
         } catch(e) {}
       }
 
+      var targetPlaylist = item.playlist || '';
+      var pUrl = playlistUrl || getPlaylistSpotifyUrl(targetPlaylist);
+
+      // Generar Mockups oficiales (Post cuadrado 1080x1080 y Story vertical 1080x1920)
+      var postMockupDataUrl = null;
+      var storyMockupDataUrl = null;
+      try {
+        var loadedCover = coverUrl ? await loadImgPromise(coverUrl) : null;
+        
+        // 1. Render Post Mockup Cuadrado (1080x1080)
+        if (typeof generateCuratorPostCanvas === 'function') {
+          generateCuratorPostCanvas(item.artist_name, item.song_title, targetPlaylist, loadedCover);
+          var postCanvas = document.getElementById('curatorPostCanvas');
+          if (postCanvas) {
+            postMockupDataUrl = postCanvas.toDataURL('image/jpeg', 0.92);
+          }
+        }
+
+        // 2. Render Vertical Story Mockup (1080x1920)
+        if (typeof generateWhatsAppVerticalCanvas === 'function') {
+          generateWhatsAppVerticalCanvas(item.artist_name, item.song_title, targetPlaylist, loadedCover);
+          var storyCanvas = document.getElementById('wpVerticalStoryCanvas');
+          if (storyCanvas) {
+            storyMockupDataUrl = storyCanvas.toDataURL('image/jpeg', 0.92);
+          }
+        }
+      } catch(mockErr) {
+        console.warn('[publishTrackSpotlightArticle] Error generando mockups en canvas:', mockErr);
+      }
+
       var res = await fetch('/api/generate-article', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -6788,15 +6838,18 @@ ${playlistUrl}`;
           song_title: item.song_title,
           genre: item.genre || 'Indie',
           country: item.country || '',
-          playlist: item.playlist || '',
+          playlist: targetPlaylist,
+          playlist_url: pUrl,
           spotify_url: item.spotify_url,
           cover_url: coverUrl,
+          post_mockup_url: postMockupDataUrl,
+          story_mockup_url: storyMockupDataUrl,
           auto_publish: true
         })
       });
       var data = await res.json();
       if (data && data.success) {
-        showToast(data.social_hub ? '🎉 ¡Track aceptado, reseña publicada y enviada a Social Hub!' : '📰 ¡Reseña editorial del track publicada en el Blog!');
+        showToast(data.social_hub ? '🎉 ¡Track aceptado, reseña publicada y enviada a Social Hub con mockups oficiales!' : '📰 ¡Reseña editorial del track publicada en el Blog!');
       }
     } catch(err) {
       console.warn('Aviso: no se pudo auto-publicar reseña en el blog:', err);

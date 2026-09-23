@@ -4,6 +4,53 @@ if (typeof process !== 'undefined' && process.env) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 
+const PLAYLIST_URL_MAP = {
+  "Electrónica emergente para perder el control en la pista": "https://open.spotify.com/playlist/56UTFQQSDPuY5cjxDol5Ob",
+  "Electronica emergente para perder el control en la pista": "https://open.spotify.com/playlist/56UTFQQSDPuY5cjxDol5Ob",
+  "Mezcla de rolas urbanas para farmear Aura": "https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB",
+  "Darkwave oscuro y atmosférico para la madrugada": "https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln",
+  "Música urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
+  "Musica urbana con flow y ritmo para moverte": "https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr",
+  "Metal intenso para liberar toda tu energía": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
+  "Metal intenso para liberar toda tu energia": "https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1",
+  "Rock para sacar la rabia y el enojo acumulado": "https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc",
+  "SoftSongs para esos domingos sin hacer nada": "https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF",
+  "Dreamy Songs para escuchar en la intimidad de tu habitación": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+  "Dreamy Songs para escuchar en la intimidad de tu habitacion": "https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj",
+  "SynthPop para cuando solo quieres bailar": "https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl"
+};
+
+function resolvePlaylistSpotifyUrl(playlistName, explicitUrl) {
+  if (explicitUrl && typeof explicitUrl === 'string' && explicitUrl.includes('open.spotify.com/playlist/')) {
+    return explicitUrl.trim();
+  }
+  if (!playlistName) {
+    return 'https://open.spotify.com/user/thenewindiewave';
+  }
+  const cleanName = playlistName.trim();
+  if (PLAYLIST_URL_MAP[cleanName]) {
+    return PLAYLIST_URL_MAP[cleanName];
+  }
+  const norm = cleanName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  for (const [key, url] of Object.entries(PLAYLIST_URL_MAP)) {
+    const normKey = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (norm.includes(normKey) || normKey.includes(norm)) {
+      return url;
+    }
+  }
+  if (norm.includes('darkwave') || norm.includes('madrugada')) return 'https://open.spotify.com/playlist/4mcJJz8GiKTuxieL9Jziln';
+  if (norm.includes('aura') || norm.includes('urbana')) return 'https://open.spotify.com/playlist/79SKuyss3MfkzvOJGnaisB';
+  if (norm.includes('flow') || norm.includes('moverte')) return 'https://open.spotify.com/playlist/7bbYPZ5ia4IGRP2fT47kXr';
+  if (norm.includes('metal') || norm.includes('energia')) return 'https://open.spotify.com/playlist/5OLiBaOPAe5cBEdV1AoSd1';
+  if (norm.includes('rabia') || norm.includes('enojo')) return 'https://open.spotify.com/playlist/6cuhRpfYmEt0vYCT9mFLKc';
+  if (norm.includes('domingos') || norm.includes('soft')) return 'https://open.spotify.com/playlist/20uF7xCOW8zldDCiAowxuF';
+  if (norm.includes('dreamy') || norm.includes('intimidad') || norm.includes('habitacion') || norm.includes('cuarto')) return 'https://open.spotify.com/playlist/0Ty7tTNh1ONGyOLuasPREj';
+  if (norm.includes('synthpop') || norm.includes('bailar')) return 'https://open.spotify.com/playlist/36ribRboGB3DwM821oYokl';
+  if (norm.includes('electronica') || norm.includes('pista')) return 'https://open.spotify.com/playlist/56UTFQQSDPuY5cjxDol5Ob';
+
+  return 'https://open.spotify.com/user/thenewindiewave';
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -33,9 +80,12 @@ export default async function handler(req, res) {
       genre,
       country,
       playlist,
+      playlist_url,
       feedback,
       spotify_url,
       cover_url,
+      post_mockup_url,
+      story_mockup_url,
       notes,
       variation = 0
     } = req.body || {};
@@ -126,18 +176,33 @@ REGLAS CRÍTICAS:
         return res.status(400).json({ error: 'Faltan campos obligatorios (artist_name, song_title).' });
       }
 
-      let spotifyEmbedHtml = '';
-      if (spotify_url) {
-        const match = spotify_url.match(/track\/([a-zA-Z0-9]+)/);
-        if (match && match[1]) {
-          const trackId = match[1];
-          spotifyEmbedHtml = `
-            <div style="margin: 24px 0;">
-              <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/${trackId}?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-            </div>
-          `;
-        }
-      }
+      const finalPlaylistName = playlist || 'Selección Oficial TNIW';
+      const finalPlaylistUrl = resolvePlaylistSpotifyUrl(finalPlaylistName, playlist_url);
+
+      const playlistComponentHtml = `
+        <div style="margin: 28px 0; padding: 22px 24px; background: rgba(29, 185, 84, 0.08); border: 1px solid rgba(29, 185, 84, 0.35); border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#1DB954" style="flex-shrink:0;"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            <span style="font-family: monospace; font-size: 11px; font-weight: 800; color: #1DB954; text-transform: uppercase; letter-spacing: 0.06em;">Playlist Oficial en Spotify</span>
+          </div>
+          <div style="font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 6px; font-family: 'Space Grotesk', -apple-system, sans-serif;">
+            ${escapeHtml(finalPlaylistName)}
+          </div>
+          <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 12px; line-height: 1.5;">
+            Escucha <strong>"${escapeHtml(song_title)}"</strong> de <strong>${escapeHtml(artist_name)}</strong> y toda la selección oficial directamente en Spotify:
+          </p>
+          <div style="word-break: break-all; margin-bottom: 16px;">
+            <a href="${finalPlaylistUrl}" target="_blank" rel="noopener noreferrer" style="color: #1DB954; font-weight: 700; font-family: monospace; font-size: 13px; text-decoration: underline;">
+              🔗 ${finalPlaylistUrl}
+            </a>
+          </div>
+          <div>
+            <a href="${finalPlaylistUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; background: #1DB954; color: #000; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 9999px; text-decoration: none; font-family: 'Space Grotesk', -apple-system, sans-serif;">
+              ▶ Abrir Playlist en Spotify ↗
+            </a>
+          </div>
+        </div>
+      `;
 
       const slug = `radar-tniw-${slugify(artist_name)}-${slugify(song_title)}-${Date.now().toString().slice(-4)}`;
       const title = `Descubrimiento Radar: "${song_title}" de ${artist_name}`;
@@ -148,14 +213,24 @@ REGLAS CRÍTICAS:
 
         <p>El lanzamiento destaca por una propuesta sonora con identidad genuina, texturas envolventes y un gancho melódico que conecta de inmediato con la audiencia.</p>
 
-        <p>El balance entre instrumentación y arreglos logra transmitir una atmósfera singular sin perder fuerza rítmica. Por su frescura y carácter sonoro auténtico, ha sido seleccionada para rotar en nuestra playlist oficial <em>"${escapeHtml(playlist || 'Selección Oficial TNIW')}"</em> en Spotify.</p>
+        <p>El balance entre instrumentación y arreglos logra transmitir una atmósfera singular sin perder fuerza rítmica. Por su frescura y carácter sonoro auténtico, ha sido seleccionada para rotar en nuestra playlist oficial <em>"${escapeHtml(finalPlaylistName)}"</em> en Spotify.</p>
 
-        ${spotifyEmbedHtml}
+        ${playlistComponentHtml}
 
         <p>Sigue de cerca a <strong>${escapeHtml(artist_name)}</strong> y escucha la canción completa directamente en nuestras listas oficiales para apoyar su crecimiento orgánico.</p>
       `;
 
-      let finalCover = cover_url ? cover_url.trim() : '';
+      // Subir mockups oficiales a Cloudinary si fueron generados
+      let uploadedPostMockup = null;
+      if (post_mockup_url) {
+        uploadedPostMockup = await uploadImageToCloudinary(post_mockup_url);
+      }
+      let uploadedStoryMockup = null;
+      if (story_mockup_url) {
+        uploadedStoryMockup = await uploadImageToCloudinary(story_mockup_url);
+      }
+
+      let finalCover = uploadedPostMockup || (cover_url ? cover_url.trim() : '');
       if (!finalCover && spotify_url) {
         finalCover = await fetchSpotifyTrackCover(spotify_url);
       }
@@ -176,6 +251,8 @@ REGLAS CRÍTICAS:
         author_role: 'Curador & Fundador TNIW',
         author_avatar: 'rodrigo_studio_web.jpg',
         image_url: finalCover,
+        post_mockup_url: uploadedPostMockup || null,
+        story_mockup_url: uploadedStoryMockup || null,
         read_time: '1.5 min',
         tags: [artist_name, genre || 'Indie', 'Radar TNIW', 'Lanzamiento'],
         featured: false,
@@ -373,7 +450,26 @@ async function uploadImageToCloudinary(remoteImageUrl) {
 async function pushArticleToSocialHub(article) {
   if (!article) return false;
   try {
-    const finalImageUrl = await uploadImageToCloudinary(article.image_url);
+    const isTrack = (article.category === 'Artistas en el Radar') ||
+                    (article.title || '').toLowerCase().includes('descubrimiento radar') ||
+                    (article.slug || '').startsWith('radar-tniw-');
+
+    // Mockup cuadrado para el Feed (Facebook, Instagram, Threads, X, TikTok)
+    let finalPostImageUrl = null;
+    if (article.post_mockup_url) {
+      finalPostImageUrl = await uploadImageToCloudinary(article.post_mockup_url);
+    } else {
+      finalPostImageUrl = await uploadImageToCloudinary(article.image_url);
+    }
+
+    // Mockup vertical para Stories (Facebook, Instagram)
+    let finalStoryImageUrl = null;
+    if (article.story_mockup_url) {
+      finalStoryImageUrl = await uploadImageToCloudinary(article.story_mockup_url);
+    } else {
+      finalStoryImageUrl = finalPostImageUrl;
+    }
+
     const postGroupId = `grp_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 7)}`;
     const nowIso = new Date().toISOString();
     const nowObj = new Date();
@@ -391,10 +487,6 @@ async function pushArticleToSocialHub(article) {
       : (article.slug ? (article.slug.split('-').pop() || article.slug) : '');
     const url = `https://thenewindiewave.online/b/${shortCode || encodeURIComponent(article.slug || '')}`;
 
-    const isTrack = (article.category === 'Artistas en el Radar') ||
-                    title.toLowerCase().includes('descubrimiento radar') ||
-                    (article.slug || '').startsWith('radar-tniw-');
-
     const copyText = isTrack
       ? `🚨 ¡NUEVO TRACK EN EL RADAR EDITORIAL! 📡✨\n\n"${title}"\n\n${cleanSummary}\n\n👉 Escucha el track y lee la reseña completa aquí:\n🔗 ${url}\n\n#TheNewIndieWave #ArtistasEnElRadar #Descubrimientos #MusicaNueva #IndieMusic`
       : `🚨 ¡NUEVA NOTA EN EL RADAR EDITORIAL! 🚨\n\n"${title}"\n\n${cleanSummary}\n\n👉 Lee la cobertura completa en el blog:\n🔗 ${url}\n\n#TheNewIndieWave #CulturaIndie #MusicaIndie #BlogMusical`;
@@ -402,8 +494,8 @@ async function pushArticleToSocialHub(article) {
     // 1. Post Feed (Facebook, Instagram, Threads, X, TikTok)
     const feedBundle = {
       id: Math.random().toString(36).substr(2, 9),
-      media: finalImageUrl,
-      mediaUrls: [finalImageUrl],
+      media: finalPostImageUrl,
+      mediaUrls: [finalPostImageUrl],
       mediaType: 'photo',
       original_filename: `tniw_post_${article.slug || 'art'}.png`,
       post_group_id: postGroupId,
@@ -424,7 +516,7 @@ async function pushArticleToSocialHub(article) {
     const recordFeed = {
       brand_id: '6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c',
       content: copyText,
-      media_url: finalImageUrl,
+      media_url: finalPostImageUrl,
       platforms: ['facebook', 'instagram', 'threads', 'x', 'tiktok'],
       platform_post_types: {
         facebook: 'post',
@@ -442,8 +534,8 @@ async function pushArticleToSocialHub(article) {
     // 2. Story (Facebook, Instagram)
     const storyBundle = {
       id: Math.random().toString(36).substr(2, 9),
-      media: finalImageUrl,
-      mediaUrls: [finalImageUrl],
+      media: finalStoryImageUrl,
+      mediaUrls: [finalStoryImageUrl],
       mediaType: 'photo',
       original_filename: `tniw_story_${article.slug || 'art'}.png`,
       post_group_id: postGroupId,
@@ -461,7 +553,7 @@ async function pushArticleToSocialHub(article) {
     const recordStory = {
       brand_id: '6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c',
       content: copyText,
-      media_url: finalImageUrl,
+      media_url: finalStoryImageUrl,
       platforms: ['facebook', 'instagram'],
       platform_post_types: {
         facebook: 'story',

@@ -10,8 +10,8 @@
       "destination": "/api/generate-article"
     },
     {
-      "source": "/b/:code",
-      "destination": "/blog.html"
+      "source": "/b/:code*",
+      "destination": "/api/b?code=:code"
     }
   ],
   "headers": [
