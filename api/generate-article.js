@@ -274,7 +274,32 @@ REGLAS CRÍTICAS:
         auto_publish,
         liveFacts
       });
+
+      // Generar Mockups Oficiales de TNIW (Post 1:1 y Story 9:16) con foto extraída/resuelta, título y resumen
+      let mockups = { postMockupUrl: null, storyMockupUrl: null };
+      try {
+        mockups = await generateNewsMockups({
+          title: articlePayload.title,
+          summary: articlePayload.summary,
+          imageUrl: articlePayload.image_url,
+          region: 'México',
+          category: articlePayload.category || category
+        });
+      } catch (mErr) {
+        console.warn('[generate-article] Error generando mockups:', mErr.message);
+      }
+
+      if (mockups.postMockupUrl) {
+        articlePayload.image_url = mockups.postMockupUrl;
+      }
+      articlePayload.post_mockup_url = mockups.postMockupUrl || articlePayload.image_url;
+      articlePayload.story_mockup_url = mockups.storyMockupUrl || mockups.postMockupUrl || articlePayload.image_url;
     }
+
+    // Preparar payload para Supabase (eliminando columnas que no existen en la base de datos)
+    const supabasePayload = { ...articlePayload };
+    delete supabasePayload.post_mockup_url;
+    delete supabasePayload.story_mockup_url;
 
     // Inyectar en Supabase
     const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/articles`, {
@@ -285,7 +310,7 @@ REGLAS CRÍTICAS:
         'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
         'Prefer': 'return=representation'
       },
-      body: JSON.stringify(articlePayload)
+      body: JSON.stringify(supabasePayload)
     });
 
     if (!insertRes.ok) {
@@ -382,7 +407,12 @@ REGLAS CRÍTICAS:
     // Auto-publicar automáticamente en Social Hub (Post en FB, IG, Threads, X, TikTok + Story en FB, IG)
     let socialHubSuccess = false;
     try {
-      socialHubSuccess = await pushArticleToSocialHub(insertedData && insertedData[0] ? insertedData[0] : articlePayload);
+      const hubData = {
+        ...(insertedData && insertedData[0] ? insertedData[0] : articlePayload),
+        post_mockup_url: articlePayload.post_mockup_url,
+        story_mockup_url: articlePayload.story_mockup_url
+      };
+      socialHubSuccess = await pushArticleToSocialHub(hubData);
     } catch (shErr) {
       console.warn('[generate-article] Error auto-publicando en Social Hub:', shErr);
     }
@@ -405,6 +435,322 @@ REGLAS CRÍTICAS:
   } catch (error) {
     console.error('Error en generate-article:', error);
     return res.status(500).json({ error: error.message || 'Error interno del servidor' });
+  }
+}
+
+// ==============================================================================
+// GENERADOR DE MOCKUPS EDITORIALES TNIW (POST 1:1 Y STORY 9:16)
+// ==============================================================================
+function wrapTextToLines(text, maxCharsPerLine) {
+  if (!text) return [];
+  const words = text.trim().split(/\s+/);
+  const lines = [];
+  let currentLine = '';
+
+  for (const word of words) {
+    if ((currentLine + ' ' + word).trim().length <= maxCharsPerLine) {
+      currentLine = (currentLine + ' ' + word).trim();
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+
+function escapeXml(unsafe) {
+  if (!unsafe) return '';
+  return unsafe.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+async function fetchImageAsBase64(url) {
+  if (!url || !url.startsWith('http')) return null;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4500);
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 TNIW/1.0',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    const contentType = res.headers.get('content-type') || 'image/jpeg';
+    const buffer = Buffer.from(await res.arrayBuffer());
+    return `data:${contentType};base64,${buffer.toString('base64')}`;
+  } catch (e) {
+    return null;
+  }
+}
+
+function buildPostMockupSvg({ title, summary, imageBase64, region = 'México', category = 'Cultura Indie' }) {
+  const W = 1080;
+  const H = 1080;
+
+  const rawTitleLines = wrapTextToLines(title, 34);
+  const titleLines = rawTitleLines.slice(0, 3);
+  if (rawTitleLines.length > 3 && titleLines[2]) {
+    titleLines[2] = titleLines[2].replace(/[.,:;]?$/, '...');
+  }
+
+  const rawSummaryLines = wrapTextToLines(summary, 52);
+  const summaryLines = rawSummaryLines.slice(0, 3);
+  if (rawSummaryLines.length > 3 && summaryLines[2]) {
+    summaryLines[2] = summaryLines[2].replace(/[.,:;]?$/, '...');
+  }
+
+  const titleTspans = titleLines.map((line, i) => 
+    `<tspan x="${W / 2}" dy="${i === 0 ? 0 : 44}">${escapeXml(line)}</tspan>`
+  ).join('');
+
+  const summaryTspans = summaryLines.map((line, i) => 
+    `<tspan x="${W / 2}" dy="${i === 0 ? 0 : 32}">${escapeXml(line)}</tspan>`
+  ).join('');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+  <defs>
+    <clipPath id="postImgClip">
+      <rect x="70" y="180" width="940" height="480" rx="20"/>
+    </clipPath>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0c0d12"/>
+      <stop offset="50%" stop-color="#08080a"/>
+      <stop offset="100%" stop-color="#050507"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="${W}" height="${H}" fill="url(#bgGrad)"/>
+
+  <g stroke="rgba(255,255,255,0.025)" stroke-width="1">
+    <line x1="0" y1="120" x2="${W}" y2="120"/>
+    <line x1="0" y1="240" x2="${W}" y2="240"/>
+    <line x1="0" y1="360" x2="${W}" y2="360"/>
+    <line x1="0" y1="480" x2="${W}" y2="480"/>
+    <line x1="0" y1="600" x2="${W}" y2="600"/>
+    <line x1="0" y1="720" x2="${W}" y2="720"/>
+    <line x1="0" y1="840" x2="${W}" y2="840"/>
+    <line x1="0" y1="960" x2="${W}" y2="960"/>
+    <line x1="120" y1="0" x2="120" y2="${H}"/>
+    <line x1="240" y1="0" x2="240" y2="${H}"/>
+    <line x1="360" y1="0" x2="360" y2="${H}"/>
+    <line x1="480" y1="0" x2="480" y2="${H}"/>
+    <line x1="600" y1="0" x2="600" y2="${H}"/>
+    <line x1="720" y1="0" x2="720" y2="${H}"/>
+    <line x1="840" y1="0" x2="840" y2="${H}"/>
+    <line x1="960" y1="0" x2="960" y2="${H}"/>
+  </g>
+
+  <rect x="35" y="35" width="1010" height="1010" fill="none" stroke="rgba(187, 244, 81, 0.35)" stroke-width="2.5" rx="26"/>
+  <rect x="39" y="39" width="1002" height="1002" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1" rx="22"/>
+
+  <text x="${W / 2}" y="92" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="34" font-weight="900" text-anchor="middle" letter-spacing="4">THE NEW INDIE WAVE</text>
+  
+  <rect x="${(W - 320) / 2}" y="115" width="320" height="34" rx="17" fill="rgba(187, 244, 81, 0.12)" stroke="rgba(187, 244, 81, 0.5)" stroke-width="1.5"/>
+  <text x="${W / 2}" y="138" fill="#bbf451" font-family="'Courier New', Courier, monospace" font-size="15" font-weight="bold" text-anchor="middle" letter-spacing="2">RADAR EDITORIAL // ${escapeXml(region).toUpperCase()}</text>
+
+  <rect x="68" y="178" width="944" height="484" rx="22" fill="#141419" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+  <g clip-path="url(#postImgClip)">
+    <image href="${imageBase64}" x="70" y="180" width="940" height="480" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+
+  <rect x="90" y="200" width="170" height="32" rx="6" fill="rgba(9, 9, 11, 0.88)" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+  <text x="175" y="221" fill="#38bdf8" font-family="'Courier New', Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle" letter-spacing="1">⚡ NOTICIA FLASH</text>
+
+  <g transform="translate(0, 715)">
+    <text x="${W / 2}" y="0" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="35" font-weight="900" text-anchor="middle" letter-spacing="-0.5">
+      ${titleTspans}
+    </text>
+  </g>
+
+  <g transform="translate(0, 855)">
+    <text x="${W / 2}" y="0" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="400" text-anchor="middle" letter-spacing="0.2">
+      ${summaryTspans}
+    </text>
+  </g>
+
+  <g transform="translate(${(W - 480) / 2}, 960)">
+    <rect width="480" height="52" rx="26" fill="#bbf451"/>
+    <text x="240" y="32" fill="#09090b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="900" text-anchor="middle" letter-spacing="1">LEER NOTA COMPLETA ↗  thenewindiewave.online</text>
+  </g>
+</svg>`;
+}
+
+function buildStoryMockupSvg({ title, summary, imageBase64, region = 'México', category = 'Cultura Indie' }) {
+  const W = 1080;
+  const H = 1920;
+
+  const rawTitleLines = wrapTextToLines(title, 32);
+  const titleLines = rawTitleLines.slice(0, 4);
+  if (rawTitleLines.length > 4 && titleLines[3]) {
+    titleLines[3] = titleLines[3].replace(/[.,:;]?$/, '...');
+  }
+
+  const rawSummaryLines = wrapTextToLines(summary, 46);
+  const summaryLines = rawSummaryLines.slice(0, 5);
+  if (rawSummaryLines.length > 5 && summaryLines[4]) {
+    summaryLines[4] = summaryLines[4].replace(/[.,:;]?$/, '...');
+  }
+
+  const titleTspans = titleLines.map((line, i) => 
+    `<tspan x="${W / 2}" dy="${i === 0 ? 0 : 56}">${escapeXml(line)}</tspan>`
+  ).join('');
+
+  const summaryTspans = summaryLines.map((line, i) => 
+    `<tspan x="${W / 2}" dy="${i === 0 ? 0 : 40}">${escapeXml(line)}</tspan>`
+  ).join('');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+  <defs>
+    <clipPath id="storyImgClip">
+      <rect x="80" y="300" width="920" height="740" rx="28"/>
+    </clipPath>
+    <linearGradient id="bgStoryGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0e1017"/>
+      <stop offset="40%" stop-color="#08090d"/>
+      <stop offset="100%" stop-color="#040507"/>
+    </linearGradient>
+    <radialGradient id="glowTop" cx="80%" cy="15%" r="40%">
+      <stop offset="0%" stop-color="rgba(56, 189, 248, 0.18)"/>
+      <stop offset="100%" stop-color="rgba(56, 189, 248, 0.2)"/>
+    </radialGradient>
+    <radialGradient id="glowBottom" cx="20%" cy="85%" r="40%">
+      <stop offset="0%" stop-color="rgba(187, 244, 81, 0.15)"/>
+      <stop offset="100%" stop-color="rgba(187, 244, 81, 0)"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="${W}" height="${H}" fill="url(#bgStoryGrad)"/>
+  <rect width="${W}" height="${H}" fill="url(#glowTop)"/>
+  <rect width="${W}" height="${H}" fill="url(#glowBottom)"/>
+
+  <rect x="40" y="60" width="1000" height="1800" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2" rx="36"/>
+
+  <text x="${W / 2}" y="145" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="38" font-weight="900" text-anchor="middle" letter-spacing="4">THE NEW INDIE WAVE</text>
+  <text x="${W / 2}" y="190" fill="#bbf451" font-family="'Courier New', Courier, monospace" font-size="20" font-weight="bold" text-anchor="middle" letter-spacing="3">// NOTICIAS &amp; RADAR EDITORIAL //</text>
+
+  <rect x="${(W - 280) / 2}" y="220" width="280" height="42" rx="21" fill="rgba(187, 244, 81, 0.12)" stroke="#bbf451" stroke-width="1.5"/>
+  <text x="${W / 2}" y="247" fill="#bbf451" font-family="'Courier New', Courier, monospace" font-size="16" font-weight="bold" text-anchor="middle" letter-spacing="2">${escapeXml(region).toUpperCase()}</text>
+
+  <rect x="76" y="296" width="928" height="748" rx="30" fill="#141419" stroke="rgba(255,255,255,0.18)" stroke-width="2.5"/>
+  <g clip-path="url(#storyImgClip)">
+    <image href="${imageBase64}" x="80" y="300" width="920" height="740" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+
+  <rect x="110" y="330" width="210" height="40" rx="8" fill="rgba(9, 9, 11, 0.88)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+  <text x="215" y="356" fill="#38bdf8" font-family="'Courier New', Courier, monospace" font-size="14" font-weight="bold" text-anchor="middle" letter-spacing="1">⚡ RADAR NOTICIAS</text>
+
+  <g transform="translate(0, 1120)">
+    <text x="${W / 2}" y="0" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="44" font-weight="900" text-anchor="middle" letter-spacing="-0.5">
+      ${titleTspans}
+    </text>
+  </g>
+
+  <g transform="translate(0, 1360)">
+    <text x="${W / 2}" y="0" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="28" font-weight="400" text-anchor="middle" letter-spacing="0.2">
+      ${summaryTspans}
+    </text>
+  </g>
+
+  <line x1="200" y1="1610" x2="880" y2="1610" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+
+  <g transform="translate(${(W - 600) / 2}, 1670)">
+    <rect width="600" height="76" rx="38" fill="#bbf451"/>
+    <text x="300" y="47" fill="#09090b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="900" text-anchor="middle" letter-spacing="1">👉 LEE LA NOTA EN NUESTRA WEB</text>
+  </g>
+
+  <text x="${W / 2}" y="1800" fill="#94a3b8" font-family="'Courier New', Courier, monospace" font-size="20" font-weight="bold" text-anchor="middle" letter-spacing="2">thenewindiewave.online/blog</text>
+</svg>`;
+}
+
+async function uploadSvgAsPngToCloudinary(svgContent, namePrefix = 'mockup') {
+  if (!svgContent) return null;
+  try {
+    const cloudName = 'ckknw1do';
+    const apiKey = '576643641599951';
+    const apiSecret = 'BqRSk2zRcn2-BtMi9BIHHiRyTfQ';
+    const folder = 'social-hub/6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c';
+    const timestamp = Math.floor(Date.now() / 1000);
+
+    const strToSign = `folder=${folder}&format=png&timestamp=${timestamp}${apiSecret}`;
+    const signature = crypto.createHash('sha1').update(strToSign).digest('hex');
+
+    const dataUri = `data:image/svg+xml;base64,${Buffer.from(svgContent).toString('base64')}`;
+
+    const body = new URLSearchParams();
+    body.append('file', dataUri);
+    body.append('api_key', apiKey);
+    body.append('timestamp', timestamp.toString());
+    body.append('signature', signature);
+    body.append('folder', folder);
+    body.append('format', 'png');
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.secure_url) return data.secure_url;
+    } else {
+      const errText = await res.text();
+      console.warn('[Cloudinary SVG Upload Error]:', errText);
+    }
+  } catch (err) {
+    console.warn('[Cloudinary SVG Exception]:', err.message);
+  }
+  return null;
+}
+
+async function generateNewsMockups({ title, summary, imageUrl, region = 'México', category = 'Cultura Indie' }) {
+  try {
+    const fallbackUrl = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80';
+    let base64 = await fetchImageAsBase64(imageUrl);
+    if (!base64 && imageUrl !== fallbackUrl) {
+      base64 = await fetchImageAsBase64(fallbackUrl);
+    }
+    if (!base64) return { postMockupUrl: null, storyMockupUrl: null };
+
+    const cleanTitle = (title || '').replace(/\s+/g, ' ').trim();
+    const cleanSummary = (summary || '')
+      .replace(/<[^>]*>?/gm, '')
+      .replace(/\s*[\.\s]*(?:cobertura\s+(?:v[ií]a|por)|v[ií]a\b|fuente\s*:|prensa\s*:)\s+[^.\n!]+[.\n!]?/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const postSvg = buildPostMockupSvg({
+      title: cleanTitle,
+      summary: cleanSummary,
+      imageBase64: base64,
+      region,
+      category
+    });
+
+    const storySvg = buildStoryMockupSvg({
+      title: cleanTitle,
+      summary: cleanSummary,
+      imageBase64: base64,
+      region,
+      category
+    });
+
+    const [postMockupUrl, storyMockupUrl] = await Promise.all([
+      uploadSvgAsPngToCloudinary(postSvg, 'post'),
+      uploadSvgAsPngToCloudinary(storySvg, 'story')
+    ]);
+
+    return { postMockupUrl, storyMockupUrl };
+  } catch (err) {
+    console.warn('[generateNewsMockups Error]:', err);
+    return { postMockupUrl: null, storyMockupUrl: null };
   }
 }
 
