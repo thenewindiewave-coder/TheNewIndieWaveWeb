@@ -279,6 +279,19 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    white-space: nowrap;
+  }
+
+  .sla-normal {
+    background: rgba(187, 244, 81, 0.1);
+    color: var(--accent-lime);
+    border: 1px solid rgba(187, 244, 81, 0.25);
+  }
+
+  .sla-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.35);
   }
 
   .sla-urgent {
@@ -287,10 +300,11 @@
     border: 1px solid rgba(239, 68, 68, 0.3);
   }
 
-  .sla-normal {
-    background: rgba(187, 244, 81, 0.1);
-    color: var(--accent-lime);
-    border: 1px solid rgba(187, 244, 81, 0.25);
+  .sla-overdue {
+    background: rgba(239, 68, 68, 0.22);
+    color: #ff5555;
+    border: 1px solid #ef4444;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);
   }
 
   /* SPOTIFY PLAYER EMBED WRAP */
@@ -1616,6 +1630,65 @@
     }).join('');
   }
 
+  // Medidor y cronómetro en tiempo real de 48h para curador
+  function formatSlaBadge(item, tab) {
+    var isBoost = item.tier === 'boost';
+
+    // En pestañas de Aceptadas o Declinadas, ya no corre el cronómetro de 48h
+    if (tab === 'accepted' || tab === 'rejected') {
+      if (isBoost) {
+        return '<span class="sla-badge sla-urgent" title="Envío con prioridad Impulso">⚡ IMPULSO</span>';
+      }
+      return ''; // No mostrar insignia de 48H en tracks ya resueltos
+    }
+
+    // Tab PENDIENTE: Medir tiempo transcurrido desde que llegó (created_at) hacia las 48h
+    var createdTime = item.created_at ? new Date(item.created_at).getTime() : 0;
+    var now = Date.now();
+    var diffMs = (createdTime > 0 && !isNaN(createdTime)) ? (now - createdTime) : 0;
+    var totalMins = Math.max(0, Math.floor(diffMs / (60 * 1000)));
+    var hours = Math.floor(totalMins / 60);
+    var mins = totalMins % 60;
+
+    var formattedArrival = (createdTime > 0 && !isNaN(createdTime))
+      ? new Date(createdTime).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
+      : 'Reciente';
+
+    if (isBoost) {
+      return '<span class="sla-badge sla-urgent" title="Llegó: ' + formattedArrival + ' (Lleva ' + hours + 'h ' + mins + 'm)">⚡ IMPULSO • ' + hours + 'h ' + mins + 'm</span>';
+    }
+
+    // Plan Estándar (Meta editorial: 48h)
+    if (hours < 24) {
+      // 🟢 Verde: Menos de 24 horas transcurridas
+      return '<span class="sla-badge sla-normal" title="Llegó: ' + formattedArrival + ' | Meta: 48h">⏳ ' + hours + 'h ' + mins + 'm / 48h</span>';
+    } else if (hours < 40) {
+      // 🟡 Amarillo: Entre 24h y 40h
+      return '<span class="sla-badge sla-warning" title="Llegó: ' + formattedArrival + ' | En seguimiento">⏳ ' + hours + 'h ' + mins + 'm / 48h</span>';
+    } else if (hours < 48) {
+      // 🟠 Naranja / Urgente: Entre 40h y 48h
+      var remainingHours = 48 - hours;
+      return '<span class="sla-badge sla-urgent" title="Llegó: ' + formattedArrival + ' | ¡Quedan ~' + remainingHours + 'h!">⚠️ ' + hours + 'h ' + mins + 'm / 48h</span>';
+    } else {
+      // 🔴 Rojo: Excedió las 48 horas
+      var overdueHours = hours - 48;
+      return '<span class="sla-badge sla-overdue" title="Llegó: ' + formattedArrival + ' | Excedido por +' + overdueHours + 'h">🚨 +' + overdueHours + 'h VENCIDO (' + hours + 'h)</span>';
+    }
+  }
+
+  function updateSlaBadgesInPlace() {
+    if (currentTab !== 'pending') return;
+    var containers = document.querySelectorAll('.sla-timer-container[data-id]');
+    containers.forEach(function(el) {
+      var id = el.getAttribute('data-id');
+      var sub = allSubmissions.find(function(s) { return String(s.id) === String(id); });
+      if (sub) {
+        el.innerHTML = formatSlaBadge(sub, currentTab);
+      }
+    });
+  }
+  setInterval(updateSlaBadgesInPlace, 60000);
+
   // 4. Renderizado Compacto de Canciones
   function renderQueue() {
     var container = document.getElementById('queueContainer');
@@ -1787,7 +1860,7 @@
             </div>
 
             <div class="compact-right">
-              ${isBoost ? '<span class="sla-badge sla-urgent">⚡ IMPULSO</span>' : '<span class="sla-badge sla-normal">⏳ 48H</span>'}
+              <span class="sla-timer-container" data-id="${item.id}">${formatSlaBadge(item, currentTab)}</span>
               ${currentTab === 'accepted' ? '<span class="badge-status-accepted">✓ ACEPTADA</span>' : (currentTab === 'rejected' ? '<span class="badge-status-declined">✕ DECLINADA</span>' : '<span class="badge-status-pending">● EN COLA</span>')}
               <button class="btn-toggle-chevron ${isExpanded ? 'open' : ''}" id="chevron-${item.id}">▼</button>
             </div>

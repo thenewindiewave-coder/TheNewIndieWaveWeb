@@ -1254,6 +1254,15 @@
           if (accBox) accBox.style.display = 'none';
           if (decBox) decBox.style.display = 'none';
         }
+
+        if (record.created_at) {
+          var createdMs = new Date(record.created_at).getTime();
+          if (!isNaN(createdMs) && createdMs > 0) {
+            var deadlineMs = createdMs + (48 * 3600 * 1000);
+            var remainingSec = Math.floor((deadlineMs - Date.now()) / 1000);
+            totalSeconds = Math.max(0, remainingSec);
+          }
+        }
       }
     } catch(err){}
   }
