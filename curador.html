@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Chivo:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.youtube.com/iframe_api"></script>
 <style>
   :root {
     --bg: #09090b;
@@ -2657,7 +2658,13 @@
 
   function renderArtistCardHtml(a, isTop, indexInCat, totalInCat, globalIdx) {
     var mediaPreview = '';
-    if (a.media_url) {
+    var ytId = (typeof getYouTubeVideoId === 'function') ? getYouTubeVideoId(a.media_url) : null;
+    if (ytId) {
+      mediaPreview = `<div style="position:relative; width: 52px; height: 52px; border-radius: 6px; overflow: hidden; background: #000; flex-shrink: 0;">
+        <img src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+        <span style="position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.85); color: var(--accent-lime); font-size: 8px; font-family: var(--font-mono); padding: 1px 3px; border-radius: 2px; font-weight: 700;">▶ YT</span>
+      </div>`;
+    } else if (a.media_url) {
       if (a.media_url.endsWith('.mp4') || a.media_type === 'video') {
         mediaPreview = `<video src="${a.media_url}" style="width: 52px; height: 52px; border-radius: 6px; object-fit: cover; background: #000; flex-shrink: 0;" muted></video>`;
       } else {
@@ -3042,19 +3049,66 @@
               </div>
             </div>
 
-            <!-- FOTO / MULTIMEDIA CON SUBIDA DIRECTA DESDE CELULAR O PC -->
+            <!-- FOTO / MULTIMEDIA CON SUBIDA DIRECTA DESDE CELULAR O PC O YOUTUBE -->
             <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 14px;">
               <label style="display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 6px;">
-                📸 FOTO O VIDEO DEL ARTISTA (CLOUDINARY / URL)
+                📸 FOTO O VIDEO DEL ARTISTA (YOUTUBE / CLOUDINARY / URL)
               </label>
               
               <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px;">
-                <input type="text" id="rfMediaUrl" value="${artist ? (artist.media_url || '') : ''}" oninput="previewRadarMedia(this.value)" placeholder="https://res.cloudinary.com/... o URL directa" style="flex:1; min-width:200px; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
+                <input type="text" id="rfMediaUrl" value="${artist ? (artist.media_url || '') : ''}" oninput="handleRadarMediaInput(this.value)" placeholder="Pega link de YouTube (https://youtu.be/...) o Cloudinary / URL" style="flex:1; min-width:200px; background:#09090b; border:1px solid var(--border-strong); padding:9px 12px; color:#fff; border-radius:4px; font-size:13px;">
                 
                 <label style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 9px 14px; border-radius: 4px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
                   📁 Subir Archivo
                   <input type="file" accept="image/*,video/*" onchange="handleDirectFileUpload(this)" style="display: none;">
                 </label>
+              </div>
+
+              <!-- CONTROLES ESPECÍFICOS PARA LOOP DE 30s DE YOUTUBE -->
+              <div id="rfYoutubeLoopControls" style="display: none; background: rgba(0,0,0,0.65); border: 1px solid rgba(187,244,81,0.3); border-radius: 6px; padding: 12px; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                  <div>
+                    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                      <span>🔁 LOOP DE 30 SEGUNDOS (RESEÑA & RADAR)</span>
+                    </div>
+                    <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-top: 2px;">
+                      Indica en qué segundo del video empieza el loop de 30 segundos.
+                    </div>
+                  </div>
+                  <div id="rfYtLoopBadge" style="background: rgba(187,244,81,0.12); border: 1px solid var(--accent-lime); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px;">
+                    00:00 ➔ 00:30 (30 seg)
+                  </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <label style="font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-transform: uppercase;">Inicio:</label>
+                    <input type="number" id="rfMediaStart" min="0" step="1" value="${artist ? (artist.media_start || 0) : 0}" oninput="onRadarYtStartChange(this.value)" style="width: 75px; background: #09090b; border: 1px solid var(--accent-lime); color: var(--accent-lime); font-family: var(--font-mono); font-weight: 700; padding: 6px 8px; border-radius: 4px; font-size: 12px; text-align: center;">
+                    <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">seg</span>
+                  </div>
+
+                  <!-- Botones de ajuste y presets -->
+                  <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" onclick="adjustRadarYtStart(-5)" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 10.5px; padding: 5px 8px; border-radius: 3px; cursor: pointer;">-5s</button>
+                    <button type="button" onclick="adjustRadarYtStart(5)" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 10.5px; padding: 5px 8px; border-radius: 3px; cursor: pointer;">+5s</button>
+                    <button type="button" onclick="setRadarYtStart(0)" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 10.5px; padding: 5px 8px; border-radius: 3px; cursor: pointer;">0s</button>
+                    <button type="button" onclick="setRadarYtStart(15)" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 10.5px; padding: 5px 8px; border-radius: 3px; cursor: pointer;">15s</button>
+                    <button type="button" onclick="setRadarYtStart(30)" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 10.5px; padding: 5px 8px; border-radius: 3px; cursor: pointer;">30s</button>
+                    <button type="button" onclick="setRadarYtStart(60)" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 10.5px; padding: 5px 8px; border-radius: 3px; cursor: pointer;">60s</button>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+                  <button type="button" onclick="captureRadarYtCurrentTime()" style="background: rgba(56,189,248,0.15); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                    📍 Marcar segundo actual del reproductor
+                  </button>
+                  <button type="button" onclick="testRadarYtLoop()" style="background: rgba(187,244,81,0.15); border: 1px solid var(--accent-lime); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                    🔄 Probar Loop (30s)
+                  </button>
+                  <button type="button" id="rfYtAudioToggleBtn" onclick="toggleRadarYtAudio()" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-strong); color: #fff; font-family: var(--font-mono); font-size: 11px; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
+                    🔇 Silenciado
+                  </button>
+                </div>
               </div>
 
               <div id="rfUploadStatus" style="display:none; font-family: var(--font-mono); font-size: 11px; margin-bottom: 6px;"></div>
@@ -3164,11 +3218,19 @@
     document.body.appendChild(div.firstElementChild);
 
     if (artist && artist.media_url) {
-      previewRadarMedia(artist.media_url);
+      var initialStart = artist.media_start !== undefined ? artist.media_start : 0;
+      var startInput = document.getElementById('rfMediaStart');
+      if (startInput) startInput.value = initialStart;
+      if (typeof getYouTubeVideoId === 'function' && getYouTubeVideoId(artist.media_url)) {
+        var loopControls = document.getElementById('rfYoutubeLoopControls');
+        if (loopControls) loopControls.style.display = 'block';
+      }
+      previewRadarMedia(artist.media_url, initialStart);
     }
   }
 
   function closeRadarModal() {
+    clearRadarYouTubeLoop();
     var modal = document.getElementById('curatorRadarModal');
     if(modal) modal.remove();
   }
@@ -3180,7 +3242,10 @@
     list.sort(function(a, b){ return (parseInt(a.order, 10) || 999) - (parseInt(b.order, 10) || 999); });
     
     var mediaUrl = (document.getElementById('rfMediaUrl').value || '').trim();
-    var isVideo = mediaUrl.includes('/video/') || mediaUrl.endsWith('.mp4') || mediaUrl.endsWith('.webm') || mediaUrl.endsWith('.mov') || mediaUrl.startsWith('data:video');
+    var startInput = document.getElementById('rfMediaStart');
+    var mediaStart = startInput ? (parseInt(startInput.value, 10) || 0) : 0;
+    var isYt = (typeof getYouTubeVideoId === 'function') ? !!getYouTubeVideoId(mediaUrl) : false;
+    var isVideo = isYt || mediaUrl.includes('/video/') || mediaUrl.endsWith('.mp4') || mediaUrl.endsWith('.webm') || mediaUrl.endsWith('.mov') || mediaUrl.startsWith('data:video');
 
     // Normalizar Instagram
     var rawIg = (document.getElementById('rfInstagram').value || '').trim();
@@ -3213,6 +3278,7 @@
       badge: document.getElementById('rfBadge').value.trim().toUpperCase() || 'SOLISTA',
       media_type: isVideo ? 'video' : 'image',
       media_url: mediaUrl,
+      media_start: mediaStart,
       track_id: document.getElementById('rfTrackId').value.trim(),
       short_bio: document.getElementById('rfShortBio').value.trim(),
       full_review: document.getElementById('rfFullReview').value.trim(),
@@ -3374,6 +3440,8 @@
             var artistUrl = 'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(a.id);
             var dateStr = a.archived_at ? new Date(a.archived_at).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Archivado';
             var thumb = a.media_url || 'logo.png';
+            var archYtId = (typeof getYouTubeVideoId === 'function') ? getYouTubeVideoId(a.media_url) : null;
+            if (archYtId) thumb = 'https://img.youtube.com/vi/' + archYtId + '/hqdefault.jpg';
             return `
               <div class="track-item" style="padding: 12px 16px; border-left: 3px solid #a78bfa; background: rgba(167,139,250,0.03);">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
@@ -3432,15 +3500,260 @@
     }
   }
 
-  function previewRadarMedia(url) {
+  var curatorYtPlayer = null;
+  var curatorYtLoopTimer = null;
+  var curatorYtIsMuted = true;
+
+  function clearRadarYouTubeLoop() {
+    if (curatorYtLoopTimer) {
+      clearInterval(curatorYtLoopTimer);
+      curatorYtLoopTimer = null;
+    }
+    if (curatorYtPlayer) {
+      try {
+        if (typeof curatorYtPlayer.destroy === 'function') {
+          curatorYtPlayer.destroy();
+        }
+      } catch(e) {}
+      curatorYtPlayer = null;
+    }
+  }
+
+  function handleRadarMediaInput(url) {
+    var cleanUrl = (url || '').trim();
+    var ytId = (typeof getYouTubeVideoId === 'function') ? getYouTubeVideoId(cleanUrl) : null;
+    var loopControls = document.getElementById('rfYoutubeLoopControls');
+    
+    if (ytId) {
+      if (loopControls) loopControls.style.display = 'block';
+      var startInput = document.getElementById('rfMediaStart');
+      var detectedStart = (typeof extractYouTubeStart === 'function') ? extractYouTubeStart(cleanUrl) : 0;
+      var currentStart = startInput ? (parseInt(startInput.value, 10) || 0) : 0;
+      if (detectedStart > 0 && currentStart === 0) {
+        if (startInput) startInput.value = detectedStart;
+        currentStart = detectedStart;
+      }
+      previewRadarMedia(cleanUrl, currentStart);
+    } else {
+      if (loopControls) loopControls.style.display = 'none';
+      clearRadarYouTubeLoop();
+      previewRadarMedia(cleanUrl);
+    }
+  }
+
+  function updateRadarYtBadge(startSec) {
+    var s = Math.max(0, parseInt(startSec, 10) || 0);
+    var e = s + 30;
+    var badge = document.getElementById('rfYtLoopBadge');
+    if (badge) {
+      var fmt = (typeof formatSecondsToMMSS === 'function') ? formatSecondsToMMSS : function(n){ return n + 's'; };
+      badge.textContent = fmt(s) + ' ➔ ' + fmt(e) + ' (30 seg)';
+    }
+  }
+
+  function onRadarYtStartChange(val) {
+    var s = Math.max(0, parseInt(val, 10) || 0);
+    updateRadarYtBadge(s);
+    if (curatorYtPlayer && typeof curatorYtPlayer.seekTo === 'function') {
+      try {
+        curatorYtPlayer.seekTo(s, true);
+        curatorYtPlayer.playVideo();
+      } catch(e) {}
+    }
+  }
+
+  function adjustRadarYtStart(delta) {
+    var startInput = document.getElementById('rfMediaStart');
+    if (!startInput) return;
+    var current = parseInt(startInput.value, 10) || 0;
+    var next = Math.max(0, current + delta);
+    startInput.value = next;
+    onRadarYtStartChange(next);
+  }
+
+  function setRadarYtStart(seconds) {
+    var startInput = document.getElementById('rfMediaStart');
+    if (!startInput) return;
+    var next = Math.max(0, parseInt(seconds, 10) || 0);
+    startInput.value = next;
+    onRadarYtStartChange(next);
+  }
+
+  function captureRadarYtCurrentTime() {
+    if (!curatorYtPlayer || typeof curatorYtPlayer.getCurrentTime !== 'function') {
+      showToast('⚠️ Reproduce el video para capturar el segundo exacto');
+      return;
+    }
+    try {
+      var currentSec = Math.floor(curatorYtPlayer.getCurrentTime() || 0);
+      var startInput = document.getElementById('rfMediaStart');
+      if (startInput) startInput.value = currentSec;
+      onRadarYtStartChange(currentSec);
+      var fmt = (typeof formatSecondsToMMSS === 'function') ? formatSecondsToMMSS : function(n){ return n + 's'; };
+      showToast('✓ Segundo ' + currentSec + ' (' + fmt(currentSec) + ') marcado como inicio');
+    } catch(e) {
+      showToast('⚠️ No se pudo leer el tiempo actual');
+    }
+  }
+
+  function testRadarYtLoop() {
+    var startInput = document.getElementById('rfMediaStart');
+    var s = startInput ? (parseInt(startInput.value, 10) || 0) : 0;
+    if (curatorYtPlayer && typeof curatorYtPlayer.seekTo === 'function') {
+      try {
+        curatorYtPlayer.seekTo(s, true);
+        curatorYtPlayer.playVideo();
+        var fmt = (typeof formatSecondsToMMSS === 'function') ? formatSecondsToMMSS : function(n){ return n + 's'; };
+        showToast('▶️ Reproduciendo loop de 30s (' + fmt(s) + ' a ' + fmt(s + 30) + ')');
+      } catch(e) {}
+    }
+  }
+
+  function toggleRadarYtAudio() {
+    var btn = document.getElementById('rfYtAudioToggleBtn');
+    if (!curatorYtPlayer) return;
+    try {
+      if (curatorYtIsMuted) {
+        if (typeof curatorYtPlayer.unMute === 'function') curatorYtPlayer.unMute();
+        if (typeof curatorYtPlayer.setVolume === 'function') curatorYtPlayer.setVolume(100);
+        curatorYtIsMuted = false;
+        if (btn) {
+          btn.innerHTML = '🔊 Con Audio';
+          btn.style.color = 'var(--accent-lime)';
+          btn.style.borderColor = 'var(--accent-lime)';
+        }
+        showToast('🔊 Audio activado para la vista previa');
+      } else {
+        if (typeof curatorYtPlayer.mute === 'function') curatorYtPlayer.mute();
+        curatorYtIsMuted = true;
+        if (btn) {
+          btn.innerHTML = '🔇 Silenciado';
+          btn.style.color = '#fff';
+          btn.style.borderColor = 'var(--border-strong)';
+        }
+        showToast('🔇 Audio silenciado');
+      }
+    } catch(e) {}
+  }
+
+  function previewRadarMedia(url, explicitStart) {
     var prev = document.getElementById('rfMediaPreview');
     if (!prev) return;
     if (!url || !url.trim()) {
       prev.style.display = 'none';
       prev.innerHTML = '';
+      clearRadarYouTubeLoop();
       return;
     }
     var cleanUrl = url.trim();
+    var ytId = (typeof getYouTubeVideoId === 'function') ? getYouTubeVideoId(cleanUrl) : null;
+
+    if (ytId) {
+      clearRadarYouTubeLoop();
+      prev.style.display = 'block';
+
+      var loopControls = document.getElementById('rfYoutubeLoopControls');
+      if (loopControls) loopControls.style.display = 'block';
+
+      var startInput = document.getElementById('rfMediaStart');
+      var startSec = explicitStart !== undefined 
+        ? explicitStart 
+        : (startInput ? (parseInt(startInput.value, 10) || 0) : ((typeof extractYouTubeStart === 'function') ? extractYouTubeStart(cleanUrl) : 0));
+
+      updateRadarYtBadge(startSec);
+
+      var embedUrl = 'https://www.youtube-nocookie.com/embed/' + ytId + 
+        '?autoplay=1&mute=1&controls=1&loop=1&playlist=' + ytId + 
+        '&start=' + startSec + '&end=' + (startSec + 30) + 
+        '&playsinline=1&modestbranding=1&rel=0&enablejsapi=1';
+
+      prev.innerHTML = `
+        <div style="background: rgba(0,0,0,0.6); padding: 12px; border-radius: 6px; border: 1px solid rgba(187,244,81,0.35);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-lime); font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+              <span>▶ Video de YouTube Detectado (Loop 30 seg)</span>
+            </div>
+            <div id="rfYtPlaybackTime" style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan); font-weight: 600;">
+              00:00 / 00:00
+            </div>
+          </div>
+          <div style="position: relative; width: 100%; aspect-ratio: 16/9; max-height: 220px; border-radius: 6px; overflow: hidden; background: #000; box-shadow: 0 4px 20px rgba(0,0,0,0.6);">
+            <iframe id="curatorYtIframe" src="${embedUrl}" 
+              style="width: 100%; height: 100%; border: none; display: block;" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen></iframe>
+          </div>
+        </div>
+      `;
+
+      function setupCuratorPlayer() {
+        if (!document.getElementById('curatorYtIframe')) return;
+        try {
+          curatorYtPlayer = new YT.Player('curatorYtIframe', {
+            events: {
+              'onReady': function(e) {
+                try {
+                  e.target.seekTo(startSec, true);
+                  e.target.playVideo();
+                  if (curatorYtIsMuted && typeof e.target.mute === 'function') e.target.mute();
+                } catch(err) {}
+              },
+              'onStateChange': function(e) {
+                if (e.data === 0) { // ENDED
+                  var curS = document.getElementById('rfMediaStart') ? (parseInt(document.getElementById('rfMediaStart').value, 10) || 0) : startSec;
+                  try {
+                    e.target.seekTo(curS, true);
+                    e.target.playVideo();
+                  } catch(err) {}
+                }
+              }
+            }
+          });
+
+          curatorYtLoopTimer = setInterval(function() {
+            try {
+              if (curatorYtPlayer && typeof curatorYtPlayer.getCurrentTime === 'function') {
+                var curr = curatorYtPlayer.getCurrentTime();
+                var dur = typeof curatorYtPlayer.getDuration === 'function' ? curatorYtPlayer.getDuration() : 0;
+                var curS = document.getElementById('rfMediaStart') ? (parseInt(document.getElementById('rfMediaStart').value, 10) || 0) : startSec;
+                var curEnd = curS + 30;
+
+                var timeDisplay = document.getElementById('rfYtPlaybackTime');
+                if (timeDisplay) {
+                  var fmt = (typeof formatSecondsToMMSS === 'function') ? formatSecondsToMMSS : function(n){ return n + 's'; };
+                  timeDisplay.textContent = fmt(curr) + ' / ' + fmt(dur);
+                }
+
+                if (curr >= curEnd || (curr < curS && curr > 0.5)) {
+                  curatorYtPlayer.seekTo(curS, true);
+                }
+              }
+            } catch(e) {}
+          }, 400);
+
+        } catch(err) {
+          console.warn('Error iniciando curator YT player:', err);
+        }
+      }
+
+      if (window.YT && window.YT.Player) {
+        setupCuratorPlayer();
+      } else {
+        var waitYtCount = 0;
+        var waitYtInterval = setInterval(function() {
+          waitYtCount++;
+          if (window.YT && window.YT.Player) {
+            clearInterval(waitYtInterval);
+            setupCuratorPlayer();
+          } else if (waitYtCount > 30) {
+            clearInterval(waitYtInterval);
+          }
+        }, 150);
+      }
+      return;
+    }
+
+    clearRadarYouTubeLoop();
     var isVideo = cleanUrl.includes('/video/') || cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.mov') || cleanUrl.startsWith('data:video');
 
     prev.style.display = 'block';
@@ -5280,8 +5593,10 @@ ${playlistUrl}`;
       imageUrl = (artist && (artist.media_url || artist.image || artist.mediaUrl || artist.img || artist.cover)) || '';
       if (imageUrl) {
         imageUrl = imageUrl.trim();
-        // Si el archivo en Cloudinary es video, obtener el frame fotográfico en JPG con el offset configurado
-        if (imageUrl.includes('cloudinary.com')) {
+        var storyYtId = (typeof getYouTubeVideoId === 'function') ? getYouTubeVideoId(imageUrl) : null;
+        if (storyYtId) {
+          imageUrl = 'https://img.youtube.com/vi/' + storyYtId + '/hqdefault.jpg';
+        } else if (imageUrl.includes('cloudinary.com')) {
           imageUrl = imageUrl.replace(/\.(mp4|mov|webm|m4v)(\?.*)?$/i, '.jpg$2');
           var offsetSec = (_radarStoryVideoFrameOffset !== undefined && _radarStoryVideoFrameOffset !== null) ? _radarStoryVideoFrameOffset : 0;
           if (imageUrl.includes('/video/upload/')) {

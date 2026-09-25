@@ -58,7 +58,10 @@ module.exports = async (req, res) => {
 
   if (artist && artist.media_url) {
     const rawUrl = artist.media_url.trim();
-    if (rawUrl.endsWith('.mp4')) {
+    const ytMatch = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/i);
+    if (ytMatch) {
+      imgUrl = `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+    } else if (rawUrl.endsWith('.mp4')) {
       if (rawUrl.includes('res.cloudinary.com') && rawUrl.includes('/video/upload/')) {
         // Generar miniatura automática 1200x630 desde el video de Cloudinary
         let thumb = rawUrl.replace('/video/upload/', '/video/upload/so_auto,w_1200,h_630,c_fill,q_auto,f_jpg/');

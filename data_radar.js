@@ -15,13 +15,45 @@ function parseArtistOtherData(item) {
       if (parsed.order !== undefined && parsed.order !== null && !isNaN(parsed.order)) {
         item.order = parseInt(parsed.order, 10);
       }
+      if (parsed.media_start !== undefined && parsed.media_start !== null && !isNaN(parsed.media_start)) {
+        item.media_start = parseInt(parsed.media_start, 10);
+      }
     } catch(e) {}
   }
   if (item.order === undefined || item.order === null || isNaN(item.order)) {
     var match = (item.id || '').match(/radar-(\d+)/);
     item.order = match ? parseInt(match[1], 10) : 999;
   }
+  if (item.media_start === undefined && item.media_url) {
+    item.media_start = extractYouTubeStart(item.media_url);
+  }
   return item;
+}
+
+function getYouTubeVideoId(url) {
+  if (!url || typeof url !== 'string') return null;
+  var str = url.trim();
+  var match = str.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/i);
+  return match ? match[1] : null;
+}
+
+function extractYouTubeStart(url) {
+  if (!url || typeof url !== 'string') return 0;
+  var str = url.trim();
+  var tMatch = str.match(/[?&](?:t|start)=(\d+h)?(\d+m)?(\d+s?|\d+)/i);
+  if (!tMatch) return 0;
+  var hours = 0, mins = 0, secs = 0;
+  if (tMatch[1]) hours = parseInt(tMatch[1], 10) || 0;
+  if (tMatch[2]) mins = parseInt(tMatch[2], 10) || 0;
+  if (tMatch[3]) secs = parseInt(tMatch[3].replace('s',''), 10) || 0;
+  return (hours * 3600) + (mins * 60) + secs;
+}
+
+function formatSecondsToMMSS(seconds) {
+  var s = Math.max(0, Math.floor(seconds || 0));
+  var m = Math.floor(s / 60);
+  var remS = s % 60;
+  return (m < 10 ? '0' : '') + m + ':' + (remS < 10 ? '0' : '') + remS;
 }
 
 function isArtistArchived(item) {
@@ -173,6 +205,9 @@ async function saveRadarArtistToSupabase(artist) {
     if (artist.order !== undefined && artist.order !== null && !isNaN(artist.order)) {
       otherData.order = parseInt(artist.order, 10);
     }
+    if (artist.media_start !== undefined && artist.media_start !== null && !isNaN(artist.media_start)) {
+      otherData.media_start = parseInt(artist.media_start, 10);
+    }
 
     var payload = {
       id: artist.id,
@@ -299,6 +334,9 @@ async function unarchiveRadarArtistInSupabase(artistId, targetType, targetOrder)
     if (targetOrder !== undefined && targetOrder !== null) {
       otherData.order = targetOrder;
     }
+    if (artist.media_start !== undefined && artist.media_start !== null && !isNaN(artist.media_start)) {
+      otherData.media_start = parseInt(artist.media_start, 10);
+    }
 
     var payload = {
       id: artist.id,
@@ -409,5 +447,17 @@ if (typeof window !== 'undefined') {
   window.getArtistRadarUrl = getArtistRadarUrl;
   window.getArtistSocialShareUrl = getArtistSocialShareUrl;
   window.isArtistArchived = isArtistArchived;
+  window.getYouTubeVideoId = getYouTubeVideoId;
+  window.extractYouTubeStart = extractYouTubeStart;
+  window.formatSecondsToMMSS = formatSecondsToMMSS;
   window.RADAR_ARTISTS = getRadarArtists();
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    getYouTubeVideoId: getYouTubeVideoId,
+    extractYouTubeStart: extractYouTubeStart,
+    formatSecondsToMMSS: formatSecondsToMMSS,
+    parseArtistOtherData: parseArtistOtherData
+  };
 }
