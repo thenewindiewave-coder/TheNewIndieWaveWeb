@@ -5,22 +5,25 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.s
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
 export default async function handler(req, res) {
-  const { code, error } = req.query || {};
-
-  if (error || !code) {
-    return res.send(`
-      <html>
-        <body style="background:#09090b; color:#ef4444; font-family:sans-serif; text-align:center; padding:50px;">
-          <h2>❌ Error en la vinculación con Spotify</h2>
-          <p>${error || 'No se recibió código de autorización.'}</p>
-          <a href="/curador.html" style="color:#bbf451;">← Volver al Panel de Curador</a>
-        </body>
-      </html>
-    `);
-  }
-
   const isLocal = (req.headers.host || '').includes('localhost');
   const redirectUri = isLocal ? 'http://localhost:3000/api/spotify-callback' : 'https://thenewindiewave.online/api/spotify-callback';
+
+  const { code, error, action } = req.query || {};
+
+  // Si se solicita login o no viene código/error, redirigir a autorización de Spotify
+  if (action === 'login' || (!code && !error)) {
+    const scopes = [
+      'playlist-modify-public',
+      'playlist-modify-private',
+      'playlist-read-private',
+      'playlist-read-collaborative',
+      'user-read-private',
+      'user-read-email'
+    ].join(' ');
+
+    const authUrl = `https://accounts.spotify.com/authorize?response_type=code&client_id=${SPOTIFY_CLIENT_ID}&scope=${encodeURIComponent(scopes)}&redirect_uri=${encodeURIComponent(redirectUri)}&show_dialog=true`;
+    return res.redirect(authUrl);
+  }
 
   try {
     const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');

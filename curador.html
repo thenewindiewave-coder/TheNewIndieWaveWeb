@@ -3693,10 +3693,11 @@
     }
 
     try {
-      var res = await fetch('/api/extract-youtube-loop', {
+      var res = await fetch('/api/upload?action=youtube-loop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'youtube-loop',
           url: rawUrl,
           start: startSec,
           duration: 30

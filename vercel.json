@@ -27,6 +27,14 @@
       "destination": "/api/generate-article"
     },
     {
+      "source": "/api/spotify-login",
+      "destination": "/api/spotify-callback?action=login"
+    },
+    {
+      "source": "/api/extract-youtube-loop",
+      "destination": "/api/upload?action=youtube-loop"
+    },
+    {
       "source": "/b",
       "destination": "/blog"
     },
