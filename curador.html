@@ -3109,6 +3109,16 @@
                     🔇 Silenciado
                   </button>
                 </div>
+
+                <!-- Botón de extracción a Cloudinary -->
+                <div style="margin-top: 10px; border-top: 1px dashed rgba(187,244,81,0.3); padding-top: 10px;">
+                  <button type="button" id="rfBtnConvertYtToCloudinary" onclick="convertAndUploadYouTubeLoop()" style="width: 100%; background: linear-gradient(135deg, rgba(187,244,81,0.2) 0%, rgba(56,189,248,0.2) 100%); border: 1px solid var(--accent-lime); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 9px 14px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s ease;">
+                    <span>⚡ Extraer loop de 30s y subir a Cloudinary (MP4 Nativo)</span>
+                  </button>
+                  <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-top: 4px; text-align: center;">
+                    Corta los 30 segundos seleccionados sin marcas ni controles de YouTube y los aloja como MP4 nativo.
+                  </div>
+                </div>
               </div>
 
               <div id="rfUploadStatus" style="display:none; font-family: var(--font-mono); font-size: 11px; margin-bottom: 6px;"></div>
@@ -3245,6 +3255,20 @@
     var startInput = document.getElementById('rfMediaStart');
     var mediaStart = startInput ? (parseInt(startInput.value, 10) || 0) : 0;
     var isYt = (typeof getYouTubeVideoId === 'function') ? !!getYouTubeVideoId(mediaUrl) : false;
+
+    // Si aún tiene URL de YouTube, auto-convertimos el loop de 30s y lo subimos a Cloudinary antes de guardar
+    if (isYt) {
+      if (typeof convertAndUploadYouTubeLoop === 'function') {
+        var convertedUrl = await convertAndUploadYouTubeLoop();
+        if (!convertedUrl) {
+          alert('No se pudo convertir el video de YouTube a Cloudinary. Por favor verifica la URL e intenta nuevamente.');
+          return;
+        }
+        mediaUrl = convertedUrl;
+        isYt = false;
+      }
+    }
+
     var isVideo = isYt || mediaUrl.includes('/video/') || mediaUrl.endsWith('.mp4') || mediaUrl.endsWith('.webm') || mediaUrl.endsWith('.mov') || mediaUrl.startsWith('data:video');
 
     // Normalizar Instagram
@@ -3634,6 +3658,87 @@
         showToast('🔇 Audio silenciado');
       }
     } catch(e) {}
+  }
+
+  async function convertAndUploadYouTubeLoop() {
+    var mediaUrlInput = document.getElementById('rfMediaUrl');
+    if (!mediaUrlInput) return null;
+    var rawUrl = (mediaUrlInput.value || '').trim();
+    if (!rawUrl) {
+      showToast('⚠️ Ingresa una URL de YouTube primero');
+      return null;
+    }
+    var isYt = (typeof getYouTubeVideoId === 'function') ? !!getYouTubeVideoId(rawUrl) : false;
+    if (!isYt) {
+      return rawUrl;
+    }
+
+    var startInput = document.getElementById('rfMediaStart');
+    var startSec = startInput ? (parseInt(startInput.value, 10) || 0) : 0;
+
+    var statusEl = document.getElementById('rfUploadStatus');
+    var btn = document.getElementById('rfBtnConvertYtToCloudinary');
+    var originalBtnText = btn ? btn.innerHTML : '';
+
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+      btn.innerHTML = '<span>⏳ Extrayendo loop de 30s y subiendo a Cloudinary... (espera ~10s)</span>';
+    }
+
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = 'var(--accent-lime)';
+      statusEl.textContent = '⏳ Extrayendo 30s de YouTube y subiendo a Cloudinary... por favor espera.';
+    }
+
+    try {
+      var res = await fetch('/api/extract-youtube-loop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: rawUrl,
+          start: startSec,
+          duration: 30
+        })
+      });
+
+      var data = await res.json();
+      if (!res.ok || !data.success || !data.url) {
+        throw new Error(data.error || 'Error al procesar el loop de YouTube');
+      }
+
+      // Asignar la URL del video MP4 en Cloudinary
+      mediaUrlInput.value = data.url;
+
+      // Ocultar controles de loop de YouTube
+      var loopControls = document.getElementById('rfYoutubeLoopControls');
+      if (loopControls) loopControls.style.display = 'none';
+
+      // Previsualizar el nuevo video MP4
+      previewRadarMedia(data.url);
+
+      if (statusEl) {
+        statusEl.style.color = 'var(--accent-lime)';
+        statusEl.textContent = '✓ ¡Loop de 30s guardado en Cloudinary con éxito!';
+      }
+      showToast('✓ Video loop de 30s extraído y subido a Cloudinary');
+      return data.url;
+    } catch(err) {
+      console.error('Error en convertAndUploadYouTubeLoop:', err);
+      if (statusEl) {
+        statusEl.style.color = '#ef4444';
+        statusEl.textContent = '✕ Error: ' + (err.message || 'No se pudo procesar');
+      }
+      showToast('✕ Error al extraer video: ' + (err.message || 'Error desconocido'));
+      return null;
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.innerHTML = originalBtnText;
+      }
+    }
   }
 
   function previewRadarMedia(url, explicitStart) {
