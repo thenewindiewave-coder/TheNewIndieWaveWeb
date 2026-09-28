@@ -20,7 +20,31 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
-    return res.status(200).json({ status: 'ok', service: 'TNIW Telegram Webhook Active' });
+    let webhookStatus = 'unknown';
+    try {
+      const infoRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo`);
+      if (infoRes.ok) {
+        const info = await infoRes.json();
+        const expectedUrl = 'https://thenewindiewave.online/api/telegram-webhook';
+        if (!info.result?.url || info.result.url !== expectedUrl) {
+          const setRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              url: expectedUrl,
+              allowed_updates: ['message', 'callback_query']
+            })
+          });
+          const setData = await setRes.json();
+          webhookStatus = `re-registered (${setData.description || 'ok'})`;
+        } else {
+          webhookStatus = `active (${info.result.url})`;
+        }
+      }
+    } catch (e) {
+      webhookStatus = `check_error: ${e.message}`;
+    }
+    return res.status(200).json({ status: 'ok', service: 'TNIW Telegram Webhook Active', webhook: webhookStatus });
   }
 
   if (req.method !== 'POST') {
@@ -149,7 +173,7 @@ async function handlePublishBySlug(slug, chatId, isFeatured = false) {
   const item = items[0];
   let meta = {};
   try {
-    meta = JSON.parse(item.content);
+    meta = typeof item.content === 'object' && item.content !== null ? item.content : JSON.parse(item.content);
   } catch(e) {
     meta = {
       title: item.title,
@@ -167,119 +191,124 @@ async function handlePublishBySlug(slug, chatId, isFeatured = false) {
 
   await sendTelegramText(announcingText, chatId);
 
-  // 2. Redacción con periodismo musical orgánico
-  const editorial = await generateArticleJournalism(meta);
+  try {
+    // 2. Redacción con periodismo musical orgánico
+    const editorial = await generateArticleJournalism(meta);
 
-  // Si se marcó como destacada, desmarcar cualquier destacada previa para que esta sea la Cover Story reina
-  if (isFeatured) {
+    // Si se marcó como destacada, desmarcar cualquier destacada previa para que esta sea la Cover Story reina
+    if (isFeatured) {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/articles?featured=eq.true`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ featured: false })
+        });
+      } catch(e) {}
+    }
+
+    // 3. Generar Mockups Oficiales de TNIW (Post 1:1 y Story 9:16) con foto extraída, título principal y síntesis
+    let mockups = { postMockupUrl: null, storyMockupUrl: null };
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/articles?featured=eq.true`, {
-        method: 'PATCH',
+      mockups = await generateNewsMockups({
+        title: editorial.title,
+        summary: editorial.summary,
+        imageUrl: editorial.image_url,
+        region: meta.region || 'México',
+        category: 'Cultura Indie'
+      });
+    } catch (mErr) {
+      console.warn('[telegram-webhook] Error generando mockups:', mErr.message);
+    }
+
+    const finalCoverImage = mockups.postMockupUrl || editorial.image_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80';
+
+    // 4. Actualizar la nota en Supabase como publicada
+    const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?id=eq.${item.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        title: editorial.title,
+        summary: editorial.summary,
+        content: editorial.content,
+        category: 'Cultura Indie',
+        image_url: finalCoverImage,
+        featured: Boolean(isFeatured),
+        published: true,
+        published_at: new Date().toISOString()
+      })
+    });
+
+    if (!updateRes.ok) {
+      const errText = await updateRes.text();
+      await sendTelegramText(`❌ Error al actualizar en Supabase: ${errText.slice(0, 100)}`, chatId);
+      return;
+    }
+
+    // Eliminar definitivamente de Supabase las demás noticias de hoy no seleccionadas (para que no queden como archivadas)
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/articles?category=eq.scout_queue&published=eq.false`, {
+        method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json',
           'apikey': SUPABASE_SERVICE_KEY,
-          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ featured: false })
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+        }
       });
     } catch(e) {}
+
+    // 5. Auto-archivar notas antiguas para que la portada mantenga exactamente 7 notas
+    await enforceSevenArticlesLimit();
+
+    // 6. Auto-publicar en Social Hub (Post en FB, IG, Threads, X, TikTok + Story en FB, IG)
+    let socialHubSent = false;
+    try {
+      socialHubSent = await pushArticleToSocialHub({
+        title: editorial.title,
+        summary: editorial.summary,
+        slug: item.slug,
+        image_url: finalCoverImage,
+        post_mockup_url: mockups.postMockupUrl || finalCoverImage,
+        story_mockup_url: mockups.storyMockupUrl || mockups.postMockupUrl || finalCoverImage,
+        category: 'Cultura Indie'
+      });
+    } catch(shErr) {
+      console.warn('[telegram-webhook] Error auto-publicando en Social Hub:', shErr);
+    }
+
+    const shortCode = (item.id && typeof item.id === 'string' && item.id.length >= 8)
+      ? item.id.slice(0, 8)
+      : (item.slug ? (item.slug.split('-').pop() || item.slug) : '');
+    const noteShortUrl = `https://thenewindiewave.online/b/${shortCode || encodeURIComponent(item.slug || '')}`;
+
+    // 7. Enviar mensaje de éxito a Rodrigo
+    const successMsg = [
+      isFeatured ? `⭐👑 *¡NOTICIA PUBLICADA COMO DESTACADA (COVER STORY)!*` : `🎉 *¡NOTICIA PUBLICADA CON ÉXITO EN EL BLOG!*`,
+      ``,
+      `📰 *${escapeMarkdown(editorial.title)}*`,
+      `🏷️ *Categoría:* Cultura Indie // ${escapeMarkdown(meta.region || 'Indie')}`,
+      `📸 *Foto:* Vía ${escapeMarkdown(meta.source || 'Prensa')} / Oficial`,
+      mockups.postMockupUrl ? `🎨 *Mockup:* Generado (Post 1:1 & Story 9:16)` : ``,
+      isFeatured ? `🌟 *Posición:* Hero Principal de Portada` : `📌 *Posición:* Feed Editorial Principal`,
+      ``,
+      `🔗 [Ver Artículo en el Blog](${noteShortUrl})`,
+      `⚡ Portada sincronizada en 7 notas.`,
+      socialHubSent ? `📡 *¡Enviada a Social Hub con Mockups!* (FB, IG Post+Story, Threads, X, TikTok)` : `⚠️ Social Hub: no se pudo sincronizar automáticamente.`
+    ].filter(Boolean).join('\n');
+
+    await sendTelegramText(successMsg, chatId);
+  } catch (procErr) {
+    console.error('[telegram-webhook] Error en proceso de redacción/publicación:', procErr);
+    await sendTelegramText(`❌ Error inesperado durante la publicación: ${escapeMarkdown(procErr.message || 'Error desconocido')}`, chatId);
   }
-
-  // 3. Generar Mockups Oficiales de TNIW (Post 1:1 y Story 9:16) con foto extraída, título principal y síntesis
-  let mockups = { postMockupUrl: null, storyMockupUrl: null };
-  try {
-    mockups = await generateNewsMockups({
-      title: editorial.title,
-      summary: editorial.summary,
-      imageUrl: editorial.image_url,
-      region: meta.region || 'México',
-      category: 'Cultura Indie'
-    });
-  } catch (mErr) {
-    console.warn('[telegram-webhook] Error generando mockups:', mErr.message);
-  }
-
-  const finalCoverImage = mockups.postMockupUrl || editorial.image_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80';
-
-  // 4. Actualizar la nota en Supabase como publicada
-  const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?id=eq.${item.id}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_SERVICE_KEY,
-      'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-      'Prefer': 'return=representation'
-    },
-    body: JSON.stringify({
-      title: editorial.title,
-      summary: editorial.summary,
-      content: editorial.content,
-      category: 'Cultura Indie',
-      image_url: finalCoverImage,
-      featured: Boolean(isFeatured),
-      published: true,
-      published_at: new Date().toISOString()
-    })
-  });
-
-  if (!updateRes.ok) {
-    const errText = await updateRes.text();
-    await sendTelegramText(`❌ Error al actualizar en Supabase: ${errText.slice(0, 100)}`, chatId);
-    return;
-  }
-
-  // Eliminar definitivamente de Supabase las demás noticias de hoy no seleccionadas (para que no queden como archivadas)
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/articles?category=eq.scout_queue&published=eq.false`, {
-      method: 'DELETE',
-      headers: {
-        'apikey': SUPABASE_SERVICE_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
-      }
-    });
-  } catch(e) {}
-
-  // 5. Auto-archivar notas antiguas para que la portada mantenga exactamente 7 notas
-  await enforceSevenArticlesLimit();
-
-  // 6. Auto-publicar en Social Hub (Post en FB, IG, Threads, X, TikTok + Story en FB, IG)
-  let socialHubSent = false;
-  try {
-    socialHubSent = await pushArticleToSocialHub({
-      title: editorial.title,
-      summary: editorial.summary,
-      slug: item.slug,
-      image_url: finalCoverImage,
-      post_mockup_url: mockups.postMockupUrl || finalCoverImage,
-      story_mockup_url: mockups.storyMockupUrl || mockups.postMockupUrl || finalCoverImage,
-      category: 'Cultura Indie'
-    });
-  } catch(shErr) {
-    console.warn('[telegram-webhook] Error auto-publicando en Social Hub:', shErr);
-  }
-
-  const shortCode = (item.id && typeof item.id === 'string' && item.id.length >= 8)
-    ? item.id.slice(0, 8)
-    : (item.slug ? (item.slug.split('-').pop() || item.slug) : '');
-  const noteShortUrl = `https://thenewindiewave.online/b/${shortCode || encodeURIComponent(item.slug || '')}`;
-
-  // 7. Enviar mensaje de éxito a Rodrigo
-  const successMsg = [
-    isFeatured ? `⭐👑 *¡NOTICIA PUBLICADA COMO DESTACADA (COVER STORY)!*` : `🎉 *¡NOTICIA PUBLICADA CON ÉXITO EN EL BLOG!*`,
-    ``,
-    `📰 *${escapeMarkdown(editorial.title)}*`,
-    `🏷️ *Categoría:* Cultura Indie // ${escapeMarkdown(meta.region || 'Indie')}`,
-    `📸 *Foto:* Vía ${escapeMarkdown(meta.source || 'Prensa')} / Oficial`,
-    mockups.postMockupUrl ? `🎨 *Mockup:* Generado (Post 1:1 & Story 9:16)` : ``,
-    isFeatured ? `🌟 *Posición:* Hero Principal de Portada` : `📌 *Posición:* Feed Editorial Principal`,
-    ``,
-    `🔗 [Ver Artículo en el Blog](${noteShortUrl})`,
-    `⚡ Portada sincronizada en 7 notas.`,
-    socialHubSent ? `📡 *¡Enviada a Social Hub con Mockups!* (FB, IG Post+Story, Threads, X, TikTok)` : `⚠️ Social Hub: no se pudo sincronizar automáticamente.`
-  ].filter(Boolean).join('\n');
-
-  await sendTelegramText(successMsg, chatId);
 }
 
 // -----------------------------------------------------------------------------
@@ -722,7 +751,7 @@ ${factualContext}`;
 
   // Intentar con Groq
   if (GROQ_KEY) {
-    const groqModels = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
+    const groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
     for (const model of groqModels) {
       try {
         const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {

@@ -68,6 +68,8 @@ async function main() {
 
   console.log(`🤖 [TNIW Scout Bot] Modo de ejecución activo: ${mode.toUpperCase()}`);
 
+  await ensureTelegramWebhook();
+
   if (mode === 'morning') {
     await runMorningScout();
   } else if (mode === 'fallback') {
@@ -465,6 +467,33 @@ async function enforceSevenArticlesLimit() {
 // =============================================================================
 // UTILIDADES TELEGRAM
 // =============================================================================
+async function ensureTelegramWebhook() {
+  try {
+    const expectedUrl = 'https://thenewindiewave.online/api/telegram-webhook';
+    const infoRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo`);
+    if (infoRes.ok) {
+      const info = await infoRes.json();
+      if (!info.result?.url || info.result.url !== expectedUrl) {
+        console.log('🔄 [TNIW Scout] Conectando webhook de Telegram a Vercel...');
+        const setRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: expectedUrl,
+            allowed_updates: ['message', 'callback_query']
+          })
+        });
+        const setData = await setRes.json();
+        console.log('✓ [TNIW Scout] Resultado setWebhook:', setData.description || 'ok');
+      } else {
+        console.log('✓ [TNIW Scout] Webhook de Telegram verificado y activo.');
+      }
+    }
+  } catch (err) {
+    console.warn('⚠️ [TNIW Scout] Error verificando webhook:', err.message);
+  }
+}
+
 async function sendTelegramMessage(text) {
   try {
     const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {

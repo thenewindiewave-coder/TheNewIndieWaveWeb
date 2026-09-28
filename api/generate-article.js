@@ -999,7 +999,7 @@ REGLAS FUNDAMENTALES:
 
   // 1. GROQ ULTRA RÁPIDO CON MODELOS VERIFICADOS (Qwen 3.8 27B / GPT-OSS 120B)
   if (GROQ_KEY) {
-    const groqModels = ['qwen/qwen3.8-27b', 'openai/gpt-oss-120b'];
+    const groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
     for (const modelName of groqModels) {
       try {
         const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
