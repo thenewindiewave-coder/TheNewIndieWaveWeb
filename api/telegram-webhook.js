@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       const infoRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo`);
       if (infoRes.ok) {
         const info = await infoRes.json();
-        const expectedUrl = 'https://thenewindiewave.online/api/telegram-webhook';
+        const expectedUrl = 'https://www.thenewindiewave.online/api/telegram-webhook';
         if (!info.result?.url || info.result.url !== expectedUrl) {
           const setRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook`, {
             method: 'POST',

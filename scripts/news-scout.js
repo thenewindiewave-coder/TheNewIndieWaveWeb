@@ -469,7 +469,7 @@ async function enforceSevenArticlesLimit() {
 // =============================================================================
 async function ensureTelegramWebhook() {
   try {
-    const expectedUrl = 'https://thenewindiewave.online/api/telegram-webhook';
+    const expectedUrl = 'https://www.thenewindiewave.online/api/telegram-webhook';
     const infoRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo`);
     if (infoRes.ok) {
       const info = await infoRes.json();
