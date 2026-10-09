@@ -121,7 +121,7 @@ const FALLBACK_STATIC_PLAYLISTS = [
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120'); // Cache corto de 1 min para reflejar cambios
+  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate=30'); // Cache corto para reflejar cambios
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -130,11 +130,12 @@ export default async function handler(req, res) {
   try {
     const { refresh_token: queryRefreshToken } = req.query || {};
     let rToken = queryRefreshToken || process.env.SPOTIFY_REFRESH_TOKEN;
+    let targetOwnerId = SPOTIFY_USER_ID;
 
     // Si no viene en query, buscar refresh_token en Supabase
     if (!rToken) {
       try {
-        const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/radar_artists?id=eq.spotify_auth_config&select=short_bio`, {
+        const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/radar_artists?id=eq.spotify_auth_config&select=short_bio,city`, {
           headers: {
             'apikey': SUPABASE_ANON_KEY,
             'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
@@ -142,8 +143,9 @@ export default async function handler(req, res) {
         });
         if (dbRes.ok) {
           const rows = await dbRes.json();
-          if (rows && rows.length > 0 && rows[0].short_bio) {
-            rToken = rows[0].short_bio;
+          if (rows && rows.length > 0) {
+            if (rows[0].short_bio) rToken = rows[0].short_bio;
+            if (rows[0].city) targetOwnerId = rows[0].city;
           }
         }
       } catch (dbErr) {
@@ -160,20 +162,42 @@ export default async function handler(req, res) {
       }
     }
 
+    // Si tenemos token de usuario, obtener el ID verificado de la cuenta conectada (/v1/me)
+    if (userAccessToken) {
+      try {
+        const meRes = await fetch('https://api.spotify.com/v1/me', {
+          headers: { 'Authorization': `Bearer ${userAccessToken}` }
+        });
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          if (meData && meData.id) {
+            targetOwnerId = meData.id;
+          }
+        }
+      } catch (meProfileErr) {
+        console.warn('Could not fetch user /me profile:', meProfileErr.message);
+      }
+    }
+
     let rawPlaylists = [];
     let activeToken = userAccessToken;
 
-    // 1. Si tenemos token de usuario, consultar /v1/me/playlists (obtiene en vivo todas las playlists actuales de Rodrigo)
+    // 1. Si tenemos token de usuario, paginar /v1/me/playlists para obtener todas las listas de la cuenta
     if (userAccessToken) {
       try {
-        const mePlaylistsRes = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
-          headers: { 'Authorization': `Bearer ${userAccessToken}` }
-        });
-        if (mePlaylistsRes.ok) {
+        let nextUrl = 'https://api.spotify.com/v1/me/playlists?limit=50';
+        let pageCount = 0;
+        while (nextUrl && pageCount < 5) {
+          pageCount++;
+          const mePlaylistsRes = await fetch(nextUrl, {
+            headers: { 'Authorization': `Bearer ${userAccessToken}` }
+          });
+          if (!mePlaylistsRes.ok) break;
           const meData = await mePlaylistsRes.json();
           if (meData.items && meData.items.length > 0) {
-            rawPlaylists = meData.items;
+            rawPlaylists = rawPlaylists.concat(meData.items);
           }
+          nextUrl = meData.next;
         }
       } catch (meErr) {
         console.warn('Error fetching user /me/playlists:', meErr.message);
@@ -200,12 +224,22 @@ export default async function handler(req, res) {
       }
     }
 
-    // 3. Si aún no hay playlists, usar la lista de IDs de respaldo
+    // FILTRO ESTRICTO: SOLO playlists creadas por Rodrigo (donde el usuario es OWNER).
+    // Se excluyen 100% las playlists de terceros que el usuario simplemente sigue en Spotify.
+    const ownedPlaylists = rawPlaylists.filter(p => {
+      if (!p || !p.owner) return false;
+      const pOwnerId = String(p.owner.id || '').trim().toLowerCase();
+      const targetId = String(targetOwnerId || SPOTIFY_USER_ID).trim().toLowerCase();
+      const officialId = '31vxac7th7vonsgtzbeyixk32ftu';
+      return pOwnerId === targetId || pOwnerId === officialId;
+    });
+
+    // 3. Procesar las playlists propias obtenidas o recurrir a respaldo oficial de IDs
     let finalPlaylistItems = [];
 
-    if (rawPlaylists.length > 0) {
+    if (ownedPlaylists.length > 0) {
       // Mapear y obtener seguidores reales si no vienen en la lista
-      const detailPromises = rawPlaylists.map(async (p) => {
+      const detailPromises = ownedPlaylists.map(async (p) => {
         if (!p || !p.id) return null;
         let followers = (p.followers && typeof p.followers.total === 'number') ? p.followers.total : null;
         let imageUrl = (p.images && p.images.length > 0) ? p.images[0].url : null;
@@ -219,7 +253,7 @@ export default async function handler(req, res) {
             });
             if (detailRes.ok) {
               const dData = await detailRes.json();
-              if (dData.followers) followers = dData.followers.total;
+              if (dData.followers && typeof dData.followers.total === 'number') followers = dData.followers.total;
               if (dData.images && dData.images.length > 0) imageUrl = dData.images[0].url;
             }
           } catch(e) {}
@@ -234,13 +268,15 @@ export default async function handler(req, res) {
           image: imageUrl,
           spotify_url: (p.external_urls && p.external_urls.spotify) ? p.external_urls.spotify : `https://open.spotify.com/playlist/${p.id}`,
           category: detectCategory(p.name, p.description),
-          genres: extractGenres(p.name, p.description)
+          genres: extractGenres(p.name, p.description),
+          owner_id: p.owner ? p.owner.id : null,
+          is_owner: true
         };
       });
 
       finalPlaylistItems = (await Promise.all(detailPromises)).filter(Boolean);
     } else {
-      // Fallback a IDs conocidos
+      // Fallback a IDs oficiales de Rodrigo
       try {
         const clientToken = activeToken || await getClientCredentialsToken();
         const fallbackPromises = FALLBACK_PLAYLIST_IDS.map(async (pId) => {
@@ -259,7 +295,8 @@ export default async function handler(req, res) {
                 image: (data.images && data.images.length > 0) ? data.images[0].url : null,
                 spotify_url: data.external_urls ? data.external_urls.spotify : `https://open.spotify.com/playlist/${data.id}`,
                 category: detectCategory(data.name, data.description),
-                genres: extractGenres(data.name, data.description)
+                genres: extractGenres(data.name, data.description),
+                is_owner: true
               };
             }
           } catch (e) {}
@@ -281,7 +318,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      user_id: SPOTIFY_USER_ID,
+      user_id: targetOwnerId || SPOTIFY_USER_ID,
       total: sortedPlaylists.length,
       updated_at: new Date().toISOString(),
       topPlaylists,

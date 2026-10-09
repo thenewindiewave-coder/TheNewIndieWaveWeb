@@ -288,6 +288,11 @@ export default async function handler(req, res) {
         const plData = await plRes.json();
         for (const p of (plData.items || [])) {
           if (!p) continue;
+          // Solo considerar playlists donde el usuario sea dueño o tenga permisos colaborativos
+          const pOwnerId = String(p.owner?.id || '').trim().toLowerCase();
+          const isMine = pOwnerId === '31vxac7th7vonsgtzbeyixk32ftu' || p.collaborative === true;
+          if (!isMine) continue;
+
           if (p.name === playlist_name || normalize(p.name) === normInput) {
             resolvedPlaylistId = p.id;
             break;

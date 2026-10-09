@@ -930,7 +930,7 @@
   // Carga automática del Top Playlists y catálogo desde el perfil de Spotify
   async function loadTopPlaylists() {
     try {
-      const res = await fetch('/api/playlists');
+      const res = await fetch('/api/playlists?t=' + Date.now());
       if(!res.ok) return;
       const data = await res.json();
       
