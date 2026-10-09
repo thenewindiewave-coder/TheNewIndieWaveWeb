@@ -54,8 +54,8 @@ async function main() {
 
   if (mode === 'auto') {
     const currentUtcHour = new Date().getUTCHours();
-    // 13:00 - 16:00 UTC corresponde a 7:00 AM - 10:00 AM hora CDMX
-    if (currentUtcHour >= 13 && currentUtcHour <= 16) {
+    // 14:00 - 19:00 UTC corresponde a 8:00 AM - 1:00 PM hora CDMX
+    if (currentUtcHour >= 14 && currentUtcHour <= 19) {
       mode = 'morning';
     } 
     // 22:00 - 02:00 UTC corresponde a 4:00 PM - 8:00 PM hora CDMX
@@ -78,7 +78,7 @@ async function main() {
 }
 
 // =============================================================================
-// MODO 1: RASTREO MATUTINO (8:00 AM) + MENSAJE A TELEGRAM CON BOTONES
+// MODO 1: RASTREO MATUTINO (10:00 AM) + MENSAJE A TELEGRAM CON BOTONES
 // =============================================================================
 async function runMorningScout() {
   console.log('📡 [TNIW Scout Bot] Iniciando escaneo matutino de los 16 medios...');
@@ -183,7 +183,7 @@ async function runMorningScout() {
 
   if (topCandidates.length === 0) {
     console.log('No se encontraron noticias nuevas en este ciclo.');
-    await sendTelegramMessage('📡 *Radar TNIW Matutino (8:00 AM):*\nNo se detectaron noticias nuevas hoy en los 16 medios monitoreados.');
+    await sendTelegramMessage('📡 *Radar TNIW Matutino (10:00 AM):*\nNo se detectaron noticias nuevas hoy en los 16 medios monitoreados.');
     return;
   }
 
@@ -240,7 +240,7 @@ async function runMorningScout() {
   }).join('\n');
 
   const messageText = [
-    `📡 <b>RADAR DE NOTICIAS TNIW // 8:00 AM</b>`,
+    `📡 <b>RADAR DE NOTICIAS TNIW // 10:00 AM</b>`,
     `¡Buenos días Rodrigo! Se detectaron <b>${topCandidates.length} noticias frescas</b> en la red de medios:`,
     ``,
     listText,

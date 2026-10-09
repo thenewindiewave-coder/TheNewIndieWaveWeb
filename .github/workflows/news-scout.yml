@@ -2,9 +2,9 @@ name: TNIW Music News Scout Bot
 
 on:
   schedule:
-    # 8:00 AM hora México (14:00 UTC) -> Curaduría matutina a Telegram
-    - cron: '0 14 * * *'
-    # 5:00 PM hora México (23:00 UTC) -> Fallback automático si no se publicó nada hoy
+    # 10:00 AM hora México / CDMX (16:00 UTC). Programado a las 15:55 UTC (9:55 AM CDMX) para evitar la saturación de los minutos :00 en GitHub Actions y llegar puntual a las 10:00 AM
+    - cron: '55 15 * * *'
+    # 5:00 PM hora México / CDMX (23:00 UTC) -> Fallback automático si no se publicó nada hoy
     - cron: '0 23 * * *'
   # Permite ejecutarlo manualmente con 1 clic en la pestaña Actions de GitHub
   workflow_dispatch:

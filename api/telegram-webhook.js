@@ -395,7 +395,7 @@ async function handleResendRadar(chatId) {
   }).join('\n');
 
   const messageText = [
-    `📡 <b>RADAR DE NOTICIAS TNIW // 8:00 AM</b>`,
+    `📡 <b>RADAR DE NOTICIAS TNIW // 10:00 AM</b>`,
     `¡Hola Rodrigo! Tienes <b>${list.length} noticias pendientes</b> en la cola de hoy:`,
     ``,
     listText,
