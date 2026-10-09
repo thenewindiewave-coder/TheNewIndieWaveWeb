@@ -5,6 +5,12 @@
       "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/telegram-webhook?action=daily-radar",
+      "schedule": "0 16 * * *"
+    }
+  ],
   "redirects": [
     {
       "source": "/embed",

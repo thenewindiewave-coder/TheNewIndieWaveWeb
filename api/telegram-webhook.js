@@ -20,6 +20,19 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
+    const { action } = req.query || {};
+
+    // 1. DISPARADOR DE CRON VERCEL (10:00 AM CDMX) O MANUAL: ?action=daily-radar
+    if (action === 'daily-radar' || action === 'cron' || action === 'scout') {
+      try {
+        const result = await scanAndBroadcastDailyRadar(TELEGRAM_CHAT_ID);
+        return res.status(200).json({ ok: true, trigger: 'daily-radar-10am', ...result });
+      } catch (err) {
+        console.error('Error en daily-radar cron:', err);
+        return res.status(500).json({ ok: false, error: err.message });
+      }
+    }
+
     let webhookStatus = 'unknown';
     try {
       const infoRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo`);
@@ -129,8 +142,14 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
-      if (text.toLowerCase() === '/radar') {
+      if (text.toLowerCase() === '/radar' || text.toLowerCase() === '/scout') {
         await handleResendRadar(msg.chat.id);
+        return res.status(200).json({ ok: true });
+      }
+
+      if (text.toLowerCase() === '/radar refresh' || text.toLowerCase() === '/radar forzar' || text.toLowerCase() === '/radar nuevo') {
+        await sendTelegramText('🔄 *Forzando escaneo en vivo de los 16 medios musicales...*', msg.chat.id);
+        await scanAndBroadcastDailyRadar(msg.chat.id);
         return res.status(200).json({ ok: true });
       }
 
@@ -360,6 +379,236 @@ async function handleDiscardAll(chatId) {
 }
 
 // -----------------------------------------------------------------------------
+// RADAR AUTOMÁTICO MATUTINO EN VIVO (VERCEL CRON 10:00 AM CDMX / ON DEMAND)
+// -----------------------------------------------------------------------------
+const RSS_FEEDS = [
+  // 🇲🇽 MÉXICO (10 MEDIOS LÍDERES)
+  { name: 'WARP Magazine', url: 'https://warp.la/feed/', region: 'México' },
+  { name: 'Indie Rocks!', url: 'https://www.indierocks.mx/feed/', region: 'México' },
+  { name: 'Sopitas Música', url: 'https://www.sopitas.com/feed/', region: 'México' },
+  { name: 'Me Hace Ruido', url: 'https://mehaceruido.com/feed/', region: 'México' },
+  { name: 'Filter México', url: 'https://filtermexico.com/feed/', region: 'México' },
+  { name: 'Setlist.me', url: 'https://setlist.me/feed/', region: 'México' },
+  { name: 'Revista Kuadro', url: 'https://revistakuadro.com/feed/', region: 'México' },
+  { name: 'Pólvora Rock', url: 'https://polvora.com.mx/feed/', region: 'México' },
+  { name: 'Grita Radio', url: 'https://gritaradio.com/feed/', region: 'México' },
+  { name: 'Rolling Stone en Español', url: 'https://es.rollingstone.com/feed/', region: 'México' },
+
+  // 🌎 LATINOAMÉRICA
+  { name: 'Indie Hoy', url: 'https://indiehoy.com/feed/', region: 'Latinoamérica' },
+  { name: 'Cuchara Sónica', url: 'https://cucharasonica.com/feed/', region: 'Latinoamérica' },
+
+  // 🇪🇸 ESPAÑA
+  { name: 'MondoSonoro', url: 'https://www.mondosonoro.com/feed/', region: 'España' },
+  { name: 'Binaural', url: 'https://binaural.es/feed/', region: 'España' },
+  { name: 'Muzikalia', url: 'https://muzikalia.com/feed/', region: 'España' },
+  { name: 'Jenesaispop', url: 'https://jenesaispop.com/feed/', region: 'España' }
+];
+
+function isMusicRelevant(title, desc) {
+  const text = (title + ' ' + desc).toLowerCase();
+  const musicKeywords = [
+    'canción', 'cancion', 'álbum', 'album', 'disco', 'single', 'sencillo', 'tema', 'video',
+    'concierto', 'gira', 'festival', 'banda', 'estrena', 'lanzamiento', 'guitarra', 'indie',
+    'shoegaze', 'post-punk', 'rock', 'pop', 'presenta', 'estreno', 'música', 'musica',
+    'cartel', 'cover', 'adelanto', 'tour', 'videoclip', 'ep', 'lp', 'en vivo', 'acústico',
+    'acustico', 'solista', 'vocalista', 'sintetizador', 'producción', 'punk', 'metal'
+  ];
+  const ignoreKeywords = ['película', 'pelicula', 'serie', 'tráiler', 'trailer', 'netflix', 'hbo', 'taquilla', 'marvel', 'nintendo', 'playstation', 'xbox', 'videojuego', 'gaming'];
+  if (ignoreKeywords.some(k => text.includes(k) && !text.includes('soundtrack'))) return false;
+  return musicKeywords.some(k => text.includes(k));
+}
+
+function cleanXml(str) {
+  if (!str) return '';
+  return str
+    .replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&#8216;|&#8217;/g, "'")
+    .replace(/&#8220;|&#8221;/g, '"')
+    .replace(/&amp;/g, '&')
+    .trim();
+}
+
+function slugify(text) {
+  if (!text) return 'nota-' + Math.floor(Math.random() * 1000);
+  return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+async function scanAndBroadcastDailyRadar(targetChatId = TELEGRAM_CHAT_ID) {
+  // 1. Obtener slugs existentes en Supabase para no repetir noticias
+  let existingSlugs = new Set();
+  try {
+    const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/articles?select=slug`, {
+      headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` }
+    });
+    if (dbRes.ok) {
+      const rows = await dbRes.json();
+      rows.forEach(r => existingSlugs.add(r.slug));
+    }
+  } catch(e) {}
+
+  // 2. Escaneo paralelo ultra-rápido de los 16 feeds RSS
+  const candidateArticles = [];
+  const feedPromises = RSS_FEEDS.map(async feed => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4500);
+      const response = await fetch(feed.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 TNIW-Scout/1.0' },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) return;
+
+      const xml = await response.text();
+      const items = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
+
+      for (const rawItem of items.slice(0, 4)) {
+        const titleMatch = rawItem.match(/<title>([\s\S]*?)<\/title>/);
+        const linkMatch = rawItem.match(/<link>([\s\S]*?)<\/link>/);
+        const descMatch = rawItem.match(/<description>([\s\S]*?)<\/description>/);
+
+        if (titleMatch && linkMatch) {
+          const rawTitle = cleanXml(titleMatch[1]);
+          const link = cleanXml(linkMatch[1]);
+          const desc = descMatch ? cleanXml(descMatch[1]) : '';
+
+          let feedImg = null;
+          const mediaMatch = rawItem.match(/<media:content[^>]+url=["']([^"']+)["']/i);
+          const encMatch = rawItem.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
+          const thumbMatch = rawItem.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i);
+          const imgTagMatch = rawItem.match(/<img[^>]+src=["']([^"']+)["']/i);
+          const contentImgMatch = rawItem.match(/<content:encoded[\s\S]*?<img[^>]+src=["']([^"']+)["']/i);
+
+          if (mediaMatch) feedImg = mediaMatch[1];
+          else if (encMatch) feedImg = encMatch[1];
+          else if (thumbMatch) feedImg = thumbMatch[1];
+          else if (imgTagMatch) feedImg = imgTagMatch[1];
+          else if (contentImgMatch) feedImg = contentImgMatch[1];
+
+          if (isMusicRelevant(rawTitle, desc)) {
+            const testSlug = slugify(rawTitle);
+            if (!existingSlugs.has(testSlug) && !Array.from(existingSlugs).some(s => s.includes(testSlug.slice(0, 20)))) {
+              candidateArticles.push({
+                source: feed.name,
+                region: feed.region,
+                title: rawTitle,
+                link,
+                desc,
+                image_url: feedImg,
+                slug: `radar-${slugify(feed.region)}-${testSlug}-${Date.now().toString().slice(-4)}`
+              });
+            }
+          }
+        }
+      }
+    } catch(err) {}
+  });
+
+  await Promise.all(feedPromises);
+
+  // 3. Garantizar diversidad de fuentes
+  const sourceCount = {};
+  const diverseCandidates = [];
+  for (const c of candidateArticles) {
+    if (!sourceCount[c.source]) {
+      sourceCount[c.source] = 1;
+      diverseCandidates.push(c);
+      if (diverseCandidates.length >= 5) break;
+    }
+  }
+  if (diverseCandidates.length < 5) {
+    for (const c of candidateArticles) {
+      if (!diverseCandidates.includes(c)) {
+        diverseCandidates.push(c);
+        if (diverseCandidates.length >= 5) break;
+      }
+    }
+  }
+
+  const topCandidates = diverseCandidates.slice(0, 5);
+  if (topCandidates.length === 0) {
+    await sendTelegramText('📡 *Radar TNIW Matutino (10:00 AM):*\nNo se detectaron noticias nuevas hoy en los 16 medios monitoreados.', targetChatId);
+    return { count: 0, sent: false };
+  }
+
+  // 4. Resolver imágenes reales
+  await Promise.all(topCandidates.map(async c => {
+    if (!c.image_url || c.image_url.includes('unsplash.com')) {
+      const real = await resolveRealArticleImage({
+        suppliedImg: c.image_url,
+        articleUrl: c.link,
+        title: c.title
+      });
+      if (real) c.image_url = real;
+    }
+  }));
+
+  // 5. Guardar en Supabase en scout_queue (limpiando cola anterior)
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/articles?category=eq.scout_queue&published=eq.false`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` }
+    });
+  } catch(e) {}
+
+  for (const c of topCandidates) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/articles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+        },
+        body: JSON.stringify({
+          slug: c.slug,
+          title: c.title,
+          summary: c.desc.slice(0, 160),
+          content: JSON.stringify(c),
+          category: 'scout_queue',
+          image_url: c.image_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
+          published: false,
+          tags: [c.region, 'Radar TNIW']
+        })
+      });
+    } catch(e) {}
+  }
+
+  // 6. Enviar mensaje interactivo con botones a Telegram
+  const listText = topCandidates.map((c, i) => {
+    return `<b>${i + 1}.</b> [${escapeHtml(c.region)}] <b>${escapeHtml(c.source)}</b>\n"${escapeHtml(c.title)}"\n🔗 <a href="${c.link}">Leer fuente original</a>\n`;
+  }).join('\n');
+
+  const messageText = [
+    `📡 <b>RADAR DE NOTICIAS TNIW // 10:00 AM</b>`,
+    `¡Buenos días Rodrigo! Se detectaron <b>${topCandidates.length} noticias frescas</b> en la red de medios:`,
+    ``,
+    listText,
+    `━━━━━━━━━━━━━━━━━━━`,
+    `⚡ <b>Elige qué nota publicar:</b>`,
+    `• Toca <b>⚡ Publicar #N</b> para publicarla normal en el blog.`,
+    `• Toca <b>⭐ Destacar #N</b> para publicarla como <b>NOTICIA DESTACADA (Cover Story)</b>.`,
+    `• O responde con el número (ej. <code>1</code> normal o <code>1*</code> destacada).`,
+    ``,
+    `⏳ <i>Si no respondes antes de las 5:00 PM, se publicará automáticamente 1 nota al azar.</i>`
+  ].join('\n');
+
+  const buttons = [];
+  for (let i = 0; i < topCandidates.length; i++) {
+    buttons.push([
+      { text: `⚡ Publicar #${i + 1}`, callback_data: `pub:${i + 1}` },
+      { text: `⭐ Destacar #${i + 1}`, callback_data: `feat:${i + 1}` }
+    ]);
+  }
+  buttons.push([{ text: `🚫 Descartar todas hoy`, callback_data: `discard_all` }]);
+
+  await sendTelegramButtons(messageText, buttons, targetChatId);
+  return { count: topCandidates.length, sent: true };
+}
+
+// -----------------------------------------------------------------------------
 // ACCIÓN: RE-ENVIAR RADAR DE HOY (/radar)
 // -----------------------------------------------------------------------------
 async function handleResendRadar(chatId) {
@@ -377,7 +626,8 @@ async function handleResendRadar(chatId) {
 
   const list = await queueRes.json();
   if (!list || list.length === 0) {
-    await sendTelegramText('ℹ️ No hay noticias pendientes en la cola del radar hoy (o ya fueron publicadas/descartadas).', chatId);
+    await sendTelegramText('🔍 No había noticias en la cola de hoy. *Escaneando medios en vivo para generar tu radar matutino...*', chatId);
+    await scanAndBroadcastDailyRadar(chatId);
     return;
   }
 
