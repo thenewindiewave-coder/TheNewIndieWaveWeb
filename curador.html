@@ -1067,7 +1067,7 @@
     <h2 class="pin-title">PANEL DE CURADURÍA</h2>
     <p style="font-size: 12.5px; color: var(--text-muted);">The New Indie Wave // Acceso exclusivo para Rodrigo</p>
     <input type="password" class="pin-input" id="pinInput" placeholder="Introduce tu clave" autofocus onkeydown="if(event.key==='Enter') unlockPanel()">
-    <button class="btn-pin-unlock" onclick="unlockPanel()">ACCEDER A LA COLA ↗</button>
+    <button class="btn-pin-unlock" id="btnPinUnlock" onclick="unlockPanel()">ACCEDER A LA COLA ↗</button>
   </div>
 </div>
 
@@ -1095,6 +1095,9 @@
         </div>
       </div>
       <span class="badge-curator">● CURADOR: RODRIGO DL MORAL</span>
+      <button onclick="logoutCurator()" style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-family: var(--font-mono); font-size: 11px; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Cerrar sesión de curador">
+        🔒 Cerrar Sesión
+      </button>
       <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 11px;">← Ver Web Pública</a>
     </div>
   </div>
@@ -1429,29 +1432,102 @@
     }
   }
 
-  // 1. Desbloqueo de Panel
-  function unlockPanel() {
-    var p = document.getElementById('pinInput').value;
-    if(p === 'tniw2026' || p === 'rodrigo' || p === 'indie') {
-      document.getElementById('pinOverlay').style.display = 'none';
-      sessionStorage.setItem('tniw_curator_auth', '1');
-      loadSubmissions();
-      checkSpotifyAuthStatus();
-      preloadPlaylistsMetadata();
-    } else {
-      showToast('❌ Clave incorrecta');
+  // 1. Desbloqueo Seguro de Panel (Validado en Servidor vía /api/curador-auth)
+  var isCuratorAuthenticated = false;
+
+  async function unlockPanel() {
+    var pinInput = document.getElementById('pinInput');
+    var btn = document.getElementById('btnPinUnlock') || document.querySelector('.btn-pin-unlock');
+    var p = (pinInput ? pinInput.value : '').trim();
+    if (!p) {
+      showToast('⚠️ Introduce tu clave');
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = 'Verificando... ⏳';
+    }
+
+    try {
+      var res = await fetch('/api/curador-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: p })
+      });
+      var data = await res.json();
+      if (res.ok && data.success && data.token) {
+        localStorage.setItem('tniw_curator_session_token', data.token);
+        isCuratorAuthenticated = true;
+        document.getElementById('pinOverlay').style.display = 'none';
+        showToast('🔓 Acceso verificado con éxito');
+        loadSubmissions();
+        checkSpotifyAuthStatus();
+        preloadPlaylistsMetadata();
+      } else {
+        showToast('❌ ' + (data.error || 'Clave incorrecta'));
+        if (pinInput) {
+          pinInput.value = '';
+          pinInput.focus();
+        }
+      }
+    } catch(err) {
+      showToast('❌ Error de conexión al validar clave');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = 'ACCEDER A LA COLA ↗';
+      }
     }
   }
 
-  if(sessionStorage.getItem('tniw_curator_auth') === '1') {
-    document.getElementById('pinOverlay').style.display = 'none';
-    loadSubmissions();
-    checkSpotifyAuthStatus();
-    preloadPlaylistsMetadata();
+  // Verificar sesión existente en el servidor al cargar la página
+  async function initCuratorSession() {
+    var token = localStorage.getItem('tniw_curator_session_token');
+    if (!token) {
+      document.getElementById('pinOverlay').style.display = 'flex';
+      return;
+    }
+
+    try {
+      var res = await fetch('/api/curador-auth?action=verify&token=' + encodeURIComponent(token));
+      if (res.ok) {
+        var data = await res.json();
+        if (data.valid) {
+          isCuratorAuthenticated = true;
+          document.getElementById('pinOverlay').style.display = 'none';
+          loadSubmissions();
+          checkSpotifyAuthStatus();
+          preloadPlaylistsMetadata();
+          return;
+        }
+      }
+    } catch(e) {}
+
+    // Si el token es inválido o expiró
+    localStorage.removeItem('tniw_curator_session_token');
+    document.getElementById('pinOverlay').style.display = 'flex';
+  }
+  initCuratorSession();
+
+  function logoutCurator() {
+    if (confirm('¿Cerrar sesión del panel de curador?')) {
+      localStorage.removeItem('tniw_curator_session_token');
+      sessionStorage.removeItem('tniw_curator_auth');
+      isCuratorAuthenticated = false;
+      document.getElementById('pinOverlay').style.display = 'flex';
+      var pinInput = document.getElementById('pinInput');
+      if (pinInput) {
+        pinInput.value = '';
+        pinInput.focus();
+      }
+      showToast('🔒 Sesión cerrada');
+    }
   }
 
   // 2. Cargar envíos desde Supabase
   async function loadSubmissions() {
+    if (!isCuratorAuthenticated) return;
     var container = document.getElementById('queueContainer');
     try {
       var res = await fetch(SUPABASE_URL + '/rest/v1/submissions?select=*&order=created_at.desc', {
