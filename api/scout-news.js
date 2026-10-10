@@ -714,7 +714,7 @@ async function pushArticleToSocialHub(article) {
 
 
     const SOCIAL_HUB_SUPABASE_URL = 'https://gcorvulignbmbjsgekpo.supabase.co';
-    const SOCIAL_HUB_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjb3J2dWxpZ25ibWJqc2dla3BvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTM2NDg1OSwiZXhwIjoyMDg2OTQwODU5fQ.aRHvDWcIOSlUPBB0xGctZYI85gf3FrqMaTphnmOeS58';
+    const SOCIAL_HUB_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjb3J2dWxpZ25ibWJqc2dla3BvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNjQ4NTksImV4cCI6MjA4Njk0MDg1OX0.l_Wg3U3cAELt2WDLdd6IMXEVGaOLwbQ4hoVySSxeL4U';
 
     const insertRes = await fetch(`${SOCIAL_HUB_SUPABASE_URL}/rest/v1/posts`, {
       method: 'POST',
