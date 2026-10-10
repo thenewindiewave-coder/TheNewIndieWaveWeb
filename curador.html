@@ -1378,6 +1378,55 @@
   var SUPABASE_URL = 'https://bsmnzbdnffdxxveyifmc.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
+  var SOCIAL_HUB_CONFIG = window.SOCIAL_HUB_CONFIG = {
+    brandId: '6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c',
+    brandName: 'The New Indie Wave',
+    cloudinary: {
+      cloudName: 'ckknw1do',
+      apiKey: '576643641599951',
+      apiSecret: 'BqRSk2zRcn2-BtMi9BIHHiRyTfQ',
+      folder: 'social-hub/6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c'
+    },
+    supabase: {
+      url: 'https://gcorvulignbmbjsgekpo.supabase.co',
+      serviceKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjb3J2dWxpZ25ibWJqc2dla3BvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTM2NDg1OSwiZXhwIjoyMDg2OTQwODU5fQ.aRHvDWcIOSlUPBB0xGctZYI85gf3FrqMaTphnmOeS58'
+    }
+  };
+
+  async function uploadCanvasToCloudinary(dataUrl, prefix) {
+    var ts = Math.floor(Date.now() / 1000);
+    var conf = window.SOCIAL_HUB_CONFIG || SOCIAL_HUB_CONFIG;
+    var folder = conf.cloudinary.folder;
+    var secret = conf.cloudinary.apiSecret;
+    var strToSign = 'folder=' + folder + '&timestamp=' + ts + secret;
+
+    var encoder = new TextEncoder();
+    var hashBuffer = await crypto.subtle.digest('SHA-1', encoder.encode(strToSign));
+    var hashArray = Array.from(new Uint8Array(hashBuffer));
+    var signature = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+
+    var formData = new FormData();
+    formData.append('file', dataUrl);
+    formData.append('api_key', conf.cloudinary.apiKey);
+    formData.append('timestamp', ts.toString());
+    formData.append('signature', signature);
+    formData.append('folder', folder);
+
+    var res = await fetch('https://api.cloudinary.com/v1_1/' + conf.cloudinary.cloudName + '/image/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      var errData = await res.json().catch(function(){ return {}; });
+      throw new Error((errData.error && errData.error.message) || 'Fallo de subida en Cloudinary');
+    }
+
+    var json = await res.json();
+    return json.secure_url;
+  }
+  window.uploadCanvasToCloudinary = uploadCanvasToCloudinary;
+
   var playlistLinksMap = {
     // 9 Playlists Oficiales de Spotify
     "Electrónica emergente para perder el control en la pista": "https://open.spotify.com/playlist/56UTFQQSDPuY5cjxDol5Ob",
@@ -3309,12 +3358,25 @@
               </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; flex-wrap: wrap;">
+            <!-- AUTO-PUBLICAR STORY EN SOCIAL HUB -->
+            <div style="width: 100%; margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px;">
+              <label style="display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 11.5px; color: var(--accent-lime); cursor: pointer; user-select: none; background: rgba(187,244,81,0.08); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(187,244,81,0.35);">
+                <input type="checkbox" id="rfAutoPublishStory" checked style="accent-color: var(--accent-lime); width: 18px; height: 18px; cursor: pointer;">
+                <div>
+                  <span style="font-weight: 800; text-transform: uppercase;">🚀 Publicar Story automáticamente en redes (Social Hub)</span>
+                  <div style="font-size: 10px; color: var(--text-muted); font-weight: normal; margin-top: 2px;">
+                    Genera la historia oficial (9:16) y la programa para Instagram & Facebook Stories de inmediato.
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
               <button type="button" onclick="closeRadarModal()" style="background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 11.5px; padding: 10px 18px; border-radius: 4px; cursor: pointer;">
                 Cancelar
               </button>
-              <button type="submit" style="background: var(--accent-lime); border: none; color: #000; font-family: var(--font-mono); font-size: 12px; font-weight: 800; padding: 10px 24px; border-radius: 4px; cursor: pointer; box-shadow: 0 0 14px rgba(187,244,81,0.3);">
-                Guardar en Posición Fija ✓
+              <button type="submit" id="rfBtnSaveRadarArtist" style="background: var(--accent-lime); border: none; color: #000; font-family: var(--font-mono); font-size: 12px; font-weight: 800; padding: 10px 24px; border-radius: 4px; cursor: pointer; box-shadow: 0 0 14px rgba(187,244,81,0.3);">
+                Guardar y Publicar Story ✓
               </button>
             </div>
 
@@ -3432,9 +3494,23 @@
       await saveRadarArtistToSupabase(artistData);
     }
 
+    // Auto-publicación de Story en Social Hub si la casilla está activa
+    var autoPublishStory = document.getElementById('rfAutoPublishStory') ? document.getElementById('rfAutoPublishStory').checked : true;
+    if (autoPublishStory && typeof publishRadarArtistStoryToSocialHub === 'function') {
+      showToast('🚀 Artista guardado. Generando y publicando Story en Social Hub...');
+      try {
+        await publishRadarArtistStoryToSocialHub(artistData);
+        showToast('🎉 ¡Artista guardado y Story publicada con éxito en Social Hub!');
+      } catch (shErr) {
+        console.warn('Aviso: error al publicar story en Social Hub:', shErr);
+        showToast('✓ Artista guardado. (Aviso Story: ' + (shErr.message || 'no enviada') + ')');
+      }
+    } else {
+      showToast('✓ Artista guardado en posición fija #' + (insertIdx + 1));
+    }
+
     closeRadarModal();
     renderRadarManager();
-    showToast('✓ Artista guardado en posición fija #' + (insertIdx + 1));
   }
 
   async function toggleRadarType(artistId, newType) {
@@ -6831,7 +6907,214 @@ ${playlistUrl}`;
         });
       }
     }, 'image/png');
+  // ==========================================
+  // PUBLICACIÓN DE STORY DEL RADAR A SOCIAL HUB (INSTAGRAM & FACEBOOK STORIES)
+  // ==========================================
+  async function publishRadarArtistStoryToSocialHub(artist) {
+    if (!artist) throw new Error('No hay datos del artista para generar la story');
+    var artistName = (artist.name || 'Artista en el Radar').trim();
+    var cleanRadarUrl = 'https://thenewindiewave.online/artistas?artista=' + encodeURIComponent(artist.id || '');
+    var copyText = 'Descubre a ' + artistName + ' en Artistas en el Radar 📡✨\n\nLee la reseña completa y escucha su música en:\n' + cleanRadarUrl;
+
+    // 1. Resolver URL de imagen
+    var rawUrl = (artist.media_url || artist.image || artist.mediaUrl || artist.img || '').trim();
+    var imageUrl = rawUrl;
+    var ytId = (typeof getYouTubeVideoId === 'function') ? getYouTubeVideoId(rawUrl) : null;
+    if (ytId) {
+      imageUrl = 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg';
+    } else if (imageUrl.includes('cloudinary.com')) {
+      imageUrl = imageUrl.replace(/\.(mp4|mov|webm|m4v)(\?.*)?$/i, '.jpg$2');
+      if (imageUrl.includes('/video/upload/')) {
+        imageUrl = imageUrl.replace(/\/video\/upload\/(so_[0-9.]+\/)?/i, '/video/upload/so_0/');
+      }
+    }
+
+    // Proxy seguro para evitar taint de canvas si la imagen es externa
+    var safeImageUrl = imageUrl;
+    if (imageUrl && imageUrl.startsWith('http') && !imageUrl.includes('res.cloudinary.com')) {
+      safeImageUrl = '/api/upload?url=' + encodeURIComponent(imageUrl);
+    }
+
+    // 2. Pre-cargar imagen de fondo de historia TNIW
+    var bgPromise = new Promise(function(resolve) {
+      if (_curStoryBgImage && _curStoryBgImage.complete && _curStoryBgImage.naturalWidth > 0) {
+        resolve(_curStoryBgImage);
+      } else {
+        var bg = new Image();
+        bg.crossOrigin = 'anonymous';
+        bg.onload = function() { _curStoryBgImage = bg; resolve(bg); };
+        bg.onerror = function() { resolve(null); };
+        bg.src = 'historia_back.jpg';
+      }
+    });
+
+    // 3. Pre-cargar imagen del artista con CORS
+    var artistImgPromise = new Promise(function(resolve) {
+      if (!safeImageUrl) return resolve(null);
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function() {
+        if (imageUrl) _loadedRadarArtistImages[imageUrl] = img;
+        if (safeImageUrl) _loadedRadarArtistImages[safeImageUrl] = img;
+        resolve(img);
+      };
+      img.onerror = function() {
+        var fallback = new Image();
+        fallback.crossOrigin = 'anonymous';
+        fallback.onload = function() {
+          if (imageUrl) _loadedRadarArtistImages[imageUrl] = fallback;
+          resolve(fallback);
+        };
+        fallback.onerror = function() { resolve(null); };
+        fallback.src = imageUrl;
+      };
+      img.src = safeImageUrl;
+    });
+
+    await Promise.all([bgPromise, artistImgPromise]);
+
+    // 4. Renderizar en el canvas de la Story del Radar
+    var canvas = document.getElementById('amRadarStoryCanvas');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.id = 'amRadarStoryCanvas';
+      canvas.width = 1080;
+      canvas.height = 1920;
+    }
+
+    _customRadarStoryImage = null;
+    _curAmSelectedRadarArtist = artist;
+    if (typeof generateRadarArtistStoryCanvas === 'function') {
+      generateRadarArtistStoryCanvas(artist, canvas.id || 'amRadarStoryCanvas');
+    }
+
+    // 5. Extraer DataURL del canvas
+    var storyDataUrl = canvas.toDataURL('image/png');
+    if (!storyDataUrl || storyDataUrl.length < 1000) {
+      throw new Error('No se pudo generar la imagen de la story desde el canvas');
+    }
+
+    // 6. Subir imagen a Cloudinary (carpeta Social Hub)
+    var uploadFunc = window.uploadCanvasToCloudinary || uploadCanvasToCloudinary;
+    if (typeof uploadFunc !== 'function') {
+      throw new Error('Función de subida a Cloudinary no disponible');
+    }
+    var storyUploadUrl = await uploadFunc(storyDataUrl, 'story_radar');
+
+    // 7. Enviar a Social Hub Supabase (cola de publicaciones)
+    var conf = window.SOCIAL_HUB_CONFIG || SOCIAL_HUB_CONFIG;
+    var postGroupId = 'grp_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7);
+    var nowIso = new Date().toISOString();
+    var nowObj = new Date();
+    var dateStr = nowIso.split('T')[0];
+    var hourStr = nowObj.getHours().toString().padStart(2, '0');
+    var minuteStr = nowObj.getMinutes().toString().padStart(2, '0');
+    var periodStr = nowObj.getHours() >= 12 ? 'PM' : 'AM';
+
+    var storyBundle = {
+      id: Math.random().toString(36).substr(2, 9),
+      media: storyUploadUrl,
+      mediaUrls: [storyUploadUrl],
+      mediaType: 'photo',
+      original_filename: 'TNIW_Story_Radar_' + (artist.id || 'radar').replace(/[^a-zA-Z0-9]/g, '_') + '.png',
+      post_group_id: postGroupId,
+      content: copyText,
+      platforms: [
+        { id: 'facebook', type: 'story', types: ['story'], options: { shareAsStory: false } },
+        { id: 'instagram', type: 'story', types: ['story'], options: { showInFeed: false, shareAsStory: false } }
+      ],
+      mode: 'now',
+      status: 'published',
+      timestamp: { date: dateStr, hour: hourStr, minute: minuteStr, period: periodStr },
+      createdAt: nowIso
+    };
+
+    var recordStory = {
+      brand_id: conf.brandId,
+      content: copyText,
+      media_url: storyUploadUrl,
+      platforms: ['facebook', 'instagram'],
+      platform_post_types: {
+        facebook: 'story',
+        instagram: 'story'
+      },
+      payload: storyBundle,
+      scheduled_at: nowIso,
+      status: 'pending',
+      post_type: 'story'
+    };
+
+    var insertRes = await fetch(conf.supabase.url + '/rest/v1/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': conf.supabase.serviceKey,
+        'Authorization': 'Bearer ' + conf.supabase.serviceKey,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify([recordStory])
+    });
+
+    if (!insertRes.ok) {
+      var errTxt = await insertRes.text();
+      throw new Error('Error al enviar Story a Social Hub: ' + errTxt);
+    }
+
+    return {
+      success: true,
+      storyUrl: storyUploadUrl,
+      postGroupId: postGroupId
+    };
   }
+  window.publishRadarArtistStoryToSocialHub = publishRadarArtistStoryToSocialHub;
+
+  async function publishCurrentAmStoryToSocialHub() {
+    var btn = document.getElementById('btnPublishAmStorySocialHub');
+    var originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      btn.innerHTML = '<span>⏳</span> Publicando Story en Social Hub...';
+    }
+    try {
+      showToast('⏳ Publicando Story en Social Hub...');
+      var artist = _curAmSelectedRadarArtist;
+      if (!artist) {
+        var aName = _curAmArtistName || (document.getElementById('amArtistName') ? document.getElementById('amArtistName').value : 'Artista');
+        artist = {
+          id: 'radar-' + Date.now(),
+          name: aName,
+          city: 'México',
+          genre: document.getElementById('amGenre') ? document.getElementById('amGenre').value : 'Indie',
+          type: 'top3',
+          media_url: ''
+        };
+      }
+      var res = await publishRadarArtistStoryToSocialHub(artist);
+      if (btn) {
+        btn.style.background = 'linear-gradient(135deg, #059669 0%, #047857 100%)';
+        btn.innerHTML = '<span>✅</span> ¡STORY PUBLICADA EN SOCIAL HUB!';
+      }
+      showToast('🎉 ¡Story enviada a Social Hub para Instagram y Facebook Stories!');
+      setTimeout(function() {
+        if (btn) {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+          btn.innerHTML = originalText;
+        }
+      }, 5000);
+    } catch(err) {
+      console.error('Error publicando story desde modal:', err);
+      showToast('❌ Error al publicar story: ' + (err.message || 'Error desconocido'));
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.innerHTML = originalText;
+      }
+    }
+  }
+  window.publishCurrentAmStoryToSocialHub = publishCurrentAmStoryToSocialHub;
 </script>
 
 <!-- MODAL MENSAJE AUTOMÁTICO & STORY PARA CURADOR -->
@@ -6961,6 +7244,9 @@ ${playlistUrl}`;
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button id="btnPublishAmStorySocialHub" onclick="publishCurrentAmStoryToSocialHub()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-family: var(--font-mono); font-size: 13px; font-weight: 800; padding: 13px 18px; border-radius: 6px; border: 1px solid rgba(52,211,153,0.5); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35);">
+            🚀 Publicar Story en Redes (Social Hub)
+          </button>
           <button onclick="downloadAutoMessageStory()" style="background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 12.5px; font-weight: 800; padding: 12px 16px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(187, 244, 81, 0.25);">
             📥 Descargar Historia en HD (PNG)
           </button>
