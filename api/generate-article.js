@@ -87,7 +87,9 @@ export default async function handler(req, res) {
       post_mockup_url,
       story_mockup_url,
       notes,
-      variation = 0
+      variation = 0,
+      history = [],
+      previous_feedback = ''
     } = req.body || {};
 
     // MANEJO DE FEEDBACK EDITORIAL PARA CURADOR
@@ -95,67 +97,122 @@ export default async function handler(req, res) {
       const cleanNotes = (notes || '').replace(/\[WA:\s*[^\]]+\]\s*/gi, '').replace(/\[WhatsApp:\s*[^\]]+\]\s*/gi, '').trim();
 
       const GEMINI_KEY = process.env.GEMINI_API_KEY;
-      const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+      const GROQ_KEY = process.env.GROQ_API_KEY;
       const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
       const systemPrompt = `Eres Rodrigo dL Moral, curador editorial y fundador de la plataforma musical "The New Indie Wave" (TNIW).
 Tu tarea es redactar un feedback editorial para un artista independiente que acaba de enviar su canción a consideración para nuestras playlists oficiales de Spotify y redes.
 
 REGLAS CRÍTICAS:
-- Escribe en español, con voz cercana, entusiasta pero con criterio agudo ("de tú a tú", profesional y motivador).
+- Escribe en español, con voz cercana, entusiasta pero con criterio agudo ("de tú a tú", profesional, motivador y auténtico).
 - Extensión: entre 45 y 75 palabras (2 a 4 oraciones bien estructuradas).
 - PERSONALIZACIÓN OBLIGATORIA:
   1. Menciona al artista ("${artist_name}") y el nombre del tema ("${song_title}").
-  2. Habla de las características sonoras reales de su género ("${genre || 'Indie'}"), mezcla, groove, texturas, instrumentación o melodías.
-  ${cleanNotes ? `3. IMPORTANTE: El artista dejó esta nota sobre su canción: "${cleanNotes}". Haz alusión directa a su nota para demostrarle que leíste y entendiste la historia o intención de su obra.` : ''}
+  2. Habla de las características sonoras reales de su género o estilo ("${genre || 'Indie'}"), mezcla, groove, instrumentación, melodías o dinámicas.
+  ${cleanNotes ? `3. IMPORTANTE: El artista dejó esta nota sobre su canción: "${cleanNotes}". Haz alusión directa a su nota (historia, concepto o géneros que menciona) para demostrarle que leíste y entendiste la intención de su obra.` : ''}
   4. Menciona por qué encaja perfectamente en la playlist de destino: "${playlist || 'Selección Oficial TNIW'}".
-- NO uses clichés genéricos vacíos como "Qué buen tema, me atrapó la vibra". Da detalles sonoros que hagan sentir al artista que su música fue escuchada con atención.
+- DIVERSIDAD ABSOLUTA: Cada feedback DEBE ser completamente único y fresco. No uses frases prefabricadas repetitivas.
 - Devuelve ÚNICAMENTE el texto del feedback, sin comillas adicionales, sin encabezados ni introducciones.`;
 
-      const userPrompt = `Genera un feedback editorial único para "${song_title}" de ${artist_name} (Género: ${genre || 'Indie'}, País: ${country || 'Latam/Iberoamérica'}, Playlist: ${playlist || 'Selección Oficial TNIW'}). ${cleanNotes ? `Nota del artista: "${cleanNotes}".` : ''} Variación #${variation || 1}.`;
+      let userPrompt = `Genera un feedback editorial único y fresco para "${song_title}" de ${artist_name} (Género: ${genre || 'Indie'}, País: ${country || 'Latam/Iberoamérica'}, Playlist destino: ${playlist || 'Selección Oficial TNIW'}). ${cleanNotes ? `Nota del artista: "${cleanNotes}".` : ''} Variación #${variation || 1} (Timestamp: ${Date.now()}).`;
+      
+      const historyList = Array.isArray(history) ? history.filter(Boolean) : [];
+      if (previous_feedback && !historyList.includes(previous_feedback)) {
+        historyList.push(previous_feedback);
+      }
+      if (historyList.length > 0) {
+        userPrompt += `\n\nATENCIÓN ANTI-REPETICIÓN: Previamente ya se generaron estos borradores para esta misma canción:\n${historyList.slice(-4).map((h, i) => `[Borrador ${i+1}]: ${h}`).join('\n')}\nDEBES redactar una versión TOTALMENTE DIFERENTE, con otro ángulo analítico, otra apertura y distinta selección de palabras.`;
+      }
 
+      // 1. GEMINI CASCADE CON MODELOS ACTUALIZADOS (2.5, 2.0, 1.5 Flash)
       if (GEMINI_KEY) {
-        try {
-          const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
-              generationConfig: { temperature: 0.85, maxOutputTokens: 300 }
-            })
-          });
-          if (geminiRes.ok) {
-            const gData = await geminiRes.json();
-            const text = gData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-            if (text && text.length > 30) {
-              return res.status(200).json({ success: true, source: 'gemini', feedback: cleanFeedbackText(text) });
+        const geminiModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        for (const gModel of geminiModels) {
+          try {
+            const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${gModel}:generateContent?key=${GEMINI_KEY}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+                generationConfig: { temperature: 0.95, maxOutputTokens: 350 }
+              })
+            });
+            if (geminiRes.ok) {
+              const gData = await geminiRes.json();
+              const text = gData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+              if (text && text.length > 30) {
+                const cleaned = cleanFeedbackText(text);
+                if (!historyList.some(h => h.toLowerCase() === cleaned.toLowerCase())) {
+                  return res.status(200).json({ success: true, source: `gemini-${gModel}`, feedback: cleaned });
+                }
+              }
             }
-          }
-        } catch (e) {}
+          } catch (e) {}
+        }
       }
 
+      // 2. GROQ ULTRA RÁPIDO CON MODELOS OFICIALES (Llama 3.3 70B / Llama 3.1 8B)
       if (GROQ_KEY) {
+        const groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
+        for (const modelName of groqModels) {
+          try {
+            const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+              body: JSON.stringify({
+                model: modelName,
+                messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+                temperature: 0.95,
+                max_tokens: 350
+              })
+            });
+            if (groqRes.ok) {
+              const grData = await groqRes.json();
+              const text = grData.choices?.[0]?.message?.content?.trim();
+              if (text && text.length > 30) {
+                const cleaned = cleanFeedbackText(text);
+                if (!historyList.some(h => h.toLowerCase() === cleaned.toLowerCase())) {
+                  return res.status(200).json({ success: true, source: `groq-${modelName}`, feedback: cleaned });
+                }
+              }
+            }
+          } catch (e) {}
+        }
+      }
+
+      // 3. OPENAI GPT-4O-MINI
+      if (OPENAI_KEY) {
         try {
-          const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${OPENAI_KEY}`
+            },
             body: JSON.stringify({
-              model: 'openai/gpt-oss-120b',
-              messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
-              temperature: 0.85,
-              max_tokens: 300
+              model: 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+              ],
+              temperature: 0.95,
+              max_tokens: 350
             })
           });
-          if (groqRes.ok) {
-            const grData = await groqRes.json();
-            const text = grData.choices?.[0]?.message?.content?.trim();
+          if (aiRes.ok) {
+            const aiData = await aiRes.json();
+            const text = aiData.choices?.[0]?.message?.content?.trim();
             if (text && text.length > 30) {
-              return res.status(200).json({ success: true, source: 'groq', feedback: cleanFeedbackText(text) });
+              const cleaned = cleanFeedbackText(text);
+              if (!historyList.some(h => h.toLowerCase() === cleaned.toLowerCase())) {
+                return res.status(200).json({ success: true, source: 'openai-gpt-4o-mini', feedback: cleaned });
+              }
             }
           }
         } catch (e) {}
       }
 
+      // 4. MOTOR CONTEXTUAL INTELIGENTE (SIN REPETICIÓN GARANTIZADO)
       const contextualFeedback = synthesizeEditorialFeedback({
         artist_name,
         song_title,
@@ -163,7 +220,8 @@ REGLAS CRÍTICAS:
         cleanNotes,
         playlist,
         country,
-        variation
+        variation,
+        history: historyList
       });
 
       return res.status(200).json({ success: true, source: 'contextual_engine', feedback: contextualFeedback });
@@ -1354,147 +1412,209 @@ function cleanFeedbackText(text) {
 }
 
 function synthesizeEditorialFeedback({
-  artist_name,
-  song_title,
-  genre,
-  cleanNotes,
-  playlist,
-  country,
-  variation = 0
+  artist_name = 'Artista',
+  song_title = 'Track',
+  genre = 'Indie',
+  cleanNotes = '',
+  playlist = 'Selección Oficial TNIW',
+  country = '',
+  variation = 1,
+  history = []
 }) {
   const normGenre = (genre || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const normNotes = (cleanNotes || '').toLowerCase();
-  const seed = (variation * 7 + (song_title.length * 3) + artist_name.length) % 10;
+  const normNotes = (cleanNotes || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normPl = (playlist || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const cleanPl = playlist ? playlist.replace(/^[🎯\s]+/, '').trim() : 'nuestras listas oficiales';
 
-  let genreCritique = '';
-  if (normGenre.includes('afro') || normGenre.includes('tribal')) {
-    const opts = [
-      `El pulso rítmico y las polirritmias percusivas tienen un groove hipnótico brutal; el balance entre los elementos orgánicos y el peso de las frecuencias bajas le da una pegada perfecta para encender la pista.`,
-      `Tremendo trabajo con la progresión rítmica. Las percusiones tienen un aire envolvente y orgánico, mientras que el diseño sonoro en los graves empuja la energía hacia arriba con mucha clase.`,
-      `La cadencia de este track destaca por su calidez en las percusiones y la sutileza de los arreglos. Se siente una producción muy cuidada en cada compás que no deja caer la tensión en ningún momento.`
-    ];
-    genreCritique = opts[seed % opts.length];
-  } else if (normGenre.includes('synth') || normGenre.includes('electro') || normGenre.includes('dance')) {
-    const opts = [
-      `La línea de bajo sintetizada amarra el track con muchísima fuerza y dinamismo, y el tratamiento brillante en las frecuencias altas le da ese filo bailable tan adictivo.`,
-      `El hook principal se te queda grabado desde la primera vuelta. El contraste entre los sintetizadores retro-futuristas y la claridad rítmica logra una vibra festiva y sofisticada.`,
-      `Gran manejo de los arpegios y la energía en los sintetizadores. La producción suena contundente, con un estéreo amplio y una pegada que invita al baile inmediato.`
-    ];
-    genreCritique = opts[seed % opts.length];
-  } else if (normGenre.includes('dream') || normGenre.includes('shoegaze') || normGenre.includes('ambient')) {
-    const opts = [
-      `Las capas de reverberación y texturas envolventes crean una atmósfera introspectiva preciosa; la interpretación vocal flota sobre los acordes con una sensibilidad que eriza la piel.`,
-      `Lograron construir un paisaje sonoro lleno de nostalgia y matices. Las transiciones son suaves y el diseño acústico te transporta de lleno a un espacio íntimo.`,
-      `Es de esas piezas que se disfrutan con audífonos puestos: la espacialidad de la mezcla y el tratamiento etéreo de las guitarras y sintes hacen que la emoción resuene de verdad.`
-    ];
-    genreCritique = opts[seed % opts.length];
-  } else if (normGenre.includes('darkwave') || normGenre.includes('post-punk') || normGenre.includes('ebm') || normGenre.includes('coldwave')) {
-    const opts = [
-      `El bajo punzante y la estética sombría tienen ese magnetismo nocturno que buscamos. Las líneas melódicas frías y la caja con pegada seca le dan una contundencia impecable.`,
-      `Brutal esa atmósfera densa y nostálgica. El contraste entre la crudeza del bajo y las texturas afiladas evoca lo mejor del sonido underground contemporáneo.`,
-      `La cadencia motorik y la oscuridad de los sintetizadores generan una tensión bailable formidable. Es un sonido maduro y con identidad muy marcada.`
-    ];
-    genreCritique = opts[seed % opts.length];
-  } else if (normGenre.includes('metal') || normGenre.includes('punk') || normGenre.includes('hard rock') || normGenre.includes('garage') || normGenre.includes('grunge')) {
-    const opts = [
-      `La energía y el ataque de las guitarras están en el punto exacto: crudo, directo y con una pegada en la batería que transmite rabia pura y honestidad visceral.`,
-      `Una descarga sónica impecable. Me encantó la saturación armónica y la potencia en la base rítmica; suena a banda tocando en vivo sin filtros ni poses.`,
-      `Tiene ese espíritu rebelde y contundente que sacude el pecho. El empuje rítmico y la distorsión bien ecualizada hacen que el tema explote con total solidez.`
-    ];
-    genreCritique = opts[seed % opts.length];
-  } else if (normGenre.includes('rock') || normGenre.includes('indie rock') || normGenre.includes('alternat')) {
-    const opts = [
-      `Los riffs de guitarra tienen carácter y sostienen la canción con frescura; los cambios dinámicos entre verso y coro le dan un viaje sonoro súper enriquecedor.`,
-      `Excelente balance entre la melodía vocal y la mordida del instrumental. La producción suena con aire y pegada, manteniendo viva la esencia orgánica de banda.`,
-      `Una propuesta de rock independiente sumamente sólida. Se nota maestría en los arreglos y la interpretación vocal transmite emoción auténtica.`
-    ];
-    genreCritique = opts[seed % opts.length];
-  } else if (normGenre.includes('urban') || normGenre.includes('trap') || normGenre.includes('hip') || normGenre.includes('reggaeton') || normGenre.includes('flow')) {
-    const opts = [
-      `El tratamiento del sub-bajo 808 y los patrones rítmicos tienen un flow impecable; las texturas vocales están perfectamente colocadas al frente sin ensuciar la mezcla.`,
-      `Muy buen groove y cadencia interpretativa. El beat respira con soltura y los remates le dan dinamismo constante a cada barra.`,
-      `Tiene una vibra moderna y contagiosa. La producción logra un balance sonoro impecable que resalta la personalidad y soltura en la entrega vocal.`
-    ];
-    genreCritique = opts[seed % opts.length];
-  } else if (normGenre.includes('balada') || normGenre.includes('folk') || normGenre.includes('pop') || normGenre.includes('singer')) {
-    const opts = [
-      `La honestidad lírica e interpretativa llega directa al corazón; la instrumentación acústica y las dinámicas están trabajadas con muchísima elegancia y calidez.`,
-      `Una composición hermosa donde la voz y la armonía conectan desde la vulnerabilidad. No necesita sobreproducción para emocionar profundamente.`,
-      `El desarrollo melódico está sumamente bien construido. Los arreglos van entrando con delicadeza hasta alcanzar un clímax emocional muy conmovedor.`
-    ];
-    genreCritique = opts[seed % opts.length];
-  } else {
-    const opts = [
-      `La producción tiene una identidad sonora muy bien definida, con un diseño acústico balanceado y melodías que se desenvuelven de forma cautivadora.`,
-      `Nos sorprendió gratamente la riqueza de texturas y el cuidado en cada detalle de la mezcla; tiene un carácter original que destaca de inmediato.`,
-      `Una pieza sonora muy fresca e inspirada. El arreglo instrumental sostiene un pulso dinámico que atrapa la atención desde los primeros segundos.`
-    ];
-    genreCritique = opts[seed % opts.length];
+  function pick(pool) {
+    if (!pool || !pool.length) return '';
+    const fresh = pool.filter(opt => {
+      if (!history || !history.length) return true;
+      const snippet = opt.slice(0, 25).toLowerCase();
+      return !history.some(h => (h || '').toLowerCase().includes(snippet));
+    });
+    const candidates = fresh.length ? fresh : pool;
+    return candidates[Math.floor(Math.random() * candidates.length)];
   }
 
+  // 1. APERTURAS (14 opciones diversas)
+  const openings = [
+    `Gran trabajo de ${artist_name} en "${song_title}".`,
+    `"${song_title}" de ${artist_name} nos ha parecido una propuesta impecable y con mucho carácter.`,
+    `Un aplauso para ${artist_name} por esta pieza sonora que es "${song_title}".`,
+    `Qué grata experiencia escuchar "${song_title}" de ${artist_name}; atrapa desde el primer compás.`,
+    `Desde los primeros segundos, "${song_title}" de ${artist_name} demuestra una identidad artística contundente.`,
+    `Nos entusiasmó muchísimo descubrir "${song_title}" de ${artist_name} durante la curaduría editorial.`,
+    `Hay un magnetismo especial en "${song_title}"; ${artist_name} entrega una grabación sumamente lograda.`,
+    `Qué buena entrega nos hace llegar ${artist_name} con "${song_title}"; suena con frescura absoluta.`,
+    `Es un verdadero gusto toparse con propuestas como "${song_title}" de ${artist_name}, donde la autenticidad manda.`,
+    `La madurez sonora que refleja ${artist_name} en "${song_title}" habla por sí sola.`,
+    `Quedamos gratamente impresionados con "${song_title}", lo más reciente de ${artist_name}.`,
+    `"${song_title}" confirma el talento y la personalidad distintiva que ${artist_name} viene forjando.`,
+    `Hay una chispa muy genuina en la interpretación de ${artist_name} a lo largo de "${song_title}".`,
+    `Con "${song_title}", ${artist_name} logra un estándar de calidad y emoción que destaca de inmediato.`
+  ];
+
+  // 2. DETECCIÓN CONTEXTUAL DE NOTAS DEL ARTISTA
   let notesConnection = '';
-  if (cleanNotes && cleanNotes.length >= 8) {
-    if (normNotes.includes('amor') || normNotes.includes('relacion') || normNotes.includes('ruptura') || normNotes.includes('toxica') || normNotes.includes('ciclo') || normNotes.includes('nostalgia') || normNotes.includes('huir') || normNotes.includes('desolacion')) {
-      const opts = [
-        `Se nota a flor de piel la historia que nos contaste en tu nota: esa vulnerabilidad y el proceso de sanar o cerrar ciclos se transmiten con absoluta honestidad en cada nota.`,
-        `Leímos con atención la vivencia detrás de la canción y es admirable cómo supieron transformar ese duelo y nostalgia en una obra artística tan genuina.`,
+  if (cleanNotes && cleanNotes.length >= 6) {
+    if (normNotes.includes('mirar al otro') || normNotes.includes('mirarse') || normNotes.includes('amor propio') || normNotes.includes('sanar') || normNotes.includes('cerrar ciclo') || normNotes.includes('propia') || normNotes.includes('desapego') || normNotes.includes('reencontr')) {
+      notesConnection = pick([
+        `La narrativa sobre reencontrarse con uno mismo y dejar de mirar afuera se percibe con absoluta franqueza; ese viaje de amor propio le otorga un peso emocional muy conmovedor a cada verso.`,
+        `Es admirable cómo supiste traducir ese proceso de sanación y mirada interna en una composición tan directa y honesta; conecta de lleno con quien la escucha.`,
+        `Ese giro lírico de volver a mirarse a una misma y priorizar la propia voz resuena como una verdadera catarsis en la entrega interpretativa.`,
+        `Leímos con atención la historia detrás del tema: ese ejercicio de autorreflexión y madurez afectiva se siente tangible en cada fraseo y en cada silencio.`
+      ]);
+    } else if (normNotes.includes('bachata') || normNotes.includes('drama') || normNotes.includes('bolero') || normNotes.includes('cumbia') || normNotes.includes('tango') || normNotes.includes('flamenco') || normNotes.includes('fusion') || normNotes.includes('mezcla de')) {
+      notesConnection = pick([
+        `La convivencia entre la cadencia rítmica y esos toques dramáticos y melódicos crea un contraste fascinante; logra una personalidad cautivadora y fuera de lo común.`,
+        `Esa mezcla estilística tan particular le otorga un color distintivo y sumamente magnético: coquetea con distintos mundos sonoros con total soltura y elegancia.`,
+        `Nos cautivó ese balance entre dramatismo lírico y frescura rítmica; se siente como una propuesta audaz que sabe exactamente a dónde apuntar.`,
+        `Arriesgarse a fusionar matices rítmicos tradicionales con esa dosis de picardía y drama pop es uno de los puntos más altos de esta entrega.`
+      ]);
+    } else if (normNotes.includes('amor') || normNotes.includes('relacion') || normNotes.includes('ruptura') || normNotes.includes('toxica') || normNotes.includes('ciclo') || normNotes.includes('nostalgia') || normNotes.includes('desolacion') || normNotes.includes('corazon') || normNotes.includes('duelo')) {
+      notesConnection = pick([
+        `Se nota a flor de piel la historia que nos contaste en tu nota: esa vulnerabilidad y el proceso de sanar o soltar se transmiten con absoluta honestidad en cada compás.`,
+        `Leímos con detenimiento la vivencia detrás de la canción y es admirable cómo supieron transformar ese duelo y nostalgia en una obra artística tan genuina.`,
         `La emoción que describiste en tu mensaje se siente tangible en la interpretación; hay una carga introspectiva que hace que la letra cale muy hondo.`
-      ];
-      notesConnection = ' ' + opts[seed % opts.length];
-    } else if (normNotes.includes('levantar') || normNotes.includes('lucha') || normNotes.includes('declaracion') || normNotes.includes('rabia') || normNotes.includes('rebelde') || normNotes.includes('fuerza')) {
-      const opts = [
+      ]);
+    } else if (normNotes.includes('fiesta') || normNotes.includes('bailar') || normNotes.includes('baile') || normNotes.includes('noche') || normNotes.includes('club') || normNotes.includes('pista') || normNotes.includes('perder el control') || normNotes.includes('desahogo') || normNotes.includes('flow')) {
+      notesConnection = pick([
+        `Tal como nos anticipabas, la vibra bailable y ese pulso nocturno de fiesta y desahogo se contagian al instante.`,
+        `Se cumple a la perfección lo que nos comentaste: es una rola hecha para dejarse llevar y perder la noción del tiempo en la pista.`,
+        `Ese espíritu libre y festivo que nos compartiste en tu nota se traduce en un gancho rítmico irresistible y lleno de vitalidad.`
+      ]);
+    } else if (normNotes.includes('levantar') || normNotes.includes('lucha') || normNotes.includes('declaracion') || normNotes.includes('rabia') || normNotes.includes('rebelde') || normNotes.includes('fuerza') || normNotes.includes('garra')) {
+      notesConnection = pick([
         `Tal como nos compartiste en tus notas, el tema funciona como una auténtica declaración de principios y resistencia; esa garra se siente en cada compás.`,
         `Hiciste honor total a lo que nos escribiste: la rola proyecta esa fuerza para no rendirse y levantarse, algo que resuena con mucha contundencia hoy en día.`,
         `Esa convicción y rebeldía que mencionas en tu nota atraviesa toda la grabación con una honestidad desbordante.`
-      ];
-      notesConnection = ' ' + opts[seed % opts.length];
-    } else if (normNotes.includes('exceso') || normNotes.includes('fiesta') || normNotes.includes('bailar') || normNotes.includes('noche') || normNotes.includes('club') || normNotes.includes('divertir')) {
-      const opts = [
-        `Tal como nos anticipabas, la vibra bailable y ese pulso nocturno de fiesta y desahogo se contagian al instante.`,
-        `Se cumple a la perfección lo que nos comentaste: es una rola hecha para dejarse llevar y perder la noción del tiempo en la pista.`,
-        `Ese espíritu libre y festivo que nos compartiste en tu nota se traduce en un gancho rítmico irresistible.`
-      ];
-      notesConnection = ' ' + opts[seed % opts.length];
+      ]);
     } else if (normNotes.includes('single') || normNotes.includes('debut') || normNotes.includes('primer') || normNotes.includes('ep') || normNotes.includes('album') || normNotes.includes('disco')) {
-      const opts = [
+      notesConnection = pick([
         `Enhorabuena por este paso clave en tu trayectoria que nos detallaste en tus notas; presentarse con este nivel de madurez augura grandes cosas para el proyecto.`,
         `Haber elegido este corte como carta de presentación o parte de tu nuevo material es un gran acierto, refleja un estándar sonoro muy alto.`,
         `Celebramos este nuevo capítulo que nos platicas en tu nota; entrar al radar con una obra tan bien lograda marca una pauta genial.`
-      ];
-      notesConnection = ' ' + opts[seed % opts.length];
+      ]);
     } else if (normNotes.includes('bpm') || normNotes.includes('mezcla') || normNotes.includes('beat') || normNotes.includes('estudio') || normNotes.includes('produccion') || normNotes.includes('grab')) {
-      const opts = [
+      notesConnection = pick([
         `Nos encantó el detalle que compartiste sobre el proceso creativo y técnico; esa precisión en el tempo y la evolución del arreglo rinde frutos de forma magistral.`,
         `Se agradece el contexto técnico que nos dejaste: ese cuidado milimétrico en el ritmo y las transiciones hace que el tema destaque notablemente.`,
         `El experimento sonoro y de producción que nos describiste funciona de maravilla, logrando un balance auditivo de primera línea.`
-      ];
-      notesConnection = ' ' + opts[seed % opts.length];
+      ]);
     } else {
-      const opts = [
+      notesConnection = pick([
         `Agradecemos mucho la nota personal que nos compartiste; esa intención y visión artística se reflejan con total nitidez en el resultado final.`,
         `Pudimos conectar de lleno con lo que nos contaste en tu mensaje; la canción respalda al 100% ese concepto que estás construyendo.`,
         `Nos resonó mucho lo que nos dejaste dicho: hay coherencia total entre tus palabras y la energía que desprende el track.`
-      ];
-      notesConnection = ' ' + opts[seed % opts.length];
+      ]);
     }
   }
 
-  const openings = [
-    `Gran trabajo de ${artist_name} en "${song_title}".`,
-    `"${song_title}" de ${artist_name} nos ha parecido una propuesta impecable.`,
-    `Un aplauso para ${artist_name} por esta pieza sonora que es "${song_title}".`,
-    `Qué grata experiencia escuchar "${song_title}" de ${artist_name}.`
-  ];
-  const opening = openings[seed % openings.length];
+  // 3. ANÁLISIS DE GÉNERO Y PRODUCCIÓN
+  let genreCritique = '';
+  const isElectro = normGenre.includes('synth') || normGenre.includes('electro') || normGenre.includes('dance') || normGenre.includes('house') || normGenre.includes('techno') || normPl.includes('electronica') || normPl.includes('pista');
+  const isBachataPop = normGenre.includes('bachata') || normNotes.includes('bachata') || normGenre.includes('latin') || normNotes.includes('pop, bachata');
+  const isPop = normGenre.includes('pop') || normNotes.includes('pop') || normGenre.includes('balada');
+  const isDream = normGenre.includes('dream') || normGenre.includes('shoegaze') || normGenre.includes('ambient');
+  const isDark = normGenre.includes('darkwave') || normGenre.includes('post-punk') || normGenre.includes('ebm') || normGenre.includes('coldwave') || normGenre.includes('goth');
+  const isRock = normGenre.includes('rock') || normGenre.includes('indie rock') || normGenre.includes('alternat');
+  const isMetalPunk = normGenre.includes('metal') || normGenre.includes('punk') || normGenre.includes('hard rock') || normGenre.includes('garage') || normGenre.includes('grunge');
+  const isUrban = normGenre.includes('urban') || normGenre.includes('trap') || normGenre.includes('hip') || normGenre.includes('reggaeton') || normGenre.includes('flow');
+  const isAfro = normGenre.includes('afro') || normGenre.includes('tribal');
 
-  const playlistClean = playlist ? playlist.replace(/^[🎯\s]+/, '').trim() : 'nuestras listas oficiales';
+  if (isBachataPop) {
+    genreCritique = pick([
+      `El balance entre la cadencia rítmica bailable y el pulso pop funciona de maravilla; el bajo tiene un peso envolvente que sostiene la pista sin opacar los detalles vocales.`,
+      `El hook melódico se te queda grabado al instante. La instrumentación camina con una sensualidad y dinamismo sumamente frescos, logrando una producción redonda.`,
+      `Destacamos la delicadeza en las guitarras/arreglos rítmicos y el dramatismo elegante en la interpretación vocal: se siente contemporáneo, adictivo y con identidad propia.`,
+      `Tiene ese filo bailable tan contagioso pero con una sofisticación sonora que no cae en fórmulas trilladas; cada cambio dinámico suma muchísimo interés.`,
+      `La articulación de la voz y el brillo en la mezcla logran un espacio estéreo cálido y envolvente que invita a reproducirla en bucle.`
+    ]);
+  } else if (isElectro) {
+    genreCritique = pick([
+      `La línea de bajo sintetizada amarra el track con muchísima fuerza y dinamismo, y el tratamiento brillante en las frecuencias altas le da ese filo bailable tan adictivo.`,
+      `El hook principal se te queda grabado desde la primera vuelta. El contraste entre los sintetizadores envolventes y la claridad del beat logra una atmósfera nocturna perfecta para perder el control en la pista.`,
+      `Gran manejo de las progresiones y las automatizaciones en los sintes; la producción suena contundente, con un estéreo amplio y una pegada que invita al baile inmediato.`,
+      `El pulso rítmico sostiene una tensión ascendente formidable; los cortes dinámicos y la contundencia en las frecuencias bajas logran un impacto físico inmediato.`,
+      `La producción destaca por su textura moderna y la precisión de sus secuencias; hay un diseño sonoro sofisticado que eleva la energía del track.`
+    ]);
+  } else if (isPop) {
+    genreCritique = pick([
+      `El gancho melódico es instantáneo y se clava en la memoria con naturalidad; la interpretación vocal tiene brillo y una calidez que resalta cada matiz sin perder pegada.`,
+      `La cadencia rítmica y el balance entre lo orgánico y lo digital le aportan una frescura vibrante, logrando un tema que camina con muchísima gracia.`,
+      `Destacamos el tratamiento de las voces y la claridad en la producción: la mezcla respira con amplitud y permite que la interpretación lidere con gran presencia.`,
+      `Tiene esa sensibilidad pop sofisticada que no teme explorar arreglos ricos; el tema evoluciona dinámicamente hasta un clímax sumamente disfrutable.`,
+      `La riqueza en las armonías y los sutiles detalles instrumentales revelan un cuidado artesanal que eleva la canción con creces.`
+    ]);
+  } else if (isDream) {
+    genreCritique = pick([
+      `Las capas de reverberación y texturas envolventes crean una atmósfera introspectiva preciosa; la interpretación vocal flota sobre los acordes con una sensibilidad que eriza la piel.`,
+      `Lograron construir un paisaje sonoro lleno de nostalgia y matices. Las transiciones son suaves y el diseño acústico te transporta de lleno a un espacio íntimo.`,
+      `Es de esas piezas que se disfrutan con audífonos puestos: la espacialidad de la mezcla y el tratamiento etéreo de las guitarras y sintes hacen que la emoción resuene de verdad.`,
+      `El uso sutil de ecos y modulaciones teje una manta sonora reconfortante; la melodía tiene una fragilidad poética que conmueve desde el primer segundo.`
+    ]);
+  } else if (isDark) {
+    genreCritique = pick([
+      `El bajo punzante y la estética sombría tienen ese magnetismo nocturno que buscamos. Las líneas melódicas frías y la caja con pegada seca le dan una contundencia impecable.`,
+      `Brutal esa atmósfera densa y nostálgica. El contraste entre la crudeza del bajo y las texturas afiladas evoca lo mejor del sonido underground contemporáneo.`,
+      `La cadencia motorik y la oscuridad de los sintetizadores generan una tensión bailable formidable. Es un sonido maduro y con identidad muy marcada.`
+    ]);
+  } else if (isMetalPunk) {
+    genreCritique = pick([
+      `La energía y el ataque de las guitarras están en el punto exacto: crudo, directo y con una pegada en la batería que transmite rabia pura y honestidad visceral.`,
+      `Una descarga sónica impecable. Me encantó la saturación armónica y la potencia en la base rítmica; suena a banda tocando en vivo sin filtros ni poses.`,
+      `Tiene ese espíritu rebelde y contundente que sacude el pecho. El empuje rítmico y la distorsión bien ecualizada hacen que el tema explote con total solidez.`
+    ]);
+  } else if (isRock) {
+    genreCritique = pick([
+      `Los riffs de guitarra tienen carácter y sostienen la canción con frescura; los cambios dinámicos entre verso y coro le dan un viaje sonoro súper enriquecedor.`,
+      `Excelente balance entre la melodía vocal y la mordida del instrumental. La producción suena con aire y pegada, manteniendo viva la esencia orgánica de banda.`,
+      `Una propuesta de rock independiente sumamente sólida. Se nota maestría en los arreglos y la interpretación vocal transmite emoción auténtica.`
+    ]);
+  } else if (isUrban) {
+    genreCritique = pick([
+      `El tratamiento del sub-bajo 808 y los patrones rítmicos tienen un flow impecable; las texturas vocales están perfectamente colocadas al frente sin ensuciar la mezcla.`,
+      `Muy buen groove y cadencia interpretativa. El beat respira con soltura y los remates le dan dinamismo constante a cada barra.`,
+      `Tiene una vibra moderna y contagiosa. La producción logra un balance sonoro impecable que resalta la personalidad y soltura en la entrega vocal.`
+    ]);
+  } else if (isAfro) {
+    genreCritique = pick([
+      `El pulso rítmico y las polirritmias percusivas tienen un groove hipnótico brutal; el balance entre los elementos orgánicos y el peso de las frecuencias bajas le da una pegada perfecta.`,
+      `Tremendo trabajo con la progresión rítmica. Las percusiones tienen un aire envolvente y orgánico, mientras que el diseño sonoro en los graves empuja la energía hacia arriba.`,
+      `La cadencia de este track destaca por su calidez en las percusiones y la sutileza de los arreglos. Se siente una producción muy cuidada en cada compás.`
+    ]);
+  } else {
+    genreCritique = pick([
+      `La producción tiene una identidad sonora muy bien definida, con un diseño acústico balanceado y melodías que se desenvuelven de forma cautivadora.`,
+      `Nos sorprendió gratamente la riqueza de texturas y el cuidado en cada detalle de la mezcla; tiene un carácter original que destaca de inmediato.`,
+      `Una pieza sonora muy fresca e inspirada. El arreglo instrumental sostiene un pulso dinámico que atrapa la atención desde los primeros segundos.`,
+      `Destacamos la frescura en los arreglos y el balance entre planos sonoros; hay una búsqueda estética genuina que se agradece enormemente.`
+    ]);
+  }
+
+  // 4. CIERRES CON PLAYLIST (10 opciones variadas)
   const closings = [
-    `Por su vibra y nivel de producción, encaja a la perfección en "${playlistClean}". ¡Excelente trabajo y que sigan los éxitos!`,
-    `Suma muchísimo a la curaduría de "${playlistClean}". Todo listo para que nuestra audiencia la descubra. ¡Felicitaciones!`,
-    `Va directo a enriquecer el sonido de "${playlistClean}". Una entrega que merece sonar fuerte. ¡Mucho éxito en este camino!`,
-    `Es justo el tipo de propuesta fresca y auténtica que buscamos para "${playlistClean}". ¡A seguir creando con esta calidad!`
+    `Por su vibra y nivel de producción, encaja a la perfección en "${cleanPl}". ¡Excelente trabajo y que sigan los éxitos!`,
+    `Suma muchísimo a la curaduría de "${cleanPl}". Todo listo para que nuestra audiencia la descubra. ¡Felicitaciones!`,
+    `Va directo a enriquecer el sonido de "${cleanPl}". Una entrega que merece sonar fuerte. ¡Mucho éxito en este camino!`,
+    `Es justo el tipo de propuesta fresca y auténtica que buscamos para "${cleanPl}". ¡A seguir creando con esta calidad!`,
+    `Va a encajar de maravilla en la rotación de "${cleanPl}"; seguro conectará de lleno con los oyentes de la lista.`,
+    `Un aporte valiosísimo para la selección de "${cleanPl}". ¡Enhorabuena y gracias por compartirla con nosotros!`,
+    `Tiene el calibre y el magnetismo exacto para destacar dentro de "${cleanPl}". ¡A disfrutar del lanzamiento y a seguir con todo!`,
+    `Es una incorporación fantástica para la atmósfera de "${cleanPl}". Estamos convencidos de que dejará huella en la audiencia.`,
+    `Queda sumada con honores a "${cleanPl}". ¡Gran música para seguir creciendo e inspirando!`,
+    `Orgullosos de respaldar "${song_title}" dentro de "${cleanPl}". ¡Todo el éxito en lo que viene!`
   ];
-  const closing = closings[(seed + 1) % closings.length];
 
-  return `${opening} ${genreCritique}${notesConnection} ${closing}`;
+  // 5. ARQUETIPOS DE ESTRUCTURA EDITORIAL
+  const archetypes = [
+    () => `${pick(openings)} ${genreCritique} ${notesConnection ? notesConnection + ' ' : ''}${pick(closings)}`,
+    () => `${pick(openings)} ${notesConnection ? notesConnection + ' ' : ''}${genreCritique} ${pick(closings)}`,
+    () => `"${song_title}" de ${artist_name} es una muestra clarísima de talento. ${genreCritique} ${notesConnection ? notesConnection + ' ' : ''}${pick(closings)}`,
+    () => `Qué placer toparse con la autenticidad de ${artist_name} en "${song_title}". ${notesConnection ? notesConnection + ' ' : ''}${genreCritique} ${pick(closings)}`
+  ];
+
+  const archetypeIdx = Math.floor(Math.random() * archetypes.length);
+  return archetypes[archetypeIdx]().replace(/\s+/g, ' ').trim();
 }
