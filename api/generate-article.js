@@ -1721,7 +1721,7 @@ async function handleSendAcceptanceEmail(req, res) {
     // 3. Formatear el mensaje de felicitación para HTML
     const finalMessage = message && message.trim()
       ? message.trim()
-      : `¡Felicidades ${cleanArtist}! 🎉 Nos encantó escuchar '${cleanSong}' y estamos muy felices de anunciarte que ha sido oficialmente seleccionada para ser parte de nuestra comunidad en The New Indie Wave. Ya puedes encontrarla en nuestra playlist '${cleanPlaylist}'.\n\n🎧 Puedes escucharla y guardarla en Spotify con el botón que tienes más abajo.\n\n👥 Te invitamos especialmente a unirte a la comunidad oficial de artistas de THENIWAVE en WhatsApp para conectar con otros creadores y enterarte de novedades:\nhttps://chat.whatsapp.com/JxPkXMuiNCV2waucjn1DFa\n\n📸 Te adjuntamos las gráficas oficiales (post cuadrado e historia vertical) para tus historias y estados. ¡Ayúdanos a seguir creciendo compartiendo la buena noticia y etiquetándonos en tus redes! ¡Mucho éxito! 🚀\n\n📰 *ARTISTAS EN EL RADAR:*\n¿Quieres tener cobertura en nuestra sección web oficial de Artistas en el Radar? Puedes responder a este correo o escribirnos enviando tu presskit, fotos, notas de prensa, bio, etc. En el concepto o asunto del correo deben poner exactamente:\n*ARTISTAS EN EL RADA: ${cleanArtist.toUpperCase()}*`;
+      : `¡Felicidades ${cleanArtist}! 🎉 Nos encantó escuchar '${cleanSong}' y estamos muy felices de anunciarte que ha sido oficialmente seleccionada para ser parte de nuestra comunidad en The New Indie Wave. Ya puedes encontrarla en nuestra playlist '${cleanPlaylist}'.\n\n🎧 Puedes escucharla y guardarla en Spotify con el botón que tienes más abajo.\n\n👥 Te invitamos especialmente a unirte a la comunidad oficial de artistas de THENIWAVE en WhatsApp para conectar con otros creadores y enterarte de novedades:\nhttps://chat.whatsapp.com/JxPkXMuiNCV2waucjn1DFa\n\n📸 Te adjuntamos las gráficas oficiales (post cuadrado e historia vertical) para tus historias y estados. ¡Ayúdanos a seguir creciendo compartiendo la buena noticia y etiquetándonos en tus redes! ¡Mucho éxito! 🚀\n\n📰 *ARTISTAS EN EL RADAR:*\n¿Quieres tener cobertura en nuestra sección web oficial de Artistas en el Radar? Puedes responder directamente a este correo adjuntando tu presskit, fotos de prensa, notas de prensa, bio, etc. En el concepto o asunto del correo deben poner exactamente:\n*ARTISTAS EN EL RADAR: ${cleanArtist.toUpperCase()}*`;
 
     const htmlFormattedMessage = formatAcceptanceMessageForHtml(finalMessage, cleanArtist);
 
@@ -1786,10 +1786,10 @@ function formatAcceptanceMessageForHtml(text, artistName = '') {
           </div>
           <div style="font-size: 13.5px; line-height: 1.6; color: #e4e4e7;">
             ¿Quieres tener cobertura editorial en nuestra sección web oficial de <strong>Artistas en el Radar</strong>?<br />
-            Puedes responder directamente a este correo o escribirnos adjuntando tu <strong>presskit, fotos de prensa, notas de prensa, bio, etc.</strong><br /><br />
+            Puedes responder directamente a este correo adjuntando tu <strong>presskit, fotos de prensa, notas de prensa, bio, etc.</strong><br /><br />
             En el concepto o asunto de tu correo, debes colocar exactamente:<br />
             <div style="margin-top: 8px; display: inline-block; padding: 8px 14px; background: #09090b; border: 1px solid #38bdf8; border-radius: 6px; color: #38bdf8; font-family: 'Courier New', monospace; font-size: 13px; font-weight: 800; letter-spacing: 0.5px;">
-              ARTISTAS EN EL RADA: ${radarArtistUpper}
+              ARTISTAS EN EL RADAR: ${radarArtistUpper}
             </div>
           </div>
         </div>
