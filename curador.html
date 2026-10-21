@@ -1938,12 +1938,17 @@
             </div>
 
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}', '${encodeURIComponent(waNumber || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}', '${encodeURIComponent(waNumber || '')}', '${encodeURIComponent(item.email || '')}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                 🎨 Generar Pack Promocional (Artista) ↗
               </button>
               ${waNumber ? `
-                <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}', '${encodeURIComponent(waNumber || '')}')" style="background: rgba(37, 211, 102, 0.18); color: #25D366; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(37, 211, 102, 0.5); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}', '${encodeURIComponent(waNumber || '')}', '${encodeURIComponent(item.email || '')}')" style="background: rgba(37, 211, 102, 0.18); color: #25D366; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(37, 211, 102, 0.5); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                   📲 Enviar WhatsApp al Artista ↗
+                </button>
+              ` : ''}
+              ${item.email ? `
+                <button onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}', '${encodeURIComponent(waNumber || '')}', '${encodeURIComponent(item.email || '')}')" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(56, 189, 248, 0.4); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                  ✉️ Correo al Artista ↗
                 </button>
               ` : ''}
               <button onclick="openWhatsAppGroupGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}')" style="background: rgba(37, 211, 102, 0.15); color: #25D366; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(37, 211, 102, 0.4); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
@@ -2001,8 +2006,8 @@
           <div class="track-detail-body" id="detail-${item.id}" style="display: ${isExpanded ? 'block' : 'none'};">
             
             <div class="detail-contact-row">
-              <span>✉️ Correo: <a href="mailto:${item.email}" style="color:inherit; text-decoration:underline;">${item.email}</a></span>
-              ${waNumber ? ` • <a href="javascript:void(0)" onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}', '${encodeURIComponent(waNumber || '')}'); return false;" style="color: #25D366; font-weight: 600; text-decoration: none;">💬 WhatsApp: ${waNumber} ↗</a>` : ''}
+              <span>✉️ Correo: <a href="javascript:void(0)" onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}', '${encodeURIComponent(waNumber || '')}', '${encodeURIComponent(item.email || '')}'); return false;" style="color:#38bdf8; font-weight: 600; text-decoration:underline;">${item.email} (Enviar Correo) ↗</a></span>
+              ${waNumber ? ` • <a href="javascript:void(0)" onclick="openCuratorStoryGenerator('${encodeURIComponent(item.artist_name || '')}', '${encodeURIComponent(item.song_title || '')}', '${encodeURIComponent(item.playlist || '')}', '${encodeURIComponent(item.genre || '')}', '${encodeURIComponent(playlistLinksMap[item.playlist] || '')}', '${encodeURIComponent(item.spotify_url || '')}', '${encodeURIComponent(waNumber || '')}', '${encodeURIComponent(item.email || '')}'); return false;" style="color: #25D366; font-weight: 600; text-decoration: none;">💬 WhatsApp: ${waNumber} ↗</a>` : ''}
               ${igLink}
               ${ttLink}
               • <a href="${playlistLinksMap[item.playlist] || 'https://open.spotify.com'}" target="_blank" style="color: var(--accent-lime); text-decoration: underline;">Abrir Playlist en Spotify ↗</a>
@@ -2540,7 +2545,7 @@
           var m = item.notes.match(/\[(?:WA|WhatsApp):\s*([^\]]+)\]/i);
           if (m) wNum = m[1].trim();
         }
-        showToast('🎉 ¡Track agregado a Spotify! Abriendo Pack Promocional...');
+        showToast('🎉 ¡Track agregado a Spotify! Procesando publicaciones y correo al artista...');
         setTimeout(function() {
           openCuratorStoryGenerator(
             encodeURIComponent(item.artist_name || ''),
@@ -2549,7 +2554,8 @@
             encodeURIComponent(item.genre || ''),
             encodeURIComponent(playlistUrl || playlistLinksMap[targetPlaylist] || ''),
             encodeURIComponent(item.spotify_url || ''),
-            encodeURIComponent(wNum || '')
+            encodeURIComponent(wNum || ''),
+            encodeURIComponent(item.email || '')
           );
         }, 600);
 
@@ -5120,6 +5126,22 @@ ${playlistUrl}`;
           📲 Enviar por WhatsApp al Artista (wa.me) ↗
         </button>
 
+        <!-- Envío de Correo Electrónico al Artista (Mismo Mensaje y Gráficas) -->
+        <div style="background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="font-family: var(--font-mono); font-size: 11px; color: #38bdf8; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+              <span>✉️ CORREO DEL ARTISTA (CON MENSAJE &amp; GRÁFICAS):</span>
+            </label>
+            <span id="curatorEmailBadgeStatus" style="font-family: var(--font-mono); font-size: 10px; color: #a1a1aa;"></span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="email" id="curatorArtistEmailInput" placeholder="artista@correo.com" style="flex: 1; background: #09090b; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px; padding: 8px 12px; color: #fff; font-family: var(--font-mono); font-size: 12px; box-sizing: border-box;">
+            <button id="btnSendCuratorEmailModal" onclick="sendToArtistViaEmailModal()" style="background: #38bdf8; color: #000; font-family: var(--font-mono); font-size: 11px; font-weight: 800; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+              ✉️ Enviar Correo
+            </button>
+          </div>
+        </div>
+
         <div style="display: flex; gap: 8px;">
           <button onclick="copyCuratorMessage()" style="flex: 1; background: var(--accent-lime); color: #000; font-family: var(--font-mono); font-size: 12px; font-weight: 800; padding: 10px 14px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
             📋 Copiar Mensaje
@@ -5390,6 +5412,10 @@ ${playlistUrl}`;
   let _curPromoUrl = '';
   let _curPromoGenre = '';
   let _curPromoWaNumber = '';
+  let _curPromoEmail = '';
+  let _lastSentEmailArtist = '';
+  let _lastSentEmailSong = '';
+  let _lastSentEmailStatus = '';
   
   const TNIW_WHATSAPP_COMMUNITY_URL = 'https://chat.whatsapp.com/JxPkXMuiNCV2waucjn1DFa';
 
@@ -5424,6 +5450,137 @@ ${playlistUrl}`;
       });
     } else {
       showToast('Enlace: ' + url);
+    }
+  }
+
+
+  // Enviar correo manualmente desde el modal del Paquete de Aceptación
+  async function sendToArtistViaEmailModal() {
+    var btn = document.getElementById('btnSendCuratorEmailModal');
+    var emailInput = document.getElementById('curatorArtistEmailInput');
+    var badge = document.getElementById('curatorEmailBadgeStatus');
+    var ta = document.getElementById('curatorGeneratedMessageText');
+
+    var toEmail = emailInput ? emailInput.value.trim() : '';
+    if (!toEmail || !toEmail.includes('@')) {
+      showToast('⚠️ Ingresa un correo electrónico válido para el artista.');
+      if (emailInput) emailInput.focus();
+      return;
+    }
+
+    var msg = ta ? ta.value.trim() : '';
+    var origText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Enviando...';
+    }
+    if (badge) {
+      badge.textContent = 'Enviando...';
+      badge.style.color = '#38bdf8';
+    }
+
+    try {
+      var postCanvas = document.getElementById('curatorPostCanvas');
+      var storyCanvas = document.getElementById('curatorStoryCanvas');
+      var postDataUrl = postCanvas ? postCanvas.toDataURL('image/jpeg', 0.92) : null;
+      var storyDataUrl = storyCanvas ? storyCanvas.toDataURL('image/jpeg', 0.92) : null;
+
+      var res = await fetch('/api/send-acceptance-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          artist_name: _curPromoArtist,
+          artist_email: toEmail,
+          song_title: _curPromoSong,
+          playlist: _curPromoPlaylist,
+          playlist_url: _curPromoUrl,
+          message: msg,
+          post_image: postDataUrl,
+          story_image: storyDataUrl
+        })
+      });
+
+      var data = await res.json();
+      if (res.ok && data.success) {
+        showToast('✉️ ¡Correo de felicitación enviado con éxito a ' + toEmail + '!');
+        _lastSentEmailArtist = _curPromoArtist;
+        _lastSentEmailSong = _curPromoSong;
+        _lastSentEmailStatus = 'success';
+        if (badge) {
+          badge.textContent = '✅ Enviado a ' + toEmail;
+          badge.style.color = '#bbf451';
+        }
+      } else {
+        var hint = data.hint ? ('\n\n' + data.hint) : '';
+        alert('⚠️ NO SE PUDO ENVIAR EL CORREO:\n\n' + (data.error || 'Error desconocido') + hint);
+        if (badge) {
+          badge.textContent = '⚠️ Error de envío';
+          badge.style.color = '#ef4444';
+        }
+      }
+    } catch (err) {
+      console.error('Error al enviar correo al artista:', err);
+      showToast('⚠️ Error de conexión al enviar el correo.');
+      if (badge) {
+        badge.textContent = '⚠️ Error de conexión';
+        badge.style.color = '#ef4444';
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+    }
+  }
+
+  // Envío automático al aceptar track
+  async function autoSendArtistAcceptanceEmail(item, playlistUrl, postMockupDataUrl, storyMockupDataUrl, customMessage) {
+    if (!item) return;
+    var artistEmail = item.email || '';
+    if (!artistEmail || !artistEmail.includes('@')) {
+      console.warn('[autoSendArtistAcceptanceEmail] El track no tiene un correo válido:', item);
+      return;
+    }
+
+    var targetPlaylist = item.playlist || '';
+    var pUrl = playlistUrl || getPlaylistSpotifyUrl(targetPlaylist);
+    var promoMsg = customMessage || buildCuratorPromoMessage(item.artist_name, item.song_title, targetPlaylist, pUrl);
+
+    try {
+      var res = await fetch('/api/send-acceptance-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          artist_name: item.artist_name,
+          artist_email: artistEmail,
+          song_title: item.song_title,
+          playlist: targetPlaylist,
+          playlist_url: pUrl,
+          spotify_url: item.spotify_url,
+          message: promoMsg,
+          post_image: postMockupDataUrl,
+          story_image: storyMockupDataUrl
+        })
+      });
+
+      var data = await res.json();
+      if (res.ok && data.success) {
+        _lastSentEmailArtist = item.artist_name;
+        _lastSentEmailSong = item.song_title;
+        _lastSentEmailStatus = 'success';
+        showToast('✉️ ¡Correo de felicitación y gráficas enviado al artista (' + artistEmail + ')!');
+        console.log('[autoSendArtistAcceptanceEmail] Éxito:', data);
+      } else {
+        var hint = data.hint ? (' (' + data.hint + ')') : '';
+        console.warn('[autoSendArtistAcceptanceEmail] Aviso:', (data.error || 'Fallo de envío') + hint);
+        if (data.hint) {
+          showToast('⚠️ Correo al artista pendiente: revisa tu archivo .env');
+        } else {
+          showToast('⚠️ No se pudo enviar el correo al artista: ' + (data.error || 'Fallo de envío'));
+        }
+      }
+    } catch(err) {
+      console.warn('[autoSendArtistAcceptanceEmail] Error de conexión:', err);
     }
   }
 
@@ -5470,13 +5627,14 @@ ${playlistUrl}`;
     showToast('🚀 Abriendo WhatsApp... ¡Imagen de post copiada al portapapeles! Presiona Ctrl+V en el chat para adjuntarla.');
   }
 
-  function openCuratorStoryGenerator(encArtist, encSong, encPlaylist, encGenre, encPlaylistUrl, encSpotifyUrl, encWaNumber) {
+  function openCuratorStoryGenerator(encArtist, encSong, encPlaylist, encGenre, encPlaylistUrl, encSpotifyUrl, encWaNumber, encEmail) {
     _curPromoArtist = decodeURIComponent(encArtist || 'Artista');
     _curPromoSong = decodeURIComponent(encSong || 'Canción');
     _curPromoPlaylist = decodeURIComponent(encPlaylist || 'Rock Indie');
     _curPromoGenre = decodeURIComponent(encGenre || 'Indie');
     _curPromoUrl = encPlaylistUrl ? decodeURIComponent(encPlaylistUrl) : (playlistLinksMap[_curPromoPlaylist] || '');
     _curPromoWaNumber = encWaNumber ? decodeURIComponent(encWaNumber) : '';
+    _curPromoEmail = encEmail ? decodeURIComponent(encEmail) : '';
     var spotifyUrl = encSpotifyUrl ? decodeURIComponent(encSpotifyUrl) : '';
     
     _curSongName = _curPromoSong;
@@ -5486,6 +5644,20 @@ ${playlistUrl}`;
 
     var waInput = document.getElementById('curatorArtistWaInput');
     if (waInput) waInput.value = _curPromoWaNumber;
+
+    var emailInput = document.getElementById('curatorArtistEmailInput');
+    if (emailInput) emailInput.value = _curPromoEmail;
+
+    var emailBadge = document.getElementById('curatorEmailBadgeStatus');
+    if (emailBadge) {
+      if (_lastSentEmailArtist === _curPromoArtist && _lastSentEmailSong === _curPromoSong && _lastSentEmailStatus === 'success') {
+        emailBadge.textContent = '✅ Enviado automáticamente al aceptar';
+        emailBadge.style.color = '#bbf451';
+      } else {
+        emailBadge.textContent = _curPromoEmail ? 'Listo para enviar' : 'Sin correo registrado';
+        emailBadge.style.color = '#a1a1aa';
+      }
+    }
 
     // Generar Mensaje
     regenerateCuratorMessage();
@@ -5520,16 +5692,20 @@ ${playlistUrl}`;
     }
   }
 
-  function regenerateCuratorMessage() {
+  function buildCuratorPromoMessage(artist, song, playlist, url) {
     var template = promoTemplates[Math.floor(Math.random() * promoTemplates.length)];
-    var msg = template
-      .replace('{artist}', _curPromoArtist)
-      .replace('{song}', _curPromoSong)
-      .replace('{playlist}', _curPromoPlaylist)
-      .replace('{url}', _curPromoUrl);
-    
+    return template
+      .replace(/\{artist\}/g, artist || 'Artista')
+      .replace(/\{song\}/g, song || 'Canción')
+      .replace(/\{playlist\}/g, playlist || 'Playlist Oficial')
+      .replace(/\{url\}/g, url || 'https://open.spotify.com/user/thenewindiewave');
+  }
+
+  function regenerateCuratorMessage() {
+    var msg = buildCuratorPromoMessage(_curPromoArtist, _curPromoSong, _curPromoPlaylist, _curPromoUrl);
     var ta = document.getElementById('curatorGeneratedMessageText');
     if (ta) ta.value = msg;
+    return msg;
   }
 
   function copyCuratorMessage() {
@@ -7821,7 +7997,22 @@ ${playlistUrl}`;
         console.warn('[publishTrackSpotlightArticle] Error generando mockups en canvas:', mockErr);
       }
 
-      var res = await fetch('/api/generate-article', {
+      // Renderizar Story Canvas oficial si aún no se ha obtenido
+      if (!storyMockupDataUrl && typeof generateCuratorStoryCanvas === 'function') {
+        try {
+          generateCuratorStoryCanvas(item.artist_name, item.song_title, targetPlaylist, item.genre || 'Indie', 'curatorStoryCanvas', pUrl);
+          var cStoryCanvas = document.getElementById('curatorStoryCanvas');
+          if (cStoryCanvas) {
+            storyMockupDataUrl = cStoryCanvas.toDataURL('image/jpeg', 0.92);
+          }
+        } catch (eStory) {}
+      }
+
+      // Preparar mensaje idéntico de felicitaciones
+      var promoMsgOfficial = buildCuratorPromoMessage(item.artist_name, item.song_title, targetPlaylist, pUrl);
+
+      // A) Generar reseña y publicar en Social Hub / Blog
+      var articlePromise = fetch('/api/generate-article', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -7838,11 +8029,20 @@ ${playlistUrl}`;
           story_mockup_url: storyMockupDataUrl,
           auto_publish: true
         })
+      }).then(function(res) { return res.json(); }).then(function(data) {
+        if (data && data.success) {
+          showToast(data.social_hub ? '🎉 ¡Track aceptado, reseña publicada y enviada a Social Hub con mockups oficiales!' : '📰 ¡Reseña editorial del track publicada en el Blog!');
+        }
+      }).catch(function(err) {
+        console.warn('Aviso: no se pudo auto-publicar reseña en el blog:', err);
       });
-      var data = await res.json();
-      if (data && data.success) {
-        showToast(data.social_hub ? '🎉 ¡Track aceptado, reseña publicada y enviada a Social Hub con mockups oficiales!' : '📰 ¡Reseña editorial del track publicada en el Blog!');
-      }
+
+      // B) TAMBIÉN: Enviar automáticamente correo de felicitaciones al artista (con el mismo mensaje y las mismas imágenes generadas)
+      var emailPromise = (item.email && item.email.includes('@'))
+        ? autoSendArtistAcceptanceEmail(item, pUrl, postMockupDataUrl, storyMockupDataUrl, promoMsgOfficial)
+        : Promise.resolve();
+
+      await Promise.allSettled([articlePromise, emailPromise]);
     } catch(err) {
       console.warn('Aviso: no se pudo auto-publicar reseña en el blog:', err);
     }
