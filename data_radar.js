@@ -453,11 +453,3 @@ if (typeof window !== 'undefined') {
   window.RADAR_ARTISTS = getRadarArtists();
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    getYouTubeVideoId: getYouTubeVideoId,
-    extractYouTubeStart: extractYouTubeStart,
-    formatSecondsToMMSS: formatSecondsToMMSS,
-    parseArtistOtherData: parseArtistOtherData
-  };
-}

@@ -1,23 +1,8 @@
 {
   "name": "thenewindiewaveweb",
   "version": "1.0.0",
-  "description": "",
-  "main": "data_radar.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thenewindiewave-coder/TheNewIndieWaveWeb.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "private": true,
   "type": "module",
-  "bugs": {
-    "url": "https://github.com/thenewindiewave-coder/TheNewIndieWaveWeb/issues"
-  },
-  "homepage": "https://github.com/thenewindiewave-coder/TheNewIndieWaveWeb#readme",
   "dependencies": {
     "nodemailer": "^10.1.7"
   }
