@@ -1721,9 +1721,9 @@ async function handleSendAcceptanceEmail(req, res) {
     // 3. Formatear el mensaje de felicitación para HTML
     const finalMessage = message && message.trim()
       ? message.trim()
-      : `¡Felicidades ${cleanArtist}! 🎉 Nos encantó escuchar '${cleanSong}' y estamos muy felices de anunciarte que ha sido oficialmente seleccionada para ser parte de nuestra comunidad en The New Indie Wave. Ya puedes encontrarla en nuestra playlist '${cleanPlaylist}'.\n\n🎧 Escúchala y guárdala aquí:\n${cleanPlaylistUrl}\n\n👥 Te invitamos especialmente a unirte a la comunidad oficial de artistas de THENIWAVE en WhatsApp:\nhttps://chat.whatsapp.com/JxPkXMuiNCV2waucjn1DFa\n\n📸 Te adjuntamos las gráficas oficiales para tus historias y estados. ¡Ayúdanos a seguir creciendo compartiendo la buena noticia y etiquetándonos en tus redes! ¡Mucho éxito! 🚀\n\n📰 *ARTISTAS EN EL RADAR:*\n¿Quieres tener cobertura en nuestra sección web oficial de Artistas en el Radar? Puedes responder a este correo o escribirnos enviando tu presskit, fotos, notas de prensa, bio, etc. En el concepto o asunto del correo deben poner exactamente:\n*ARTISTAS EN EL RADA: NOMBRE DEL PROYECTO*`;
+      : `¡Felicidades ${cleanArtist}! 🎉 Nos encantó escuchar '${cleanSong}' y estamos muy felices de anunciarte que ha sido oficialmente seleccionada para ser parte de nuestra comunidad en The New Indie Wave. Ya puedes encontrarla en nuestra playlist '${cleanPlaylist}'.\n\n🎧 Puedes escucharla y guardarla en Spotify con el botón que tienes más abajo.\n\n👥 Te invitamos especialmente a unirte a la comunidad oficial de artistas de THENIWAVE en WhatsApp para conectar con otros creadores y enterarte de novedades:\nhttps://chat.whatsapp.com/JxPkXMuiNCV2waucjn1DFa\n\n📸 Te adjuntamos las gráficas oficiales (post cuadrado e historia vertical) para tus historias y estados. ¡Ayúdanos a seguir creciendo compartiendo la buena noticia y etiquetándonos en tus redes! ¡Mucho éxito! 🚀\n\n📰 *ARTISTAS EN EL RADAR:*\n¿Quieres tener cobertura en nuestra sección web oficial de Artistas en el Radar? Puedes responder a este correo o escribirnos enviando tu presskit, fotos, notas de prensa, bio, etc. En el concepto o asunto del correo deben poner exactamente:\n*ARTISTAS EN EL RADA: ${cleanArtist.toUpperCase()}*`;
 
-    const htmlFormattedMessage = formatAcceptanceMessageForHtml(finalMessage);
+    const htmlFormattedMessage = formatAcceptanceMessageForHtml(finalMessage, cleanArtist);
 
     // 4. Armar el Asunto y el HTML del Correo
     const subject = `¡Felicidades ${cleanArtist}! Tu canción "${cleanSong}" ha sido agregada a The New Indie Wave 🎉`;
@@ -1768,17 +1768,63 @@ async function handleSendAcceptanceEmail(req, res) {
   }
 }
 
-function formatAcceptanceMessageForHtml(text) {
+function formatAcceptanceMessageForHtml(text, artistName = '') {
   if (!text) return '';
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\*([^\*]+)\*/g, '<strong>$1</strong>')
-    .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: #38bdf8; text-decoration: underline; word-break: break-all;">$1</a>')
-    .split(/\n\s*\n/)
-    .map(p => `<p style="margin: 0 0 16px 0; line-height: 1.6;">${p.replace(/\n/g, '<br />')}</p>`)
-    .join('');
+  
+  // Split message into paragraphs
+  const rawParagraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+  const formattedParts = [];
+
+  for (let para of rawParagraphs) {
+    // 1. Detect if this is the ARTISTAS EN EL RADAR callout
+    if (/ARTISTAS\s+EN\s+EL\s+RADA/i.test(para) || /presskit/i.test(para)) {
+      const radarArtistUpper = (artistName || 'NOMBRE DEL PROYECTO').toUpperCase();
+      formattedParts.push(`
+        <div style="margin: 24px 0; padding: 20px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.35); border-left: 4px solid #38bdf8; border-radius: 8px;">
+          <div style="font-family: 'Courier New', monospace; font-size: 11px; font-weight: 700; color: #38bdf8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;">
+            📰 CONVOCATORIA · SECCIÓN ARTISTAS EN EL RADAR
+          </div>
+          <div style="font-size: 13.5px; line-height: 1.6; color: #e4e4e7;">
+            ¿Quieres tener cobertura editorial en nuestra sección web oficial de <strong>Artistas en el Radar</strong>?<br />
+            Puedes responder directamente a este correo o escribirnos adjuntando tu <strong>presskit, fotos de prensa, notas de prensa, bio, etc.</strong><br /><br />
+            En el concepto o asunto de tu correo, debes colocar exactamente:<br />
+            <div style="margin-top: 8px; display: inline-block; padding: 8px 14px; background: #09090b; border: 1px solid #38bdf8; border-radius: 6px; color: #38bdf8; font-family: 'Courier New', monospace; font-size: 13px; font-weight: 800; letter-spacing: 0.5px;">
+              ARTISTAS EN EL RADA: ${radarArtistUpper}
+            </div>
+          </div>
+        </div>
+      `);
+      continue;
+    }
+
+    // 2. Remove raw URLs because dedicated CTA buttons are rendered right below
+    let cleaned = para
+      .replace(/https?:\/\/chat\.whatsapp\.com\/[^\s]+/gi, '')
+      .replace(/https?:\/\/open\.spotify\.com\/[^\s]+/gi, '')
+      .replace(/https?:\/\/[^\s]+/gi, '')
+      .trim();
+
+    // Rephrase lines that said "Link directo:" or "Escúchala aquí:" or "Únete a WhatsApp aquí:"
+    cleaned = cleaned
+      .replace(/🎧\s*(?:Escúchala y guárdala aquí|Link directo|Puedes encontrarla aquí|Escúchala aquí):?\s*/gi, '🎧 Puedes escucharla y guardarla en Spotify pulsando el botón oficial verde a continuación:')
+      .replace(/👥\s*(?:Te invitamos especialmente a unirte a la comunidad oficial de artistas de THENIWAVE en WhatsApp[^:\n]*:?|Súmate a nuestra comunidad de WhatsApp para artistas de THENIWAVE aquí:?|Únete a la comunidad oficial de WhatsApp de THENIWAVE con otros creadores:?|Te dejamos la invitación directa a la comunidad de WhatsApp de THENIWAVE:?)\s*/gi, '👥 Te invitamos especialmente a unirte a la comunidad oficial de artistas de THENIWAVE en WhatsApp usando el botón de acceso directo aquí abajo:');
+
+    // Remove empty punctuation artifacts like dangling colons
+    cleaned = cleaned.replace(/:\s*$/, '.');
+
+    // Escape HTML
+    cleaned = cleaned
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\*([^\*]+)\*/g, '<strong style="color: #ffffff;">$1</strong>');
+
+    if (cleaned.trim()) {
+      formattedParts.push(`<p style="margin: 0 0 16px 0; line-height: 1.65; color: #d4d4d8;">${cleaned.replace(/\n/g, '<br />')}</p>`);
+    }
+  }
+
+  return formattedParts.join('');
 }
 
 function generateAcceptanceEmailHtml({
