@@ -33,6 +33,10 @@
       "destination": "/api/generate-article"
     },
     {
+      "source": "/api/send-acceptance-email",
+      "destination": "/api/generate-article?action=send-email"
+    },
+    {
       "source": "/api/spotify-login",
       "destination": "/api/spotify-callback?action=login"
     },
