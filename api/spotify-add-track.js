@@ -45,15 +45,31 @@ const KEYWORD_PLAYLIST_MAP = [
   { keys: ['synthpop', 'bailar'], id: '36ribRboGB3DwM821oYokl', name: 'SynthPop para cuando solo quieres bailar' }
 ];
 
+async function resolveRedirectUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  const str = url.trim();
+  if (!str.startsWith('http://') && !str.startsWith('https://')) return str;
+  try {
+    const res = await fetch(str, { method: 'HEAD', redirect: 'follow' });
+    if (res.url && res.url !== str) return res.url;
+  } catch (e) {
+    try {
+      const resGet = await fetch(str, { method: 'GET', redirect: 'follow' });
+      if (resGet.url && resGet.url !== str) return resGet.url;
+    } catch (e2) {}
+  }
+  return str;
+}
+
 function parseSpotifyInput(input) {
   if (!input) return { type: null, id: null };
   const str = input.trim();
 
-  // Track directo
+  // Track directo (incluye /intl-es/track/ y spotify:track:)
   const trackMatch = str.match(/track[/:]([a-zA-Z0-9]{15,30})/);
   if (trackMatch) return { type: 'track', id: trackMatch[1] };
 
-  // Álbum o Single
+  // Álbum o Single (incluye /intl-es/album/ y spotify:album:)
   const albumMatch = str.match(/album[/:]([a-zA-Z0-9]{15,30})/);
   if (albumMatch) return { type: 'album', id: albumMatch[1] };
 
@@ -86,6 +102,7 @@ async function fetchSupabaseRefreshToken() {
 }
 
 async function refreshAccessToken(refreshToken) {
+  if (!refreshToken) throw new Error('Refresh token no provisto');
   const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
   const res = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
@@ -200,6 +217,35 @@ function resolvePlaylistId(playlistInput) {
   return null;
 }
 
+// Envío a Spotify con soporte dual para /items y /tracks
+async function insertTrackIntoSpotify(playlistId, trackId, accessToken) {
+  const trackUri = `spotify:track:${trackId}`;
+  
+  // 1. Intentar con /items (Spotify API moderna)
+  let res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/items`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ uris: [trackUri] })
+  });
+
+  // 2. Si /items devuelve 404 o 405, fallback al endpoint clásico /tracks
+  if (!res.ok && (res.status === 404 || res.status === 405)) {
+    res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ uris: [trackUri] })
+    });
+  }
+
+  return res;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -215,58 +261,81 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Falta el enlace de Spotify de la canción.' });
   }
 
-  // 1. Parsear enlace (track, album, o ID)
-  const parsedSpotify = parseSpotifyInput(spotify_url);
+  // 1. Parsear enlace (track, album, ID o enlace redirigido)
+  let rawUrl = String(spotify_url).trim();
+  let parsedSpotify = parseSpotifyInput(rawUrl);
+
+  // Si no se reconoció ID y es una URL HTTP(S), resolver redirección (ej. urlgeni.us, spotify.link)
+  if (!parsedSpotify.id && (rawUrl.startsWith('http://') || rawUrl.startsWith('https://'))) {
+    try {
+      const expandedUrl = await resolveRedirectUrl(rawUrl);
+      if (expandedUrl && expandedUrl !== rawUrl) {
+        rawUrl = expandedUrl;
+        parsedSpotify = parseSpotifyInput(rawUrl);
+      }
+    } catch (e) {
+      console.warn('Error resolviendo redirección de URL:', e.message);
+    }
+  }
+
   if (!parsedSpotify.id) {
     return res.status(400).json({
       error: 'El enlace de Spotify no es válido. Asegúrate de que sea un enlace a un Track o Álbum de Spotify.'
     });
   }
 
-  // 2. Resolver Access Token fresco (con fallback garantizado a Supabase)
-  let accessToken = null;
-  let cleanRefreshToken = (refresh_token && refresh_token !== 'null' && refresh_token !== 'undefined' && refresh_token.trim())
+  // 2. Estrategia Robusta de Autenticación con Spotify
+  // Prioridad 1: Token maestro oficial de Supabase (dueño de las playlists oficiales de TNIW)
+  // Prioridad 2: Token enviado por el cliente o de entorno
+  const supabaseToken = await fetchSupabaseRefreshToken();
+  const cleanClientToken = (refresh_token && refresh_token !== 'null' && refresh_token !== 'undefined' && refresh_token.trim())
     ? refresh_token.trim()
     : null;
+  const envToken = process.env.SPOTIFY_REFRESH_TOKEN ? process.env.SPOTIFY_REFRESH_TOKEN.trim() : null;
 
-  // Intentar primero con el token recibido o de entorno
-  let tokenCandidate = cleanRefreshToken || process.env.SPOTIFY_REFRESH_TOKEN;
-  let triedSupabase = false;
-
-  if (!tokenCandidate) {
-    tokenCandidate = await fetchSupabaseRefreshToken();
-    triedSupabase = true;
+  // Lista de refresh tokens candidatos en orden de autoridad
+  const refreshCandidates = [];
+  if (supabaseToken) refreshCandidates.push({ source: 'supabase', token: supabaseToken });
+  if (cleanClientToken && cleanClientToken !== supabaseToken) {
+    refreshCandidates.push({ source: 'client', token: cleanClientToken });
+  }
+  if (envToken && envToken !== supabaseToken && envToken !== cleanClientToken) {
+    refreshCandidates.push({ source: 'env', token: envToken });
   }
 
-  if (tokenCandidate) {
+  if (refreshCandidates.length === 0) {
+    return res.status(400).json({
+      error: 'No hay credenciales de Spotify configuradas. Por favor haz clic en "Vincular Spotify" en el panel curador.',
+      needs_auth: true
+    });
+  }
+
+  // Obtener al menos un Access Token funcional
+  let activeAccessToken = null;
+  let activeSource = null;
+  let lastAuthError = null;
+
+  for (const cand of refreshCandidates) {
     try {
-      accessToken = await refreshAccessToken(tokenCandidate);
-    } catch (errFirst) {
-      console.warn('Fallo al refrescar token candidato:', errFirst.message);
-      // Si falló y no habíamos probado el de Supabase, probar con Supabase ahora
-      if (!triedSupabase) {
-        const supabaseToken = await fetchSupabaseRefreshToken();
-        if (supabaseToken && supabaseToken !== tokenCandidate) {
-          try {
-            accessToken = await refreshAccessToken(supabaseToken);
-          } catch (errSupa) {
-            console.error('Fallo también con el token de Supabase:', errSupa.message);
-          }
-        }
-      }
+      activeAccessToken = await refreshAccessToken(cand.token);
+      activeSource = cand.source;
+      break;
+    } catch (err) {
+      console.warn(`Fallo al refrescar token de origen ${cand.source}:`, err.message);
+      lastAuthError = err;
     }
   }
 
-  if (!accessToken) {
+  if (!activeAccessToken) {
     return res.status(400).json({
-      error: 'No se pudo autenticar con Spotify. Por favor haz clic en "Vincular Spotify" en el panel curador.',
+      error: 'No se pudo autenticar con Spotify (' + (lastAuthError ? lastAuthError.message : 'token inválido') + '). Haz clic en "Vincular Spotify" en el panel curador.',
       needs_auth: true
     });
   }
 
   try {
     // 3. Resolver ID final del track (si era un álbum, consultar y obtener track)
-    const { trackId, trackUrl } = await resolveTrackId(parsedSpotify, song_title, accessToken);
+    const { trackId, trackUrl } = await resolveTrackId(parsedSpotify, song_title, activeAccessToken);
     if (!trackId) {
       return res.status(400).json({ error: 'No se pudo resolver el ID del track en Spotify.' });
     }
@@ -283,12 +352,11 @@ export default async function handler(req, res) {
       const normInput = normalize(playlist_name);
       let nextUrl = 'https://api.spotify.com/v1/me/playlists?limit=50';
       while (nextUrl && !resolvedPlaylistId) {
-        const plRes = await fetch(nextUrl, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+        const plRes = await fetch(nextUrl, { headers: { 'Authorization': `Bearer ${activeAccessToken}` } });
         if (!plRes.ok) break;
         const plData = await plRes.json();
         for (const p of (plData.items || [])) {
           if (!p) continue;
-          // Solo considerar playlists donde el usuario sea dueño o tenga permisos colaborativos
           const pOwnerId = String(p.owner?.id || '').trim().toLowerCase();
           const isMine = pOwnerId === '31vxac7th7vonsgtzbeyixk32ftu' || p.collaborative === true;
           if (!isMine) continue;
@@ -304,35 +372,32 @@ export default async function handler(req, res) {
 
     if (!resolvedPlaylistId) {
       return res.status(400).json({
-        error: `No se reconoció la playlist destino "${playlist_name || playlist_id}". Selecciona una de las 8 playlists oficiales.`
+        error: `No se reconoció la playlist destino "${playlist_name || playlist_id}". Selecciona una de las 9 playlists oficiales.`
       });
     }
 
     // 5. Insertar track físicamente en la playlist de Spotify
-    const trackUri = `spotify:track:${trackId}`;
-    let addRes = await fetch(`https://api.spotify.com/v1/playlists/${resolvedPlaylistId}/items`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        uris: [trackUri]
-      })
-    });
+    let addRes = await insertTrackIntoSpotify(resolvedPlaylistId, trackId, activeAccessToken);
 
-    // Fallback al endpoint clásico /tracks si /items responde 404
-    if (!addRes.ok && addRes.status === 404) {
-      addRes = await fetch(`https://api.spotify.com/v1/playlists/${resolvedPlaylistId}/tracks`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          uris: [trackUri]
-        })
-      });
+    // Si responde 401 (token expiró) o 403 (la cuenta activa no es dueña ni colaboradora de la playlist),
+    // intentar con los otros tokens candidatos (en especial el de Supabase si se usó client token)
+    if (!addRes.ok && (addRes.status === 401 || addRes.status === 403)) {
+      console.warn(`Inserción con token (${activeSource}) dio ${addRes.status}. Probando tokens alternativos...`);
+      for (const altCand of refreshCandidates) {
+        if (altCand.source === activeSource) continue;
+        try {
+          const altAccessToken = await refreshAccessToken(altCand.token);
+          const retryRes = await insertTrackIntoSpotify(resolvedPlaylistId, trackId, altAccessToken);
+          if (retryRes.ok) {
+            addRes = retryRes;
+            activeAccessToken = altAccessToken;
+            console.log(`Inserción exitosa usando token alternativo (${altCand.source})!`);
+            break;
+          }
+        } catch (altErr) {
+          console.warn(`Error en token alternativo (${altCand.source}):`, altErr.message);
+        }
+      }
     }
 
     if (!addRes.ok) {
@@ -358,7 +423,7 @@ export default async function handler(req, res) {
       playlist_id: resolvedPlaylistId,
       playlist_name: finalPlaylistName,
       track_id: trackId,
-      track_url: trackUrl,
+      track_url: trackUrl || `https://open.spotify.com/track/${trackId}`,
       message: '¡Track añadido con éxito a la playlist de Spotify!'
     });
 

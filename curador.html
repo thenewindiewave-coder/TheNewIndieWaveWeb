@@ -1465,11 +1465,31 @@
     window.location.href = SPOTIFY_AUTH_DIRECT_URL;
   }
 
-  function checkSpotifyAuthStatus() {
+  async function checkSpotifyAuthStatus() {
     var rToken = localStorage.getItem('tniw_curator_spotify_refresh');
     var btn = document.getElementById('btnConnectSpotifyCurator');
     var badge = document.getElementById('badgeSpotifyConnected');
-    if (rToken) {
+
+    var isConnected = !!(rToken && rToken !== 'null' && rToken !== 'undefined' && rToken.trim());
+
+    if (!isConnected) {
+      try {
+        var chkRes = await fetch(SUPABASE_URL + '/rest/v1/radar_artists?id=eq.spotify_auth_config&select=id,name,short_bio', {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          }
+        });
+        if (chkRes.ok) {
+          var rows = await chkRes.json();
+          if (rows && rows.length > 0 && rows[0].short_bio) {
+            isConnected = true;
+          }
+        }
+      } catch(e) {}
+    }
+
+    if (isConnected) {
       if (btn) btn.style.display = 'none';
       if (badge) badge.style.display = 'inline-flex';
     } else {
@@ -2036,9 +2056,13 @@
   // 5. Utilidades y Helpers
   function getSpotifyEmbedUrl(url) {
     if(!url) return null;
-    var match = url.match(/track\/([a-zA-Z0-9]+)/);
-    if(match && match[1]) {
-      return 'https://open.spotify.com/embed/track/' + match[1] + '?utm_source=generator&theme=0';
+    var trackMatch = url.match(/track\/([a-zA-Z0-9]+)/);
+    if(trackMatch && trackMatch[1]) {
+      return 'https://open.spotify.com/embed/track/' + trackMatch[1] + '?utm_source=generator&theme=0';
+    }
+    var albumMatch = url.match(/album\/([a-zA-Z0-9]+)/);
+    if(albumMatch && albumMatch[1]) {
+      return 'https://open.spotify.com/embed/album/' + albumMatch[1] + '?utm_source=generator&theme=0';
     }
     return null;
   }
