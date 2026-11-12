@@ -71,6 +71,10 @@ export default async function handler(req, res) {
     return handleSendAcceptanceEmail(req, res);
   }
 
+  if (action === 'publish-radar-story' || req.body?.type === 'radar_story_social_hub') {
+    return handlePublishRadarStoryToSocialHub(req, res);
+  }
+
   const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bsmnzbdnffdxxveyifmc.supabase.co';
   const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbW56YmRuZmZkeHh2ZXlpZm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTg4MjQsImV4cCI6MjEwMzQzNDgyNH0.XYaUC4WDCMps78mt7nMBO_R5rmULYkWfejF_Jiltjsk';
 
@@ -1000,6 +1004,159 @@ async function pushArticleToSocialHub(article) {
   } catch (err) {
     console.error('[Social Hub Push Error]:', err);
     return false;
+  }
+}
+
+async function handlePublishRadarStoryToSocialHub(req, res) {
+  try {
+    const { artist, story_data_url, copy_text } = req.body || {};
+    if (!artist) {
+      return res.status(400).json({ error: 'No se enviaron datos del artista.' });
+    }
+
+    const artistName = (artist.name || 'Artista en el Radar').trim();
+    const artistId = encodeURIComponent(artist.id || '');
+    const cleanRadarUrl = `https://thenewindiewave.online/artistas.html?artista=${artistId}`;
+    const city = artist.city ? ` (${artist.city.toUpperCase()})` : '';
+    const genre = artist.genre ? ` // ${artist.genre.toUpperCase()}` : '';
+
+    let cleanBio = (artist.short_bio || artist.full_review || '').replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+    if (cleanBio.length > 180) cleanBio = cleanBio.slice(0, 175) + '...';
+
+    const defaultCopy = `🚨 ¡NUEVO ARTISTA EN EL RADAR! 📡✨\n\n` +
+      `Descubre a ${artistName}${city}${genre}\n\n` +
+      (cleanBio ? `"${cleanBio}"\n\n` : '') +
+      `👉 Lee la reseña completa y escucha su música en:\n` +
+      `🔗 ${cleanRadarUrl}\n\n` +
+      `#TheNewIndieWave #ArtistasEnElRadar #Descubrimientos #MusicaNueva #IndieMusic #CulturaIndie`;
+
+    const copy = (copy_text && copy_text.trim()) ? copy_text.trim() : defaultCopy;
+
+    // 1. Subir la imagen de la story (canvas data URL o imagen remota) a Cloudinary
+    let uploadedStoryUrl = null;
+    if (story_data_url) {
+      uploadedStoryUrl = await uploadImageToCloudinary(story_data_url);
+    }
+    if (!uploadedStoryUrl && artist.media_url) {
+      uploadedStoryUrl = await uploadImageToCloudinary(artist.media_url);
+    }
+
+    if (!uploadedStoryUrl) {
+      return res.status(400).json({ error: 'No se pudo generar ni subir la imagen de la story a Cloudinary.' });
+    }
+
+    const postGroupId = `grp_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 7)}`;
+    const nowIso = new Date().toISOString();
+    const nowObj = new Date();
+    const dateStr = nowIso.split('T')[0];
+    const hourStr = nowObj.getHours().toString().padStart(2, '0');
+    const minuteStr = nowObj.getMinutes().toString().padStart(2, '0');
+    const periodStr = nowObj.getHours() >= 12 ? 'PM' : 'AM';
+
+    // 1. Post Feed (Facebook, Instagram, Threads, X, TikTok)
+    const feedBundle = {
+      id: Math.random().toString(36).substr(2, 9),
+      media: uploadedStoryUrl,
+      mediaUrls: [uploadedStoryUrl],
+      mediaType: 'photo',
+      original_filename: `TNIW_Radar_Post_${(artist.id || 'radar').replace(/[^a-zA-Z0-9]/g, '_')}.png`,
+      post_group_id: postGroupId,
+      content: copy,
+      platforms: [
+        { id: 'facebook', type: 'post', types: ['post'], options: { shareAsStory: false } },
+        { id: 'instagram', type: 'post', types: ['post'], options: { showInFeed: true, shareAsStory: false } },
+        { id: 'threads', type: 'post', types: ['post'], options: { whoCanReply: 'everyone' } },
+        { id: 'x', type: 'post', types: ['post'], options: { whoCanReply: 'everyone' } },
+        { id: 'tiktok', type: 'post', types: ['post'], options: { allowDuet: true, visibility: 'public', allowStitch: true, isYourBrand: false, allowComments: true, isBrandedContent: false, commercialContent: false } }
+      ],
+      mode: 'now',
+      status: 'published',
+      timestamp: { date: dateStr, hour: hourStr, minute: minuteStr, period: periodStr },
+      createdAt: nowIso
+    };
+
+    const recordFeed = {
+      brand_id: '6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c',
+      content: copy,
+      media_url: uploadedStoryUrl,
+      platforms: ['facebook', 'instagram', 'threads', 'x', 'tiktok'],
+      platform_post_types: {
+        facebook: 'post',
+        instagram: 'post',
+        threads: 'post',
+        x: 'post',
+        tiktok: 'post'
+      },
+      payload: feedBundle,
+      scheduled_at: nowIso,
+      status: 'pending',
+      post_type: 'post'
+    };
+
+    // 2. Story (Facebook, Instagram Stories)
+    const storyBundle = {
+      id: Math.random().toString(36).substr(2, 9),
+      media: uploadedStoryUrl,
+      mediaUrls: [uploadedStoryUrl],
+      mediaType: 'photo',
+      original_filename: `TNIW_Radar_Story_${(artist.id || 'radar').replace(/[^a-zA-Z0-9]/g, '_')}.png`,
+      post_group_id: postGroupId,
+      content: copy,
+      platforms: [
+        { id: 'facebook', type: 'story', types: ['story'], options: { shareAsStory: false } },
+        { id: 'instagram', type: 'story', types: ['story'], options: { showInFeed: false, shareAsStory: false } }
+      ],
+      mode: 'now',
+      status: 'published',
+      timestamp: { date: dateStr, hour: hourStr, minute: minuteStr, period: periodStr },
+      createdAt: nowIso
+    };
+
+    const recordStory = {
+      brand_id: '6c3d2719-eb61-4ee5-ab4c-89b2810e2c4c',
+      content: copy,
+      media_url: uploadedStoryUrl,
+      platforms: ['facebook', 'instagram'],
+      platform_post_types: {
+        facebook: 'story',
+        instagram: 'story'
+      },
+      payload: storyBundle,
+      scheduled_at: nowIso,
+      status: 'pending',
+      post_type: 'story'
+    };
+
+    const SOCIAL_HUB_SUPABASE_URL = 'https://gcorvulignbmbjsgekpo.supabase.co';
+    const SOCIAL_HUB_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdjb3J2dWxpZ25ibWJqc2dla3BvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNjQ4NTksImV4cCI6MjA4Njk0MDg1OX0.l_Wg3U3cAELt2WDLdd6IMXEVGaOLwbQ4hoVySSxeL4U';
+
+    const insertRes = await fetch(`${SOCIAL_HUB_SUPABASE_URL}/rest/v1/posts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SOCIAL_HUB_SUPABASE_KEY,
+        'Authorization': `Bearer ${SOCIAL_HUB_SUPABASE_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify([recordFeed, recordStory])
+    });
+
+    if (!insertRes.ok) {
+      const errText = await insertRes.text();
+      console.warn('[Social Hub Radar Supabase Error]:', errText);
+      return res.status(500).json({ error: 'Error al encolar en Social Hub: ' + errText });
+    }
+
+    console.log(`[Social Hub] Radar Story y Feed encolados con éxito para: "${artistName}"`);
+    return res.status(200).json({
+      success: true,
+      storyUrl: uploadedStoryUrl,
+      postGroupId,
+      message: `¡Story y Post de ${artistName} enviados con éxito a Social Hub!`
+    });
+  } catch (err) {
+    console.error('[handlePublishRadarStoryToSocialHub Error]:', err);
+    return res.status(500).json({ error: 'Error publicando story en Social Hub: ' + err.message });
   }
 }
 
