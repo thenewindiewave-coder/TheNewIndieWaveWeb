@@ -6112,10 +6112,12 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     ctx.strokeRect(40, 40, W-80, H-80);
 
     // Cover Image (Center)
-    var covW = 600;
-    var covH = 600;
+    var radarObj = (_wpCurrentIsRadar && _wpRadarArtistObj) ? _wpRadarArtistObj : _curRadarArtistObj;
+    var isRadarPost = !!radarObj;
+    var covW = isRadarPost ? 500 : 600;
+    var covH = isRadarPost ? 500 : 600;
     var covX = (W - covW) / 2;
-    var covY = 200;
+    var covY = isRadarPost ? 165 : 200;
 
     if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
       ctx.save();
@@ -6142,34 +6144,44 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
 
     // Logo & Header text
     ctx.fillStyle = '#fff';
-    ctx.font = '900 38px "Space Grotesk", "Outfit", "Syne", sans-serif';
+    ctx.font = '900 36px "Space Grotesk", "Outfit", "Syne", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('THE NEW INDIE WAVE', W/2, 100);
+    ctx.fillText('THE NEW INDIE WAVE', W/2, 95);
     
-    var radarObj = (_wpCurrentIsRadar && _wpRadarArtistObj) ? _wpRadarArtistObj : _curRadarArtistObj;
     if (radarObj) {
       ctx.fillStyle = '#bbf451';
-      ctx.font = 'bold 24px "Space Mono", monospace';
-      ctx.fillText('🌟 ARTISTAS EN EL RADAR', W/2, 145);
+      ctx.font = 'bold 22px "Space Mono", monospace';
+      ctx.fillText('🌟 ARTISTAS EN EL RADAR', W/2, 135);
 
-      // Nombre del Artista
+      // 1. Nombre del Artista
+      var nameY = covY + covH + 68;
       ctx.fillStyle = '#fff';
-      ctx.font = '900 66px "Space Grotesk", "Outfit", "Syne", sans-serif';
-      ctx.fillText(truncateStringCur(radarObj.name || artist, 32), W/2, covY + covH + 85);
+      ctx.font = '900 58px "Space Grotesk", "Outfit", "Syne", sans-serif';
+      ctx.fillText(radarObj.name || artist, W/2, nameY);
 
-      // Badge y Ciudad / Género
-      var metaStr = [(radarObj.badge || 'DESTACADO'), (radarObj.city || ''), (radarObj.genre || '')].filter(Boolean).join(' • ');
-      ctx.fillStyle = 'var(--accent-cyan)';
-      ctx.font = '700 26px "Space Mono", monospace';
-      ctx.fillText(truncateStringCur(metaStr, 48), W/2, covY + covH + 138);
+      // 2. Badge • Ciudad • Género (Completo sin truncar)
+      var metaParts = [(radarObj.badge || 'DESTACADO'), (radarObj.city || ''), (radarObj.genre || '')].filter(Boolean);
+      var metaStr = metaParts.join(' • ');
+      var metaY = nameY + 46;
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '700 22px "Space Mono", monospace';
+      var metaMetrics = ctx.measureText(metaStr);
+      if (metaMetrics.width > 940) {
+        metaY = wrapTextCenteredCur(ctx, metaStr, W/2, metaY, 940, 28);
+      } else {
+        ctx.fillText(metaStr, W/2, metaY);
+        metaY += 28;
+      }
 
-      // Frase o URL
+      // 3. Reseña corta completa (Multi-línea sin truncar)
       var rawQuote = radarObj.short_bio || radarObj.full_review || radarObj.bio || radarObj.career_notes || '';
       var cleanQuote = rawQuote.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
-      var quote = cleanQuote ? ('"' + truncateStringCur(cleanQuote, 65) + '"') : '📡 thenewindiewave.online/artistas';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-      ctx.font = 'italic 24px "Space Grotesk", sans-serif';
-      ctx.fillText(quote, W/2, covY + covH + 195);
+      if (cleanQuote) {
+        var quoteY = metaY + 22;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+        ctx.font = 'italic 22px "Space Grotesk", sans-serif';
+        wrapTextCenteredCur(ctx, '“' + cleanQuote + '”', W/2, quoteY, 940, 32);
+      }
       return;
     }
 
@@ -7534,10 +7546,12 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     ctx.strokeRect(40, 40, W-80, H-80);
 
     // Cover Image (Center)
-    var covW = 600;
-    var covH = 600;
+    var radarObj = (_wpCurrentIsRadar && _wpRadarArtistObj) ? _wpRadarArtistObj : _curRadarArtistObj;
+    var isRadarPost = !!radarObj;
+    var covW = isRadarPost ? 500 : 600;
+    var covH = isRadarPost ? 500 : 600;
     var covX = (W - covW) / 2;
-    var covY = 200;
+    var covY = isRadarPost ? 165 : 200;
 
     if (coverImg && coverImg.complete && coverImg.naturalWidth > 0) {
       ctx.save();
@@ -7566,34 +7580,44 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
 
     // Logo & Header text
     ctx.fillStyle = '#fff';
-    ctx.font = '900 38px "Space Grotesk", "Outfit", "Syne", sans-serif';
+    ctx.font = '900 36px "Space Grotesk", "Outfit", "Syne", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('THE NEW INDIE WAVE', W/2, 100);
+    ctx.fillText('THE NEW INDIE WAVE', W/2, 95);
     
-    var radarObj = (_wpCurrentIsRadar && _wpRadarArtistObj) ? _wpRadarArtistObj : _curRadarArtistObj;
     if (radarObj) {
       ctx.fillStyle = '#bbf451';
-      ctx.font = 'bold 24px "Space Mono", monospace';
-      ctx.fillText('🌟 ARTISTAS EN EL RADAR', W/2, 145);
+      ctx.font = 'bold 22px "Space Mono", monospace';
+      ctx.fillText('🌟 ARTISTAS EN EL RADAR', W/2, 135);
 
-      // Nombre del Artista
+      // 1. Nombre del Artista
+      var nameY = covY + covH + 68;
       ctx.fillStyle = '#fff';
-      ctx.font = '900 66px "Space Grotesk", "Outfit", "Syne", sans-serif';
-      ctx.fillText(truncateStringCur(radarObj.name || artist, 32), W/2, covY + covH + 85);
+      ctx.font = '900 58px "Space Grotesk", "Outfit", "Syne", sans-serif';
+      ctx.fillText(radarObj.name || artist, W/2, nameY);
 
-      // Badge y Ciudad / Género
-      var metaStr = [(radarObj.badge || 'DESTACADO'), (radarObj.city || ''), (radarObj.genre || '')].filter(Boolean).join(' • ');
-      ctx.fillStyle = 'var(--accent-cyan)';
-      ctx.font = '700 26px "Space Mono", monospace';
-      ctx.fillText(truncateStringCur(metaStr, 48), W/2, covY + covH + 138);
+      // 2. Badge • Ciudad • Género (Completo sin truncar)
+      var metaParts = [(radarObj.badge || 'DESTACADO'), (radarObj.city || ''), (radarObj.genre || '')].filter(Boolean);
+      var metaStr = metaParts.join(' • ');
+      var metaY = nameY + 46;
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '700 22px "Space Mono", monospace';
+      var metaMetrics = ctx.measureText(metaStr);
+      if (metaMetrics.width > 940) {
+        metaY = wrapTextCenteredCur(ctx, metaStr, W/2, metaY, 940, 28);
+      } else {
+        ctx.fillText(metaStr, W/2, metaY);
+        metaY += 28;
+      }
 
-      // Frase o URL
+      // 3. Reseña corta completa (Multi-línea sin truncar)
       var rawQuote = radarObj.short_bio || radarObj.full_review || radarObj.bio || radarObj.career_notes || '';
       var cleanQuote = rawQuote.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
-      var quote = cleanQuote ? ('"' + truncateStringCur(cleanQuote, 65) + '"') : '📡 thenewindiewave.online/artistas';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-      ctx.font = 'italic 24px "Space Grotesk", sans-serif';
-      ctx.fillText(quote, W/2, covY + covH + 195);
+      if (cleanQuote) {
+        var quoteY = metaY + 22;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+        ctx.font = 'italic 22px "Space Grotesk", sans-serif';
+        wrapTextCenteredCur(ctx, '“' + cleanQuote + '”', W/2, quoteY, 940, 32);
+      }
       return;
     }
 
