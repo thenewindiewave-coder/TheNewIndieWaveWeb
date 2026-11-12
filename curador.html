@@ -2983,6 +2983,19 @@
 
         </div>
 
+        <!-- ACCIONES PROMOCIONALES RÁPIDAS (PACK ARTISTA, CORREO, COMUNIDAD WHATSAPP) -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.08);">
+          <button onclick="openRadarPromoPack('${a.id}')" style="background: rgba(187, 244, 81, 0.12); color: var(--accent-lime); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(187, 244, 81, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+            🎨 Generar Pack Promocional (Artista) ↗
+          </button>
+          <button onclick="openRadarArtistEmail('${a.id}')" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(56, 189, 248, 0.4); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+            ✉️ Correo al Artista ↗
+          </button>
+          <button onclick="openRadarCommunityPost('${a.id}')" style="background: rgba(37, 211, 102, 0.15); color: #25D366; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 1px solid rgba(37, 211, 102, 0.4); padding: 6px 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+            💬 Generar Post Grupo (Comunidad) ↗
+          </button>
+        </div>
+
         ${a.short_bio ? `
           <div style="font-size: 12px; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 4px; margin-top: 10px; border-left: 2px solid var(--border-strong);">
             "${a.short_bio}"
@@ -3034,6 +3047,115 @@
     if (typeof saveAllRadarArtistsOrders === 'function') {
       await saveAllRadarArtistsOrders(list);
     }
+  }
+
+  // OBTENER CONTEXTO COMPLETO DE ARTISTA DEL RADAR (CON DATOS VINCULADOS DE SUBMISSIONS)
+  function getRadarArtistFullContext(artistId) {
+    var rawList = (typeof getRadarArtists === 'function') ? getRadarArtists() : (window.DEFAULT_RADAR_ARTISTS || []);
+    var a = rawList.find(function(item){ return item && item.id === artistId; });
+    if (!a && window.RADAR_ARTISTS) {
+      a = window.RADAR_ARTISTS.find(function(item){ return item && item.id === artistId; });
+    }
+    if (!a) return null;
+
+    var matchedSub = null;
+    if (Array.isArray(allSubmissions) && allSubmissions.length) {
+      var aName = (a.name || '').trim().toLowerCase();
+      var aSpot = (a.spotify_url || '').trim().toLowerCase();
+      matchedSub = allSubmissions.find(function(s) {
+        if (!s) return false;
+        var sName = (s.artist_name || '').trim().toLowerCase();
+        var sSpot = (s.spotify_url || '').trim().toLowerCase();
+        if (aName && sName && (aName === sName || aName.includes(sName) || sName.includes(aName))) return true;
+        if (aSpot && sSpot && (aSpot === sSpot || aSpot.includes(sSpot) || sSpot.includes(aSpot))) return true;
+        return false;
+      }) || null;
+    }
+
+    var artistName = a.name || 'Artista';
+    var radarUrl = 'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(a.id);
+    var songTitle = (matchedSub && matchedSub.song_title) ? matchedSub.song_title : (a.song_title || a.track_name || (a.track_id && !a.track_id.includes('http') ? a.track_id : 'Descubrimiento Radar'));
+    var playlist = (matchedSub && matchedSub.playlist) ? matchedSub.playlist : (a.playlist || 'Artistas en el Radar');
+    var genre = a.genre || (matchedSub ? matchedSub.genre : '') || 'Indie';
+    var playlistUrl = (matchedSub && playlistLinksMap[matchedSub.playlist]) ? playlistLinksMap[matchedSub.playlist] : radarUrl;
+    var spotifyUrl = a.spotify_url || (matchedSub ? matchedSub.spotify_url : '') || (a.track_id && a.track_id.includes('spotify.com') ? a.track_id : '');
+    var waNumber = a.whatsapp || a.phone || (matchedSub ? (matchedSub.whatsapp || matchedSub.phone || matchedSub.phone_number || '') : '');
+    var email = a.email || (matchedSub ? matchedSub.email : '');
+
+    return {
+      artist: a,
+      matchedSub: matchedSub,
+      artistName: artistName,
+      songTitle: songTitle,
+      playlist: playlist,
+      genre: genre,
+      radarUrl: radarUrl,
+      playlistUrl: playlistUrl,
+      spotifyUrl: spotifyUrl,
+      waNumber: waNumber,
+      email: email
+    };
+  }
+
+  // ACCIÓN 1: PACK PROMOCIONAL PARA EL ARTISTA (STORY RADAR + POST + MENSAJE OFICIAL)
+  function openRadarPromoPack(artistId) {
+    var ctx = getRadarArtistFullContext(artistId);
+    if (!ctx) {
+      showToast('⚠️ No se encontró la información del artista en el radar');
+      return;
+    }
+
+    _curRadarArtistObj = ctx.artist;
+    _curRadarUrl = ctx.radarUrl;
+
+    openCuratorStoryGenerator(
+      encodeURIComponent(ctx.artistName),
+      encodeURIComponent(ctx.songTitle),
+      encodeURIComponent(ctx.playlist),
+      encodeURIComponent(ctx.genre),
+      encodeURIComponent(ctx.playlistUrl),
+      encodeURIComponent(ctx.spotifyUrl),
+      encodeURIComponent(ctx.waNumber),
+      encodeURIComponent(ctx.email)
+    );
+  }
+
+  // ACCIÓN 2: CORREO AL ARTISTA (ENFOCA DIRECTAMENTE EL CAMPO DE ENVÍO DE EMAIL)
+  function openRadarArtistEmail(artistId) {
+    openRadarPromoPack(artistId);
+
+    setTimeout(function() {
+      var emailInput = document.getElementById('curatorArtistEmailInput');
+      if (emailInput) {
+        emailInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        emailInput.focus();
+        if (emailInput.value) {
+          showToast('✉️ Correo listo: ' + emailInput.value + ' (haz clic en Enviar Correo)');
+        } else {
+          showToast('✉️ Escribe el correo del artista para enviarle su felicitación y gráficas.');
+        }
+      }
+    }, 180);
+  }
+
+  // ACCIÓN 3: GENERAR POST GRUPO COMUNIDAD WHATSAPP
+  function openRadarCommunityPost(artistId) {
+    var ctx = getRadarArtistFullContext(artistId);
+    if (!ctx) {
+      showToast('⚠️ No se encontró la información del artista en el radar');
+      return;
+    }
+
+    _wpCurrentIsRadar = true;
+    _wpRadarArtistObj = ctx.artist;
+
+    openWhatsAppGroupGenerator(
+      encodeURIComponent(ctx.artistName),
+      encodeURIComponent(ctx.songTitle),
+      encodeURIComponent(ctx.playlist),
+      encodeURIComponent(ctx.radarUrl),
+      encodeURIComponent(ctx.spotifyUrl)
+    );
   }
 
   // LISTAS MAESTRAS DE GÉNEROS Y FORMATOS (ORDENADAS ALFABÉTICAMENTE A-Z)
@@ -3403,7 +3525,19 @@
             <!-- SECCIÓN COMPLETA DE REDES SOCIALES Y ENLACES OFICIALES -->
             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 14px; margin-top: 4px;">
               <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                🌐 REDES SOCIALES Y ENLACES OFICIALES DEL ARTISTA
+                🌐 CONTACTO, REDES SOCIALES Y ENLACES OFICIALES
+              </div>
+
+              <!-- CONTACTO DIRECTO (CORREO Y WHATSAPP) -->
+              <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 4px;">✉️ Correo Electrónico (Para Envíos Oficiales)</label>
+                  <input type="email" id="rfEmail" value="${artist ? (artist.email || '') : ''}" placeholder="artista@correo.com" style="width:100%; background:#09090b; border:1px solid rgba(56,189,248,0.4); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 10px; color: #25D366; text-transform: uppercase; margin-bottom: 4px;">💬 WhatsApp / Teléfono (Con código de país)</label>
+                  <input type="text" id="rfWhatsapp" value="${artist ? (artist.whatsapp || artist.phone || '') : ''}" placeholder="+54 9 11 5573 1247" style="width:100%; background:#09090b; border:1px solid rgba(37,211,102,0.4); padding:8px 10px; color:#fff; border-radius:4px; font-size:12.5px;">
+                </div>
               </div>
 
               <div class="radar-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
@@ -3562,6 +3696,8 @@
       full_review: document.getElementById('rfFullReview').value.trim(),
       career_notes: document.getElementById('rfCareer').value.trim(),
       events_note: document.getElementById('rfEvents').value.trim(),
+      email: (document.getElementById('rfEmail') ? document.getElementById('rfEmail').value.trim() : ''),
+      whatsapp: (document.getElementById('rfWhatsapp') ? document.getElementById('rfWhatsapp').value.trim() : ''),
       spotify_url: document.getElementById('rfSpotifyUrl').value.trim(),
       instagram: cleanIg,
       youtube_url: (document.getElementById('rfYoutubeUrl') ? document.getElementById('rfYoutubeUrl').value.trim() : ''),
@@ -5657,6 +5793,9 @@ ${playlistUrl}`;
     showToast('🚀 Abriendo WhatsApp... ¡Imagen de post copiada al portapapeles! Presiona Ctrl+V en el chat para adjuntarla.');
   }
 
+  var _curRadarArtistObj = null;
+  var _curRadarUrl = '';
+
   function openCuratorStoryGenerator(encArtist, encSong, encPlaylist, encGenre, encPlaylistUrl, encSpotifyUrl, encWaNumber, encEmail) {
     _curPromoArtist = decodeURIComponent(encArtist || 'Artista');
     _curPromoSong = decodeURIComponent(encSong || 'Canción');
@@ -5692,11 +5831,35 @@ ${playlistUrl}`;
     // Generar Mensaje
     regenerateCuratorMessage();
 
-    // Generar IG Story
-    generateCuratorStoryCanvas(_curPromoArtist, _curPromoSong, _curPromoPlaylist, _curPromoGenre, 'curatorStoryCanvas', _curPromoUrl);
+    // Generar IG Story (si es artista de radar, renderizar su Story HD de Radar)
+    if (_curRadarArtistObj && typeof generateRadarArtistStoryCanvas === 'function') {
+      try {
+        generateRadarArtistStoryCanvas(_curRadarArtistObj, 'curatorStoryCanvas');
+      } catch(e) {
+        generateCuratorStoryCanvas(_curPromoArtist, _curPromoSong, _curPromoPlaylist, _curPromoGenre, 'curatorStoryCanvas', _curPromoUrl);
+      }
+    } else {
+      generateCuratorStoryCanvas(_curPromoArtist, _curPromoSong, _curPromoPlaylist, _curPromoGenre, 'curatorStoryCanvas', _curPromoUrl);
+    }
 
     // Generar Post Cuadrado (WA)
     generateCuratorPostCanvas(_curPromoArtist, _curPromoSong, _curPromoPlaylist, null);
+
+    // Si es artista de radar y tiene foto o media_url, usarla directamente para el post cuadrado
+    if (_curRadarArtistObj && _curRadarArtistObj.media_url && !_curRadarArtistObj.media_url.includes('youtube') && !_curRadarArtistObj.media_url.includes('youtu.be')) {
+      var rMedia = _curRadarArtistObj.media_url;
+      if (_wpTrackCoverCache[rMedia]) {
+        generateCuratorPostCanvas(_curPromoArtist, _curPromoSong, _curPromoPlaylist, _wpTrackCoverCache[rMedia]);
+      } else {
+        var rImg = new Image();
+        rImg.crossOrigin = 'anonymous';
+        rImg.onload = function() {
+          _wpTrackCoverCache[rMedia] = rImg;
+          generateCuratorPostCanvas(_curPromoArtist, _curPromoSong, _curPromoPlaylist, rImg);
+        };
+        rImg.src = rMedia;
+      }
+    }
 
     // Fetch track cover for the square post
     if (spotifyUrl) {
@@ -5723,6 +5886,39 @@ ${playlistUrl}`;
   }
 
   function buildCuratorPromoMessage(artist, song, playlist, url) {
+    if (_curRadarArtistObj) {
+      var rUrl = _curRadarUrl || ('https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(_curRadarArtistObj.id));
+      var isRealPlaylist = playlist && playlist !== 'Artistas en el Radar' && playlist !== 'Playlist Oficial';
+      if (isRealPlaylist && song && song !== 'Descubrimiento Radar') {
+        return `¡Felicidades *${artist}*! 🎉
+
+¡Tu proyecto musical ya aparece de manera oficial en *ARTISTAS EN EL RADAR* de The New Indie Wave!
+${rUrl}
+
+Te preparamos esta reseña y espacio permanente en nuestro directorio editorial para que más escuchas, curadores y medios independientes de México, Latam y España conozcan tu propuesta sonora.
+
+También es un gusto informarte que tu tema *"${song}"* ha sido seleccionado para la playlist oficial *"${playlist}"*:
+${url}
+
+Te adjuntamos las gráficas oficiales en alta definición para que las compartas en tus historias y estados. ¡Que sigan creciendo los éxitos! 🚀
+
+Sigamos haciendo comunidad:
+Instagram: @the.new.indie.wave • @rodrigodlmoral`;
+      } else {
+        return `¡Felicidades *${artist}*! 🎉
+
+¡Tu proyecto musical ya aparece de manera oficial en *ARTISTAS EN EL RADAR* de The New Indie Wave!
+${rUrl}
+
+Te preparamos esta reseña y espacio permanente en nuestro directorio editorial para que más escuchas, curadores y medios independientes de México, Latam y España conozcan tu propuesta sonora.
+
+Te compartimos el enlace oficial y las gráficas en alta definición para que las compartas en tus historias y estados celebrando este lanzamiento. ¡Que sigan creciendo los éxitos! 🚀
+
+Sigamos haciendo comunidad:
+Instagram: @the.new.indie.wave • @rodrigodlmoral`;
+      }
+    }
+
     var template = promoTemplates[Math.floor(Math.random() * promoTemplates.length)];
     return template
       .replace(/\{artist\}/g, artist || 'Artista')
@@ -5871,6 +6067,8 @@ ${playlistUrl}`;
   }
 
   function closeCuratorStoryModal() {
+    _curRadarArtistObj = null;
+    _curRadarUrl = '';
     var modal = document.getElementById('storyModalCurator');
     if (modal) modal.style.display = 'none';
   }
@@ -6661,6 +6859,14 @@ ${playlistUrl}`;
   let _wpCurrentPlaylist = '';
   let _wpCurrentUrl = '';
   let _wpTrackCoverCache = {}; // URL -> Image object
+  var _wpCurrentIsRadar = false;
+  var _wpRadarArtistObj = null;
+
+  const wpRadarTemplates = [
+    "🌟 ¡NUEVO DESCUBRIMIENTO EN EL RADAR EDITORIAL! 📡✨\n\nComunidad de The New Indie Wave, les presentamos a *{artist}*. Ya pueden leer su reseña editorial completa y escuchar su propuesta musical aquí: 👇\n{url}",
+    "🚀 ¡MÚSICA FRESCA DIRECTO AL RADAR! 💎\n\nConozcan el proyecto de *{artist}*, nuestro más reciente artista en el Radar de The New Indie Wave. Descubran su sonido, historia y lanzamientos en su página exclusiva: 👇\n{url}",
+    "🎧 ¡TALENTO INDEPENDIENTE EN EL RADAR! 🔥\n\nSumérgete en el sonido de *{artist}*. Te dejamos su reseña destacada y enlaces oficiales en The New Indie Wave. ¡Vayan a darle amor y escucharla ya mismo! 👇\n{url}"
+  ];
 
   function openWhatsAppGroupGenerator(encArtist, encSong, encPlaylist, encPlaylistUrl, encSpotifyUrl) {
     _wpCurrentArtist = decodeURIComponent(encArtist || 'Artista');
@@ -6684,6 +6890,24 @@ ${playlistUrl}`;
       generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
     } catch(e2) {
       console.error('Error render inicial WhatsApp Vertical:', e2);
+    }
+
+    // Si es artista de radar y tiene foto o media_url, usarla para los canvas de WhatsApp
+    if (_wpCurrentIsRadar && _wpRadarArtistObj && _wpRadarArtistObj.media_url && !_wpRadarArtistObj.media_url.includes('youtube') && !_wpRadarArtistObj.media_url.includes('youtu.be')) {
+      var rMedia = _wpRadarArtistObj.media_url;
+      if (_wpTrackCoverCache[rMedia]) {
+        try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[rMedia]); } catch(e){}
+        try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[rMedia]); } catch(e){}
+      } else {
+        var rImg = new Image();
+        rImg.crossOrigin = 'anonymous';
+        rImg.onload = function() {
+          _wpTrackCoverCache[rMedia] = rImg;
+          try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, rImg); } catch(e){}
+          try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, rImg); } catch(e){}
+        };
+        rImg.src = rMedia;
+      }
     }
 
     // Consultar metadatos y carátula oficial en alta resolución desde Spotify API
@@ -6740,6 +6964,17 @@ ${playlistUrl}`;
   }
 
   function regenerateWhatsAppMessage() {
+    if (_wpCurrentIsRadar) {
+      var rTemplate = wpRadarTemplates[Math.floor(Math.random() * wpRadarTemplates.length)];
+      var rMsg = rTemplate
+        .replace('{artist}', _wpCurrentArtist)
+        .replace('{song}', _wpCurrentSong)
+        .replace('{playlist}', _wpCurrentPlaylist)
+        .replace('{url}', _wpCurrentUrl);
+      var taR = document.getElementById('wpGeneratedMessageText');
+      if (taR) taR.value = rMsg;
+      return;
+    }
     var template = wpTemplates[Math.floor(Math.random() * wpTemplates.length)];
     var msg = template
       .replace('{artist}', _wpCurrentArtist)
@@ -7051,6 +7286,8 @@ ${playlistUrl}`;
   }
 
   function closeWhatsAppGroupModal() {
+    _wpCurrentIsRadar = false;
+    _wpRadarArtistObj = null;
     var modal = document.getElementById('whatsappGroupModal');
     if (modal) modal.style.display = 'none';
   }

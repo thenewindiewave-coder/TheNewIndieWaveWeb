@@ -9,6 +9,8 @@ function parseArtistOtherData(item) {
       if (parsed.career_notes) item.career_notes = parsed.career_notes;
       if (parsed.events_note) item.events_note = parsed.events_note;
       if (parsed.facebook_url) item.facebook_url = parsed.facebook_url;
+      if (parsed.email) item.email = parsed.email;
+      if (parsed.whatsapp) item.whatsapp = parsed.whatsapp;
       if (parsed.archived !== undefined) item.archived = parsed.archived;
       if (parsed.archived_at) item.archived_at = parsed.archived_at;
       if (parsed.previous_type) item.previous_type = parsed.previous_type;
@@ -199,6 +201,8 @@ async function saveRadarArtistToSupabase(artist) {
     if (artist.career_notes) otherData.career_notes = artist.career_notes;
     if (artist.events_note) otherData.events_note = artist.events_note;
     if (artist.facebook_url) otherData.facebook_url = artist.facebook_url;
+    if (artist.email) otherData.email = artist.email;
+    if (artist.whatsapp) otherData.whatsapp = artist.whatsapp;
     if (artist.archived !== undefined) otherData.archived = artist.archived;
     if (artist.archived_at) otherData.archived_at = artist.archived_at;
     if (artist.previous_type) otherData.previous_type = artist.previous_type;
