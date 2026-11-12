@@ -6713,16 +6713,14 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     ctx.fillText(badgeLabel, W / 2, bY + (bHeight / 2));
     ctx.restore();
 
-    // 3. Tarjeta Central del Artista (Diseño Dinámico - Cero Espacio Muerto)
-    var cardX = 90;
-    var cardY = 265;
-    var cardW = 900;
-    var photoH = 780;
-    var ctaBoxH = 120;
-    var vH = 38;
-    var estLines = cleanBio ? Math.max(1, Math.ceil(cleanBio.length / 46)) : 0;
-    var estQuoteH = estLines * 34;
-    var cardH = 45 + photoH + 46 + 42 + 50 + estQuoteH + 32 + ctaBoxH + 20 + vH + 42;
+    // 3. Tarjeta Central del Artista (Diseño Armónico - Cobertura Completa 1080x1920)
+    var cardX = 85;
+    var cardY = 240;
+    var cardW = 910;
+    var cardH = 1460;
+    var photoH = 820;
+    var ctaBoxH = 125;
+    var vH = 40;
 
     // Sombra exterior de la tarjeta principal
     ctx.save();
@@ -6746,10 +6744,10 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     ctx.stroke();
     ctx.restore();
 
-    // 4. Foto / Carátula del Artista (y=310, W=800, H=780)
-    var photoX = cardX + 50;
+    // 4. Foto / Carátula del Artista (y=285, W=820, H=820)
+    var photoX = cardX + 45;
     var photoY = cardY + 45;
-    var photoW = cardW - 100;
+    var photoW = cardW - 90;
 
     ctx.save();
     ctx.shadowColor = 'transparent';
@@ -6827,7 +6825,7 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     ctx.restore();
 
     // 5. Nombre del Artista & Información
-    var infoY = photoY + photoH + 46;
+    var infoY = photoY + photoH + 50;
 
     ctx.save();
     ctx.shadowColor = 'transparent';
@@ -6837,25 +6835,25 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = '#ffffff';
-    ctx.font = '900 52px sans-serif';
-    ctx.fillText(truncateStringCur(artistName.toUpperCase(), 24), W / 2, infoY);
+    ctx.font = '900 56px sans-serif';
+    ctx.fillText(truncateStringCur(artistName.toUpperCase(), 28), W / 2, infoY);
 
     ctx.fillStyle = '#38bdf8';
-    ctx.font = 'bold 22px monospace';
-    ctx.fillText('// ' + genre.toUpperCase() + '  •  ' + city.toUpperCase(), W / 2, infoY + 42);
+    ctx.font = 'bold 23px monospace';
+    ctx.fillText('// ' + genre.toUpperCase() + '  •  ' + city.toUpperCase(), W / 2, infoY + 44);
 
-    var quoteBottomY = infoY + 85;
+    var quoteBottomY = infoY + 88;
     if (cleanBio) {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
-      ctx.font = 'italic 23px sans-serif';
-      quoteBottomY = wrapTextCenteredCur(ctx, '“' + cleanBio + '”', W / 2, infoY + 95, 780, 34);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+      ctx.font = 'italic 24px sans-serif';
+      quoteBottomY = wrapTextCenteredCur(ctx, '“' + cleanBio + '”', W / 2, infoY + 95, 800, 36);
     }
     ctx.restore();
 
-    // 6. CAJA DE LLAMADO A LA ACCIÓN INTEGRADA (Elimina todo espacio muerto)
-    var ctaBoxY = quoteBottomY + 32;
-    var ctaBoxW = 780;
-    var ctaBoxH = 120;
+    // 6. CAJA DE LLAMADO A LA ACCIÓN INTEGRADA (Sin espacios muertos)
+    var ctaBoxY = Math.max(quoteBottomY + 30, 1395);
+    var ctaBoxW = 810;
+    var ctaBoxH = 125;
     var ctaBoxX = (W - ctaBoxW) / 2;
 
     ctx.save();
@@ -6882,10 +6880,10 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
 
     ctx.fillStyle = '#bbf451';
     ctx.font = '900 34px monospace';
-    ctx.fillText('thenewindiewave.online', W / 2, ctaBoxY + 82);
+    ctx.fillText('thenewindiewave.online', W / 2, ctaBoxY + 84);
     ctx.restore();
 
-    // 7. Pill de Verificación Editorial (Perfectamente ubicado debajo del llamado a la acción)
+    // 7. Pill de Verificación Editorial (Perfectamente integrado)
     var pillY = ctaBoxY + ctaBoxH + 22;
     var vLabel = '● PROYECTO SELECCIONADO EN EL RADAR TNIW';
     ctx.save();
@@ -6896,22 +6894,38 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     ctx.font = 'bold 18px monospace';
     var vTextWidth = ctx.measureText(vLabel).width;
     var vW = vTextWidth + 40;
-    var vH = 38;
+    var vH = 40;
     var vX = (W - vW) / 2;
 
     ctx.fillStyle = 'rgba(187, 244, 81, 0.12)';
-    drawRoundRectCur(ctx, vX, pillY, vW, vH, 19);
+    drawRoundRectCur(ctx, vX, pillY, vW, vH, 20);
     ctx.fill();
 
-    ctx.strokeStyle = 'rgba(187, 244, 81, 0.4)';
+    ctx.strokeStyle = 'rgba(187, 244, 81, 0.45)';
     ctx.lineWidth = 1.2;
-    drawRoundRectCur(ctx, vX, pillY, vW, vH, 19);
+    drawRoundRectCur(ctx, vX, pillY, vW, vH, 20);
     ctx.stroke();
 
     ctx.fillStyle = '#bbf451';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(vLabel, W / 2, pillY + (vH / 2));
+    ctx.restore();
+
+    // 8. Pie de Historia Oficial en zona inferior (Elimina todo espacio muerto del lienzo completo)
+    var botY = 1795;
+    ctx.save();
+    ctx.shadowColor = 'rgba(187, 244, 81, 0.55)';
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = '#bbf451';
+    ctx.font = '900 28px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('thenewindiewave.online/artistas', W / 2, botY);
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.font = 'bold 17px monospace';
+    ctx.fillText('⚡ DESCUBRIMIENTOS INDIE  •  COMUNIDAD OFICIAL ⚡', W / 2, botY + 36);
     ctx.restore();
 
     try {
