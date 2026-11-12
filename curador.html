@@ -3097,6 +3097,125 @@
     };
   }
 
+  // RESOLVER IMAGEN / PORTADA DE ARTISTA DEL RADAR (CLOUDINARY, YOUTUBE THUMBNAIL, SPOTIFY, ETC)
+  function resolveRadarArtistImage(artist, callback) {
+    if (!artist) {
+      if (callback) callback(null);
+      return;
+    }
+
+    var rawUrl = artist.media_url || artist.image || artist.cover || (artist.matchedSub ? (artist.matchedSub.cover_url || artist.matchedSub.spotify_url) : '') || '';
+    if (!rawUrl && artist.track_id && (artist.track_id.includes('youtube') || artist.track_id.includes('youtu.be'))) {
+      rawUrl = artist.track_id;
+    }
+    rawUrl = (rawUrl || '').trim();
+
+    var resolvedUrl = '';
+    if (rawUrl) {
+      var ytId = (typeof getYouTubeVideoId === 'function') ? getYouTubeVideoId(rawUrl) : (function(u){
+        var m = (u || '').match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/i);
+        return m ? m[1] : null;
+      })(rawUrl);
+
+      if (ytId) {
+        resolvedUrl = 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg';
+      } else if (rawUrl.includes('cloudinary.com')) {
+        resolvedUrl = rawUrl.replace(/\.(mp4|mov|webm|m4v)(\?.*)?$/i, '.jpg$2');
+        if (resolvedUrl.includes('/video/upload/')) {
+          var offset = (artist.media_start !== undefined && artist.media_start !== null) ? artist.media_start : 0;
+          resolvedUrl = resolvedUrl.replace(/\/video\/upload\/(so_[0-9.]+\/)?/i, '/video/upload/so_' + offset + '/');
+        }
+      } else if (!rawUrl.includes('spotify.com') && !/^[0-9A-Za-z]{22}$/.test(rawUrl)) {
+        resolvedUrl = rawUrl;
+      }
+    }
+
+    if (resolvedUrl) {
+      if (typeof _loadedRadarArtistImages !== 'undefined' && _loadedRadarArtistImages[resolvedUrl] && _loadedRadarArtistImages[resolvedUrl] !== 'error') {
+        if (callback) callback(_loadedRadarArtistImages[resolvedUrl]);
+        return;
+      }
+      if (typeof _wpTrackCoverCache !== 'undefined' && _wpTrackCoverCache[resolvedUrl] && _wpTrackCoverCache[resolvedUrl] !== 'error') {
+        if (callback) callback(_wpTrackCoverCache[resolvedUrl]);
+        return;
+      }
+
+      var img = new Image();
+      if (!resolvedUrl.startsWith('data:')) {
+        img.crossOrigin = 'anonymous';
+      }
+      img.onload = function() {
+        if (typeof _wpTrackCoverCache !== 'undefined') _wpTrackCoverCache[resolvedUrl] = img;
+        if (typeof _loadedRadarArtistImages !== 'undefined') _loadedRadarArtistImages[resolvedUrl] = img;
+        if (callback) callback(img);
+      };
+      img.onerror = function() {
+        var fbImg = new Image();
+        if (!resolvedUrl.startsWith('data:')) {
+          fbImg.crossOrigin = 'anonymous';
+        }
+        fbImg.onload = function() {
+          if (typeof _wpTrackCoverCache !== 'undefined') _wpTrackCoverCache[resolvedUrl] = fbImg;
+          if (typeof _loadedRadarArtistImages !== 'undefined') _loadedRadarArtistImages[resolvedUrl] = fbImg;
+          if (callback) callback(fbImg);
+        };
+        fbImg.onerror = function() {
+          if (typeof _wpTrackCoverCache !== 'undefined') _wpTrackCoverCache[resolvedUrl] = 'error';
+          if (callback) callback(null);
+        };
+        fbImg.src = resolvedUrl;
+      };
+      img.src = resolvedUrl;
+      return;
+    }
+
+    var spUrl = (artist.spotify_url || artist.track_id || (artist.matchedSub ? artist.matchedSub.spotify_url : '') || rawUrl || '').trim();
+    if (spUrl) {
+      if (/^[0-9A-Za-z]{22}$/.test(spUrl)) {
+        spUrl = 'https://open.spotify.com/track/' + spUrl;
+      } else if (spUrl.includes('spotify:track:')) {
+        spUrl = 'https://open.spotify.com/track/' + spUrl.split('spotify:track:')[1].trim();
+      }
+    }
+
+    if (spUrl && (spUrl.includes('spotify.com/track/') || spUrl.includes('spotify.com/intl-') || spUrl.includes('/track/'))) {
+      fetch('/api/spotify-lookup?url=' + encodeURIComponent(spUrl))
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if (d && d.cover) {
+            if (typeof _wpTrackCoverCache !== 'undefined' && _wpTrackCoverCache[d.cover] && _wpTrackCoverCache[d.cover] !== 'error') {
+              if (callback) callback(_wpTrackCoverCache[d.cover]);
+              return;
+            }
+            var spImg = new Image();
+            spImg.crossOrigin = 'anonymous';
+            spImg.onload = function() {
+              if (typeof _wpTrackCoverCache !== 'undefined') _wpTrackCoverCache[d.cover] = spImg;
+              if (typeof _loadedRadarArtistImages !== 'undefined') _loadedRadarArtistImages[d.cover] = spImg;
+              if (callback) callback(spImg);
+            };
+            spImg.onerror = function() {
+              var fb = new Image();
+              fb.onload = function() {
+                if (typeof _wpTrackCoverCache !== 'undefined') _wpTrackCoverCache[d.cover] = fb;
+                if (typeof _loadedRadarArtistImages !== 'undefined') _loadedRadarArtistImages[d.cover] = fb;
+                if (callback) callback(fb);
+              };
+              fb.onerror = function() { if (callback) callback(null); };
+              fb.src = d.cover;
+            };
+            spImg.src = d.cover;
+          } else {
+            if (callback) callback(null);
+          }
+        })
+        .catch(function(){ if (callback) callback(null); });
+      return;
+    }
+
+    if (callback) callback(null);
+  }
+
   // ACCIÓN 1: PACK PROMOCIONAL PARA EL ARTISTA (STORY RADAR + POST + MENSAJE OFICIAL)
   function openRadarPromoPack(artistId) {
     var ctx = getRadarArtistFullContext(artistId);
@@ -3118,6 +3237,16 @@
       encodeURIComponent(ctx.waNumber),
       encodeURIComponent(ctx.email)
     );
+
+    // Cargar la imagen del artista para el post cuadrado del pack
+    resolveRadarArtistImage(ctx.artist, function(coverImg) {
+      if (coverImg) {
+        generateCuratorPostCanvas(ctx.artistName, ctx.songTitle, ctx.playlist, coverImg);
+        if (typeof generateRadarArtistStoryCanvas === 'function') {
+          try { generateRadarArtistStoryCanvas(ctx.artist, 'curatorStoryCanvas'); } catch(e){}
+        }
+      }
+    });
   }
 
   // ACCIÓN 2: CORREO AL ARTISTA (ENFOCA DIRECTAMENTE EL CAMPO DE ENVÍO DE EMAIL)
@@ -3154,7 +3283,8 @@
       encodeURIComponent(ctx.songTitle),
       encodeURIComponent(ctx.playlist),
       encodeURIComponent(ctx.radarUrl),
-      encodeURIComponent(ctx.spotifyUrl)
+      encodeURIComponent(ctx.spotifyUrl),
+      true
     );
   }
 
@@ -6016,6 +6146,33 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     ctx.textAlign = 'center';
     ctx.fillText('THE NEW INDIE WAVE', W/2, 100);
     
+    var radarObj = (_wpCurrentIsRadar && _wpRadarArtistObj) ? _wpRadarArtistObj : _curRadarArtistObj;
+    if (radarObj) {
+      ctx.fillStyle = '#bbf451';
+      ctx.font = 'bold 24px "Space Mono", monospace';
+      ctx.fillText('🌟 ARTISTAS EN EL RADAR', W/2, 145);
+
+      // Nombre del Artista
+      ctx.fillStyle = '#fff';
+      ctx.font = '900 66px "Space Grotesk", "Outfit", "Syne", sans-serif';
+      ctx.fillText(truncateStringCur(radarObj.name || artist, 32), W/2, covY + covH + 85);
+
+      // Badge y Ciudad / Género
+      var metaStr = [(radarObj.badge || 'DESTACADO'), (radarObj.city || ''), (radarObj.genre || '')].filter(Boolean).join(' • ');
+      ctx.fillStyle = 'var(--accent-cyan)';
+      ctx.font = '700 26px "Space Mono", monospace';
+      ctx.fillText(truncateStringCur(metaStr, 48), W/2, covY + covH + 138);
+
+      // Frase o URL
+      var rawQuote = radarObj.short_bio || radarObj.full_review || radarObj.bio || radarObj.career_notes || '';
+      var cleanQuote = rawQuote.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+      var quote = cleanQuote ? ('"' + truncateStringCur(cleanQuote, 65) + '"') : '📡 thenewindiewave.online/artistas';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.font = 'italic 24px "Space Grotesk", sans-serif';
+      ctx.fillText(quote, W/2, covY + covH + 195);
+      return;
+    }
+
     ctx.fillStyle = '#bbf451';
     ctx.font = 'bold 24px "Space Mono", monospace';
     ctx.fillText('RECIÉN AÑADIDA A NUESTRA PLAYLIST', W/2, 145);
@@ -6868,7 +7025,10 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     "🎧 ¡TALENTO INDEPENDIENTE EN EL RADAR! 🔥\n\nSumérgete en el sonido de *{artist}*. Te dejamos su reseña destacada y enlaces oficiales en The New Indie Wave. ¡Vayan a darle amor y escucharla ya mismo! 👇\n{url}"
   ];
 
-  function openWhatsAppGroupGenerator(encArtist, encSong, encPlaylist, encPlaylistUrl, encSpotifyUrl) {
+  function openWhatsAppGroupGenerator(encArtist, encSong, encPlaylist, encPlaylistUrl, encSpotifyUrl, isRadarExplicit) {
+    if (isRadarExplicit !== undefined) {
+      _wpCurrentIsRadar = !!isRadarExplicit;
+    }
     _wpCurrentArtist = decodeURIComponent(encArtist || 'Artista');
     _wpCurrentSong = decodeURIComponent(encSong || 'Canción');
     _wpCurrentPlaylist = decodeURIComponent(encPlaylist || 'Playlist');
@@ -6880,7 +7040,31 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     var modal = document.getElementById('whatsappGroupModal');
     if (modal) modal.style.display = 'flex';
 
-    // Render inicial
+    // CASO ESPECIAL: ARTISTAS EN EL RADAR
+    if (_wpCurrentIsRadar && _wpRadarArtistObj) {
+      // 1. Status Vertical: Generar exactamente la story oficial de radar (como la generada para el artista)
+      try {
+        generateRadarArtistStoryCanvas(_wpRadarArtistObj, 'wpVerticalStoryCanvas');
+      } catch(e) {
+        console.error('Error generando story vertical radar:', e);
+      }
+
+      // 2. Post Cuadrado: Render inicial
+      try {
+        generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
+      } catch(e) {}
+
+      // 3. Resolver imagen de radar y actualizar ambos lienzos con la portada
+      resolveRadarArtistImage(_wpRadarArtistObj, function(coverImg) {
+        if (coverImg) {
+          try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, coverImg); } catch(e){}
+          try { generateRadarArtistStoryCanvas(_wpRadarArtistObj, 'wpVerticalStoryCanvas'); } catch(e){}
+        }
+      });
+      return;
+    }
+
+    // Render inicial para canciones aceptadas de playlist
     try {
       generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, null);
     } catch(e1) {
@@ -6892,23 +7076,7 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
       console.error('Error render inicial WhatsApp Vertical:', e2);
     }
 
-    // Si es artista de radar y tiene foto o media_url, usarla para los canvas de WhatsApp
-    if (_wpCurrentIsRadar && _wpRadarArtistObj && _wpRadarArtistObj.media_url && !_wpRadarArtistObj.media_url.includes('youtube') && !_wpRadarArtistObj.media_url.includes('youtu.be')) {
-      var rMedia = _wpRadarArtistObj.media_url;
-      if (_wpTrackCoverCache[rMedia]) {
-        try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[rMedia]); } catch(e){}
-        try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, _wpTrackCoverCache[rMedia]); } catch(e){}
-      } else {
-        var rImg = new Image();
-        rImg.crossOrigin = 'anonymous';
-        rImg.onload = function() {
-          _wpTrackCoverCache[rMedia] = rImg;
-          try { generateWhatsAppCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, rImg); } catch(e){}
-          try { generateWhatsAppVerticalCanvas(_wpCurrentArtist, _wpCurrentSong, _wpCurrentPlaylist, rImg); } catch(e){}
-        };
-        rImg.src = rMedia;
-      }
-    }
+
 
     // Consultar metadatos y carátula oficial en alta resolución desde Spotify API
     if (spotifyUrl) {
@@ -7020,6 +7188,18 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
   }
 
   function generateWhatsAppVerticalCanvas(artist, song, playlist, coverImg) {
+    // Si es artista de radar, renderizar exclusivamente la Story oficial de Radar (igual a la del artista)
+    if (_wpCurrentIsRadar && _wpRadarArtistObj) {
+      if (typeof generateRadarArtistStoryCanvas === 'function') {
+        try {
+          generateRadarArtistStoryCanvas(_wpRadarArtistObj, 'wpVerticalStoryCanvas');
+        } catch(e) {
+          console.error('Error generando story vertical radar:', e);
+        }
+      }
+      return;
+    }
+
     var canvas = document.getElementById('wpVerticalStoryCanvas');
     if (!canvas) return;
     var ctx = canvas.getContext('2d');
@@ -7313,6 +7493,19 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     var W = 1080;
     var H = 1080;
 
+    // Si es artista de radar y coverImg no vino directo, intentar rescatarlo de la caché
+    if (!coverImg && (_wpCurrentIsRadar && _wpRadarArtistObj)) {
+      var rObj = _wpRadarArtistObj;
+      var rRaw = (rObj.media_url || rObj.image || rObj.cover || (rObj.matchedSub ? rObj.matchedSub.cover_url : '') || '').trim();
+      var rYt = (typeof getYouTubeVideoId === 'function') ? getYouTubeVideoId(rRaw) : null;
+      var rKey = rYt ? ('https://img.youtube.com/vi/' + rYt + '/hqdefault.jpg') : rRaw;
+      if (typeof _loadedRadarArtistImages !== 'undefined' && _loadedRadarArtistImages[rKey] && _loadedRadarArtistImages[rKey] !== 'error') {
+        coverImg = _loadedRadarArtistImages[rKey];
+      } else if (typeof _wpTrackCoverCache !== 'undefined' && _wpTrackCoverCache[rKey] && _wpTrackCoverCache[rKey] !== 'error') {
+        coverImg = _wpTrackCoverCache[rKey];
+      }
+    }
+
     // Background
     ctx.fillStyle = '#09090b';
     ctx.fillRect(0, 0, W, H);
@@ -7377,6 +7570,33 @@ Instagram: @the.new.indie.wave • @rodrigodlmoral`;
     ctx.textAlign = 'center';
     ctx.fillText('THE NEW INDIE WAVE', W/2, 100);
     
+    var radarObj = (_wpCurrentIsRadar && _wpRadarArtistObj) ? _wpRadarArtistObj : _curRadarArtistObj;
+    if (radarObj) {
+      ctx.fillStyle = '#bbf451';
+      ctx.font = 'bold 24px "Space Mono", monospace';
+      ctx.fillText('🌟 ARTISTAS EN EL RADAR', W/2, 145);
+
+      // Nombre del Artista
+      ctx.fillStyle = '#fff';
+      ctx.font = '900 66px "Space Grotesk", "Outfit", "Syne", sans-serif';
+      ctx.fillText(truncateStringCur(radarObj.name || artist, 32), W/2, covY + covH + 85);
+
+      // Badge y Ciudad / Género
+      var metaStr = [(radarObj.badge || 'DESTACADO'), (radarObj.city || ''), (radarObj.genre || '')].filter(Boolean).join(' • ');
+      ctx.fillStyle = 'var(--accent-cyan)';
+      ctx.font = '700 26px "Space Mono", monospace';
+      ctx.fillText(truncateStringCur(metaStr, 48), W/2, covY + covH + 138);
+
+      // Frase o URL
+      var rawQuote = radarObj.short_bio || radarObj.full_review || radarObj.bio || radarObj.career_notes || '';
+      var cleanQuote = rawQuote.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+      var quote = cleanQuote ? ('"' + truncateStringCur(cleanQuote, 65) + '"') : '📡 thenewindiewave.online/artistas';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.font = 'italic 24px "Space Grotesk", sans-serif';
+      ctx.fillText(quote, W/2, covY + covH + 195);
+      return;
+    }
+
     ctx.fillStyle = '#bbf451';
     ctx.font = 'bold 24px "Space Mono", monospace';
     ctx.fillText('RECIÉN AÑADIDA A NUESTRA PLAYLIST', W/2, 145);
