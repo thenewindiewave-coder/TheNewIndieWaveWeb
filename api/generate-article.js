@@ -1883,7 +1883,10 @@ async function handleSendAcceptanceEmail(req, res) {
     const htmlFormattedMessage = formatAcceptanceMessageForHtml(finalMessage, cleanArtist);
 
     // 4. Armar el Asunto y el HTML del Correo
-    const subject = `¡Felicidades ${cleanArtist}! Tu canción "${cleanSong}" ha sido agregada a The New Indie Wave 🎉`;
+    const isRadarArtist = Boolean(req.body.is_radar || cleanPlaylist === 'Artistas en el Radar' || !cleanSong);
+    const subject = isRadarArtist
+      ? `¡Felicidades ${cleanArtist}! Tu proyecto ya está en Artistas en el Radar de The New Indie Wave 🎉`
+      : `¡Felicidades ${cleanArtist}! Tu canción "${cleanSong}" ha sido agregada a The New Indie Wave 🎉`;
     const htmlEmail = generateAcceptanceEmailHtml({
       artist_name: cleanArtist,
       song_title: cleanSong,
@@ -1892,7 +1895,8 @@ async function handleSendAcceptanceEmail(req, res) {
       formatted_message: htmlFormattedMessage,
       post_image_url: postImageUrl,
       story_image_url: storyImageUrl,
-      has_attachments: attachments.length > 0
+      has_attachments: attachments.length > 0,
+      is_radar: isRadarArtist
     });
 
     // 5. Enviar el correo a través del proveedor disponible (Gmail SMTP, Resend, Brevo)
@@ -1992,14 +1996,29 @@ function generateAcceptanceEmailHtml({
   formatted_message,
   post_image_url,
   story_image_url,
-  has_attachments
+  has_attachments,
+  is_radar = false
 }) {
+  const topTag = is_radar ? '// COBERTURA EDITORIAL · ARTISTAS EN EL RADAR' : '// SELECCIÓN OFICIAL · CURADURÍA SPOTIFY';
+  const pageTitle = is_radar ? '¡Publicado en Artistas en el Radar!' : '¡Track Aceptado en The New Indie Wave!';
+  const bannerEmoji = is_radar ? '🎉 📡 ⚡' : '🎉 🎧 ⚡';
+  const bannerSubtitle = is_radar
+    ? `Tu proyecto musical ha sido seleccionado y publicado de manera oficial en nuestra sección editorial <strong>ARTISTAS EN EL RADAR</strong>.`
+    : `Tu canción <strong>"${song_title}"</strong> ha superado la curaduría y ya forma parte de nuestra playlist oficial <strong>"${playlist}"</strong>.`;
+  const primaryButton = is_radar
+    ? `<a href="${playlist_url || 'https://thenewindiewave.online/artistas.html'}" target="_blank" style="display: block; width: 90%; background-color: #bbf451; color: #000000; font-weight: 800; font-size: 14px; text-decoration: none; padding: 14px 20px; border-radius: 8px; text-align: center; letter-spacing: 0.5px; box-shadow: 0 4px 14px rgba(187, 244, 81, 0.35);">
+        🌐 VER TU RESEÑA EN ARTISTAS EN EL RADAR ↗
+       </a>`
+    : `<a href="${playlist_url}" target="_blank" style="display: block; width: 90%; background-color: #1DB954; color: #000000; font-weight: 800; font-size: 14px; text-decoration: none; padding: 14px 20px; border-radius: 8px; text-align: center; letter-spacing: 0.5px; box-shadow: 0 4px 14px rgba(29, 185, 84, 0.35);">
+        🎧 ESCUCHAR EN SPOTIFY (${playlist}) ↗
+       </a>`;
+
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>¡Track Aceptado en The New Indie Wave!</title>
+  <title>${pageTitle}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #09090b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f4f4f5; -webkit-font-smoothing: antialiased;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #09090b; width: 100%; margin: 0; padding: 24px 8px;">
@@ -2012,7 +2031,7 @@ function generateAcceptanceEmailHtml({
           <tr>
             <td style="padding: 32px 28px 20px 28px; text-align: center; background: radial-gradient(circle at 50% 0%, rgba(187, 244, 81, 0.08) 0%, transparent 70%);">
               <div style="font-family: 'Courier New', monospace, monospace; font-size: 11px; font-weight: 700; color: #bbf451; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;">
-                // SELECCIÓN OFICIAL · CURADURÍA SPOTIFY
+                ${topTag}
               </div>
               <h1 style="margin: 0 0 6px 0; font-size: 26px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">
                 THE NEW INDIE WAVE
@@ -2028,12 +2047,12 @@ function generateAcceptanceEmailHtml({
           <tr>
             <td style="padding: 28px 28px;">
               <div style="background: linear-gradient(135deg, rgba(187, 244, 81, 0.12) 0%, rgba(34, 197, 94, 0.05) 100%); border: 1px solid rgba(187, 244, 81, 0.35); border-radius: 8px; padding: 20px; margin-bottom: 24px; text-align: center;">
-                <div style="font-size: 26px; line-height: 1; margin-bottom: 8px;">🎉 🎧 ⚡</div>
+                <div style="font-size: 26px; line-height: 1; margin-bottom: 8px;">${bannerEmoji}</div>
                 <div style="font-size: 19px; font-weight: 800; color: #bbf451; margin-bottom: 6px;">
                   ¡Felicidades, ${artist_name}!
                 </div>
                 <div style="font-size: 14px; color: #e4e4e7; line-height: 1.5;">
-                  Tu canción <strong>"${song_title}"</strong> ha superado la curaduría y ya forma parte de nuestra playlist oficial <strong>"${playlist}"</strong>.
+                  ${bannerSubtitle}
                 </div>
               </div>
               <div style="font-size: 14.5px; line-height: 1.7; color: #d4d4d8; margin-bottom: 28px;">
@@ -2042,9 +2061,7 @@ function generateAcceptanceEmailHtml({
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 30px;">
                 <tr>
                   <td align="center" style="padding-bottom: 12px;">
-                    <a href="${playlist_url}" target="_blank" style="display: block; width: 90%; background-color: #1DB954; color: #000000; font-weight: 800; font-size: 14px; text-decoration: none; padding: 14px 20px; border-radius: 8px; text-align: center; letter-spacing: 0.5px; box-shadow: 0 4px 14px rgba(29, 185, 84, 0.35);">
-                      🎧 ESCUCHAR EN SPOTIFY (${playlist}) ↗
-                    </a>
+                    ${primaryButton}
                   </td>
                 </tr>
                 <tr>

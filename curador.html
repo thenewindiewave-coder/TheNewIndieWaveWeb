@@ -3074,10 +3074,10 @@
 
     var artistName = a.name || 'Artista';
     var radarUrl = 'https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(a.id);
-    var songTitle = (matchedSub && matchedSub.song_title) ? matchedSub.song_title : (a.song_title || a.track_name || (a.track_id && !a.track_id.includes('http') ? a.track_id : 'Descubrimiento Radar'));
-    var playlist = (matchedSub && matchedSub.playlist) ? matchedSub.playlist : (a.playlist || 'Artistas en el Radar');
+    var songTitle = ''; // En Radar NO hay canción en playlist, es cobertura del proyecto/artista
+    var playlist = 'Artistas en el Radar';
     var genre = a.genre || (matchedSub ? matchedSub.genre : '') || 'Indie';
-    var playlistUrl = (matchedSub && playlistLinksMap[matchedSub.playlist]) ? playlistLinksMap[matchedSub.playlist] : radarUrl;
+    var playlistUrl = radarUrl;
     var spotifyUrl = a.spotify_url || (matchedSub ? matchedSub.spotify_url : '') || (a.track_id && a.track_id.includes('spotify.com') ? a.track_id : '');
     var waNumber = a.whatsapp || a.phone || (matchedSub ? (matchedSub.whatsapp || matchedSub.phone || matchedSub.phone_number || '') : '');
     var email = a.email || (matchedSub ? matchedSub.email : '');
@@ -3229,10 +3229,10 @@
 
     openCuratorStoryGenerator(
       encodeURIComponent(ctx.artistName),
-      encodeURIComponent(ctx.songTitle),
-      encodeURIComponent(ctx.playlist),
+      '', // Sin canción de playlist en Radar
+      encodeURIComponent('Artistas en el Radar'),
       encodeURIComponent(ctx.genre),
-      encodeURIComponent(ctx.playlistUrl),
+      encodeURIComponent(ctx.radarUrl),
       encodeURIComponent(ctx.spotifyUrl),
       encodeURIComponent(ctx.waNumber),
       encodeURIComponent(ctx.email)
@@ -3241,7 +3241,7 @@
     // Cargar la imagen del artista para el post cuadrado del pack
     resolveRadarArtistImage(ctx.artist, function(coverImg) {
       if (coverImg) {
-        generateCuratorPostCanvas(ctx.artistName, ctx.songTitle, ctx.playlist, coverImg);
+        generateCuratorPostCanvas(ctx.artistName, '', 'Artistas en el Radar', coverImg);
         if (typeof generateRadarArtistStoryCanvas === 'function') {
           try { generateRadarArtistStoryCanvas(ctx.artist, 'curatorStoryCanvas'); } catch(e){}
         }
@@ -5725,6 +5725,41 @@ ${playlistUrl}`;
     "¡Enhorabuena *{artist}*! 💎 Hemos seleccionado tu canción *'{song}'* por su gran calidad y ya forma parte de The New Indie Wave, dentro de la playlist *'{playlist}'*.\n\n🎧 Escúchala aquí:\n{url}\n\n👥 Te dejamos la invitación directa a la comunidad de WhatsApp de The New Indie Wave:\nhttps://chat.whatsapp.com/JxPkXMuiNCV2waucjn1DFa\n\n🔥 Te enviamos la gráfica oficial para compartir. Nos encantaría que nos ayudes a correr la voz compartiendo el enlace en tus redes. ¡Bienvenido a la comunidad!\n\n📰 *ARTISTAS EN EL RADAR:*\n¿Quieres tener cobertura en nuestra sección web oficial de Artistas en el Radar? Envíanos un nuevo correo adjuntando tu presskit, fotos de prensa, notas de prensa, bio, etc. En el concepto o asunto del correo deben poner exactamente:\n*ARTISTAS EN EL RADAR: NOMBRE DEL PROYECTO*"
   ];
 
+  // Plantillas exclusivas para ARTISTAS EN EL RADAR (sin mención de canciones ni playlists)
+  const promoRadarArtistTemplates = [
+    `¡Felicidades *{artist}*! 🎉
+
+¡Tu proyecto musical ya aparece de manera oficial en *ARTISTAS EN EL RADAR* de The New Indie Wave!
+{url}
+
+Te preparamos esta reseña y espacio permanente en nuestro directorio editorial para que más escuchas, curadores y medios independientes de México, Latam y España conozcan tu propuesta sonora.
+
+Te compartimos el enlace oficial y las gráficas en alta definición para que las compartas en tus historias y estados celebrando este lanzamiento. ¡Que sigan creciendo los éxitos! 🚀
+
+Sigamos haciendo comunidad:
+Instagram: @the.new.indie.wave • @rodrigodlmoral`,
+
+    `¡Hola *{artist}*! 📡✨
+
+Es un gusto informarte que tu proyecto musical ya fue publicado en la sección oficial *ARTISTAS EN EL RADAR* de The New Indie Wave:
+{url}
+
+Destacamos tu sonido, historia y propuesta sonora en nuestra plataforma editorial web. Te adjuntamos las piezas gráficas oficiales (post e historia) para que las compartas en tus redes y con tus seguidores.
+
+¡A seguir rompiéndola con nueva música! 🎸🔥
+Instagram: @the.new.indie.wave • @rodrigodlmoral`,
+
+    `¡Gran noticia *{artist}*! 💎🚀
+
+Tu cobertura editorial en *ARTISTAS EN EL RADAR* ya está activa en la web oficial de The New Indie Wave:
+{url}
+
+Queremos seguir impulsando tu proyecto con nuestra comunidad de amantes de la música independiente. Te compartimos tu enlace y el pack de gráficas oficiales en alta definición para tus historias y feed.
+
+¡Felicidades y que siga sonando fuerte! ⚡
+Instagram: @the.new.indie.wave • @rodrigodlmoral`
+  ];
+
   function formatWhatsAppForLink(rawNumber) {
     if (!rawNumber) return '';
     var clean = String(rawNumber).replace(/[^0-9]/g, '');
@@ -5787,12 +5822,13 @@ ${playlistUrl}`;
         body: JSON.stringify({
           artist_name: _curPromoArtist,
           artist_email: toEmail,
-          song_title: _curPromoSong,
-          playlist: _curPromoPlaylist,
-          playlist_url: _curPromoUrl,
+          song_title: _curRadarArtistObj ? '' : _curPromoSong,
+          playlist: _curRadarArtistObj ? 'Artistas en el Radar' : _curPromoPlaylist,
+          playlist_url: _curRadarArtistObj ? (_curRadarUrl || 'https://thenewindiewave.online/artistas.html') : _curPromoUrl,
           message: msg,
           post_image: postDataUrl,
-          story_image: storyDataUrl
+          story_image: storyDataUrl,
+          is_radar: !!_curRadarArtistObj
         })
       });
 
@@ -6018,35 +6054,10 @@ ${playlistUrl}`;
   function buildCuratorPromoMessage(artist, song, playlist, url) {
     if (_curRadarArtistObj) {
       var rUrl = _curRadarUrl || ('https://thenewindiewave.online/artistas.html?artista=' + encodeURIComponent(_curRadarArtistObj.id));
-      var isRealPlaylist = playlist && playlist !== 'Artistas en el Radar' && playlist !== 'Playlist Oficial';
-      if (isRealPlaylist && song && song !== 'Descubrimiento Radar') {
-        return `¡Felicidades *${artist}*! 🎉
-
-¡Tu proyecto musical ya aparece de manera oficial en *ARTISTAS EN EL RADAR* de The New Indie Wave!
-${rUrl}
-
-Te preparamos esta reseña y espacio permanente en nuestro directorio editorial para que más escuchas, curadores y medios independientes de México, Latam y España conozcan tu propuesta sonora.
-
-También es un gusto informarte que tu tema *"${song}"* ha sido seleccionado para la playlist oficial *"${playlist}"*:
-${url}
-
-Te adjuntamos las gráficas oficiales en alta definición para que las compartas en tus historias y estados. ¡Que sigan creciendo los éxitos! 🚀
-
-Sigamos haciendo comunidad:
-Instagram: @the.new.indie.wave • @rodrigodlmoral`;
-      } else {
-        return `¡Felicidades *${artist}*! 🎉
-
-¡Tu proyecto musical ya aparece de manera oficial en *ARTISTAS EN EL RADAR* de The New Indie Wave!
-${rUrl}
-
-Te preparamos esta reseña y espacio permanente en nuestro directorio editorial para que más escuchas, curadores y medios independientes de México, Latam y España conozcan tu propuesta sonora.
-
-Te compartimos el enlace oficial y las gráficas en alta definición para que las compartas en tus historias y estados celebrando este lanzamiento. ¡Que sigan creciendo los éxitos! 🚀
-
-Sigamos haciendo comunidad:
-Instagram: @the.new.indie.wave • @rodrigodlmoral`;
-      }
+      var rTpl = promoRadarArtistTemplates[Math.floor(Math.random() * promoRadarArtistTemplates.length)];
+      return rTpl
+        .replace(/\{artist\}/g, artist || 'Artista')
+        .replace(/\{url\}/g, rUrl);
     }
 
     var template = promoTemplates[Math.floor(Math.random() * promoTemplates.length)];
