@@ -1875,15 +1875,21 @@ async function handleSendAcceptanceEmail(req, res) {
       }
     }
 
-    // 3. Formatear el mensaje de felicitación para HTML
-    const finalMessage = message && message.trim()
-      ? message.trim()
-      : `¡Felicidades ${cleanArtist}! 🎉 Nos encantó escuchar '${cleanSong}' y estamos muy felices de anunciarte que ha sido oficialmente seleccionada para ser parte de nuestra comunidad en The New Indie Wave. Ya puedes encontrarla en nuestra playlist '${cleanPlaylist}'.\n\n🎧 Puedes escucharla y guardarla en Spotify con el botón que tienes más abajo.\n\n👥 Te invitamos especialmente a unirte a la comunidad oficial de artistas de The New Indie Wave en WhatsApp para conectar con otros creadores y enterarte de novedades:\nhttps://chat.whatsapp.com/JxPkXMuiNCV2waucjn1DFa\n\n📸 Te adjuntamos las gráficas oficiales (post cuadrado e historia vertical) para tus historias y estados. ¡Ayúdanos a seguir creciendo compartiendo la buena noticia y etiquetándonos en tus redes! ¡Mucho éxito! 🚀\n\n📰 *ARTISTAS EN EL RADAR:*\n¿Quieres tener cobertura en nuestra sección web oficial de Artistas en el Radar? Envíanos un nuevo correo adjuntando tu presskit, fotos de prensa, notas de prensa, bio, etc. En el concepto o asunto del correo deben poner exactamente:\n*ARTISTAS EN EL RADAR: ${cleanArtist.toUpperCase()}*`;
+    // 3. Determinar si es notificación para Artista en el Radar o para Track en Playlist
+    const isRadarArtist = Boolean(req.body.is_radar || cleanPlaylist === 'Artistas en el Radar' || !cleanSong);
 
-    const htmlFormattedMessage = formatAcceptanceMessageForHtml(finalMessage, cleanArtist);
+    let finalMessage = message && message.trim() ? message.trim() : '';
+    if (!finalMessage) {
+      if (isRadarArtist) {
+        finalMessage = `¡Felicidades ${cleanArtist}! 🎉\n\n¡Tu proyecto musical ya aparece de manera oficial en *ARTISTAS EN EL RADAR* de The New Indie Wave!\n${cleanPlaylistUrl || 'https://thenewindiewave.online/artistas.html'}\n\nTe preparamos esta reseña y espacio permanente en nuestro directorio editorial para que más escuchas, curadores y medios independientes conozcan tu propuesta sonora.\n\nTe compartimos el enlace oficial y las gráficas oficiales en alta definición para que las compartas en tus historias y estados celebrando este lanzamiento. ¡Que sigan creciendo los éxitos! 🚀\n\nSigamos haciendo comunidad:\nInstagram: @the.new.indie.wave • @rodrigodlmoral`;
+      } else {
+        finalMessage = `¡Felicidades ${cleanArtist}! 🎉 Nos encantó escuchar '${cleanSong}' y estamos muy felices de anunciarte que ha sido oficialmente seleccionada para ser parte de nuestra comunidad en The New Indie Wave. Ya puedes encontrarla en nuestra playlist '${cleanPlaylist}'.\n\n🎧 Puedes escucharla y guardarla en Spotify con el botón que tienes más abajo.\n\n👥 Te invitamos especialmente a unirte a la comunidad oficial de artistas de The New Indie Wave en WhatsApp para conectar con otros creadores y enterarte de novedades:\nhttps://chat.whatsapp.com/JxPkXMuiNCV2waucjn1DFa\n\n📸 Te adjuntamos las gráficas oficiales (post cuadrado e historia vertical) para tus historias y estados. ¡Ayúdanos a seguir creciendo compartiendo la buena noticia y etiquetándonos en tus redes! ¡Mucho éxito! 🚀\n\n📰 *ARTISTAS EN EL RADAR:*\n¿Quieres tener cobertura en nuestra sección web oficial de Artistas en el Radar? Envíanos un nuevo correo adjuntando tu presskit, fotos de prensa, notas de prensa, bio, etc. En el concepto o asunto del correo deben poner exactamente:\n*ARTISTAS EN EL RADAR: ${cleanArtist.toUpperCase()}*`;
+      }
+    }
+
+    const htmlFormattedMessage = formatAcceptanceMessageForHtml(finalMessage, cleanArtist, isRadarArtist);
 
     // 4. Armar el Asunto y el HTML del Correo
-    const isRadarArtist = Boolean(req.body.is_radar || cleanPlaylist === 'Artistas en el Radar' || !cleanSong);
     const subject = isRadarArtist
       ? `¡Felicidades ${cleanArtist}! Tu proyecto ya está en Artistas en el Radar de The New Indie Wave 🎉`
       : `¡Felicidades ${cleanArtist}! Tu canción "${cleanSong}" ha sido agregada a The New Indie Wave 🎉`;
@@ -1929,7 +1935,7 @@ async function handleSendAcceptanceEmail(req, res) {
   }
 }
 
-function formatAcceptanceMessageForHtml(text, artistName = '') {
+function formatAcceptanceMessageForHtml(text, artistName = '', isRadar = false) {
   if (!text) return '';
   
   // Split message into paragraphs
@@ -1937,8 +1943,8 @@ function formatAcceptanceMessageForHtml(text, artistName = '') {
   const formattedParts = [];
 
   for (let para of rawParagraphs) {
-    // 1. Detect if this is the ARTISTAS EN EL RADAR callout
-    if (/ARTISTAS\s+EN\s+EL\s+RADA/i.test(para) || /presskit/i.test(para)) {
+    // 1. Detect if this is the ARTISTAS EN EL RADAR callout (SOLO PARA CORREO DE TRACKS EN PLAYLIST)
+    if (!isRadar && (/ARTISTAS\s+EN\s+EL\s+RADAR\s*:/i.test(para) || (/presskit/i.test(para) && /radar/i.test(para)))) {
       const radarArtistUpper = (artistName || 'NOMBRE DEL PROYECTO').toUpperCase();
       formattedParts.push(`
         <div style="margin: 24px 0; padding: 20px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.35); border-left: 4px solid #38bdf8; border-radius: 8px;">
@@ -1962,6 +1968,7 @@ function formatAcceptanceMessageForHtml(text, artistName = '') {
     let cleaned = para
       .replace(/https?:\/\/chat\.whatsapp\.com\/[^\s]+/gi, '')
       .replace(/https?:\/\/open\.spotify\.com\/[^\s]+/gi, '')
+      .replace(/https?:\/\/thenewindiewave\.online\/artistas\.html[^\s]*/gi, '')
       .replace(/https?:\/\/[^\s]+/gi, '')
       .trim();
 
@@ -1983,6 +1990,25 @@ function formatAcceptanceMessageForHtml(text, artistName = '') {
     if (cleaned.trim()) {
       formattedParts.push(`<p style="margin: 0 0 16px 0; line-height: 1.65; color: #d4d4d8;">${cleaned.replace(/\n/g, '<br />')}</p>`);
     }
+  }
+
+  // 3. SI ES ARTISTA RESEÑADO EN EL RADAR:
+  // Añadir la sección especial invitándolo a mandar tracks para ser añadidos a nuestras playlists oficiales
+  if (isRadar) {
+    formattedParts.push(`
+      <div style="margin: 26px 0 16px 0; padding: 20px; background: rgba(187, 244, 81, 0.08); border: 1px solid rgba(187, 244, 81, 0.35); border-left: 4px solid #bbf451; border-radius: 8px;">
+        <div style="font-family: 'Courier New', monospace; font-size: 11px; font-weight: 700; color: #bbf451; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;">
+          🎵 CONVOCATORIA ABIERTA · ROTACIÓN EN PLAYLISTS OFICIALES
+        </div>
+        <div style="font-size: 13.5px; line-height: 1.6; color: #e4e4e7;">
+          ¿Tienes lanzamientos o canciones que quieras postular para entrar en la rotación oficial de nuestras <strong>playlists en Spotify</strong>?<br />
+          Nos encantaría escuchar tu música. Puedes postular tus canciones a través de nuestra web o respondiendo directamente a este correo con el enlace de tu track en Spotify:<br /><br />
+          <a href="https://thenewindiewave.online#submit" target="_blank" style="display: inline-block; padding: 10px 18px; background: #09090b; border: 1px solid #bbf451; border-radius: 6px; color: #bbf451; font-family: 'Courier New', monospace; font-size: 12.5px; font-weight: 800; text-decoration: none; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(187, 244, 81, 0.2);">
+            🚀 POSTULAR TRACK A NUESTRAS PLAYLISTS ↗
+          </a>
+        </div>
+      </div>
+    `);
   }
 
   return formattedParts.join('');
