@@ -3215,7 +3215,7 @@
     var currentOrder = artist ? (artist.order || (list.indexOf(artist) + 1)) : (list.length + 1);
 
     var modalHtml = `
-      <div class="artist-modal-overlay" id="curatorRadarModal" onclick="if(event.target===this) closeRadarModal()">
+      <div class="artist-modal-overlay" id="curatorRadarModal">
         <div class="artist-modal" style="padding: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
             <div>
