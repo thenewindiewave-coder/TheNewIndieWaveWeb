@@ -217,12 +217,12 @@ function resolvePlaylistId(playlistInput) {
   return null;
 }
 
-// Envío a Spotify con soporte dual para /items y /tracks
+// Envío a Spotify usando el endpoint oficial /tracks
 async function insertTrackIntoSpotify(playlistId, trackId, accessToken) {
   const trackUri = `spotify:track:${trackId}`;
   
-  // 1. Intentar con /items (Spotify API moderna)
-  let res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/items`, {
+  // Endpoint oficial de la Web API de Spotify para añadir tracks a una playlist
+  const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -230,18 +230,6 @@ async function insertTrackIntoSpotify(playlistId, trackId, accessToken) {
     },
     body: JSON.stringify({ uris: [trackUri] })
   });
-
-  // 2. Si /items devuelve 404 o 405, fallback al endpoint clásico /tracks
-  if (!res.ok && (res.status === 404 || res.status === 405)) {
-    res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ uris: [trackUri] })
-    });
-  }
 
   return res;
 }
@@ -403,6 +391,19 @@ export default async function handler(req, res) {
     if (!addRes.ok) {
       const addErr = await addRes.json().catch(() => ({}));
       const msg = (addErr.error && addErr.error.message) ? addErr.error.message : 'Error desconocido al añadir track';
+      const retryAfter = addRes.headers.get('retry-after');
+
+      if (addRes.status === 429) {
+        let waitTimeMsg = '';
+        if (retryAfter) {
+          const totalSec = parseInt(retryAfter, 10);
+          const hours = (totalSec / 3600).toFixed(1);
+          const minutes = Math.ceil(totalSec / 60);
+          waitTimeMsg = hours >= 1 ? ` (Tiempo de espera: ~${hours} horas)` : ` (Tiempo de espera: ~${minutes} minutos)`;
+        }
+        throw new Error(`Límite de peticiones de Spotify alcanzado (429 Too Many Requests / Quota Exceeded).${waitTimeMsg}. Spotify limita las aplicaciones en Development Mode.`);
+      }
+
       throw new Error(`Error de Spotify API (${addRes.status}): ${msg}`);
     }
 

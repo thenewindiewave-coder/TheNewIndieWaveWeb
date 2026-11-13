@@ -121,7 +121,7 @@ const FALLBACK_STATIC_PLAYLISTS = [
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate=30'); // Cache corto para reflejar cambios
+  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600'); // Cache de 5 min para cuidar la cuota de la API de Spotify
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
